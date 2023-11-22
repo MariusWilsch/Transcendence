@@ -19,6 +19,6 @@ services:
     ports:
       - 5435:5432
     networks:
-      - freecodecamp
+      - dev_network
 networks:
   dev_network:
