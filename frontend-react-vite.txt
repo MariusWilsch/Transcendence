@@ -1,0 +1,28 @@
+frontend
+├── README.md
+├── index.html
+├── package-lock.json
+├── package.json
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   ├── atoms
+│   │   ├── molecules
+│   │   └── organisms
+│   ├── index.css
+│   ├── main.tsx
+│   ├── pages
+│   ├── services
+│   ├── styles
+│   ├── utils
+│   └── vite-env.d.ts
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+12 directories, 14 files
