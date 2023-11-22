@@ -3,7 +3,7 @@ services:
   dev-db:
     image: postgres
     environment:
-      POSTGRES_USER: DEVELOPMENT_USER
+      POSTGRES_USER: abc
       POSTGRES_PASSWORD: DEVELOPMENT_PASSWORD
       POSTGRES_DB: DEVELOPMENT_DB
     ports:
