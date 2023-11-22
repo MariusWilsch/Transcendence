@@ -10,55 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Test {
-  id   Int    @id @default(autoincrement())
-  name String
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
 }
 
-// model User {
-//   id            Int            @id @default(autoincrement())
-//   username      String         @unique
-//   email         String         @unique
-//   userAvatarUrl String?
-//   userStatus    String
-//   createdAt     DateTime       @default(now())
-//   gamesPlayed   Int            @default(0)
-//   gamesWon      Int            @default(0)
-//   gamesLost     Int            @default(0)
-//   messages      Message[]
-//   channels      Channel[]      @relation("ChannelMembers")
-//   friends       Friendship[]
-//   blockedUsers  BlockedUsers[]
-//   achievements  Achievement[]
-//   // Other fields and relations...
-// }
-
-// model Message {
-//   id        Int      @id @default(autoincrement())
-//   senderId  Int
-//   content   String
-//   createdAt DateTime @default(now())
-//   sender    User     @relation(fields: [senderId], references: [id])
-//   // Other fields and relations...
-// }
-
-// model Channel {
-//   id          Int     @id @default(autoincrement())
-//   channelName String
-//   isPrivate   Boolean
-//   password    String? @default(null)
-//   members     User[]  @relation("ChannelMembers")
-//   // Other fields and relations...
-// }
-
-// model Friendship {
-//   id        Int      @id @default(autoincrement())
-//   userId    Int
-//   friendId  Int
-//   createdAt DateTime @default(now())
-//   user      User     @relation(fields: [userId], references: [id])
-//   friend    User     @relation(fields: [friendId], references: [id])
-//   // Other fields and relations...
-// }
-
-// // Other models like Game, Achievement, BlockedUsers, etc. would be defined in a similar manner.
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
