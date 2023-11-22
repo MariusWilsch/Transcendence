@@ -8,6 +8,6 @@ import { UserModule } from './modules/user/user.module';
 @Module({
   imports: [ChatModule, GameModule, UserModule],
   controllers: [AppController],
-  providers: [AppService],
+	providers: [AppService],
 })
 export class AppModule {}

@@ -1,21 +1,54 @@
+// NEST JS STANDARD CONFIGS
+
+// {
+//   "compilerOptions": {
+//     "module": "commonjs",
+//     "declaration": true,
+//     "removeComments": true,
+//     "emitDecoratorMetadata": true,
+//     "experimentalDecorators": true,
+//     "allowSyntheticDefaultImports": true,
+//     "target": "ES2021",
+//     "sourceMap": true,
+//     "outDir": "./dist",
+//     "baseUrl": "./",
+//     "incremental": true,
+//     "skipLibCheck": true,
+//     "strictNullChecks": false,
+//     "noImplicitAny": false,
+//     "strictBindCallApply": false,
+//     "forceConsistentCasingInFileNames": false,
+//     "noFallthroughCasesInSwitch": false
+//   }
+// }
+
+// AIRBNB STLYE GUIDE + NEST JS STANDARD CONFIGS
+
 {
   "compilerOptions": {
+    "target": "ES2021", // Higher version from your config
     "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
-    "sourceMap": true,
+    "declaration": true, // From your config
+    "removeComments": true, // From your config
+    "emitDecoratorMetadata": true, // From your config
+    "experimentalDecorators": true, // From your config
+    "allowSyntheticDefaultImports": true, // From your config
+    "sourceMap": true, // From your config
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
+    "incremental": true, // From your config
     "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "strict": true, // From guide's config
+    "esModuleInterop": true, // From guide's config
+    "forceConsistentCasingInFileNames": true, // From guide's config, assuming consistency is desired
+    "strictNullChecks": false, // From your config
+    "noImplicitAny": false, // From your config
+    "strictBindCallApply": false, // From your config
+    "noFallthroughCasesInSwitch": false, // From your config
+    "paths": {
+      "*": ["./src/*"] // From guide's config
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
