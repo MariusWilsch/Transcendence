@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  dev-db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+volumes:
+  postgres:

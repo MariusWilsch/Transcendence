@@ -15,23 +15,23 @@ model Test {
   name String
 }
 
-model User {
-  id            Int            @id @default(autoincrement())
-  username      String         @unique
-  email         String         @unique
-  userAvatarUrl String?
-  userStatus    String
-  createdAt     DateTime       @default(now())
-  gamesPlayed   Int            @default(0)
-  gamesWon      Int            @default(0)
-  gamesLost     Int            @default(0)
-  messages      Message[]
-  channels      Channel[]      @relation("ChannelMembers")
-  friends       Friendship[]
-  blockedUsers  BlockedUsers[]
-  achievements  Achievement[]
-  // Other fields and relations...
-}
+// model User {
+//   id            Int            @id @default(autoincrement())
+//   username      String         @unique
+//   email         String         @unique
+//   userAvatarUrl String?
+//   userStatus    String
+//   createdAt     DateTime       @default(now())
+//   gamesPlayed   Int            @default(0)
+//   gamesWon      Int            @default(0)
+//   gamesLost     Int            @default(0)
+//   messages      Message[]
+//   channels      Channel[]      @relation("ChannelMembers")
+//   friends       Friendship[]
+//   blockedUsers  BlockedUsers[]
+//   achievements  Achievement[]
+//   // Other fields and relations...
+// }
 
 // model Message {
 //   id        Int      @id @default(autoincrement())
