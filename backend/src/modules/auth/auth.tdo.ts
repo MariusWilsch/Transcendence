@@ -1,19 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { Global } from '@nestjs/common';
+// import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
+@Global()
 export class authDto {
-    // @IsEmail()
-    // @IsNotEmpty()
-    // email: string;
-
-    // @IsString()
-    // @IsNotEmpty()
-    // username: string;
-
-    // @IsString()
-    // @IsNotEmpty()
-    // intraId: string;
-    
-    // @IsString()
-    // @IsNotEmpty()
-    // Avatar: string;
+  email: string;
+  username: string;
+  usual_full_name: string;
+  UId: string;
+  Avatar: string;
 }

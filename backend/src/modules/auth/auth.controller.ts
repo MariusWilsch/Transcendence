@@ -1,20 +1,42 @@
-// auth.controller.ts
+import { Controller, Req, Res, Get, UseGuards } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { AuthGuard } from "@nestjs/passport";
+import { PrismaService } from "../prisma/prisma.service";
+import { PrismaClient } from '@prisma/client';
 
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+const prisma = new PrismaClient();
 
 @Controller('auth')
 export class AuthController {
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleLogin(): Promise<void> {
-    // This route will redirect to the Google login page
+  constructor(private authService: AuthService, prisma: PrismaService) {}
+
+  @Get('42')
+  @UseGuards(AuthGuard('42'))
+  login(@Res() res: any): Promise<any> {
+    return res.redirect(`${process.env.REDIRECT_BASE_URL}`);
   }
 
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleLoginCallback(@Req() req: any): Promise<string> {
-    // Handle the callback from Google, user is available in req.user
-    return `Welcome ${req.user.name}!`;
+  @Get('42/callback')
+  @UseGuards(AuthGuard('42'))
+  async callback(@Req() req: any, @Res() res: any) {
+    try {
+      // console.log(req.user);
+      let userdata = this.authService.getUser(req.user);
+      const user = await prisma.user.create({
+        data: {
+          login: userdata.username,
+          fullname: userdata.usual_full_name,
+          email: userdata.email,
+          intraId: userdata.UId,
+          Avatar: userdata.Avatar,
+        },
+      });
+      console.log('userdata', userdata);
+      
+      res.redirect('http://localhost:3001/auth');
+      console.log(this.authService.getAllusers());
+    } catch (e) {
+      console.log("Error: ",e);
+    }
   }
 }

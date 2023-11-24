@@ -1,14 +1,19 @@
-// auth.module.ts
-
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 import { PassportModule } from '@nestjs/passport';
-import { GoogleStrategy } from './google.strategy'; // Your custom strategy
+import { AuthService } from "./auth.service";
+import { AuthController } from "./auth.controller";
+import { IntraStrategy } from "./42.strategy";
+import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "modules/prisma/prisma.service";
+
 
 @Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'google' }), // Use the strategy you implement
-  ],
-  providers: [GoogleStrategy],
-  exports: [PassportModule],
+    imports: [
+      ConfigModule.forRoot(),
+      PassportModule,
+      ],
+    controllers: [AuthController],
+    providers: [AuthService, IntraStrategy, ConfigService],
 })
 export class AuthModule {}
