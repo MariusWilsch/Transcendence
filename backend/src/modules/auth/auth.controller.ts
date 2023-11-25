@@ -1,14 +1,21 @@
 import { Controller, Req, Res, Get, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "@nestjs/passport";
-import { PrismaService } from "../prisma/prisma.service";
 import { PrismaClient } from '@prisma/client';
+import { PrismaService } from "modules/prisma/prisma.service";
 
 const prisma = new PrismaClient();
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, prisma: PrismaService) {}
+  constructor(private authService: AuthService) {}
+
+  // print the user name if the user is authenticated
+  @Get('me')
+  // @UseGuards(AuthGuard('42'))
+  getProfile(): any {
+    return 'Hello Imad'
+  }
 
   @Get('42')
   @UseGuards(AuthGuard('42'))
@@ -22,6 +29,20 @@ export class AuthController {
     try {
       // console.log(req.user);
       let userdata = this.authService.getUser(req.user);
+
+      // check if user exists in db
+      const userExists = await prisma.user.findUnique({
+        where: {
+          login: userdata.username,
+        },
+      });
+    
+      if (userExists) {
+        console.log('user exists');
+        res.redirect('http://localhost:3001/auth/me');
+        return;
+      }
+
       const user = await prisma.user.create({
         data: {
           login: userdata.username,
@@ -31,12 +52,21 @@ export class AuthController {
           Avatar: userdata.Avatar,
         },
       });
-      console.log('userdata', userdata);
+      // console.log('userdata', userdata);
       
-      res.redirect('http://localhost:3001/auth');
       console.log(this.authService.getAllusers());
+      res.redirect('http://localhost:3001/auth/me');
     } catch (e) {
       console.log("Error: ",e);
     }
   }
 }
+
+
+// TODO
+// 1- user logs in to 42, ans issues a token (JWT)
+// 2- the broswer store the JWT in a cookie or local storage
+// 3- on every request, the browser sends the JWT in the header
+// 4- the server validates the JWT and sends the response
+// 5- the server sends a new JWT if the old one is expired
+

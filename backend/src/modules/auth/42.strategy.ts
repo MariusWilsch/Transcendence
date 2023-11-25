@@ -44,10 +44,10 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     done: Function
   ): Promise<any> {
     try {
-      console.log("accessToken" ,accessToken);
-      console.log("refreshToken" ,refreshToken);
-      console.log("profile" ,profile);
-      console.log("done" ,done);
+      // console.log("accessToken" ,accessToken);
+      // console.log("refreshToken" ,refreshToken);
+      // console.log("profile" ,profile);
+      // console.log("done" ,done);
 
       const { username, usual_full_name, email, intraId, avatar } = profile;
       const user: authDto = {
@@ -60,7 +60,7 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
 
       done(null, user);
     } catch (e) {
-      // console.log(e);
+      console.log("Error: " ,e);
       done(e, false);
     }
   }

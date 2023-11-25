@@ -5,7 +5,6 @@ import { AuthController } from "./auth.controller";
 import { IntraStrategy } from "./42.strategy";
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from "@nestjs/config";
-import { PrismaService } from "modules/prisma/prisma.service";
 
 
 @Module({
