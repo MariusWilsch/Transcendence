@@ -2,7 +2,6 @@ import { Controller, Req, Res, Get, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "@nestjs/passport";
 import { PrismaClient } from '@prisma/client';
-import { PrismaService } from "modules/prisma/prisma.service";
 
 const prisma = new PrismaClient();
 
@@ -10,11 +9,15 @@ const prisma = new PrismaClient();
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // print the user name if the user is authenticated
+
   @Get('me')
-  // @UseGuards(AuthGuard('42'))
   getProfile(): any {
-    return 'Hello Imad'
+    return 'U are logged in'
+  }
+
+  @Get('createUser')
+  createProfile(): any {
+    return 'create new user'
   }
 
   @Get('42')
@@ -38,7 +41,7 @@ export class AuthController {
       });
     
       if (userExists) {
-        console.log('user exists');
+        console.log('user already logged in');
         res.redirect('http://localhost:3001/auth/me');
         return;
       }
@@ -52,10 +55,13 @@ export class AuthController {
           Avatar: userdata.Avatar,
         },
       });
+
+
+
       // console.log('userdata', userdata);
       
       console.log(this.authService.getAllusers());
-      res.redirect('http://localhost:3001/auth/me');
+      res.redirect('http://localhost:3001/auth/createUser');
     } catch (e) {
       console.log("Error: ",e);
     }

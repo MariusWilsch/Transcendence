@@ -1,5 +1,7 @@
 import { Injectable, Req } from '@nestjs/common';
 import { authDto } from './auth.tdo';
+import { JwtService } from '@nestjs/jwt';
+import { JWT_SECRET } from './constants';
 
 type user = {
   username: string;
@@ -11,6 +13,8 @@ type user = {
 
 @Injectable()
 export class AuthService {
+  constructor(private jwtService: JwtService) {}
+
   private users: user[] = [
     {
       username: 'imad',
@@ -37,14 +41,17 @@ export class AuthService {
       UId: req.UId,
       Avatar: req.Avatar,
     };
-    
+
+    const jwt = this.jwtService.sign(newUser, { secret: JWT_SECRET });
+    console.log(jwt);
+
     this.users.push(newUser);
 
     return newUser;
   }
 
-    getAllusers(): user[] {
-      return this.users;
+  getAllusers(): user[] {
+    return this.users;
   }
 }
 
