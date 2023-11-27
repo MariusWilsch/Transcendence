@@ -1,5 +1,5 @@
 import React from 'react';
-import Matter, { Bodies } from 'matter-js';
+import Matter, { Bodies, Engine } from 'matter-js';
 import { useEffect } from 'react';
 
 const Game = () => {
@@ -15,6 +15,7 @@ const Game = () => {
 				wireframes: false,
 			},
 		});
+		Matter.Render.run(render);
 
 		// Declare constants
 		const wallThickness = 20;
@@ -64,6 +65,7 @@ const Game = () => {
 				strokeStyle: 'blue',
 			},
 		};
+
 		const ballOptions = {
 			restitution: 1,
 			render: {
@@ -89,12 +91,23 @@ const Game = () => {
 		);
 
 		const ball = Matter.Bodies.circle(width / 2, height / 2, 20, ballOptions);
-
 		Matter.World.add(engine.world, [leftPaddle, rightPaddle, ball]);
 
-		Matter.Render.run(render);
-		const runner = Matter.Runner.create();
-		Matter.Runner.run(runner, engine);
+		const updateGame = () => {
+			Matter.Engine.update(engine, 1000 / 60);
+		};
+
+		let frameID: number;
+		const gameLoop = () => {
+			updateGame();
+			frameID = requestAnimationFrame(gameLoop);
+		};
+
+		frameID = requestAnimationFrame(gameLoop);
+
+		return () => {
+			cancelAnimationFrame(frameID);
+		};
 	}, []);
 
 	return (
