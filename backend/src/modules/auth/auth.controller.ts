@@ -40,6 +40,7 @@ export class AuthController {
       // const ccokie = req.cookies['jwt'];
       // console.log('cookie', ccokie);
 
+
       const user = await this.authService.getUserFromCookie(ccokie);
       return `hello ${user.fullname}` || 'Error : indefind user';
     } catch (e) {
@@ -79,17 +80,13 @@ export class AuthController {
           },
         });
         if (userExists) {
-          console.log('user already logged in');
+          // console.log('user already logged in');
           res.redirect('http://localhost:3001/auth/user');
           return;
         }
       } catch (e) {
         console.log('Error: ', e);
       }
-
-      // console.log(res.user);
-      // console.log(  req.UId, req.usual_full_name, req.username, req.email,req.Avatar) ;
-      // return;
 
       const user = await prisma.user.create({
         data: {
@@ -102,8 +99,6 @@ export class AuthController {
           updated_at: new Date(),
         },
       });
-
-      // return;
 
       const payload = { user };
       const jwt = await this.jwtService.signAsync(payload, {

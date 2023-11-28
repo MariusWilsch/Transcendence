@@ -5,16 +5,6 @@ import { JWT_SECRET } from './constants';
 import { promises } from 'dns';
 import { User } from '@prisma/client';
 
-// model User {
-//   // id             String    @id @default(uuid())
-//   intraId        String    @unique
-//   fullname       String    @unique
-//   login          String    @unique
-//   email          String    @unique
-//   Avatar         String?
-//   created_at     DateTime  @default(now())
-//   updated_at     DateTime  @updatedAt
-// }
 
 @Injectable()
 export class AuthService {
