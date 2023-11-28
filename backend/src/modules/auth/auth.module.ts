@@ -13,7 +13,8 @@ import { JWT_SECRET } from './constants';
       ConfigModule.forRoot(),
       PassportModule,
       JwtModule.register({
-        secret: JWT_SECRET,
+        // secret: JWT_SECRET,
+        signOptions: { expiresIn: '1d' },
         // signOptions: { expiresIn: '60s' },
       }),
       ],

@@ -2,56 +2,69 @@ import { Injectable, Req } from '@nestjs/common';
 import { authDto } from './auth.tdo';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
+import { promises } from 'dns';
+import { User } from '@prisma/client';
 
-type user = {
-  username: string;
-  usual_full_name: string;
-  email: string;
-  UId: string;
-  Avatar: string;
-};
+// model User {
+//   // id             String    @id @default(uuid())
+//   intraId        String    @unique
+//   fullname       String    @unique
+//   login          String    @unique
+//   email          String    @unique
+//   Avatar         String?
+//   created_at     DateTime  @default(now())
+//   updated_at     DateTime  @updatedAt
+// }
 
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
-  private users: user[] = [
-    {
-      username: 'imad',
-      usual_full_name: 'f name',
-      email: 'email',
-      UId: 'UId',
-      Avatar: 'Avatar',
-    },
-    {
-      username: 'mimouni',
-      usual_full_name: 'f name2',
-      email: 'email2',
-      UId: 'UId2',
-      Avatar: 'Avatar2',
-    },
-  ];
+  private users: User[] = [];
 
-  getUser(req: any): authDto {
-    // console.log(req);
+  getUser(user: authDto): User {
+    // console.log(user);
     const newUser = {
-      username: req.username,
-      usual_full_name: req.usual_full_name,
-      email: req.email,
-      UId: req.UId,
-      Avatar: req.Avatar,
+      intraId: user.UId,
+      fullname: user.usual_full_name,
+      login: user.username,
+      email: user.email,
+      Avatar: user.Avatar,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
 
-    const jwt = this.jwtService.sign(newUser, { secret: JWT_SECRET });
-    console.log(jwt);
+    // const jwt = this.jwtService.sign(newUser, { secret: JWT_SECRET });
+    // console.log(jwt);
 
     this.users.push(newUser);
-
     return newUser;
   }
 
-  getAllusers(): user[] {
+  getAllusers(): User[] {
     return this.users;
+  }
+
+  async getUserFromCookie(req: any): Promise<User | undefined> {
+    const jwt = req.jwt;
+
+    // console.log('JWT_SECRET', JWT_SECRET);
+
+    if (!jwt) {
+      return undefined;
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(jwt, {
+        secret: JWT_SECRET,
+      });
+
+      const user = payload.user;
+      return user;
+    } catch (error) {
+      console.error('JWT Verification Error:', error);
+      return undefined;
+    }
   }
 }
 

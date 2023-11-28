@@ -57,6 +57,7 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         UId: intraId.toString(),
         Avatar: avatar,
       };
+      // console.log("user: ", user);
 
       done(null, user);
     } catch (e) {
