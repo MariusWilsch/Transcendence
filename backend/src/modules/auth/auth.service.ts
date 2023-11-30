@@ -35,7 +35,7 @@ export class AuthService {
     return this.users;
   }
 
-  async getUserFromCookie(req: any): Promise<User | undefined> {
+   getUserFromCookie(req: any): User | undefined {
     const jwt = req.jwt;
 
     // console.log('JWT_SECRET', JWT_SECRET);
@@ -45,7 +45,7 @@ export class AuthService {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(jwt, {
+      const payload = this.jwtService.verify(jwt, {
         secret: JWT_SECRET,
       });
 

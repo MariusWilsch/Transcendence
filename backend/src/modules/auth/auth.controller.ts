@@ -12,6 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
+import { use } from 'passport';
 
 const prisma = new PrismaClient();
 
@@ -37,12 +38,14 @@ export class AuthController {
   async user(@Req() req: any) {
     try {
       const ccokie = req.cookies;
-      // const ccokie = req.cookies['jwt'];
       // console.log('cookie', ccokie);
 
-
-      const user = await this.authService.getUserFromCookie(ccokie);
-      return `hello ${user.fullname}` || 'Error : indefind user';
+      const user =  this.authService.getUserFromCookie(ccokie);
+      if (user === undefined)
+      {
+        return 'Error : indefind user';
+      }
+      return `hello ${user.fullname}`;
     } catch (e) {
       console.log('Error: ', e);
       return 'Error : indefind user';
@@ -101,13 +104,30 @@ export class AuthController {
       });
 
       const payload = { user };
-      const jwt = await this.jwtService.signAsync(payload, {
+      const jwt = this.jwtService.sign(payload, {
         secret: JWT_SECRET,
       });
       res.cookie('jwt', jwt);
       response.redirect('http://localhost:3001/auth/user');
     } catch (e) {
       console.log('Error: ', e);
+    }
+  }
+
+  @Get('logout')
+  async logout(@Res() res: any) {
+    try {
+      res.clearCookie('jwt');
+      // const user = await prisma.user.delete({
+      //   where: {
+      //     intraId: res.user.UId,
+      //   },
+      // });
+      // res.redirect('http://localhost:3001/auth/user');
+      return 'logout';
+    } catch (e) {
+      console.log('Error: ', e);
+      res.status(500).send('Internal Server Error');
     }
   }
 }
