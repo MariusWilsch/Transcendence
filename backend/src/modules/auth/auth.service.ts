@@ -2,7 +2,6 @@ import { Injectable, Req } from '@nestjs/common';
 import { authDto } from './auth.tdo';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
-import { promises } from 'dns';
 import { User } from '@prisma/client';
 
 
@@ -24,9 +23,6 @@ export class AuthService {
       updated_at: new Date(),
     };
 
-    // const jwt = this.jwtService.sign(newUser, { secret: JWT_SECRET });
-    // console.log(jwt);
-
     this.users.push(newUser);
     return newUser;
   }
@@ -38,8 +34,6 @@ export class AuthService {
    getUserFromCookie(req: any): User | undefined {
     const jwt = req.jwt;
 
-    // console.log('JWT_SECRET', JWT_SECRET);
-
     if (!jwt) {
       return undefined;
     }
@@ -49,7 +43,9 @@ export class AuthService {
         secret: JWT_SECRET,
       });
 
-      const user = payload.user;
+      const user = payload.userWithoutDate;
+
+      console.log('payload: ', payload);
       return user;
     } catch (error) {
       console.error('JWT Verification Error:', error);
