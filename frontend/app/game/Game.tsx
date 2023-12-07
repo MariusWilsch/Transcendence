@@ -1,9 +1,23 @@
+'use client';
 import React from 'react';
 import Matter, { Bodies, Render } from 'matter-js';
 import { useEffect } from 'react';
 
 interface GameEntityFactory {
 	createWall(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		options?: object,
+	): Matter.Body;
+	createBall(
+		x: number,
+		y: number,
+		radius: number,
+		options?: object,
+	): Matter.Body;
+	createPaddle(
 		x: number,
 		y: number,
 		width: number,
@@ -20,6 +34,73 @@ class MatterGameEntityFactory implements GameEntityFactory {
 		height: number,
 		options?: object,
 	): Matter.Body => Bodies.rectangle(x, y, width, height, options);
+	createBall = (
+		x: number,
+		y: number,
+		radius: number,
+		options?: object,
+	): Matter.Body => Bodies.circle(x, y, radius, options);
+	createPaddle = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		options?: object,
+	): Matter.Body => Bodies.rectangle(x, y, width, height, options);
+	createInitialGameSet = ({ width, height }: { width: number; height: number }) => {
+		const floor = this.createWall(
+			width / 2,
+			wallThickness / 2,
+			width,
+			wallThickness,
+			wallOptions,
+		);
+		const ceiling = this.createWall(
+			width / 2,
+			height - wallThickness / 2,
+			width,
+			wallThickness,
+			wallOptions,
+		);
+		const leftPaddle = this.createPaddle(
+			paddleWidth / 2,
+			height / 2,
+			paddleWidth,
+			paddleHeight,
+			paddleOptions,
+		);
+		const rightPaddle = this.createPaddle(
+			width - paddleWidth / 2,
+			height / 2,
+			paddleWidth,
+			paddleHeight,
+			paddleOptions,
+		);
+		const ball = this.createBall(width / 2, height / 2, 20, ballOptions);
+		const invisibleRightWall = this.createWall(
+			width - paddleWidth + 5, // Slightly behind the paddle
+			height / 2,
+			1, // Very thin
+			height, // Tall enough to cover the movement range
+			{ isStatic: true, render: { visible: false } }, // Make it invisible
+		);
+		const invisibleLeftWall = this.createWall(
+			paddleWidth - 5, // Slightly behind the paddle
+			height / 2,
+			1, // Very thin
+			height, // Tall enough to cover the movement range
+			{ isStatic: true, render: { visible: false } }, // Make it invisible
+		);
+		return {
+			floor,
+			ceiling,
+			leftPaddle,
+			rightPaddle,
+			ball,
+			invisibleRightWall,
+			invisibleLeftWall,
+		};
+	};
 }
 
 //* Declare hardcoded Constants
@@ -41,6 +122,7 @@ const paddleOptions = {
 };
 const ballOptions = {
 	restitution: 1,
+	friction: 0,
 	render: {
 		fillStyle: 'white',
 		strokeStyle: 'white',
@@ -107,11 +189,17 @@ const Game = () => {
 			wallOptions,
 		);
 
-		Matter.World.add(engine.world, [floor, ceiling]);
-
 		// Create paddles
 
-		const leftPaddle = Bodies.rectangle(
+		// const leftPaddle = Bodies.rectangle(
+		// 	paddleWidth / 2,
+		// 	paddleY,
+		// 	paddleWidth,
+		// 	paddleHeight,
+		// 	paddleOptions,
+		// );
+
+		const leftPaddle = factory.createPaddle(
 			paddleWidth / 2,
 			paddleY,
 			paddleWidth,
@@ -119,7 +207,15 @@ const Game = () => {
 			paddleOptions,
 		);
 
-		const rightPaddle = Bodies.rectangle(
+		// const rightPaddle = Bodies.rectangle(
+		// 	width - paddleWidth / 2,
+		// 	paddleY,
+		// 	paddleWidth,
+		// 	paddleHeight,
+		// 	paddleOptions,
+		// );
+
+		const rightPaddle = factory.createPaddle(
 			width - paddleWidth / 2,
 			paddleY,
 			paddleWidth,
@@ -130,29 +226,49 @@ const Game = () => {
 		rightPaddle.isSensor = true;
 		leftPaddle.isSensor = true;
 
-		const ball = Matter.Bodies.circle(width / 2, height / 2, 20, ballOptions);
-		Matter.Body.setVelocity(ball, { x: 5, y: 5 });
-		ball.frictionAir = 0;
-		Matter.World.add(engine.world, [leftPaddle, rightPaddle, ball]);
+		// const ball = Matter.Bodies.circle(width / 2, height / 2, 20, ballOptions);
+
+		const ball = factory.createBall(width / 2, height / 2, 20, ballOptions);
+
+		// Matter.Body.setVelocity(ball, { x: 5, y: 5 });
 
 		// Detect collisions
 
-		const invisibleRightWall = Matter.Bodies.rectangle(
+		// const invisibleRightWall = Matter.Bodies.rectangle(
+		// 	width - paddleWidth + 5, // Slightly behind the paddle
+		// 	height / 2,
+		// 	1, // Very thin
+		// 	height, // Tall enough to cover the movement range
+		// 	{ isStatic: true, render: { visible: false } }, // Make it invisible
+		// );
+
+		// const invisibleLeftWall = Matter.Bodies.rectangle(
+		// 	paddleWidth - 5, // Slightly behind the paddle
+		// 	height / 2,
+		// 	1, // Very thin
+		// 	height, // Tall enough to cover the movement range
+		// 	{ isStatic: true, render: { visible: false } }, // Make it invisible
+		// );
+
+		const invisibleRightWall = factory.createWall(
 			width - paddleWidth + 5, // Slightly behind the paddle
 			height / 2,
 			1, // Very thin
 			height, // Tall enough to cover the movement range
 			{ isStatic: true, render: { visible: false } }, // Make it invisible
 		);
-		Matter.World.add(engine.world, invisibleRightWall);
 
-		const invisibleLeftWall = Matter.Bodies.rectangle(
+		const invisibleLeftWall = factory.createWall(
 			paddleWidth - 5, // Slightly behind the paddle
 			height / 2,
 			1, // Very thin
 			height, // Tall enough to cover the movement range
 			{ isStatic: true, render: { visible: false } }, // Make it invisible
 		);
+
+		Matter.World.add(engine.world, [leftPaddle, rightPaddle, ball]);
+		Matter.World.add(engine.world, [floor, ceiling]);
+		Matter.World.add(engine.world, invisibleRightWall);
 		Matter.World.add(engine.world, invisibleLeftWall);
 
 		Matter.Events.on(engine, 'collisionStart', (event) => {
