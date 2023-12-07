@@ -41,4 +41,28 @@ export class UserService {
           }
         };
     }
+
+    async getUserbyLogin(login : string)
+    {
+      try {
+          const User = await prisma.user.findUnique(
+            {
+              where: {
+                login: login,
+              },
+            }
+          );
+          return User;
+        } catch (error : any) {
+          if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+              throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'NotFoundException',
+                message: 'User cannot be found',
+              }, HttpStatus.NOT_FOUND, {cause: error});
+            }
+          }
+        };
+    }
 }

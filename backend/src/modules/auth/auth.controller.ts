@@ -38,8 +38,8 @@ export class AuthController {
   
   
   @Get('user')
-  // @UseGuards(JwtAuthGuard)
-  async user(@Req() req: any) {
+  @UseGuards(JwtAuthGuard)
+  async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;
       
@@ -48,22 +48,17 @@ export class AuthController {
       {
         return undefined;
       }
-      return this.userservive.getUserbyId(userfromcookie.intraId);
+      // return this.userservive.getUserbyId(userfromcookie.intraId);
+      res.redirect(`http://localhost:3001/users/${userfromcookie.login}`);
     } catch (e) {
       console.log('Error: ', e);
-      return 'Error : indefind user';
+      // return 'Error : indefind user';
     }
-  }
-
-  @Get('42')
-  @UseGuards(AuthGuard('42'))
-  login(@Res() res: any) {
-    res.redirect('http://localhost:3000/profile');
   }
 
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
-  async callback(@Req() req: any, @Res() res: any, @Res() response: any) {
+  async callback(@Req() req: any, @Res() res: any) {
     try {      
       let userdata = this.authService.getUser(req.user);
 
@@ -83,7 +78,7 @@ export class AuthController {
             secret: JWT_SECRET,
           });
           res.cookie('jwt', jwt);
-          return this.login(res);
+          return res.redirect('http://localhost:3000/profile');
         }
 
 
@@ -109,7 +104,7 @@ export class AuthController {
       });
       res.cookie('jwt', jwt);
       // response.redirect('http://localhost:3001/auth/user');
-      return this.login(res);
+      return res.redirect('http://localhost:3000/profile');
     } catch (e) {
       console.log('Error: ', e);
     }
@@ -124,7 +119,7 @@ export class AuthController {
       //     intraId: res.user.UId,
       //   },
       // });
-      // res.redirect('http://localhost:3001/auth/user');
+      res.redirect('http://localhost:3000');
       return 'logout';
     } catch (e) {
       console.log('Error: ', e);
