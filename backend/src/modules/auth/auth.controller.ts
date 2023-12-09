@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Req,
-  Res,
-  Get,
-  UseGuards,
-  Options,
-  Redirect,
-} from '@nestjs/common';
+import { Controller, Req, Res, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaClient } from '@prisma/client';
@@ -22,7 +14,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    private userservive: UserService,
+    private userservive: UserService
   ) {}
 
   @Get()
@@ -35,52 +27,50 @@ export class AuthController {
   getProfile(@Req() req) {
     return req.user;
   }
-  
-  
+
   @Get('user')
   @UseGuards(JwtAuthGuard)
   async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;
-      
-      const userfromcookie =  this.authService.getUserFromCookie(ccokie);
-      if (userfromcookie === undefined)
-      {
+
+      const userfromcookie = this.authService.getUserFromCookie(ccokie);
+      if (userfromcookie === undefined) {
         return undefined;
       }
-      // return this.userservive.getUserbyId(userfromcookie.intraId);
-      res.redirect(`http://localhost:3001/users/${userfromcookie.login}`);
+      return res.redirect(
+        `http://localhost:3001/users/${userfromcookie.intraId}`
+      );
     } catch (e) {
       console.log('Error: ', e);
-      // return 'Error : indefind user';
     }
   }
 
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: any, @Res() res: any) {
-    try {      
+    try {
       let userdata = this.authService.getUser(req.user);
 
-        const userExists = await prisma.user.findUnique({
-          where: {
-            intraId: userdata.intraId,
-          },
+      const userExists = await prisma.user.findUnique({
+        where: {
+          intraId: userdata.intraId,
+        },
+      });
+      if (userExists) {
+        // res.redirect('http://localhost:3001/auth/user');
+
+        const { created_at, updated_at, ...userWithoutDate } = userExists;
+        // console.log('userWithoutDate: ', userWithoutDate);
+
+        const payload = { userWithoutDate };
+        const jwt = this.jwtService.sign(payload, {
+          secret: JWT_SECRET,
         });
-        if (userExists) {
-          // res.redirect('http://localhost:3001/auth/user');
-          
-          const { created_at, updated_at, ...userWithoutDate } = userExists;
-          console.log('userWithoutDate: ' , userWithoutDate);
-
-          const payload = { userWithoutDate };
-          const jwt = this.jwtService.sign(payload, {
-            secret: JWT_SECRET,
-          });
-          res.cookie('jwt', jwt);
-          return res.redirect('http://localhost:3000/profile');
-        }
-
+        res.cookie('jwt', jwt);
+        res.cookie('id', userExists.intraId);
+        return res.redirect('http://localhost:3000/profile');
+      }
 
       const user = await prisma.user.create({
         data: {
@@ -95,15 +85,12 @@ export class AuthController {
       });
 
       const { created_at, updated_at, ...userWithoutDate } = user;
-      console.log('userWithoutDate: ' , userWithoutDate);
-
-
       const payload = { userWithoutDate };
       const jwt = this.jwtService.sign(payload, {
         secret: JWT_SECRET,
       });
       res.cookie('jwt', jwt);
-      // response.redirect('http://localhost:3001/auth/user');
+      res.cookie('id', user.intraId);
       return res.redirect('http://localhost:3000/profile');
     } catch (e) {
       console.log('Error: ', e);
@@ -114,11 +101,6 @@ export class AuthController {
   async logout(@Res() res: any) {
     try {
       res.clearCookie('jwt');
-      // const user = await prisma.user.delete({
-      //   where: {
-      //     intraId: res.user.UId,
-      //   },
-      // });
       res.redirect('http://localhost:3000');
       return 'logout';
     } catch (e) {

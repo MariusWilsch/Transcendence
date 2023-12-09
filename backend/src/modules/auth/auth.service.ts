@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { User } from '@prisma/client';
 
-
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) {}
@@ -31,7 +30,7 @@ export class AuthService {
     return this.users;
   }
 
-   getUserFromCookie(req: any): User | undefined {
+  getUserFromCookie(req: any): User | undefined {
     const jwt = req.jwt;
 
     if (!jwt) {
@@ -45,7 +44,7 @@ export class AuthService {
 
       const user = payload.userWithoutDate;
 
-      console.log('payload: ', payload);
+      // console.log('payload: ', payload);
       return user;
     } catch (error) {
       console.error('JWT Verification Error:', error);

@@ -3,10 +3,13 @@
 import Image from "next/image";
 import logo from "../public/42_Logo.svg";
 import Link from "next/link";
-import { useEffect } from "react";
+import { AppProvider } from './AppContext'
+
 
 export default function Home() {
   return (
+    <AppProvider>
+
     <div
       className="hero min-h-screen"
       style={{
@@ -36,5 +39,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </AppProvider>
+
   );
 }
