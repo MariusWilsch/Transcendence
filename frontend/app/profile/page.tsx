@@ -170,12 +170,9 @@ const UserDetailsCard = ({
   const { isDivVisible } = useAppContext();
   const [newLoginInput, setNewLoginInput] = useState("");
 
-  // console.log("user : ", user);
   const updateLogin = async () => {
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
-      let updatedUser = { ...user, login: newLoginInput };
-      setUser(updatedUser as User);
-
+      
       try {
         const response = await fetch(
           `http://localhost:3001/users/${intraId}/login`,
@@ -186,7 +183,9 @@ const UserDetailsCard = ({
             },
             body: JSON.stringify({ newLogin: newLoginInput }),
           }
-        );
+          );
+          let updatedUser = { ...user, login: newLoginInput };
+          setUser(updatedUser as User);
       } catch (error: any) {
         console.error("Error updating login:", error.message);
       }
@@ -202,16 +201,20 @@ const UserDetailsCard = ({
         className="flex items-center justify-center p-4
         rounded-md "
       >
-        <div className="text-base-100 text-lg font-serif"> {value} </div>
+        <div className="text-base-100 text-lg font-serif "> {value} </div>
         {isDivVisible && (
-          <div>
+          <div className="">
             &nbsp;
             <input
               type="text"
               placeholder=" the new username "
               value={newLoginInput}
               onChange={(e) => setNewLoginInput(e.target.value)}
-              className="rounded-lg border-opacity-50 border-2 border-slate-400 bg-[#e8eef3] text-sm"
+              className={`rounded-lg border-opacity-50 border-2 ${
+                newLoginInput !== ""
+                  ? "border-green-500"
+                  : "border-red-500"
+              } bg-[#e8eef3] text-sm outline-none `}
             />
             &nbsp;
             <button onClick={updateLogin} className="">
@@ -221,7 +224,7 @@ const UserDetailsCard = ({
                 width={30}
                 priority={true}
                 quality={100}
-                className="inline-block"
+                className="inline-block "
                 style={{ width: "2vh", height: "2vh" }}
               ></Image>
             </button>
@@ -282,7 +285,7 @@ const Achievements = ({ Achievements }: { Achievements: string }) => {
         Your achievements :{" "}
       </div>
       <div className="flex items-center justify-center p-4 rounded-md">
-        <div className="text-base-100 font-serif"> {Achievements} </div>
+        <div className="font-serif"> {Achievements} </div>
       </div>
     </div>
   );
@@ -296,7 +299,7 @@ const GameHistory = ({ games }: { games: string }) => {
         Your games history :{" "}
       </div>
       <div className="flex items-center justify-center p-4 rounded-md">
-        <div className="text-base-100 font-serif"> {games} </div>
+        <div className="font-serif"> {games} </div>
       </div>
     </div>
   );
@@ -342,8 +345,6 @@ const UserProfile = () => {
 
   return (
     <div>
-      <h2>User Profile</h2>
-
       <div>
         <label htmlFor="avatar">Select Avatar:</label>
         <input

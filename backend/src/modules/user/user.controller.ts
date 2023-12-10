@@ -19,7 +19,6 @@ export class UserController {
   @Post(':id/login')
   async post(@Param('id') userId: string, @Body() body: { newLogin: string }) {
     try {
-      // Check if the user exists
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
         return { error: 'User not found', message: 'User not found' };
