@@ -68,7 +68,7 @@ export class UserService {
     }
   }
 
-  // Method to update the login of a user
+
   async updateLogin(userId: string, newLogin: string): Promise<void> {
     const user = await this.getUserbyId(userId);
 
@@ -84,6 +84,21 @@ export class UserService {
         },
         data: {
           login: newLogin,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating login:', error);
+    }
+  }
+
+  async updateAvatar(userId: string, newAvatar: string): Promise<void> {
+    try {
+      await prisma.user.update({
+        where: {
+          intraId: userId,
+        },
+        data: {
+          Avatar: newAvatar,
         },
       });
     } catch (error) {

@@ -172,7 +172,6 @@ const UserDetailsCard = ({
 
   const updateLogin = async () => {
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
-      
       try {
         const response = await fetch(
           `http://localhost:3001/users/${intraId}/login`,
@@ -183,9 +182,9 @@ const UserDetailsCard = ({
             },
             body: JSON.stringify({ newLogin: newLoginInput }),
           }
-          );
-          let updatedUser = { ...user, login: newLoginInput };
-          setUser(updatedUser as User);
+        );
+        let updatedUser = { ...user, login: newLoginInput };
+        setUser(updatedUser as User);
       } catch (error: any) {
         console.error("Error updating login:", error.message);
       }
@@ -211,9 +210,7 @@ const UserDetailsCard = ({
               value={newLoginInput}
               onChange={(e) => setNewLoginInput(e.target.value)}
               className={`rounded-lg border-opacity-50 border-2 ${
-                newLoginInput !== ""
-                  ? "border-green-500"
-                  : "border-red-500"
+                newLoginInput !== "" ? "border-green-500" : "border-red-500"
               } bg-[#e8eef3] text-sm outline-none `}
             />
             &nbsp;
@@ -305,7 +302,7 @@ const GameHistory = ({ games }: { games: string }) => {
   );
 };
 
-const UserProfile = () => {
+const UserProfile = ({ intraId }: { intraId: string | undefined }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -324,22 +321,28 @@ const UserProfile = () => {
   const handleUpload = async () => {
     if (selectedFile) {
       const formData = new FormData();
-      formData.append("avatar", selectedFile);
+      formData.append('avatar', selectedFile);
 
+      console.log('formData', formData);
       try {
-        const response = await fetch("http://localhost:3001/users/imimouni", {
-          method: "POST",
-          body: imagePreview,
+        const response = await fetch(`http://localhost:3001/users/${intraId}/avatar`, {
+          method: 'POST',
+          body: formData,
+          credentials: "include", // Include cookies in the request
         });
-
         if (response.ok) {
-          console.log("Avatar updated successfully");
+          console.log('Avatar uploaded successfully');
         } else {
-          console.error("Failed to update avatar:", response.statusText);
+          console.error('Failed to update avatar:', response.statusText);
         }
       } catch (error) {
-        console.error("Error during POST request:", error);
+        console.error('Error during POST request:', error);
       }
+
+      setImagePreview(null);
+      setSelectedFile(null);
+    } else {
+      console.log('Please select a file');
     }
   };
 
@@ -358,7 +361,7 @@ const UserProfile = () => {
         <img
           src={imagePreview}
           alt="Selected Avatar"
-          style={{ maxWidth: "100%" }}
+          style={{ maxWidth: '100%' }}
         />
       )}
       {selectedFile && (
@@ -373,7 +376,6 @@ const UserProfile = () => {
 
 export default function Profile() {
   const { user, setUser } = useAppContext();
-  // const [userData, setUserData] = useState<User | null>(null);
 
   useEffect(() => {
     const checkJwtCookie = async () => {
@@ -387,10 +389,8 @@ export default function Profile() {
         });
         var data: User = await response.json();
 
-        // setUserData(data);
         setUser(data);
-
-        console.log("data : ", data);
+        // console.log("user data : ", data);
       } catch (error) {
         console.error("Error during login:", error);
       }
@@ -431,7 +431,7 @@ export default function Profile() {
       <Achievements Achievements={"randomAchievement"} />
       <GameHistory games={"randomAgame"} />
 
-      <UserProfile />
+      <UserProfile intraId={intraId} />
     </div>
   );
 }

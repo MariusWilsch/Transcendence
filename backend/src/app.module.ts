@@ -9,9 +9,13 @@ import { AuthController } from 'modules/auth/auth.controller';
 import { AuthService } from 'modules/auth/auth.service';
 import { PrismaModule } from 'modules/prisma/prisma.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
-  imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule],
+  imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule, ServeStaticModule.forRoot({
+    rootPath: join(__dirname, '..', 'uploads/'),
+  })],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, JwtService],
 })
