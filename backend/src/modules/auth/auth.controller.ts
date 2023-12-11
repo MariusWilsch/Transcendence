@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { UserService } from 'modules/user/user.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { EmailService } from './nodemailer/email.service';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +15,8 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    private userservive: UserService
+    private userservive: UserService,
+    private readonly emailService: EmailService
   ) {}
 
   @Get()
@@ -108,6 +110,18 @@ export class AuthController {
       res.status(500).send('Internal Server Error');
     }
   }
+
+  @Get('email')
+  async sendEmail(): Promise<string> {
+    const to = 'imad.mimouni.123@gmail.com';
+    const subject = 'Test Email';
+    const text = 'test env.';
+
+    await this.emailService.sendMail(to, subject, text);
+
+    return 'Email sent!';
+  }
+
 }
 
 // TODO

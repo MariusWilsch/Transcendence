@@ -10,9 +10,9 @@ import { diskStorage } from 'multer';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: 'uploads/', // Specify your destination folder
+        destination: 'AvatarUploads/',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const uniqueSuffix = Date.now();
           const fileExtension = file.originalname.split('.').pop();
           cb(null, file.fieldname + '-' + uniqueSuffix + '.' + fileExtension);
         },
@@ -21,6 +21,6 @@ import { diskStorage } from 'multer';
   ],
   providers: [UserService, AuthService, JwtService],
   controllers: [UserController],
-  exports: [UserService], // allowing the user service to be used in other modules
+  exports: [UserService],
 })
 export class UserModule {}

@@ -14,7 +14,7 @@ import { join } from 'path';
 
 @Module({
   imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule, ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'uploads/'),
+    rootPath: join(__dirname, '..', 'AvatarUploads/'),
   })],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, JwtService],

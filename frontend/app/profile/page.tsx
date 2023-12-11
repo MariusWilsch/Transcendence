@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import edit from "../../public/edit.svg";
-import save from "../../public/save.svg";
-import backArrow from "../../public/backArrow.svg";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppContext, AppProvider } from "../AppContext";
+import { CiCirclePlus } from "react-icons/ci";
+import { CiSaveUp2 } from "react-icons/ci";
+import { CiEdit } from "react-icons/ci";
 
 export function Loading() {
   return (
@@ -24,7 +24,7 @@ export function Navbar() {
       <div className="navbar">
         <div className="navbar-start">
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+            <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -45,32 +45,33 @@ export function Navbar() {
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <a>Item 1</a>
+                <a>Leaderboard</a>
               </li>
               <li>
-                <a>Parent</a>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
+                <a>Achievements</a>
               </li>
               <li>
-                <a>Item 3</a>
+                <a>Friends</a>
+              </li>
+              <li>
+                <a>Channels</a>
+              </li>
+              <li>
+                <a>Play</a>
+              </li>
+              <li>
+                <a>Log out</a>
               </li>
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl text-slate-700 font-serif">
+          <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
             Profile
           </a>
         </div>
-        <div className="navbar-center hidden lg:flex">
+        {/* <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <a>Item 1</a>
+              <a>Profile</a>
             </li>
             <li>
               <details>
@@ -86,21 +87,28 @@ export function Navbar() {
               </details>
             </li>
             <li>
-              <a>Item 3</a>
+              <a>Leaderboard</a>
+            </li>
+            <li>
+              <a>Achievements</a>
+            </li>
+            <li>
+              <a>Friends</a>
+            </li>
+            <li>
+              <a>Channels</a>
+            </li>
+            <li>
+              <a>Play</a>
+            </li>
+            <li>
+              <a>Log out</a>
             </li>
           </ul>
-        </div>
+        </div> */}
         <div className="flex justify-end w-[100vw] px-4">
           <button onClick={toggleDivVisibility}>
-            <Image
-              src={edit}
-              alt="edit profile"
-              width={40}
-              priority={true}
-              quality={100}
-              className=""
-              style={{ width: "3vh", height: "3vh" }}
-            />
+            <CiEdit className="text-black" size="25" />
           </button>
         </div>
       </div>
@@ -118,16 +126,17 @@ type User = {
   updated_at: Date;
 };
 
-type UserDescriptionCardProps = {
+const UserDescriptionCard = ({
+  title,
+  content,
+}: {
   title: string;
   content: string;
-};
-
-const UserDescriptionCard = ({ title, content }: UserDescriptionCardProps) => {
+}) => {
   return (
     <div className=" flex-1 flex flex-col ">
       <div className="flex flex-col items-center justify-center">
-        <div className="bg-[#9DB2BF] rounded-xl h-[15vw] w-[15vw] pt-3">
+        <div className="bg-[#9DB2BF] rounded-xl h-[15vw] w-[15vw] md:w-[10vw] md:h-[10vw] pt-3">
           <div className="text-white text-lg text-centerfont-mono rounded-md text-center">
             {title}
           </div>
@@ -148,12 +157,12 @@ const UserLevelCard = ({
   intraId: string | undefined;
 }) => {
   return (
-    <div className="flex items-center justify-center w-screen h-[7vh]">
+    <div className="flex items-center justify-center h-[7vh]">
       <div
         className="flex items-center justify-center p-4
         rounded-md"
       >
-        <div className="text-base-100 font-serif"> {value} </div>
+        <div className="text-base-100  days left"> {value} </div>
       </div>
     </div>
   );
@@ -167,7 +176,7 @@ const UserDetailsCard = ({
   intraId: string | undefined;
 }) => {
   const { user, setUser } = useAppContext();
-  const { isDivVisible } = useAppContext();
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
   const [newLoginInput, setNewLoginInput] = useState("");
 
   const updateLogin = async () => {
@@ -194,13 +203,23 @@ const UserDetailsCard = ({
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      updateLogin();
+      toggleDivVisibility();
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center w-screen h-[7vh] ">
+    <div className="flex items-center justify-center h-[7vh] ">
       <div
         className="flex items-center justify-center p-4
-        rounded-md "
+        rounded-md"
       >
-        <div className="text-base-100 text-lg font-serif "> {value} </div>
+        <div className="text-base-100 text-2xl font-medium font-sans days left ">
+          {" "}
+          {value}{" "}
+        </div>
         {isDivVisible && (
           <div className="">
             &nbsp;
@@ -209,21 +228,20 @@ const UserDetailsCard = ({
               placeholder=" the new username "
               value={newLoginInput}
               onChange={(e) => setNewLoginInput(e.target.value)}
+              onKeyPress={handleKeyPress}
               className={`rounded-lg border-opacity-50 border-2 ${
                 newLoginInput !== "" ? "border-green-500" : "border-red-500"
               } bg-[#e8eef3] text-sm outline-none `}
             />
             &nbsp;
-            <button onClick={updateLogin} className="">
-              <Image
-                src={save}
-                alt="save"
-                width={30}
-                priority={true}
-                quality={100}
-                className="inline-block "
-                style={{ width: "2vh", height: "2vh" }}
-              ></Image>
+            <button
+              onClick={() => {
+                updateLogin();
+                toggleDivVisibility();
+              }}
+              className=""
+            >
+              <CiSaveUp2 className="text-black inline-block" size="24" />
             </button>
           </div>
         )}
@@ -232,79 +250,19 @@ const UserDetailsCard = ({
   );
 };
 
-type UserProfileImageProps = {
+const UserProfileImage = ({
+  src,
+  intraId,
+}: {
   src: string;
-};
-
-const UserProfileImage = ({ src }: UserProfileImageProps) => {
-  return (
-    <div
-      className="flex flex-col items-center justify-center 
-    m-4"
-    >
-      <Image
-        src={src}
-        alt="backArrow"
-        width={300}
-        height={300}
-        priority={true}
-        quality={100}
-        className="rounded-full border-2 border-black"
-        style={{ width: "20vh", height: "20vh" }}
-      />
-    </div>
-  );
-};
-
-const BackButton = () => {
-  return (
-    <div className="hidden sm:block pt-[5vh] px-[5vw] hover:opacity-70">
-      <Link href="http://localhost:3000" className="">
-        <Image
-          src={backArrow}
-          alt="home page"
-          width={30}
-          priority={true}
-          quality={75}
-          className=""
-          style={{ width: "2.5vh", height: "4vh" }}
-        />
-      </Link>
-    </div>
-  );
-};
-
-const Achievements = ({ Achievements }: { Achievements: string }) => {
-  return (
-    <div className="h-[10vh] mx-[10vw] m-[10vw]">
-      <div className="text-base-100 text-lg font-serif">
-        {" "}
-        Your achievements :{" "}
-      </div>
-      <div className="flex items-center justify-center p-4 rounded-md">
-        <div className="font-serif"> {Achievements} </div>
-      </div>
-    </div>
-  );
-};
-
-const GameHistory = ({ games }: { games: string }) => {
-  return (
-    <div className="h-[10vh] mx-[10vw]">
-      <div className="text-base-100 text-lg font-serif">
-        {" "}
-        Your games history :{" "}
-      </div>
-      <div className="flex items-center justify-center p-4 rounded-md">
-        <div className="font-serif"> {games} </div>
-      </div>
-    </div>
-  );
-};
-
-const UserProfile = ({ intraId }: { intraId: string | undefined }) => {
+  intraId: string | undefined;
+}) => {
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  useEffect(() => {
+    setImagePreview(src);
+  }, [src]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -312,7 +270,6 @@ const UserProfile = ({ intraId }: { intraId: string | undefined }) => {
       const file = files[0];
       setSelectedFile(file);
 
-      // Create a preview URL for the selected image
       const previewURL = URL.createObjectURL(file);
       setImagePreview(previewURL);
     }
@@ -321,55 +278,154 @@ const UserProfile = ({ intraId }: { intraId: string | undefined }) => {
   const handleUpload = async () => {
     if (selectedFile) {
       const formData = new FormData();
-      formData.append('avatar', selectedFile);
+      formData.append("avatar", selectedFile);
 
-      console.log('formData', formData);
+      console.log("formData", formData);
       try {
-        const response = await fetch(`http://localhost:3001/users/${intraId}/avatar`, {
-          method: 'POST',
-          body: formData,
-          credentials: "include", // Include cookies in the request
-        });
+        const response = await fetch(
+          `http://localhost:3001/users/${intraId}/avatar`,
+          {
+            method: "POST",
+            body: formData,
+            credentials: "include", // Include cookies in the request
+          }
+        );
         if (response.ok) {
-          console.log('Avatar uploaded successfully');
+          console.log("Avatar uploaded successfully");
         } else {
-          console.error('Failed to update avatar:', response.statusText);
+          console.error("Failed to update avatar");
         }
       } catch (error) {
-        console.error('Error during POST request:', error);
+        console.error("Error during POST request:", error);
       }
 
-      setImagePreview(null);
       setSelectedFile(null);
     } else {
-      console.log('Please select a file');
+      console.log("Please select a file");
     }
   };
 
   return (
     <div>
-      <div>
-        <label htmlFor="avatar">Select Avatar:</label>
-        <input
-          type="file"
-          id="avatar"
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-      </div>
-      {imagePreview && (
-        <img
-          src={imagePreview}
-          alt="Selected Avatar"
-          style={{ maxWidth: '100%' }}
-        />
-      )}
-      {selectedFile && (
-        <div>
-          <p>Selected File: {selectedFile.name}</p>
-          <button onClick={handleUpload}>Upload Avatar</button>
+      <div className="flex flex-col items-center justify-center">
+        <div
+          className="w-[25vh] h-[25vh]"
+          style={{ position: "relative", display: "inline-block" }}
+        >
+          {imagePreview && (
+            <Image
+              src={imagePreview}
+              alt="image Preview"
+              width={300}
+              height={300}
+              priority={true}
+              quality={100}
+              className="rounded-full border-2 border-black"
+              style={{ width: "25vh", height: "25vh" }}
+            />
+          )}
+
+          <div>
+            {isDivVisible && (
+              <div
+                className=""
+                style={{ position: "absolute", bottom: 0, right: 0 }}
+              >
+                <label htmlFor="avatar" className="">
+                  <CiCirclePlus
+                    className="text-black mb-[1.5vh] mr-[1.5vh]"
+                    size="25"
+                    onChange={handleFileChange}
+                  />
+                  <input
+                    type="file"
+                    id="avatar"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="inset-0 cursor-pointer bg-black hidden"
+                  />
+                </label>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+        {selectedFile && (
+          <div className="flex flex-col items-center justify-center m-5">
+            <button
+              onClick={() => {
+                handleUpload();
+                toggleDivVisibility();
+              }}
+            >
+              <div className="inline-block font-sans text-black text-lg">
+                {" "}
+                save &nbsp;{" "}
+              </div>
+              <CiSaveUp2 className="text-black inline-block" size="22" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Achievements = ({ Achievements }: { Achievements: string }) => {
+  return (
+    <div className="h-[10vh] mx-[10vw] m-[10vw]">
+      <div className="text-base-100 text-lg  days left">
+        {" "}
+        Your achievements :{" "}
+      </div>
+      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+        <div className=" days left font-sans"> {Achievements} </div>
+      </div>
+    </div>
+  );
+};
+
+const GameHistory = ({ games }: { games: string }) => {
+  return (
+    <div className="h-[10vh] mx-[10vw]">
+      <div className="text-base-100 text-lg  days lef font-sanst">
+        {" "}
+        Your games history :{" "}
+      </div>
+      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+        <div className=" days left"> {games} </div>
+      </div>
+    </div>
+  );
+};
+
+const Sidebar = () => {
+  return (
+    <div>
+      <div className="text-2xl font-bold flex flex-row text-center m-2">
+        Profile
+      </div>
+      <div className="fixed h-screen text-white flex flex-col justify-center">
+        <ul className="list-none text-center">
+          <li>
+            <a href="#">Leaderboard</a>
+          </li>
+          <li>
+            <a href="#">Achievements</a>
+          </li>
+          <li>
+            <a href="#">Friends</a>
+          </li>
+          <li>
+            <a href="#">Channels</a>
+          </li>
+          <li>
+            <a href="#">Play</a>
+          </li>
+          <li>
+            <a href="#">Log out</a>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };
@@ -413,25 +469,30 @@ export default function Profile() {
     "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg";
 
   return (
-    <div className="bg-[#DDE6ED] h-screen w-screen">
-      <Navbar />
-      <UserProfileImage src={IntraPic} />
+    <div className="h-screen w-screen">
+      <div className="flex h-screen">
+        <div className="w-1/5 bg-gray-800 p-4 hidden md:inline-block">
+          <Sidebar />
+        </div>
+        <div className="flex-1 p-4 overflow-y-auto">
+          <Navbar />
+          <UserProfileImage src={IntraPic} intraId={intraId} />
 
-      <UserDetailsCard value={Login} intraId={intraId} />
-      <UserLevelCard value={level} intraId={intraId} />
+          <UserDetailsCard value={Login} intraId={intraId} />
+          <UserLevelCard value={level} intraId={intraId} />
 
-      <div className="flex flex-col items-center justify-center w-screen">
-        <div className="flex flex-row justify-items-center w-[90vw] h-[100%]">
-          <UserDescriptionCard title={"42"} content={"Friends"} />
-          <UserDescriptionCard title={"42"} content={"Wins"} />
-          <UserDescriptionCard title={"42"} content={"Loses"} />
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
+              <UserDescriptionCard title={"42"} content={"Friends"} />
+              <UserDescriptionCard title={"42"} content={"Wins"} />
+              <UserDescriptionCard title={"42"} content={"Loses"} />
+            </div>
+          </div>
+
+          <Achievements Achievements={"random achievement"} />
+          <GameHistory games={"random game"} />
         </div>
       </div>
-
-      <Achievements Achievements={"randomAchievement"} />
-      <GameHistory games={"randomAgame"} />
-
-      <UserProfile intraId={intraId} />
     </div>
   );
 }
