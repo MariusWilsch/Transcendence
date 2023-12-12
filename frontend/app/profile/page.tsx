@@ -165,7 +165,7 @@ const UserLevelCard = ({
   intraId: string | undefined;
 }) => {
   return (
-    <div className="flex items-center justify-center h-[7vh]">
+    <div className="flex items-center justify-center h-[7vh] text-gray-900">
       <div
         className="flex items-center justify-center p-4
         rounded-md"
@@ -224,9 +224,8 @@ const UserDetailsCard = ({
         className="flex items-center justify-center p-4
         rounded-md"
       >
-        <div className="text-base-100 text-2xl font-medium font-sans days left ">
-          {" "}
-          {value}{" "}
+        <div className="text-2xl font-medium font-sans days left text-gray-900">
+          {value}&nbsp;
         </div>
         {isDivVisible && (
           <div className="">
@@ -389,7 +388,7 @@ const Achievements = ({ Achievements }: { Achievements: string }) => {
         {" "}
         Your achievements :{" "}
       </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500" >
         <div className=" days left font-sans"> {Achievements} </div>
       </div>
     </div>
@@ -403,7 +402,7 @@ const GameHistory = ({ games }: { games: string }) => {
         {" "}
         Your games history :{" "}
       </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
         <div className=" days left"> {games} </div>
       </div>
     </div>
