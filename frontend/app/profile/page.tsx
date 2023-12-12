@@ -7,6 +7,7 @@ import { useAppContext, AppProvider } from "../AppContext";
 import { CiCirclePlus } from "react-icons/ci";
 import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
+import { IoIosCloseCircleOutline } from "react-icons/io";
 
 export function Loading() {
   return (
@@ -17,7 +18,7 @@ export function Loading() {
 }
 
 export function Navbar() {
-  const { toggleDivVisibility } = useAppContext();
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
 
   return (
     <div className="">
@@ -107,9 +108,16 @@ export function Navbar() {
           </ul>
         </div> */}
         <div className="flex justify-end w-[100vw] px-4">
-          <button onClick={toggleDivVisibility}>
-            <CiEdit className="text-black" size="25" />
-          </button>
+          {!isDivVisible && (
+            <button onClick={toggleDivVisibility}>
+              <CiEdit className="text-black" size="25" />
+            </button>
+          )}
+          {isDivVisible && (
+            <button onClick={toggleDivVisibility}>
+              <IoIosCloseCircleOutline className="text-black" size="25" />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -230,8 +238,8 @@ const UserDetailsCard = ({
               onChange={(e) => setNewLoginInput(e.target.value)}
               onKeyPress={handleKeyPress}
               className={`rounded-lg border-opacity-50 border-2 ${
-                newLoginInput !== "" ? "border-green-500" : "border-red-500"
-              } bg-[#e8eef3] text-sm outline-none `}
+                newLoginInput !== "" ? "border-green-500" : "border-slate-300"
+              } bg-slate-50 text-sm outline-none text-black`}
             />
             &nbsp;
             <button
@@ -332,11 +340,13 @@ const UserProfileImage = ({
                 style={{ position: "absolute", bottom: 0, right: 0 }}
               >
                 <label htmlFor="avatar" className="">
-                  <CiCirclePlus
-                    className="text-black mb-[1.5vh] mr-[1.5vh]"
-                    size="25"
-                    onChange={handleFileChange}
-                  />
+                  <div className="bg-white mb-[5vw] mr-[5vw] md:mb-[2.4vh] md:mr-[2.4vh] rounded-full">
+                    <CiCirclePlus
+                      className="text-black "
+                      size="25"
+                      onChange={handleFileChange}
+                    />
+                  </div>
                   <input
                     type="file"
                     id="avatar"
@@ -349,17 +359,19 @@ const UserProfileImage = ({
             )}
           </div>
         </div>
-        {selectedFile && (
-          <div className="flex flex-col items-center justify-center m-5">
+        {selectedFile && isDivVisible && (
+          <div
+            className="flex flex-col items-center justify-center m-5
+          animate-moveLeftAndRight"
+          >
             <button
               onClick={() => {
                 handleUpload();
                 toggleDivVisibility();
               }}
             >
-              <div className="inline-block font-sans text-black text-lg">
-                {" "}
-                save &nbsp;{" "}
+              <div className="inline-block font-sans text-black text-lg font-medium">
+                save &nbsp;
               </div>
               <CiSaveUp2 className="text-black inline-block" size="22" />
             </button>
@@ -430,6 +442,35 @@ const Sidebar = () => {
   );
 };
 
+const TwoFactorAuth = () => {
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
+
+  return (
+    <div>
+      {isDivVisible && (
+        <div>
+        <div className="flex flex-col items-center justify-center">
+        <div >
+
+          <span className="label-text font-sans text-gray-800 text-base inline-block">
+            Enable 2FA &nbsp;
+          </span>
+          <div className="inline-block">
+            <input
+              type="checkbox"
+              className="toggle [--tglbg:white] bg-slate-700 
+            hover:bg-slate-600 border-bg-slate-800 "
+              style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
+            />
+          </div>
+        </div>
+        </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Profile() {
   const { user, setUser } = useAppContext();
 
@@ -479,6 +520,8 @@ export default function Profile() {
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
+          <TwoFactorAuth />
+
           <UserLevelCard value={level} intraId={intraId} />
 
           <div className="flex flex-col items-center justify-center">

@@ -16,19 +16,8 @@ export class AuthController {
     private authService: AuthService,
     private jwtService: JwtService,
     private userservive: UserService,
-    private readonly emailService: EmailService
+    private emailService: EmailService
   ) {}
-
-  @Get()
-  home(): any {
-    return 'Home';
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Req() req) {
-    return req.user;
-  }
 
   @Get('user')
   @UseGuards(JwtAuthGuard)
@@ -113,15 +102,42 @@ export class AuthController {
 
   @Get('email')
   async sendEmail(): Promise<string> {
-    const to = 'imad.mimouni.123@gmail.com';
-    const subject = 'Test Email';
-    const text = 'test env.';
+    const to = 'imimouni@student.1337.ma';
+    // const to = 'imad.mimouni.123@gmail.com';
+
+    const login = 'imimouni';
+    const code = '12347895';
+
+    const subject = 'Transcendance : 2FA Code';
+
+    const text = `
+<body style="font-family: Arial, sans-serif; color: #333;">
+
+<p>Dear ${login},</p>
+
+<p style="margin-bottom: 10px;">
+Thank you for signing up in Transcendance! To complete your registration, here is your verification code:
+</p>
+
+<p style="color: red; font-weight: bold;">
+${code}
+</p>
+
+<p>
+This code will expire in 5 minutes. If you did not sign up for Transcendance, please ignore this email.
+</p>
+
+<p style="font-weight: bold;">
+The Transcendance Team
+</p>
+
+</body>
+    `;
 
     await this.emailService.sendMail(to, subject, text);
 
     return 'Email sent!';
   }
-
 }
 
 // TODO

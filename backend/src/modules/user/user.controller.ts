@@ -66,8 +66,8 @@ export class UserController {
       const avatarFilename = avatar.filename;
       const avatarUrl = `http://localhost:3001/${avatarFilename}`;
   
-      console.log('Avatar Filename:', avatarFilename);
-      console.log('Avatar URL:', avatarUrl);
+      // console.log('Avatar Filename:', avatarFilename);
+      // console.log('Avatar URL:', avatarUrl);
   
       await this.userService.updateAvatar(userId, avatarUrl);
   
