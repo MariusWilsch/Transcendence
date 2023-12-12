@@ -1,4 +1,10 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {}
 
-module.exports = nextConfig
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    images: {
+        domains: ['cdn.intra.42.fr', 'm.gettywallpapers.com', 'localhost'],
+      },
+  }
+  
+  module.exports = nextConfig
+  

@@ -12,14 +12,12 @@ datasource db {
 
 
 model User {
-  id             String   @id @default(uuid())
-  intraId        String   @unique
-  name           String?  @unique
-  email          String   @unique
+  // id             String    @id @default(uuid())
+  intraId        String    @unique //
+  fullname       String    @unique
+  login          String    @unique
+  email          String    @unique
   Avatar         String?
-  isAuth         Boolean  @default(true)
-  TwoFASecret    String?
-  isTwoFAEnabled Boolean  @default(false)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
 }
