@@ -11,12 +11,14 @@ import { PrismaModule } from 'modules/prisma/prisma.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { Email2FAService } from 'modules/auth/nodemailer/email.service';
+import { EmailModule } from 'modules/auth/nodemailer/email.module';
 
 @Module({
-  imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule, ServeStaticModule.forRoot({
+  imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule, EmailModule , ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'AvatarUploads/'),
   })],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, JwtService],
+  providers: [AppService, AuthService, JwtService, Email2FAService],
 })
 export class AppModule {}

@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaClient, Prisma, User } from '@prisma/client';
-import { retry } from 'rxjs';
 
 const prisma = new PrismaClient();
 
@@ -105,4 +104,5 @@ export class UserService {
       console.error('Error updating login:', error);
     }
   }
+
 }

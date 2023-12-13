@@ -1,4 +1,12 @@
-import { Controller, Req, Res, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Req,
+  Res,
+  Get,
+  UseGuards,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaClient } from '@prisma/client';
@@ -6,7 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { UserService } from 'modules/user/user.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { EmailService } from './nodemailer/email.service';
+import { Email2FAService } from './nodemailer/email.service';
 
 const prisma = new PrismaClient();
 
@@ -15,12 +23,12 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    private userservive: UserService,
-    private emailService: EmailService
+    private userService: UserService,
+    private Email2FAService: Email2FAService
   ) {}
 
   @Get('user')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;
@@ -40,6 +48,7 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: any, @Res() res: any) {
+    // console.log('req: ', req);
     try {
       let userdata = this.authService.getUser(req.user);
 
@@ -49,8 +58,6 @@ export class AuthController {
         },
       });
       if (userExists) {
-        // res.redirect('http://localhost:3001/auth/user');
-
         const { created_at, updated_at, ...userWithoutDate } = userExists;
         // console.log('userWithoutDate: ', userWithoutDate);
 
@@ -60,6 +67,13 @@ export class AuthController {
         });
         res.cookie('jwt', jwt);
         res.cookie('id', userExists.intraId);
+
+        if (userExists.isTfaEnabled === true) {
+          res.clearCookie('jwt');
+          this.authService.generateOtp(userExists);
+          return res.redirect('http://localhost:3000/2FA');
+        }
+
         return res.redirect('http://localhost:3000/profile');
       }
 
@@ -100,43 +114,18 @@ export class AuthController {
     }
   }
 
-  @Get('email')
-  async sendEmail(): Promise<string> {
-    const to = 'imimouni@student.1337.ma';
-    // const to = 'imad.mimouni.123@gmail.com';
+  @Post('verifyOtp')
+  verifyOtp(@Body() body: any) {
+    // console.log('body: ', body);
+    // const isVerified = this.otpService.verifyOtp(secret, otp);
 
-    const login = 'imimouni';
-    const code = '12347895';
-
-    const subject = 'Transcendance : 2FA Code';
-
-    const text = `
-<body style="font-family: Arial, sans-serif; color: #333;">
-
-<p>Dear ${login},</p>
-
-<p style="margin-bottom: 10px;">
-Thank you for signing up in Transcendance! To complete your registration, here is your verification code:
-</p>
-
-<p style="color: red; font-weight: bold;">
-${code}
-</p>
-
-<p>
-This code will expire in 5 minutes. If you did not sign up for Transcendance, please ignore this email.
-</p>
-
-<p style="font-weight: bold;">
-The Transcendance Team
-</p>
-
-</body>
-    `;
-
-    await this.emailService.sendMail(to, subject, text);
-
-    return 'Email sent!';
+    // if (isVerified) {
+    //   // Auth successful
+    //   return { success: true };
+    // } else {
+    //   // Auth failed
+    //   return { success: false };
+    // }
   }
 }
 

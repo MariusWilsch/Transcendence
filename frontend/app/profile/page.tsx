@@ -124,7 +124,7 @@ export function Navbar() {
   );
 }
 
-type User = {
+export type User = {
   intraId: string;
   fullname: string;
   login: string;
@@ -384,11 +384,10 @@ const UserProfileImage = ({
 const Achievements = ({ Achievements }: { Achievements: string }) => {
   return (
     <div className="h-[10vh] mx-[10vw] m-[10vw]">
-      <div className="text-base-100 text-lg  days left">
-        {" "}
-        Your achievements :{" "}
+      <div className="text-gray-900 text-lg  days left">
+        Your achievements :&nbsp;
       </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500" >
+      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
         <div className=" days left font-sans"> {Achievements} </div>
       </div>
     </div>
@@ -398,9 +397,8 @@ const Achievements = ({ Achievements }: { Achievements: string }) => {
 const GameHistory = ({ games }: { games: string }) => {
   return (
     <div className="h-[10vh] mx-[10vw]">
-      <div className="text-base-100 text-lg  days lef font-sanst">
-        {" "}
-        Your games history :{" "}
+      <div className="text-lg  days lef font-sanst  text-gray-900">
+        Your games history :&nbsp;
       </div>
       <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
         <div className=" days left"> {games} </div>
@@ -412,7 +410,7 @@ const GameHistory = ({ games }: { games: string }) => {
 const Sidebar = () => {
   return (
     <div>
-      <div className="text-2xl font-bold flex flex-row text-center m-2">
+      <div className="text-2xl font-semibold flex flex-row text-center m-2 text-gray-200">
         Profile
       </div>
       <div className="fixed h-screen text-white flex flex-col justify-center">
@@ -441,29 +439,73 @@ const Sidebar = () => {
   );
 };
 
-const TwoFactorAuth = () => {
+const TwoFactorAuth = ({ intraId }: { intraId: string | undefined }) => {
   const { isDivVisible, toggleDivVisibility } = useAppContext();
+
+  const handleCheckboxChange = async (event: any) => {
+    if (event.target.checked) {
+      console.log("Checkbox is checked");
+      const response = await fetch(
+        `http://localhost:3001/users/${intraId}/enableOtp`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      const res = await response.json();
+
+      if (res.sucess) {
+        console.log("2FA is enabled");
+      }
+      else {
+        console.log("Error in enabling 2FA");
+      }
+    } else {
+      console.log("Checkbox is unchecked");
+      const response = await fetch(
+        `http://localhost:3001/users/${intraId}/disableOtp`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+        );
+        const res = await response.json();
+        
+        if (res.sucess) {
+        console.log("2FA is disabled");
+      }
+      else {
+        console.log("Error in disabling 2FA");
+      }
+    }
+  };
 
   return (
     <div>
       {isDivVisible && (
         <div>
-        <div className="flex flex-col items-center justify-center">
-        <div >
-
-          <span className="label-text font-sans text-gray-800 text-base inline-block">
-            Enable 2FA &nbsp;
-          </span>
-          <div className="inline-block">
-            <input
-              type="checkbox"
-              className="toggle [--tglbg:white] bg-slate-700 
+          <div className="flex flex-col items-center justify-center">
+            <div>
+              <span className="label-text font-sans text-gray-800 text-base inline-block">
+                Enable 2FA &nbsp;
+              </span>
+              <div className="inline-block">
+                <input
+                  type="checkbox"
+                  className="toggle [--tglbg:white] bg-slate-700 
             hover:bg-slate-600 border-bg-slate-800 "
-              style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
-            />
+                  style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
+                  onChange={handleCheckboxChange}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        </div>
         </div>
       )}
     </div>
@@ -509,7 +551,7 @@ export default function Profile() {
     "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg";
 
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen ">
       <div className="flex h-screen">
         <div className="w-1/5 bg-gray-800 p-4 hidden md:inline-block">
           <Sidebar />
@@ -519,7 +561,7 @@ export default function Profile() {
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
-          <TwoFactorAuth />
+          <TwoFactorAuth intraId={intraId} />
 
           <UserLevelCard value={level} intraId={intraId} />
 

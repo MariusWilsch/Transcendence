@@ -10,23 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-// model User {
-//   intraId        String    @unique
-//   fullname       String    @unique
-//   login          String    @unique
-//   email          String    @unique
-//   Avatar         String?
-//   created_at     DateTime  @default(now())
-//   updated_at     DateTime  @updatedAt
-// }
-
 model User {
   intraId        String    @unique
   fullname       String    @unique
   login          String    @unique
   email          String    @unique
   Avatar         String?
+  isTfaAuth      Boolean   @default(false)
+  isTfaEnabled   Boolean   @default(false)
+  tfa            Tfa?
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
+}
+
+model Tfa {
+  user           User      @relation(fields: [intraId], references: [intraId])
+  intraId        String    @unique
+  otp            String    @unique
+  created_at     DateTime  @default(now())
 }
