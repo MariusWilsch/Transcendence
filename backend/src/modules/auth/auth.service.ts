@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { Email2FAService } from './nodemailer/email.service';
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 // import { User } from '@prisma/client';
 
 type User = {
@@ -27,8 +28,6 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  private users: User[] = [];
-
   getUser(user: authDto): User {
     const newUser = {
       intraId: user.UId,
@@ -42,13 +41,12 @@ export class AuthService {
       updated_at: new Date(),
     };
 
-    this.users.push(newUser);
     return newUser;
   }
 
-  getAllusers(): User[] {
-    return this.users;
-  }
+  // getAllusers(): User[] {
+  //   return this.users;
+  // }
 
   getUserFromCookie(req: any): User | undefined {
     const jwt = req.jwt;
@@ -83,6 +81,7 @@ export class AuthService {
     const otpcode = otp;
     await this.Email2FAService.sendEmail(user.email, user.login, otp);
 
+    const hash = await this.hashCode(otpcode);
     // save the otp in the db
 
     const userIntraId = user.intraId;
@@ -96,13 +95,13 @@ export class AuthService {
     if (existingTfa) {
       await prisma.tfa.update({
         where: { intraId: existingTfa.intraId },
-        data: { otp: otpcode },
+        data: { otp: hash },
       });
     } else {
       await prisma.tfa.create({
         data: {
           intraId: userIntraId,
-          otp: otpcode,
+          otp: hash,
         },
       });
     }
@@ -118,7 +117,8 @@ export class AuthService {
       where: { intraId: id },
     });
 
-    if (existingTfa && existingTfa.otp === otp) {
+    const isCodeValid = await this.compareCode(otp, existingTfa.otp);
+    if (existingTfa && isCodeValid) {
       await prisma.tfa.delete({
         where: { intraId: id },
       });
@@ -128,13 +128,9 @@ export class AuthService {
         where: { intraId: id },
         data: { isTfaAuth: true },
       });
-
-      // console.log('existingTfa: ', existingTfa);//
       return true;
     }
-    
-    // console.log('not existingTfa: ', existingTfa);//
-    return false;
+        return false;
   }
 
   async enableOtp(userId : string) : Promise<boolean>{
@@ -163,6 +159,16 @@ export class AuthService {
       console.error('Error disabling otp:', error);
       return false;
     }
+  }
+  async hashCode(code: string): Promise<string> {
+    const saltRounds = 2;
+    const hashedCode = await bcrypt.hash(code, saltRounds);
+    return hashedCode;
+  }
+
+  async compareCode(code: string, hashedCode: string): Promise<boolean> {
+    const isMatch = await bcrypt.compare(code, hashedCode);
+    return isMatch;
   }
 
 }

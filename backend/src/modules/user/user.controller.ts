@@ -18,13 +18,12 @@ import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET, URL } from '../auth/constants';
 
-
 @Controller('users')
 export class UserController {
   constructor(
     private userService: UserService,
     private authService: AuthService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   @Get()
@@ -40,22 +39,23 @@ export class UserController {
   @Post(':id/login')
   async editlogin(
     @Param('id') userId: string,
-    @Body() body: { newLogin: string }
+    @Body() body: { newLogin: string },
+    @Res() res: any
   ) {
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
         return { error: 'User not found', message: 'User not found' };
       }
-      if (body.newLogin.trim() === '') {
-        return {
-          error: "Login can't be empty",
-          message: "Login can't be empty",
-        };
+
+      const uniqueLogin = await this.userService.uniqueLogin(body.newLogin);
+      if (body.newLogin.trim() === '' || uniqueLogin === false) {
+        return res.json({ success: false });
       }
       await this.userService.updateLogin(userId, body.newLogin);
+      return res.json({ success: true });
     } catch (error: any) {
-      return { error: 'Failed to update login', message: error.message };
+      return res.json({ success: false });
     }
   }
 
@@ -78,7 +78,6 @@ export class UserController {
           secret: JWT_SECRET,
         });
 
-        
         res.cookie('jwt', jwt);
         return res.json({ sucess: true });
       } else {
@@ -86,17 +85,13 @@ export class UserController {
       }
     } catch (error) {
       console.error('Error during OTP verification:', error);
-      res
-        .json({ success: false, error: 'Internal Server Error' });
+      res.json({ success: false, error: 'Internal Server Error' });
     }
   }
 
   @Get(':id/enableOtp')
   @UseGuards(JwtAuthGuard)
-  async enableOtp(
-    @Param('id') userId: string,
-    @Res() res: any
-  ) {
+  async enableOtp(@Param('id') userId: string, @Res() res: any) {
     try {
       const isEnabled = await this.authService.enableOtp(userId);
 
@@ -107,17 +102,13 @@ export class UserController {
       }
     } catch (error) {
       console.error('Error during OTP verification:', error);
-      res
-        .json({ success: false, error: 'Internal Server Error' });
+      res.json({ success: false, error: 'Internal Server Error' });
     }
   }
 
   @Get(':id/disableOtp')
   @UseGuards(JwtAuthGuard)
-  async disableOtp(
-    @Param('id') userId: string,
-    @Res() res: any
-  ) {
+  async disableOtp(@Param('id') userId: string, @Res() res: any) {
     try {
       const disEnabled = await this.authService.disableOtp(userId);
 
@@ -128,8 +119,7 @@ export class UserController {
       }
     } catch (error) {
       console.error('Error during OTP verification:', error);
-      res
-        .json({ success: false, error: 'Internal Server Error' });
+      res.json({ success: false, error: 'Internal Server Error' });
     }
   }
 
@@ -153,9 +143,6 @@ export class UserController {
 
       const avatarFilename = avatar.filename;
       const avatarUrl = `${URL}:3001/${avatarFilename}`;
-
-      // console.log('Avatar Filename:', avatarFilename);
-      // console.log('Avatar URL:', avatarUrl);
 
       await this.userService.updateAvatar(userId, avatarUrl);
 

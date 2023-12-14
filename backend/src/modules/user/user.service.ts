@@ -105,4 +105,13 @@ export class UserService {
     }
   }
 
+
+  async uniqueLogin(login: string): Promise<boolean> {
+    const user = await this.getUserbyLogin(login);
+
+    if (user) {
+      return false;
+    }
+    return true;
+  }
 }

@@ -1,9 +1,10 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider } from "../AppContext";
-import { Loading, User } from "../profile/page";
+import { Loading } from "../profile/page";
 import { useRouter } from 'next/navigation'
 import Cookies from "universal-cookie";
+import { User } from "../AppContext";
 
 const cookies = new Cookies();
 
@@ -44,7 +45,7 @@ const TwoFactorVerification = () => {
     try {
       console.log("valid OTP");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/${id}/verifyOtp`,
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${id}/verifyOtp`,
         {
           method: "POST",
           headers: {

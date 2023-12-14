@@ -8,6 +8,8 @@ import { CiCirclePlus } from "react-icons/ci";
 import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function Loading() {
   return (
@@ -60,8 +62,13 @@ export function Navbar() {
               <li>
                 <a>Play</a>
               </li>
+              <br></br>
               <li>
-                <a>Log out</a>
+                <Link
+                  href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
+                >
+                  Log out
+                </Link>
               </li>
             </ul>
           </div>
@@ -204,11 +211,25 @@ const UserDetailsCard = ({
         );
         let updatedUser = { ...user, login: newLoginInput };
         setUser(updatedUser as User);
+
+        const data = await response.json();
+        if (data.success === false) {
+          const msg = "Failed to update login : " + newLoginInput;
+          toast.error(msg, { draggable: false });
+          console.log(newLoginInput, ": -maybe- not unique");
+        }
+        else {
+          toast.success("Login updated successfully", { draggable: false });
+          console.log(newLoginInput, ": updated successfully");
+        }
       } catch (error: any) {
+        const msg = "Error updating login: " + newLoginInput;
+        toast.error(msg, { draggable: false });
         console.error("Error updating login:", error.message);
       }
       setNewLoginInput("");
     } else {
+      toast.error("Please enter a valid login", { draggable: false });
       console.log("Please enter a valid login");
     }
   };
@@ -296,20 +317,24 @@ const UserProfileImage = ({
           {
             method: "POST",
             body: formData,
-            credentials: "include", // Include cookies in the request
+            credentials: "include",
           }
         );
         if (response.ok) {
+          toast.success("Avatar uploaded successfully", { draggable: false });
           console.log("Avatar uploaded successfully");
         } else {
+          toast.error("Failed to update avatar", { draggable: false });
           console.error("Failed to update avatar");
         }
       } catch (error) {
+        toast.error("Failed to update avatar", { draggable: false });
         console.error("Error during POST request:", error);
       }
 
       setSelectedFile(null);
     } else {
+      toast.error("Please select a file", { draggable: false });
       console.log("Please select a file");
     }
   };
@@ -340,7 +365,7 @@ const UserProfileImage = ({
                 className=""
                 style={{ position: "absolute", bottom: 0, right: 0 }}
               >
-                <label htmlFor="avatar" className="">
+                <label htmlFor="avatar" className="cursor-pointer">
                   <div className="bg-white mb-[2.4vh] mr-[2.4vh] md:mb-[2.7vh] md:mr-[2.7vh] rounded-full">
                     <CiCirclePlus
                       className="text-black "
@@ -348,6 +373,7 @@ const UserProfileImage = ({
                       onChange={handleFileChange}
                     />
                   </div>
+
                   <input
                     type="file"
                     id="avatar"
@@ -433,7 +459,9 @@ const Sidebar = () => {
             <a href="#">Play</a>
           </li>
           <li>
-            <a href="#">Log out</a>
+            <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
+              Log out
+            </Link>
           </li>
         </ul>
       </div>
@@ -457,7 +485,6 @@ const TwoFactorAuth = ({
     });
 
     if (event.target.checked) {
-      console.log("Checkbox is checked");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/enableOtp`,
         {
@@ -471,12 +498,13 @@ const TwoFactorAuth = ({
       const res = await response.json();
 
       if (res.sucess) {
+        toast.success("2FA is enabled", { draggable: false });
         console.log("2FA is enabled");
       } else {
+        toast.error("Error in enabling 2FA", { draggable: false });
         console.log("Error in enabling 2FA");
       }
     } else {
-      console.log("Checkbox is unchecked");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/disableOtp`,
         {
@@ -490,8 +518,10 @@ const TwoFactorAuth = ({
       const res = await response.json();
 
       if (res.sucess) {
+        toast.success("2FA is disabled", { draggable: false });
         console.log("2FA is disabled");
       } else {
+        toast.error("Error in disabling 2FA", { draggable: false });
         console.log("Error in disabling 2FA");
       }
     }
@@ -543,19 +573,18 @@ export default function Profile() {
         var data: User = await response.json();
 
         setUser(data);
-        // console.log("user data : ", data);
-      } catch (error) {
+      } catch (error : any) {
+        const msg = "Error during login" + error.message;
+        toast.error(msg, { draggable: false });
         console.error("Error during login:", error);
       }
     };
     checkJwtCookie();
-  }, []);
+  }, [user?.login]);
 
   if (!user) {
     return <Loading />;
   }
-
-  console.log("user: ", user.isTfaEnabled);
 
   const Login = user?.login || "Login";
   const intraId = user?.intraId;
@@ -594,6 +623,7 @@ export default function Profile() {
           <GameHistory games={"random game"} />
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

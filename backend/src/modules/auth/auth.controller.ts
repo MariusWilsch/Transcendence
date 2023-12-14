@@ -104,6 +104,7 @@ export class AuthController {
   @Get('logout')
   async logout(@Res() res: any) {
     try {
+      res.clearCookie('id');
       res.clearCookie('jwt');
       res.redirect(`${URL}:3000`);
       return 'logout';
