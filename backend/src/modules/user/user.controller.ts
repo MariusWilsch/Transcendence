@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from 'modules/auth/auth.service';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from '../auth/constants';
+import { JWT_SECRET, URL } from '../auth/constants';
 
 
 @Controller('users')
@@ -69,7 +69,6 @@ export class UserController {
       const isVerified = await this.authService.verifyOtp(userId, body.otp);
 
       if (isVerified) {
-        // return res.redirect('http://localhost:3000/profile');
         const userExists = await this.userService.getUserbyId(userId);
 
         const { created_at, updated_at, ...userWithoutDate } = userExists;
@@ -153,7 +152,7 @@ export class UserController {
       }
 
       const avatarFilename = avatar.filename;
-      const avatarUrl = `http://localhost:3001/${avatarFilename}`;
+      const avatarUrl = `${URL}:3001/${avatarFilename}`;
 
       // console.log('Avatar Filename:', avatarFilename);
       // console.log('Avatar URL:', avatarUrl);

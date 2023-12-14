@@ -44,7 +44,7 @@ const TwoFactorVerification = () => {
     try {
       console.log("valid OTP");
       const response = await fetch(
-        `http://localhost:3001/users/${id}/verifyOtp`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${id}/verifyOtp`,
         {
           method: "POST",
           headers: {

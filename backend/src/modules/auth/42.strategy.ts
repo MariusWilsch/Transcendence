@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-42';
 import { authDto } from './auth.tdo';
 import { ConfigService } from '@nestjs/config';
+import { URL } from './constants';
+
 
 @Injectable()
 export class IntraStrategy extends PassportStrategy(Strategy, '42') {
@@ -24,9 +26,10 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     super({
       clientID: clientIDD,
       clientSecret: clientSecrett,
+      // callbackURL: `${URL}:3001/auth/42/callback`,
       callbackURL:
         configService.get('REDIRECT_URI') ||
-        'http://localhost:3001/auth/42/callback',
+        `${URL}:3001/auth/42/callback`,
       profileFields: {
         username: 'login',
         usual_full_name: 'usual_full_name',

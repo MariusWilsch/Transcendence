@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from './constants';
+import { JWT_SECRET, URL } from './constants';
 import { UserService } from 'modules/user/user.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Email2FAService } from './nodemailer/email.service';
@@ -38,7 +38,7 @@ export class AuthController {
         return undefined;
       }
       return res.redirect(
-        `http://localhost:3001/users/${userfromcookie.intraId}`
+        `${URL}:3001/users/${userfromcookie.intraId}`
       );
     } catch (e) {
       console.log('Error: ', e);
@@ -48,7 +48,6 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: any, @Res() res: any) {
-    // console.log('req: ', req);
     try {
       let userdata = this.authService.getUser(req.user);
 
@@ -58,23 +57,23 @@ export class AuthController {
         },
       });
       if (userExists) {
-        const { created_at, updated_at, ...userWithoutDate } = userExists;
-        // console.log('userWithoutDate: ', userWithoutDate);
+        if (this.authService.getUserFromCookie(req.cookies) === undefined) {
+          const { created_at, updated_at, ...userWithoutDate } = userExists;
 
-        const payload = { userWithoutDate };
-        const jwt = this.jwtService.sign(payload, {
-          secret: JWT_SECRET,
-        });
-        res.cookie('jwt', jwt);
-        res.cookie('id', userExists.intraId);
+          const payload = { userWithoutDate };
+          const jwt = this.jwtService.sign(payload, {
+            secret: JWT_SECRET,
+          });
+          res.cookie('jwt', jwt);
+          res.cookie('id', userExists.intraId);
 
-        if (userExists.isTfaEnabled === true) {
-          res.clearCookie('jwt');
-          this.authService.generateOtp(userExists);
-          return res.redirect('http://localhost:3000/2FA');
+          if (userExists.isTfaEnabled === true) {
+            res.clearCookie('jwt');
+            this.authService.generateOtp(userExists);
+            return res.redirect(`${URL}:3000/2FA`);
+          }
         }
-
-        return res.redirect('http://localhost:3000/profile');
+        return res.redirect(`${URL}:3000/profile`);
       }
 
       const user = await prisma.user.create({
@@ -96,7 +95,7 @@ export class AuthController {
       });
       res.cookie('jwt', jwt);
       res.cookie('id', user.intraId);
-      return res.redirect('http://localhost:3000/profile');
+      return res.redirect(`${URL}:3000/profile`);
     } catch (e) {
       console.log('Error: ', e);
     }
@@ -106,26 +105,12 @@ export class AuthController {
   async logout(@Res() res: any) {
     try {
       res.clearCookie('jwt');
-      res.redirect('http://localhost:3000');
+      res.redirect(`${URL}:3000`);
       return 'logout';
     } catch (e) {
       console.log('Error: ', e);
       res.status(500).send('Internal Server Error');
     }
-  }
-
-  @Post('verifyOtp')
-  verifyOtp(@Body() body: any) {
-    // console.log('body: ', body);
-    // const isVerified = this.otpService.verifyOtp(secret, otp);
-
-    // if (isVerified) {
-    //   // Auth successful
-    //   return { success: true };
-    // } else {
-    //   // Auth failed
-    //   return { success: false };
-    // }
   }
 }
 

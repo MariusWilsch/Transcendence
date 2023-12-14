@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAppContext, AppProvider } from "../AppContext";
+import { useAppContext, AppProvider, User } from "../AppContext";
 import { CiCirclePlus } from "react-icons/ci";
 import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
@@ -124,15 +124,17 @@ export function Navbar() {
   );
 }
 
-export type User = {
-  intraId: string;
-  fullname: string;
-  login: string;
-  email: string;
-  Avatar: string;
-  created_at: Date;
-  updated_at: Date;
-};
+// export type User = {
+//   intraId: string;
+//   fullname: string;
+//   login: string;
+//   email: string;
+//   Avatar: string;
+//   isTfaAuth : boolean;
+//   isTfaEnabled : boolean;
+//   created_at: Date;
+//   updated_at: Date;
+// };
 
 const UserDescriptionCard = ({
   title,
@@ -191,7 +193,7 @@ const UserDetailsCard = ({
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
       try {
         const response = await fetch(
-          `http://localhost:3001/users/${intraId}/login`,
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/login`,
           {
             method: "POST",
             headers: {
@@ -290,7 +292,7 @@ const UserProfileImage = ({
       console.log("formData", formData);
       try {
         const response = await fetch(
-          `http://localhost:3001/users/${intraId}/avatar`,
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/avatar`,
           {
             method: "POST",
             body: formData,
@@ -339,7 +341,7 @@ const UserProfileImage = ({
                 style={{ position: "absolute", bottom: 0, right: 0 }}
               >
                 <label htmlFor="avatar" className="">
-                  <div className="bg-white mb-[5vw] mr-[5vw] md:mb-[2.4vh] md:mr-[2.4vh] rounded-full">
+                  <div className="bg-white mb-[2.4vh] mr-[2.4vh] md:mb-[2.7vh] md:mr-[2.7vh] rounded-full">
                     <CiCirclePlus
                       className="text-black "
                       size="25"
@@ -439,14 +441,25 @@ const Sidebar = () => {
   );
 };
 
-const TwoFactorAuth = ({ intraId }: { intraId: string | undefined }) => {
+const TwoFactorAuth = ({
+  intraId,
+  isTfa,
+}: {
+  intraId: string | undefined;
+  isTfa: boolean;
+}) => {
   const { isDivVisible, toggleDivVisibility } = useAppContext();
+  const [isChecked, setIsChecked] = useState(isTfa);
 
   const handleCheckboxChange = async (event: any) => {
+    setIsChecked((prev) => {
+      return !prev;
+    });
+
     if (event.target.checked) {
       console.log("Checkbox is checked");
       const response = await fetch(
-        `http://localhost:3001/users/${intraId}/enableOtp`,
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/enableOtp`,
         {
           method: "GET",
           headers: {
@@ -459,14 +472,13 @@ const TwoFactorAuth = ({ intraId }: { intraId: string | undefined }) => {
 
       if (res.sucess) {
         console.log("2FA is enabled");
-      }
-      else {
+      } else {
         console.log("Error in enabling 2FA");
       }
     } else {
       console.log("Checkbox is unchecked");
       const response = await fetch(
-        `http://localhost:3001/users/${intraId}/disableOtp`,
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/disableOtp`,
         {
           method: "GET",
           headers: {
@@ -474,13 +486,12 @@ const TwoFactorAuth = ({ intraId }: { intraId: string | undefined }) => {
           },
           credentials: "include",
         }
-        );
-        const res = await response.json();
-        
-        if (res.sucess) {
+      );
+      const res = await response.json();
+
+      if (res.sucess) {
         console.log("2FA is disabled");
-      }
-      else {
+      } else {
         console.log("Error in disabling 2FA");
       }
     }
@@ -498,8 +509,9 @@ const TwoFactorAuth = ({ intraId }: { intraId: string | undefined }) => {
               <div className="inline-block">
                 <input
                   type="checkbox"
+                  checked={isChecked}
                   className="toggle [--tglbg:white] bg-slate-700 
-            hover:bg-slate-600 border-bg-slate-800 "
+                 hover:bg-slate-600 border-bg-slate-800 "
                   style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
                   onChange={handleCheckboxChange}
                 />
@@ -518,13 +530,16 @@ export default function Profile() {
   useEffect(() => {
     const checkJwtCookie = async () => {
       try {
-        const response = await fetch("http://localhost:3001/auth/user", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
         var data: User = await response.json();
 
         setUser(data);
@@ -539,6 +554,8 @@ export default function Profile() {
   if (!user) {
     return <Loading />;
   }
+
+  console.log("user: ", user.isTfaEnabled);
 
   const Login = user?.login || "Login";
   const intraId = user?.intraId;
@@ -561,7 +578,7 @@ export default function Profile() {
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
-          <TwoFactorAuth intraId={intraId} />
+          <TwoFactorAuth intraId={intraId} isTfa={user.isTfaEnabled} />
 
           <UserLevelCard value={level} intraId={intraId} />
 
