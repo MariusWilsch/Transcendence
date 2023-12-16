@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAppContext, AppProvider } from "../AppContext";
+import { useAppContext, AppProvider, User } from "../AppContext";
 import { CiCirclePlus } from "react-icons/ci";
 import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
+import { IoIosCloseCircleOutline } from "react-icons/io";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function Loading() {
   return (
@@ -17,7 +20,7 @@ export function Loading() {
 }
 
 export function Navbar() {
-  const { toggleDivVisibility } = useAppContext();
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
 
   return (
     <div className="">
@@ -59,8 +62,13 @@ export function Navbar() {
               <li>
                 <a>Play</a>
               </li>
+              <br></br>
               <li>
-                <a>Log out</a>
+                <Link
+                  href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
+                >
+                  Log out
+                </Link>
               </li>
             </ul>
           </div>
@@ -107,24 +115,33 @@ export function Navbar() {
           </ul>
         </div> */}
         <div className="flex justify-end w-[100vw] px-4">
-          <button onClick={toggleDivVisibility}>
-            <CiEdit className="text-black" size="25" />
-          </button>
+          {!isDivVisible && (
+            <button onClick={toggleDivVisibility}>
+              <CiEdit className="text-black" size="25" />
+            </button>
+          )}
+          {isDivVisible && (
+            <button onClick={toggleDivVisibility}>
+              <IoIosCloseCircleOutline className="text-black" size="25" />
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-type User = {
-  intraId: string;
-  fullname: string;
-  login: string;
-  email: string;
-  Avatar: string;
-  created_at: Date;
-  updated_at: Date;
-};
+// export type User = {
+//   intraId: string;
+//   fullname: string;
+//   login: string;
+//   email: string;
+//   Avatar: string;
+//   isTfaAuth : boolean;
+//   isTfaEnabled : boolean;
+//   created_at: Date;
+//   updated_at: Date;
+// };
 
 const UserDescriptionCard = ({
   title,
@@ -157,7 +174,7 @@ const UserLevelCard = ({
   intraId: string | undefined;
 }) => {
   return (
-    <div className="flex items-center justify-center h-[7vh]">
+    <div className="flex items-center justify-center h-[7vh] text-gray-900">
       <div
         className="flex items-center justify-center p-4
         rounded-md"
@@ -183,7 +200,7 @@ const UserDetailsCard = ({
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
       try {
         const response = await fetch(
-          `http://localhost:3001/users/${intraId}/login`,
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/login`,
           {
             method: "POST",
             headers: {
@@ -194,11 +211,25 @@ const UserDetailsCard = ({
         );
         let updatedUser = { ...user, login: newLoginInput };
         setUser(updatedUser as User);
+
+        const data = await response.json();
+        if (data.success === false) {
+          const msg = "Failed to update login : " + newLoginInput;
+          toast.error(msg, { draggable: false });
+          console.log(newLoginInput, ": -maybe- not unique");
+        }
+        else {
+          toast.success("Login updated successfully", { draggable: false });
+          console.log(newLoginInput, ": updated successfully");
+        }
       } catch (error: any) {
+        const msg = "Error updating login: " + newLoginInput;
+        toast.error(msg, { draggable: false });
         console.error("Error updating login:", error.message);
       }
       setNewLoginInput("");
     } else {
+      toast.error("Please enter a valid login", { draggable: false });
       console.log("Please enter a valid login");
     }
   };
@@ -216,9 +247,8 @@ const UserDetailsCard = ({
         className="flex items-center justify-center p-4
         rounded-md"
       >
-        <div className="text-base-100 text-2xl font-medium font-sans days left ">
-          {" "}
-          {value}{" "}
+        <div className="text-2xl font-medium font-sans days left text-gray-900">
+          {value}&nbsp;
         </div>
         {isDivVisible && (
           <div className="">
@@ -230,8 +260,8 @@ const UserDetailsCard = ({
               onChange={(e) => setNewLoginInput(e.target.value)}
               onKeyPress={handleKeyPress}
               className={`rounded-lg border-opacity-50 border-2 ${
-                newLoginInput !== "" ? "border-green-500" : "border-red-500"
-              } bg-[#e8eef3] text-sm outline-none `}
+                newLoginInput !== "" ? "border-green-500" : "border-slate-300"
+              } bg-slate-50 text-sm outline-none text-black`}
             />
             &nbsp;
             <button
@@ -283,24 +313,28 @@ const UserProfileImage = ({
       console.log("formData", formData);
       try {
         const response = await fetch(
-          `http://localhost:3001/users/${intraId}/avatar`,
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/avatar`,
           {
             method: "POST",
             body: formData,
-            credentials: "include", // Include cookies in the request
+            credentials: "include",
           }
         );
         if (response.ok) {
+          toast.success("Avatar uploaded successfully", { draggable: false });
           console.log("Avatar uploaded successfully");
         } else {
+          toast.error("Failed to update avatar", { draggable: false });
           console.error("Failed to update avatar");
         }
       } catch (error) {
+        toast.error("Failed to update avatar", { draggable: false });
         console.error("Error during POST request:", error);
       }
 
       setSelectedFile(null);
     } else {
+      toast.error("Please select a file", { draggable: false });
       console.log("Please select a file");
     }
   };
@@ -331,12 +365,15 @@ const UserProfileImage = ({
                 className=""
                 style={{ position: "absolute", bottom: 0, right: 0 }}
               >
-                <label htmlFor="avatar" className="">
-                  <CiCirclePlus
-                    className="text-black mb-[1.5vh] mr-[1.5vh]"
-                    size="25"
-                    onChange={handleFileChange}
-                  />
+                <label htmlFor="avatar" className="cursor-pointer">
+                  <div className="bg-white mb-[2.4vh] mr-[2.4vh] md:mb-[2.7vh] md:mr-[2.7vh] rounded-full">
+                    <CiCirclePlus
+                      className="text-black "
+                      size="25"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+
                   <input
                     type="file"
                     id="avatar"
@@ -349,17 +386,19 @@ const UserProfileImage = ({
             )}
           </div>
         </div>
-        {selectedFile && (
-          <div className="flex flex-col items-center justify-center m-5">
+        {selectedFile && isDivVisible && (
+          <div
+            className="flex flex-col items-center justify-center m-5
+          animate-moveLeftAndRight"
+          >
             <button
               onClick={() => {
                 handleUpload();
                 toggleDivVisibility();
               }}
             >
-              <div className="inline-block font-sans text-black text-lg">
-                {" "}
-                save &nbsp;{" "}
+              <div className="inline-block font-sans text-black text-lg font-medium">
+                save &nbsp;
               </div>
               <CiSaveUp2 className="text-black inline-block" size="22" />
             </button>
@@ -373,11 +412,10 @@ const UserProfileImage = ({
 const Achievements = ({ Achievements }: { Achievements: string }) => {
   return (
     <div className="h-[10vh] mx-[10vw] m-[10vw]">
-      <div className="text-base-100 text-lg  days left">
-        {" "}
-        Your achievements :{" "}
+      <div className="text-gray-900 text-lg  days left">
+        Your achievements :&nbsp;
       </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
         <div className=" days left font-sans"> {Achievements} </div>
       </div>
     </div>
@@ -387,11 +425,10 @@ const Achievements = ({ Achievements }: { Achievements: string }) => {
 const GameHistory = ({ games }: { games: string }) => {
   return (
     <div className="h-[10vh] mx-[10vw]">
-      <div className="text-base-100 text-lg  days lef font-sanst">
-        {" "}
-        Your games history :{" "}
+      <div className="text-lg  days lef font-sanst  text-gray-900">
+        Your games history :&nbsp;
       </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans">
+      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
         <div className=" days left"> {games} </div>
       </div>
     </div>
@@ -401,7 +438,7 @@ const GameHistory = ({ games }: { games: string }) => {
 const Sidebar = () => {
   return (
     <div>
-      <div className="text-2xl font-bold flex flex-row text-center m-2">
+      <div className="text-2xl font-semibold flex flex-row text-center m-2 text-gray-200">
         Profile
       </div>
       <div className="fixed h-screen text-white flex flex-col justify-center">
@@ -422,10 +459,97 @@ const Sidebar = () => {
             <a href="#">Play</a>
           </li>
           <li>
-            <a href="#">Log out</a>
+            <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
+              Log out
+            </Link>
           </li>
         </ul>
       </div>
+    </div>
+  );
+};
+
+const TwoFactorAuth = ({
+  intraId,
+  isTfa,
+}: {
+  intraId: string | undefined;
+  isTfa: boolean;
+}) => {
+  const { isDivVisible, toggleDivVisibility } = useAppContext();
+  const [isChecked, setIsChecked] = useState(isTfa);
+
+  const handleCheckboxChange = async (event: any) => {
+    setIsChecked((prev) => {
+      return !prev;
+    });
+
+    if (event.target.checked) {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/enableOtp`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      const res = await response.json();
+
+      if (res.sucess) {
+        toast.success("2FA is enabled", { draggable: false });
+        console.log("2FA is enabled");
+      } else {
+        toast.error("Error in enabling 2FA", { draggable: false });
+        console.log("Error in enabling 2FA");
+      }
+    } else {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/disableOtp`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      const res = await response.json();
+
+      if (res.sucess) {
+        toast.success("2FA is disabled", { draggable: false });
+        console.log("2FA is disabled");
+      } else {
+        toast.error("Error in disabling 2FA", { draggable: false });
+        console.log("Error in disabling 2FA");
+      }
+    }
+  };
+
+  return (
+    <div>
+      {isDivVisible && (
+        <div>
+          <div className="flex flex-col items-center justify-center">
+            <div>
+              <span className="label-text font-sans text-gray-800 text-base inline-block">
+                Enable 2FA &nbsp;
+              </span>
+              <div className="inline-block">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  className="toggle [--tglbg:white] bg-slate-700 
+                 hover:bg-slate-600 border-bg-slate-800 "
+                  style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
+                  onChange={handleCheckboxChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -436,23 +560,27 @@ export default function Profile() {
   useEffect(() => {
     const checkJwtCookie = async () => {
       try {
-        const response = await fetch("http://localhost:3001/auth/user", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
         var data: User = await response.json();
 
         setUser(data);
-        // console.log("user data : ", data);
-      } catch (error) {
+      } catch (error : any) {
+        const msg = "Error during login" + error.message;
+        toast.error(msg, { draggable: false });
         console.error("Error during login:", error);
       }
     };
     checkJwtCookie();
-  }, []);
+  }, [user?.login]);
 
   if (!user) {
     return <Loading />;
@@ -469,7 +597,7 @@ export default function Profile() {
     "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg";
 
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen ">
       <div className="flex h-screen">
         <div className="w-1/5 bg-gray-800 p-4 hidden md:inline-block">
           <Sidebar />
@@ -479,6 +607,8 @@ export default function Profile() {
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
+          <TwoFactorAuth intraId={intraId} isTfa={user.isTfaEnabled} />
+
           <UserLevelCard value={level} intraId={intraId} />
 
           <div className="flex flex-col items-center justify-center">
@@ -493,6 +623,7 @@ export default function Profile() {
           <GameHistory games={"random game"} />
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

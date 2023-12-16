@@ -7,6 +7,7 @@ import { AppProvider } from './AppContext'
 
 
 export default function Home() {
+
   return (
     <AppProvider>
 
@@ -25,10 +26,10 @@ export default function Home() {
             You can play Pong and chat with others.
           </p>
           <Link
-          href="http://localhost:3001/auth/42/callback"
+          href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/42/callback`}
           className="bg-white hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
         >
-        Log in with{" "}
+        Log in with &nbsp;
         <Image
           src={logo}
           alt="42 logo"

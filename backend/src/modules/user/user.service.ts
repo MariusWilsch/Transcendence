@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaClient, Prisma, User } from '@prisma/client';
-import { retry } from 'rxjs';
 
 const prisma = new PrismaClient();
 
@@ -104,5 +103,15 @@ export class UserService {
     } catch (error) {
       console.error('Error updating login:', error);
     }
+  }
+
+
+  async uniqueLogin(login: string): Promise<boolean> {
+    const user = await this.getUserbyLogin(login);
+
+    if (user) {
+      return false;
+    }
+    return true;
   }
 }

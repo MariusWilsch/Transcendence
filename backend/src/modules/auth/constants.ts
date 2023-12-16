@@ -4,6 +4,6 @@ const configService = new ConfigService();
 
 
 
-export const JWT_SECRET = configService.get('JWT_SECRET') || 'alternative_secret';
+export const JWT_SECRET = configService.get('JWT_SECRET');
 export const GOOGLE = configService.get('GOOGLE');
-// export const JWT_SECRET = 'alternative_secret';
+export const URL = configService.get('URL');

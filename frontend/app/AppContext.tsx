@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type User = {
+export type User = {
   intraId: string;
   fullname: string;
   login: string;
   email: string;
   Avatar: string;
+  isTfaAuth : boolean;
+  isTfaEnabled : boolean;
   created_at: Date;
   updated_at: Date;
 };

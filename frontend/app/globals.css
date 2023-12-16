@@ -5,3 +5,16 @@
 body {
   background-color: white; /* Set your desired background color */
 }
+
+@keyframes moveLeftAndRight {
+  50% {
+    transform: translateX(0);
+  }
+  0%, 100% {
+    transform: translateX(3px);
+  }
+}
+
+.animate-moveLeftAndRight {
+  animation: moveLeftAndRight 0.5s infinite;
+}

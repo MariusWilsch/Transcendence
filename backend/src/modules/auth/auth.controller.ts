@@ -1,12 +1,20 @@
-import { Controller, Req, Res, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Req,
+  Res,
+  Get,
+  UseGuards,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from './constants';
+import { JWT_SECRET, URL } from './constants';
 import { UserService } from 'modules/user/user.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { EmailService } from './nodemailer/email.service';
+import { Email2FAService } from './nodemailer/email.service';
 
 const prisma = new PrismaClient();
 
@@ -15,23 +23,12 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    private userservive: UserService,
-    private readonly emailService: EmailService
+    private userService: UserService,
+    private Email2FAService: Email2FAService
   ) {}
 
-  @Get()
-  home(): any {
-    return 'Home';
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Req() req) {
-    return req.user;
-  }
-
   @Get('user')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;
@@ -41,7 +38,7 @@ export class AuthController {
         return undefined;
       }
       return res.redirect(
-        `http://localhost:3001/users/${userfromcookie.intraId}`
+        `${URL}:3001/users/${userfromcookie.intraId}`
       );
     } catch (e) {
       console.log('Error: ', e);
@@ -60,18 +57,23 @@ export class AuthController {
         },
       });
       if (userExists) {
-        // res.redirect('http://localhost:3001/auth/user');
+        if (this.authService.getUserFromCookie(req.cookies) === undefined) {
+          const { created_at, updated_at, ...userWithoutDate } = userExists;
 
-        const { created_at, updated_at, ...userWithoutDate } = userExists;
-        // console.log('userWithoutDate: ', userWithoutDate);
+          const payload = { userWithoutDate };
+          const jwt = this.jwtService.sign(payload, {
+            secret: JWT_SECRET,
+          });
+          res.cookie('jwt', jwt);
+          res.cookie('id', userExists.intraId);
 
-        const payload = { userWithoutDate };
-        const jwt = this.jwtService.sign(payload, {
-          secret: JWT_SECRET,
-        });
-        res.cookie('jwt', jwt);
-        res.cookie('id', userExists.intraId);
-        return res.redirect('http://localhost:3000/profile');
+          if (userExists.isTfaEnabled === true) {
+            res.clearCookie('jwt');
+            this.authService.generateOtp(userExists);
+            return res.redirect(`${URL}:3000/2FA`);
+          }
+        }
+        return res.redirect(`${URL}:3000/profile`);
       }
 
       const user = await prisma.user.create({
@@ -93,7 +95,7 @@ export class AuthController {
       });
       res.cookie('jwt', jwt);
       res.cookie('id', user.intraId);
-      return res.redirect('http://localhost:3000/profile');
+      return res.redirect(`${URL}:3000/profile`);
     } catch (e) {
       console.log('Error: ', e);
     }
@@ -102,26 +104,15 @@ export class AuthController {
   @Get('logout')
   async logout(@Res() res: any) {
     try {
+      res.clearCookie('id');
       res.clearCookie('jwt');
-      res.redirect('http://localhost:3000');
+      res.redirect(`${URL}:3000`);
       return 'logout';
     } catch (e) {
       console.log('Error: ', e);
       res.status(500).send('Internal Server Error');
     }
   }
-
-  @Get('email')
-  async sendEmail(): Promise<string> {
-    const to = 'imad.mimouni.123@gmail.com';
-    const subject = 'Test Email';
-    const text = 'test env.';
-
-    await this.emailService.sendMail(to, subject, text);
-
-    return 'Email sent!';
-  }
-
 }
 
 // TODO
