@@ -1,21 +1,21 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 
-// interface GameState {
-// 	ballX: number;
-// 	ballY: number;
-// 	ballRadius: number;
-// 	ballVelocityX: number;
-// 	ballVelocityY: number;
-// }
+interface GameState {
+	ballX: number;
+	ballY: number;
+	ballRadius: number;
+	ballVelocityX: number;
+	ballVelocityY: number;
+}
 
-// const gameVars = {
-// 	ballX: 200,
-// 	ballY: 200,
-// 	ballRadius: 30,
-// 	ballVelocityX: 2,
-// 	ballVelocityY: 2,
-// };
+const gameVars = {
+	ballX: 200,
+	ballY: 200,
+	ballRadius: 30,
+	ballVelocityX: 5,
+	ballVelocityY: 5,
+};
 
 interface vec2 {
 	x: number;
@@ -30,6 +30,7 @@ interface BallState {
 
 const vec2 = (x: number, y: number) => ({ x: x, y: y });
 
+// ES6 class
 class Ball implements BallState {
 	pos: vec2;
 	velocity: vec2;
@@ -48,7 +49,8 @@ class Ball implements BallState {
 	draw = function (this: Ball, ctx: CanvasRenderingContext2D) {
 		ctx.beginPath();
 		ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI);
-		// ctx.fill();
+		ctx.fillStyle = 'lightblue';
+		ctx.fill();
 		ctx.stroke();
 	};
 }
@@ -58,37 +60,44 @@ const Game = () => {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		console.log(window.innerWidth);
+		// log screen size
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
-
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		if (!ctx) return;
 		// Drawing a rectangle
 		ctx.fillStyle = 'red';
 		ctx.fillRect(100, 100, 50, 50);
 
+		const ball: Ball = new Ball(
+			vec2(gameVars.ballX, gameVars.ballY),
+			vec2(gameVars.ballVelocityX, gameVars.ballVelocityY),
+			gameVars.ballRadius,
+		);
+
+		function ballCollisionWithEdges(Ball: Ball) {
+			//* Refactor this
+			if (!canvas) return;
+			// Ball collision with bottom edge
+			if (Ball.pos.y + Ball.radius >= canvas.height) Ball.velocity.y *= -1;
+
+			// Ball collision with top edge
+			if (Ball.pos.y - Ball.radius <= 0) Ball.velocity.y *= -1;
+			// Ball collision with right edge
+			if (Ball.pos.x + Ball.radius >= canvas.width) Ball.velocity.x *= -1;
+			// Ball collision with left edge
+			if (Ball.pos.x - Ball.radius <= 0) Ball.velocity.x *= -1;
+		}
+
 		function update() {
 			// Update ball position
-			gameVars.ballX += gameVars.ballVelocityX;
-			gameVars.ballY += gameVars.ballVelocityY;
+			ball.update();
+			ballCollisionWithEdges(ball);
 		}
 
 		function draw() {
 			// Drawing a circle
-			ctx.beginPath();
-			ctx.fillStyle = 'blue';
-			ctx.strokeStyle = 'blue';
-			ctx.arc(
-				gameVars.ballX,
-				gameVars.ballY,
-				gameVars.ballRadius,
-				0,
-				2 * Math.PI,
-			);
-			ctx.fill();
-			ctx.stroke();
-			ctx.closePath();
+			ball.draw(ctx);
 		}
 
 		function loop() {

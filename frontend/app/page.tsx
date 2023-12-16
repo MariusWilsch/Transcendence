@@ -23,7 +23,6 @@ import Game from './game/Game';
 export default function Home() {
 	return (
 		<main>
-			<h1>Transcendence is in development</h1>
 			<Game />
 		</main>
 	);
