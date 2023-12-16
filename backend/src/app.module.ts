@@ -4,13 +4,6 @@ import { AppService } from './app.service';
 import { ChatModule } from './modules/chat/chat.module';
 import { GameModule } from './modules/game/game.module';
 import { UserModule } from './modules/user/user.module';
-<<<<<<< HEAD
-
-@Module({
-  imports: [ChatModule, GameModule, UserModule],
-  controllers: [AppController],
-  providers: [AppService],
-=======
 import { AuthModule } from 'modules/auth/auth.module';
 import { AuthController } from 'modules/auth/auth.controller';
 import { AuthService } from 'modules/auth/auth.service';
@@ -25,6 +18,5 @@ import { join } from 'path';
   })],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, JwtService],
->>>>>>> origin/imad
 })
 export class AppModule {}

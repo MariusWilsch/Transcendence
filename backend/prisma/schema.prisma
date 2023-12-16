@@ -11,13 +11,36 @@ datasource db {
 }
 
 
+// model User {
+//   // id             String    @id @default(uuid())
+//   intraId        String    @unique //
+//   fullname       String    @unique
+//   login          String    @unique
+//   email          String    @unique
+//   Avatar         String?
+//   created_at     DateTime  @default(now())
+//   updated_at     DateTime  @updatedAt
+// }
+
+// prisma/schema.prisma
 model User {
-  // id             String    @id @default(uuid())
-  intraId        String    @unique //
+  intraId        String    @id @unique
   fullname       String    @unique
   login          String    @unique
   email          String    @unique
   Avatar         String?
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
+  sentMessages   Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  sender         String
+  recipient      String
+  content        String
+  createdAt      DateTime  @default(now())
+  senderUser     User      @relation("SentMessages", fields: [sender], references: [intraId])
+  recipientUser  User      @relation("ReceivedMessages", fields: [recipient], references: [intraId])
 }
