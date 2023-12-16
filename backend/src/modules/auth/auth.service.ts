@@ -13,7 +13,7 @@ type User = {
   login: string;
   email: string;
   Avatar: string;
-  isTfaAuth: Boolean;
+  isRegistred: Boolean;
   isTfaEnabled: Boolean;
   created_at: Date;
   updated_at: Date;
@@ -35,8 +35,8 @@ export class AuthService {
       login: user.username,
       email: user.email,
       Avatar: user.Avatar,
-      isTfaAuth: false,
-      isTfaEnabled: true,
+      isRegistred: false,
+      isTfaEnabled: false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -123,23 +123,22 @@ export class AuthService {
         where: { intraId: id },
       });
 
-
       await prisma.user.update({
         where: { intraId: id },
-        data: { isTfaAuth: true },
+        data: { isRegistred: true },
       });
       return true;
     }
-        return false;
+    return false;
   }
 
-  async enableOtp(userId : string) : Promise<boolean>{
+  async enableOtp(userId: string): Promise<boolean> {
     try {
       await prisma.user.update({
         where: { intraId: userId },
         data: { isTfaEnabled: true },
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error enabling otp:', error);
@@ -147,7 +146,7 @@ export class AuthService {
     }
   }
 
-  async disableOtp(userId : string) : Promise<boolean>{
+  async disableOtp(userId: string): Promise<boolean> {
     try {
       await prisma.user.update({
         where: { intraId: userId },
@@ -170,7 +169,6 @@ export class AuthService {
     const isMatch = await bcrypt.compare(code, hashedCode);
     return isMatch;
   }
-
 }
 
 // TODO:

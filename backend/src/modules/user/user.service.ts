@@ -24,21 +24,15 @@ export class UserService {
           intraId: id,
         },
       });
+      // check if the avattar exist
+      if (User && User.Avatar) {
+        User.Avatar = User.Avatar;
+      }
+      //check if the avatar exist in the url
+
       return User;
     } catch (error: any) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new HttpException(
-            {
-              status: HttpStatus.NOT_FOUND,
-              error: 'NotFoundException',
-              message: 'User cannot be found',
-            },
-            HttpStatus.NOT_FOUND,
-            { cause: error }
-          );
-        }
-      }
+      console.log('Error in getUserbyId: ', error);
     }
   }
 
@@ -51,19 +45,7 @@ export class UserService {
       });
       return User;
     } catch (error: any) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new HttpException(
-            {
-              status: HttpStatus.NOT_FOUND,
-              error: 'NotFoundException',
-              message: 'User cannot be found',
-            },
-            HttpStatus.NOT_FOUND,
-            { cause: error }
-          );
-        }
-      }
+      console.log('Error in getUserbyLogin: ', error);
     }
   }
 
@@ -85,6 +67,14 @@ export class UserService {
           login: newLogin,
         },
       });
+      await prisma.user.update({
+        where: {
+          intraId: userId,
+        },
+        data: {
+          isRegistred: true,
+        },
+      });
     } catch (error) {
       console.error('Error updating login:', error);
     }
@@ -98,6 +88,14 @@ export class UserService {
         },
         data: {
           Avatar: newAvatar,
+        },
+      });
+      await prisma.user.update({
+        where: {
+          intraId: userId,
+        },
+        data: {
+          isRegistred: true,
         },
       });
     } catch (error) {

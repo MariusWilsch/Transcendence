@@ -37,6 +37,7 @@ export class UserController {
   }
 
   @Post(':id/login')
+  @UseGuards(JwtAuthGuard)
   async editlogin(
     @Param('id') userId: string,
     @Body() body: { newLogin: string },
@@ -45,7 +46,7 @@ export class UserController {
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
-        return { error: 'User not found', message: 'User not found' };
+        return res.json({ success: false });
       }
 
       const uniqueLogin = await this.userService.uniqueLogin(body.newLogin);
@@ -55,6 +56,7 @@ export class UserController {
       await this.userService.updateLogin(userId, body.newLogin);
       return res.json({ success: true });
     } catch (error: any) {
+      console.error("Error login ", error);
       return res.json({ success: false });
     }
   }
@@ -79,6 +81,7 @@ export class UserController {
         });
 
         res.cookie('jwt', jwt);
+        res.clearCookie('id');
         return res.json({ sucess: true });
       } else {
         return res.json({ sucess: false });
@@ -124,36 +127,30 @@ export class UserController {
   }
 
   @Post(':id/avatar')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async editavatar(
     @Param('id') userId: string,
-    @UploadedFile() avatar: Express.Multer.File
+    @UploadedFile() avatar: Express.Multer.File,
+    @Res() res: any
   ) {
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
-        return { error: 'User not found', message: 'User not found' };
+        return res.json({ success: false });
       }
       if (!avatar) {
-        return {
-          error: "Avatar can't be empty",
-          message: "Avatar can't be empty",
-        };
+        return res.json({ success: false });
       }
 
       const avatarFilename = avatar.filename;
       const avatarUrl = `${URL}:3001/${avatarFilename}`;
 
       await this.userService.updateAvatar(userId, avatarUrl);
-
-      return {
-        success: true,
-        message: 'Avatar updated successfully',
-        avatarFilename,
-        avatarUrl,
-      };
+      return res.json({ success: true });
     } catch (error: any) {
-      return { error: 'Failed to update Avatar', message: error.message };
+      console.error('Error avatar:', error);
+      return res.json({ success: false });
     }
   }
 }

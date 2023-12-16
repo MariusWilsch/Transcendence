@@ -37,6 +37,7 @@ export class AuthController {
       if (userfromcookie === undefined) {
         return undefined;
       }
+
       return res.redirect(
         `${URL}:3001/users/${userfromcookie.intraId}`
       );
@@ -57,7 +58,18 @@ export class AuthController {
         },
       });
       if (userExists) {
+        await prisma.user.update({
+          where: {
+            intraId: userdata.intraId,
+          },
+          data: {
+            isRegistred: true,
+          },
+        });
+        
         if (this.authService.getUserFromCookie(req.cookies) === undefined) {
+
+
           const { created_at, updated_at, ...userWithoutDate } = userExists;
 
           const payload = { userWithoutDate };
@@ -65,15 +77,15 @@ export class AuthController {
             secret: JWT_SECRET,
           });
           res.cookie('jwt', jwt);
-          res.cookie('id', userExists.intraId);
-
+          
           if (userExists.isTfaEnabled === true) {
+            res.cookie('id', userExists.intraId);
             res.clearCookie('jwt');
             this.authService.generateOtp(userExists);
             return res.redirect(`${URL}:3000/2FA`);
           }
         }
-        return res.redirect(`${URL}:3000/profile`);
+        return res.redirect(`${URL}:3000/profile/${userExists.intraId}`);
       }
 
       const user = await prisma.user.create({
@@ -83,6 +95,8 @@ export class AuthController {
           login: req.user.username,
           email: req.user.email,
           Avatar: req.user.Avatar,
+          isRegistred: false,
+          isTfaEnabled: false,
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -94,8 +108,8 @@ export class AuthController {
         secret: JWT_SECRET,
       });
       res.cookie('jwt', jwt);
-      res.cookie('id', user.intraId);
-      return res.redirect(`${URL}:3000/profile`);
+      // res.cookie('id', user.intraId);
+      return res.redirect(`${URL}:3000/profile/${user.intraId}`);
     } catch (e) {
       console.log('Error: ', e);
     }

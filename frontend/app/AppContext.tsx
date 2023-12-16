@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type User = {
   intraId: string;
@@ -6,8 +6,8 @@ export type User = {
   login: string;
   email: string;
   Avatar: string;
-  isTfaAuth : boolean;
-  isTfaEnabled : boolean;
+  isRegistred: boolean;
+  isTfaEnabled: boolean;
   created_at: Date;
   updated_at: Date;
 };
@@ -40,13 +40,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setUser,
   };
 
-  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+  );
 };
 
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
 };

@@ -16,7 +16,7 @@ model User {
   login          String    @unique
   email          String    @unique
   Avatar         String?
-  isTfaAuth      Boolean   @default(false)
+  isRegistred      Boolean   @default(false)
   isTfaEnabled   Boolean   @default(false)
   tfa            Tfa?
   created_at     DateTime  @default(now())
