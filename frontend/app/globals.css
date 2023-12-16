@@ -4,7 +4,10 @@
 
 html,
 body {
-  @apply h-screen w-screen bg-black;
-  @apply text-white;
-  @apply text-center;
+	margin: 0;
+	padding: 0;
+	overflow: hidden
+	@apply h-screen w-screen bg-black;
+	@apply text-white;
+	@apply text-center;
 }

@@ -4,21 +4,21 @@ import Image from 'next/image';
 import { useSelector } from 'react-redux';
 import Game from './game/Game';
 
-interface coords {
-	x: number;
-	y: number;
-}
+// interface coords {
+// 	x: number;
+// 	y: number;
+// }
 
-interface GameState {
-	score: number;
-	paddleA: coords;
-	paddleB: coords;
-	ball: coords;
-}
+// interface GameState {
+// 	score: number;
+// 	paddleA: coords;
+// 	paddleB: coords;
+// 	ball: coords;
+// }
 
-interface RootState {
-	game: GameState;
-}
+// interface RootState {
+// 	game: GameState;
+// }
 
 export default function Home() {
 	return (
