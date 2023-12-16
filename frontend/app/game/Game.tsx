@@ -1,20 +1,17 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 
-interface GameState {
-	ballX: number;
-	ballY: number;
-	ballRadius: number;
-	ballVelocityX: number;
-	ballVelocityY: number;
-}
-
 const gameVars = {
 	ballX: 200,
 	ballY: 200,
 	ballRadius: 30,
-	ballVelocityX: 5,
-	ballVelocityY: 5,
+	ballVelocityX: 10,
+	ballVelocityY: 10,
+	// Paddle Config
+	paddleWidth: 20,
+	paddleHeight: 100,
+	paddleVelocityX: 0,
+	paddleVelocityY: 0,
 };
 
 interface vec2 {
@@ -47,11 +44,41 @@ class Ball implements BallState {
 	};
 
 	draw = function (this: Ball, ctx: CanvasRenderingContext2D) {
+		ctx.fillStyle = '#E2E8F0';
+		ctx.strokeStyle = '#E2E8F0';
 		ctx.beginPath();
 		ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI);
 		ctx.fillStyle = 'lightblue';
 		ctx.fill();
 		ctx.stroke();
+	};
+}
+
+interface PaddleState {
+	pos: vec2;
+	velocity: vec2;
+	width: number;
+	height: number;
+}
+
+class Paddle implements PaddleState {
+	pos: vec2;
+	velocity: vec2;
+	width: number;
+	height: number;
+	constructor(pos: vec2, velocity: vec2, width: number, height: number) {
+		this.pos = pos;
+		this.velocity = velocity;
+		this.width = width;
+		this.height = height;
+	}
+	update = function (this: Paddle) {
+		this.pos.x += this.velocity.x;
+		this.pos.y += this.velocity.y;
+	};
+	draw = function (this: Paddle, ctx: CanvasRenderingContext2D) {
+		ctx.fillStyle = '#E2E8F0';
+		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
 	};
 }
 
@@ -66,9 +93,26 @@ const Game = () => {
 		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 		if (!ctx) return;
 		// Drawing a rectangle
-		ctx.fillStyle = 'red';
-		ctx.fillRect(100, 100, 50, 50);
 
+		window.addEventListener('keydown', (e) => {});
+
+		window.addEventListener('keyup', (e) => {});
+
+		const leftPaddle: Paddle = new Paddle(
+			vec2(0, canvas.height / 2 - gameVars.paddleHeight / 2),
+			vec2(gameVars.paddleVelocityX, gameVars.paddleVelocityY),
+			gameVars.paddleWidth,
+			gameVars.paddleHeight,
+		);
+		const rightPaddle: Paddle = new Paddle(
+			vec2(
+				canvas.width - gameVars.paddleWidth,
+				canvas.height / 2 - gameVars.paddleHeight / 2,
+			),
+			vec2(gameVars.paddleVelocityX, gameVars.paddleVelocityY),
+			gameVars.paddleWidth,
+			gameVars.paddleHeight,
+		);
 		const ball: Ball = new Ball(
 			vec2(gameVars.ballX, gameVars.ballY),
 			vec2(gameVars.ballVelocityX, gameVars.ballVelocityY),
@@ -80,7 +124,6 @@ const Game = () => {
 			if (!canvas) return;
 			// Ball collision with bottom edge
 			if (Ball.pos.y + Ball.radius >= canvas.height) Ball.velocity.y *= -1;
-
 			// Ball collision with top edge
 			if (Ball.pos.y - Ball.radius <= 0) Ball.velocity.y *= -1;
 			// Ball collision with right edge
@@ -92,15 +135,28 @@ const Game = () => {
 		function update() {
 			// Update ball position
 			ball.update();
+			// Update paddle position
+			leftPaddle.update();
+			rightPaddle.update();
+			// Check for ball collision with edges
 			ballCollisionWithEdges(ball);
 		}
 
 		function draw() {
 			// Drawing a circle
 			ball.draw(ctx);
+			// Drawing a paddles
+			leftPaddle.draw(ctx);
+			rightPaddle.draw(ctx);
 		}
 
+		// let lastTime = 0;
 		function loop() {
+			// const currentTime = Date.now();
+			// const deltaTime = currentTime - lastTime;
+			// lastTime = currentTime;
+			// const fps = 1000 / deltaTime;
+			// console.log(`FPS: ${fps.toFixed(2)}`);
 			if (!canvas) return;
 			ctx.clearRect(0, 0, canvas.width, canvas.height); //! Clear canvas
 			window.requestAnimationFrame(loop); // Request next frame
@@ -110,7 +166,7 @@ const Game = () => {
 		loop();
 	}, []);
 
-	return <canvas ref={canvasRef}></canvas>;
+	return <canvas ref={canvasRef} className="bg-indigo-800"></canvas>;
 };
 
 export default Game;
