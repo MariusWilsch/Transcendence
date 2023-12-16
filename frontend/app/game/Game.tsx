@@ -1,17 +1,21 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 
+let upPressed = false as boolean;
+let downPressed = false as boolean;
+let deltaTime = 0 as number;
+
 const gameVars = {
 	ballX: 200,
 	ballY: 200,
 	ballRadius: 30,
-	ballVelocityX: 10,
-	ballVelocityY: 10,
+	ballVelocityX: 5,
+	ballVelocityY: 5,
 	// Paddle Config
 	paddleWidth: 20,
 	paddleHeight: 100,
-	paddleVelocityX: 0,
-	paddleVelocityY: 0,
+	paddleVelocityX: 1,
+	paddleVelocityY: 1,
 };
 
 interface vec2 {
@@ -39,11 +43,20 @@ class Ball implements BallState {
 	}
 
 	update = function (this: Ball) {
+		// console.log(this.pos);
 		this.pos.x += this.velocity.x;
 		this.pos.y += this.velocity.y;
 	};
 
 	draw = function (this: Ball, ctx: CanvasRenderingContext2D) {
+		// Clearing the ball
+		// const diameter = this.radius * 2; //! May increase performance when only clearing the ball instead of the whole canvas
+		// ctx.clearRect(
+		// 	this.pos.x - this.radius,
+		// 	this.pos.y - this.radius,
+		// 	diameter,
+		// 	diameter,
+		// );
 		ctx.fillStyle = '#E2E8F0';
 		ctx.strokeStyle = '#E2E8F0';
 		ctx.beginPath();
@@ -73,12 +86,25 @@ class Paddle implements PaddleState {
 		this.height = height;
 	}
 	update = function (this: Paddle) {
-		this.pos.x += this.velocity.x;
-		this.pos.y += this.velocity.y;
+		if (upPressed) {
+			this.pos.y -= this.velocity.y * deltaTime;
+		} else if (downPressed) this.pos.y += this.velocity.y * deltaTime;
 	};
 	draw = function (this: Paddle, ctx: CanvasRenderingContext2D) {
 		ctx.fillStyle = '#E2E8F0';
 		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+	};
+	getHalfWidth = function (this: Paddle) {
+		return this.width / 2;
+	};
+	getHalfHeight = function (this: Paddle) {
+		return this.height / 2;
+	};
+	getCenter = function (this: Paddle) {
+		return vec2(
+			this.pos.x + this.getHalfWidth(),
+			this.pos.y + this.getHalfHeight(),
+		);
 	};
 }
 
@@ -94,9 +120,18 @@ const Game = () => {
 		if (!ctx) return;
 		// Drawing a rectangle
 
-		window.addEventListener('keydown', (e) => {});
+		window.addEventListener('keydown', (e) => {
+			if (e.key == 'ArrowUp') upPressed = true;
+			else if (e.key == 'ArrowDown') downPressed = true;
+		});
 
-		window.addEventListener('keyup', (e) => {});
+		window.addEventListener('keyup', (e) => {
+			if (e.key === 'ArrowUp') {
+				upPressed = false;
+			} else if (e.key === 'ArrowDown') {
+				downPressed = false;
+			}
+		});
 
 		const leftPaddle: Paddle = new Paddle(
 			vec2(0, canvas.height / 2 - gameVars.paddleHeight / 2),
@@ -119,6 +154,17 @@ const Game = () => {
 			gameVars.ballRadius,
 		);
 
+		console.log(ball.pos);
+
+		function paddleCollisionWithEdges(Paddle: Paddle) {
+			if (!canvas) return;
+			// Paddle collision with bottom edge
+			if (Paddle.pos.y + Paddle.height >= canvas.height)
+				Paddle.pos.y = canvas.height - Paddle.height;
+			// Paddle collision with top edge
+			if (Paddle.pos.y <= 0) Paddle.pos.y = 0;
+		}
+
 		function ballCollisionWithEdges(Ball: Ball) {
 			//* Refactor this
 			if (!canvas) return;
@@ -132,14 +178,33 @@ const Game = () => {
 			if (Ball.pos.x - Ball.radius <= 0) Ball.velocity.x *= -1;
 		}
 
+		function ballPaddleCollision(ball: Ball, paddle: Paddle) {
+			// Get the distance between the ball and the paddle
+			let dx = Math.abs(ball.pos.x - paddle.getCenter().x) as number;
+			let dy = Math.abs(ball.pos.y - paddle.getCenter().y) as number;
+
+			let compareX = dx - paddle.getHalfWidth();
+			let compareY = dy - paddle.getHalfHeight();
+
+			if (dx <= compareX && dy <= compareY) {
+				// Collision detected
+				ball.velocity.x *= -1;
+			}
+		}
+
 		function update() {
 			// Update ball position
 			ball.update();
 			// Update paddle position
 			leftPaddle.update();
-			rightPaddle.update();
+			// rightPaddle.update();
 			// Check for ball collision with edges
 			ballCollisionWithEdges(ball);
+			// Check for paddle collision with edges
+			paddleCollisionWithEdges(leftPaddle);
+			// Check for ball collision with paddle
+			ballPaddleCollision(ball, leftPaddle);
+			ballPaddleCollision(ball, rightPaddle);
 		}
 
 		function draw() {
@@ -150,15 +215,15 @@ const Game = () => {
 			rightPaddle.draw(ctx);
 		}
 
-		// let lastTime = 0;
+		let lastTime = 0;
 		function loop() {
-			// const currentTime = Date.now();
-			// const deltaTime = currentTime - lastTime;
-			// lastTime = currentTime;
+			const currentTime = Date.now();
+			deltaTime = currentTime - lastTime;
+			lastTime = currentTime;
 			// const fps = 1000 / deltaTime;
 			// console.log(`FPS: ${fps.toFixed(2)}`);
 			if (!canvas) return;
-			ctx.clearRect(0, 0, canvas.width, canvas.height); //! Clear canvas
+			ctx.clearRect(0, 0, canvas.width, canvas.height); //! Clear canvas, what if we just clear the ball and paddles?
 			window.requestAnimationFrame(loop); // Request next frame
 			update(); // Update game variables
 			draw(); // Draw next frame
