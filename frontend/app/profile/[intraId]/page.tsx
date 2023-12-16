@@ -621,16 +621,30 @@ export default function Profile(params: any) {
             credentials: "include",
           }
         );
-        var data: User = await response.json();
-
-        setuserFromRoutId(data);
+    
+        if (!response.ok) {
+          toast.error("User not found");
+          console.log("User not found");
+          return;
+        }
+        const contentType = response.headers.get("content-type");
+        
+        if (contentType && contentType.includes("application/json")) {
+          var data: User = await response.json();
+          setuserFromRoutId(data);
+        } else {
+          toast.error("User not found");
+          console.log("User not found");
+        }
       } catch (error: any) {
         const msg = "Error during login" + error.message;
         toast.error(msg);
         console.error("Error during login:", error);
       }
     };
+    
     getUserFromRoutId();
+    
   }, [userFromRoutId?.login]);
 
   useEffect(() => {

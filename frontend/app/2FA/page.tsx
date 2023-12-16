@@ -1,7 +1,7 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider } from "../AppContext";
-import { Loading } from "../profile/page";
+import { Loading } from "../profile/[intraId]/page";
 import { useRouter } from 'next/navigation'
 import Cookies from "universal-cookie";
 import { User } from "../AppContext";
@@ -59,7 +59,7 @@ const TwoFactorVerification = () => {
       console.log("responseData: ", responseData.sucess);
 
       if (responseData.sucess) {
-        router.push('/profile')
+        router.push(`/profile/${id}`)
       } else {
         console.log("OTP not verified");
       }

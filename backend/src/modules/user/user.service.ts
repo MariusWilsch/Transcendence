@@ -24,11 +24,6 @@ export class UserService {
           intraId: id,
         },
       });
-      // check if the avattar exist
-      if (User && User.Avatar) {
-        User.Avatar = User.Avatar;
-      }
-      //check if the avatar exist in the url
 
       return User;
     } catch (error: any) {
