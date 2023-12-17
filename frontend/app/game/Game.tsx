@@ -1,21 +1,29 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
+import * as PIXI from 'pixi.js';
 
-let upPressed = false as boolean;
-let downPressed = false as boolean;
-let deltaTime = 0 as number;
+interface gameVars {
+	backgroundColor: number;
+	paddleWidth: number;
+	paddleHeight: number;
+	paddleColor: number;
+	paddleVelocity: number;
+	ballColor: number;
+	ballRadius: number;
+	ballVelocityX: number;
+	ballVelocityY: number;
+}
 
 const gameVars = {
-	ballX: 200,
-	ballY: 200,
-	ballRadius: 30,
-	ballVelocityX: 5,
-	ballVelocityY: 5,
-	// Paddle Config
+	// backgroundColor: 0x1099bb,
 	paddleWidth: 20,
 	paddleHeight: 100,
-	paddleVelocityX: 1,
-	paddleVelocityY: 1,
+	paddleColor: 0xde3249,
+	paddleVelocity: 5,
+	ballColor: 0xffffff,
+	ballRadius: 20,
+	ballVelocityX: 0,
+	ballVelocityY: 2,
 };
 
 interface vec2 {
@@ -23,215 +31,203 @@ interface vec2 {
 	y: number;
 }
 
-interface BallState {
+const createVec2 = (x: number, y: number) => ({ x, y });
+
+interface PaddleProps {
 	pos: vec2;
-	velocity: vec2;
-	radius: number;
-}
-
-const vec2 = (x: number, y: number) => ({ x: x, y: y });
-
-// ES6 class
-class Ball implements BallState {
-	pos: vec2;
-	velocity: vec2;
-	radius: number;
-	constructor(pos: vec2, velocity: vec2, radius: number) {
-		this.pos = pos;
-		this.velocity = velocity;
-		this.radius = radius;
-	}
-
-	update = function (this: Ball) {
-		// console.log(this.pos);
-		this.pos.x += this.velocity.x;
-		this.pos.y += this.velocity.y;
-	};
-
-	draw = function (this: Ball, ctx: CanvasRenderingContext2D) {
-		// Clearing the ball
-		// const diameter = this.radius * 2; //! May increase performance when only clearing the ball instead of the whole canvas
-		// ctx.clearRect(
-		// 	this.pos.x - this.radius,
-		// 	this.pos.y - this.radius,
-		// 	diameter,
-		// 	diameter,
-		// );
-		ctx.fillStyle = '#E2E8F0';
-		ctx.strokeStyle = '#E2E8F0';
-		ctx.beginPath();
-		ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI);
-		ctx.fillStyle = 'lightblue';
-		ctx.fill();
-		ctx.stroke();
-	};
-}
-
-interface PaddleState {
-	pos: vec2;
-	velocity: vec2;
 	width: number;
 	height: number;
+	color: number;
+	input: { up: boolean; down: boolean };
 }
 
-class Paddle implements PaddleState {
+class Paddle implements PaddleProps {
 	pos: vec2;
-	velocity: vec2;
 	width: number;
 	height: number;
-	constructor(pos: vec2, velocity: vec2, width: number, height: number) {
+	color: number;
+	input: { up: boolean; down: boolean };
+
+	constructor(
+		pos: vec2,
+		width: number,
+		height: number,
+		color: number,
+		input: { up: boolean; down: boolean } = { up: false, down: false },
+	) {
 		this.pos = pos;
-		this.velocity = velocity;
 		this.width = width;
 		this.height = height;
+		this.color = color;
+		this.input = input;
 	}
-	update = function (this: Paddle) {
-		if (upPressed) {
-			this.pos.y -= this.velocity.y * deltaTime;
-		} else if (downPressed) this.pos.y += this.velocity.y * deltaTime;
-	};
-	draw = function (this: Paddle, ctx: CanvasRenderingContext2D) {
-		ctx.fillStyle = '#E2E8F0';
-		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
-	};
-	getHalfWidth = function (this: Paddle) {
-		return this.width / 2;
-	};
-	getHalfHeight = function (this: Paddle) {
-		return this.height / 2;
-	};
-	getCenter = function (this: Paddle) {
-		return vec2(
-			this.pos.x + this.getHalfWidth(),
-			this.pos.y + this.getHalfHeight(),
-		);
-	};
+	draw(graphics: PIXI.Graphics) {
+		graphics.beginFill(this.color);
+		graphics.lineStyle(4, 0xff3300, 1);
+		graphics.drawRect(this.pos.x, this.pos.y, this.width, this.height);
+		graphics.endFill();
+	}
+	update(deltaTime: number) {
+		if (this.input.up) this.pos.y -= gameVars.paddleVelocity * deltaTime;
+		if (this.input.down) this.pos.y += gameVars.paddleVelocity * deltaTime;
+	}
 }
 
-const Game = () => {
-	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+interface BallProps {
+	pos: vec2;
+	radius: number;
+	color: number;
+	velocity: vec2;
+}
+
+class Ball implements BallProps {
+	pos: vec2;
+	radius: number;
+	color: number;
+	velocity: vec2;
+
+	constructor(pos: vec2, radius: number, color: number) {
+		this.pos = pos;
+		this.radius = radius;
+		this.color = color;
+		this.velocity = createVec2(gameVars.ballVelocityX, gameVars.ballVelocityY);
+	}
+	getBallCenter() {
+		return createVec2(this.pos.x + this.radius, this.pos.y + this.radius);
+	}
+	draw(graphics: PIXI.Graphics) {
+		graphics.beginFill(this.color);
+		graphics.drawCircle(this.pos.x, this.pos.y, this.radius);
+		graphics.endFill();
+	}
+	update(deltaTime: number) {
+		this.pos.x += this.velocity.x * deltaTime;
+		this.pos.y += this.velocity.y * deltaTime;
+	}
+}
+
+function initGameObjects() {
+	const canvasDimensions = createVec2(window.innerWidth, window.innerHeight);
+	const canvasCenter = createVec2(
+		canvasDimensions.x / 2,
+		canvasDimensions.y / 2,
+	);
+	const leftPaddle = new Paddle(
+		createVec2(0, canvasCenter.y - gameVars.paddleHeight / 2),
+		gameVars.paddleWidth,
+		gameVars.paddleHeight,
+		gameVars.paddleColor,
+	);
+	const rightPaddle = new Paddle(
+		createVec2(
+			canvasDimensions.x - gameVars.paddleWidth,
+			canvasCenter.y - gameVars.paddleHeight / 2,
+		),
+		gameVars.paddleWidth,
+		gameVars.paddleHeight,
+		gameVars.paddleColor,
+	);
+	const ball = new Ball(
+		createVec2(canvasCenter.x, canvasCenter.y),
+		gameVars.ballRadius,
+		gameVars.ballColor,
+	);
+	return { leftPaddle, rightPaddle, ball };
+}
+
+const Game: React.FC = () => {
+	const pixiContainer = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
-		// log screen size
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-		if (!ctx) return;
-		// Drawing a rectangle
+		if (!pixiContainer.current) throw new Error('PixiContainer is not defined');
 
-		window.addEventListener('keydown', (e) => {
-			if (e.key == 'ArrowUp') upPressed = true;
-			else if (e.key == 'ArrowDown') downPressed = true;
+		const app = new PIXI.Application<HTMLCanvasElement>({
+			width: window.innerWidth, // Width of the canvas
+			height: window.innerHeight, // Height of the canvas
+			backgroundColor: 0x1099bb, // Background color
 		});
 
-		window.addEventListener('keyup', (e) => {
-			if (e.key === 'ArrowUp') {
-				upPressed = false;
-			} else if (e.key === 'ArrowDown') {
-				downPressed = false;
+		pixiContainer.current.appendChild(app.view);
+
+		// Add your PixiJS application logic here
+
+		// Draw leftPaddle
+		const graphics = new PIXI.Graphics();
+		const { leftPaddle, rightPaddle, ball } = initGameObjects();
+		app.stage.addChild(graphics);
+
+		function onWallCollision() {
+			if (
+				ball.getBallCenter().y <= 0 ||
+				ball.getBallCenter().y >= window.innerHeight
+			)
+				ball.velocity.y *= -1;
+		}
+
+		document.addEventListener('keydown', (e) => {
+			switch (e.key) {
+				case 'w':
+					leftPaddle.input.up = true;
+					break;
+				case 's':
+					leftPaddle.input.down = true;
+					break;
+				case 'ArrowUp':
+					rightPaddle.input.up = true;
+					break;
+				case 'ArrowDown':
+					rightPaddle.input.down = true;
+					break;
 			}
 		});
 
-		const leftPaddle: Paddle = new Paddle(
-			vec2(0, canvas.height / 2 - gameVars.paddleHeight / 2),
-			vec2(gameVars.paddleVelocityX, gameVars.paddleVelocityY),
-			gameVars.paddleWidth,
-			gameVars.paddleHeight,
-		);
-		const rightPaddle: Paddle = new Paddle(
-			vec2(
-				canvas.width - gameVars.paddleWidth,
-				canvas.height / 2 - gameVars.paddleHeight / 2,
-			),
-			vec2(gameVars.paddleVelocityX, gameVars.paddleVelocityY),
-			gameVars.paddleWidth,
-			gameVars.paddleHeight,
-		);
-		const ball: Ball = new Ball(
-			vec2(gameVars.ballX, gameVars.ballY),
-			vec2(gameVars.ballVelocityX, gameVars.ballVelocityY),
-			gameVars.ballRadius,
-		);
-
-		console.log(ball.pos);
-
-		function paddleCollisionWithEdges(Paddle: Paddle) {
-			if (!canvas) return;
-			// Paddle collision with bottom edge
-			if (Paddle.pos.y + Paddle.height >= canvas.height)
-				Paddle.pos.y = canvas.height - Paddle.height;
-			// Paddle collision with top edge
-			if (Paddle.pos.y <= 0) Paddle.pos.y = 0;
-		}
-
-		function ballCollisionWithEdges(Ball: Ball) {
-			//* Refactor this
-			if (!canvas) return;
-			// Ball collision with bottom edge
-			if (Ball.pos.y + Ball.radius >= canvas.height) Ball.velocity.y *= -1;
-			// Ball collision with top edge
-			if (Ball.pos.y - Ball.radius <= 0) Ball.velocity.y *= -1;
-			// Ball collision with right edge
-			if (Ball.pos.x + Ball.radius >= canvas.width) Ball.velocity.x *= -1;
-			// Ball collision with left edge
-			if (Ball.pos.x - Ball.radius <= 0) Ball.velocity.x *= -1;
-		}
-
-		function ballPaddleCollision(ball: Ball, paddle: Paddle) {
-			// Get the distance between the ball and the paddle
-			let dx = Math.abs(ball.pos.x - paddle.getCenter().x) as number;
-			let dy = Math.abs(ball.pos.y - paddle.getCenter().y) as number;
-
-			let compareX = dx - paddle.getHalfWidth();
-			let compareY = dy - paddle.getHalfHeight();
-
-			if (dx <= compareX && dy <= compareY) {
-				// Collision detected
-				ball.velocity.x *= -1;
+		document.addEventListener('keyup', (e) => {
+			switch (e.key) {
+				case 'w':
+					leftPaddle.input.up = false;
+					break;
+				case 's':
+					leftPaddle.input.down = false;
+					break;
+				case 'ArrowUp':
+					rightPaddle.input.up = false;
+					break;
+				case 'ArrowDown':
+					rightPaddle.input.down = false;
+					break;
 			}
-		}
-
-		function update() {
-			// Update ball position
-			ball.update();
-			// Update paddle position
-			leftPaddle.update();
-			// rightPaddle.update();
-			// Check for ball collision with edges
-			ballCollisionWithEdges(ball);
-			// Check for paddle collision with edges
-			paddleCollisionWithEdges(leftPaddle);
-			// Check for ball collision with paddle
-			ballPaddleCollision(ball, leftPaddle);
-			ballPaddleCollision(ball, rightPaddle);
-		}
+		});
 
 		function draw() {
-			// Drawing a circle
-			ball.draw(ctx);
-			// Drawing a paddles
-			leftPaddle.draw(ctx);
-			rightPaddle.draw(ctx);
+			graphics.clear();
+			leftPaddle.draw(graphics);
+			rightPaddle.draw(graphics);
+			ball.draw(graphics);
 		}
 
-		let lastTime = 0;
-		function loop() {
-			const currentTime = Date.now();
-			deltaTime = currentTime - lastTime;
-			lastTime = currentTime;
-			// const fps = 1000 / deltaTime;
-			// console.log(`FPS: ${fps.toFixed(2)}`);
-			if (!canvas) return;
-			ctx.clearRect(0, 0, canvas.width, canvas.height); //! Clear canvas, what if we just clear the ball and paddles?
-			window.requestAnimationFrame(loop); // Request next frame
-			update(); // Update game variables
-			draw(); // Draw next frame
+		function update(deltaTime: number) {
+			leftPaddle.update(deltaTime);
+			rightPaddle.update(deltaTime);
+			ball.update(deltaTime);
+			onWallCollision();
 		}
-		loop();
+
+		app.ticker.add((deltaTime) => {
+			update(deltaTime);
+			draw();
+			console.log(app.ticker.FPS);
+		});
+
+		return () => {
+			// On component unmount, destroy the application
+			if (app) {
+				pixiContainer.current?.removeChild(app.view);
+				app.destroy();
+			}
+		};
 	}, []);
 
-	return <canvas ref={canvasRef} className="bg-indigo-800"></canvas>;
+	return <div ref={pixiContainer} />;
 };
 
 export default Game;
