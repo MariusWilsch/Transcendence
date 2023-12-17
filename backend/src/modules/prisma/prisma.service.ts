@@ -26,7 +26,6 @@ export class PrismaService {
       },
     });
   }
-  
 
   async getMessagesByUser(userId: string): Promise<any[]> {
     return this.prisma.message.findMany({
@@ -46,6 +45,19 @@ export class PrismaService {
   async getAllMessages(): Promise<any[]> {
     return this.prisma.message.findMany();
   }
+  //get user by id
+  async getUserById(userId: string): Promise<any> {
+    return this.prisma.user.findUnique({
+      where: {
+        intraId: userId,
+      },
+    });
+  }
+  //get all users
+  async getAllUsers(): Promise<any[]> {
+    return this.prisma.user.findMany();
+  }
+  
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
   }
