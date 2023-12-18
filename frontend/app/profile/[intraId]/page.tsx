@@ -8,6 +8,10 @@ import { CiCirclePlus } from "react-icons/ci";
 import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
+import { TbFriends } from "react-icons/tb";
+import { MdOutlineBlock } from "react-icons/md";
+import { BiMessageRounded } from "react-icons/bi";
+import { IoGameControllerOutline } from "react-icons/io5";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -23,7 +27,7 @@ export function Loading() {
 export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
   const { isDivVisible, toggleDivVisibility } = useAppContext();
 
-  console.log("isProfileOwner: ", isProfileOwner);
+  // console.log("isProfileOwner: ", isProfileOwner);
   return (
     <div className="">
       <div className="navbar">
@@ -550,6 +554,37 @@ const TwoFactorAuth = ({
   );
 };
 
+const Friend = ({
+  isProfileOwner,
+  userId,
+  friendId,
+}: {
+  isProfileOwner: boolean;
+  userId: string | undefined;
+  friendId: string;
+}) => {
+  return (
+    <div>
+      {!isProfileOwner && (
+        <div className="flex items-center justify-center text-black">
+          <button className="mx-2">
+            <TbFriends size="25" />
+          </button>
+          <button className="mx-2">
+            <MdOutlineBlock size="25" />
+          </button>
+          <button className="mx-2">
+            <BiMessageRounded size="25" />
+          </button>
+          <button className="mx-2">
+            <IoGameControllerOutline size="25" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Profile(params: any) {
   const { user, setUser, isDivVisible, toggleDivVisibility } = useAppContext();
 
@@ -560,7 +595,7 @@ export default function Profile(params: any) {
   const [userProfil, setuserProfil] = useState<User | null>(null);
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
 
-  console.log("Rout ID: ", params.params.intraId);
+  // console.log("Rout ID: ", params.params.intraId);
   // console.log("user.intraId: ", user.intraId);
 
   const addLogin = () => {
@@ -621,14 +656,14 @@ export default function Profile(params: any) {
             credentials: "include",
           }
         );
-    
+
         if (!response.ok) {
           toast.error("User not found");
           console.log("User not found");
           return;
         }
         const contentType = response.headers.get("content-type");
-        
+
         if (contentType && contentType.includes("application/json")) {
           var data: User = await response.json();
           setuserFromRoutId(data);
@@ -642,9 +677,8 @@ export default function Profile(params: any) {
         console.error("Error during login:", error);
       }
     };
-    
+
     getUserFromRoutId();
-    
   }, [userFromRoutId?.login]);
 
   useEffect(() => {
@@ -709,10 +743,14 @@ export default function Profile(params: any) {
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
+          <Friend
+            isProfileOwner={isProfileOwner}
+            userId={user?.intraId}
+            friendId={params.params.intraId}
+          />
           <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
 
-          <UserLevelCard value={level} intraId={intraId} />
-
+          {/* <UserLevelCard value={level} intraId={intraId} />
           <div className="flex flex-col items-center justify-center">
             <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
               <UserDescriptionCard title={"42"} content={"Friends"} />
@@ -720,9 +758,8 @@ export default function Profile(params: any) {
               <UserDescriptionCard title={"42"} content={"Loses"} />
             </div>
           </div>
-
           <Achievements Achievements={"random achievement"} />
-          <GameHistory games={"random game"} />
+          <GameHistory games={"random game"} /> */}
         </div>
       </div>
       <Toaster />
