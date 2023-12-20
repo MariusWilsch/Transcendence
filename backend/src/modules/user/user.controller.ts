@@ -27,13 +27,16 @@ export class UserController {
   ) {}
 
   @Get()
-  async getAllUsers(): Promise<User[] | undefined> {
-    return this.userService.getAllUsers();
+  async getAllUsers(@Res() res : any): Promise<User[] | undefined> {
+    const data = await this.userService.getAllUsers();
+    res.json(data);
+    return data;
   }
 
   @Get(':id')
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
-    return this.userService.getUserbyId(id);
+    const data = await this.userService.getUserbyId(id);
+    return data
   }
 
   @Post(':id/login')
@@ -150,6 +153,22 @@ export class UserController {
       return res.json({ success: true });
     } catch (error: any) {
       console.error('Error avatar:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Post('addfriend')
+  // @UseGuards(JwtAuthGuard)
+  async addfriend(
+    @Body() body: { userId: string; friendId: string },
+    @Res() res: any
+  ) {
+    try {
+      const { userId, friendId } = body;
+      const isFriend = await this.userService.createFriend(userId, friendId);
+        return res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error addfriend:', error);
       return res.json({ success: false });
     }
   }

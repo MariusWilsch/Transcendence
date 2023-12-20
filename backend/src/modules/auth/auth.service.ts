@@ -80,18 +80,12 @@ export class AuthService {
 
     const otpcode = otp;
     await this.Email2FAService.sendEmail(user.email, user.login, otp);
-
     const hash = await this.hashCode(otpcode);
-    // save the otp in the db
-
     const userIntraId = user.intraId;
-
-    // Find the existing Tfa entry for the user
     const existingTfa = await prisma.tfa.findUnique({
       where: { intraId: userIntraId },
     });
 
-    // Update the existing Tfa entry or create a new one
     if (existingTfa) {
       await prisma.tfa.update({
         where: { intraId: existingTfa.intraId },
@@ -105,11 +99,6 @@ export class AuthService {
         },
       });
     }
-
-    // Send the secret to the user (usually via email)
-    // ...
-
-    // return { secret };
   }
 
   async verifyOtp(id: string, otp: string): Promise<boolean> {
@@ -169,6 +158,8 @@ export class AuthService {
     const isMatch = await bcrypt.compare(code, hashedCode);
     return isMatch;
   }
+
+
 }
 
 // TODO:

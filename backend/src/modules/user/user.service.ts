@@ -9,11 +9,15 @@ export class UserService {
 
   async getAllUsers() {
     try {
-      const allUsers = await prisma.user.findMany();
-      return allUsers;
+      const Users =  await prisma.user.findMany({
+        orderBy: {
+          created_at: 'asc',
+        },
+      });
+
+      return Users;
     } catch (e) {
-      console.log('Error: ', e);
-      return undefined;
+      console.log('Error in getAllUsers: ', e);
     }
   }
 
@@ -107,4 +111,16 @@ export class UserService {
     }
     return true;
   }
+
+  async createFriend(userId: string, friendId: string)
+  {
+    const friend = await prisma.friend.create({
+      data: {
+        friendshipStatus: 'PENDING',
+        userId: userId,
+        friendId: friendId,
+      },
+    });
+  }
+  
 }

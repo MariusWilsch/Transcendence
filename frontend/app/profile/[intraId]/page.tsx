@@ -13,6 +13,7 @@ import { MdOutlineBlock } from "react-icons/md";
 import { BiMessageRounded } from "react-icons/bi";
 import { IoGameControllerOutline } from "react-icons/io5";
 import toast, { Toaster } from "react-hot-toast";
+import { CiSearch } from "react-icons/ci";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
 
@@ -26,7 +27,35 @@ export function Loading() {
 
 export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
   const { isDivVisible, toggleDivVisibility } = useAppContext();
+  const [inputValue, setInputValue] = useState("");
 
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    // Send a POST request here using the input value
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        toast.error("User not found");
+        console.log("User not found");
+        return;
+      }
+
+      const users: User[] = await response.json();
+      console.log(users);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   // console.log("isProfileOwner: ", isProfileOwner);
   return (
     <div className="">
@@ -78,49 +107,32 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
               </li>
             </ul>
           </div>
-          <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
+          {/* <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
             Profile
-          </a>
+          </a> */}
         </div>
-        {/* <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li>
-              <a>Profile</a>
-            </li>
-            <li>
-              <details>
-                <summary>Parent</summary>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
-              </details>
-            </li>
-            <li>
-              <a>Leaderboard</a>
-            </li>
-            <li>
-              <a>Achievements</a>
-            </li>
-            <li>
-              <a>Friends</a>
-            </li>
-            <li>
-              <a>Channels</a>
-            </li>
-            <li>
-              <a>Play</a>
-            </li>
-            <li>
-              <a>Log out</a>
-            </li>
-          </ul>
-        </div> */}
+        <div className="">
+          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
+            <CiSearch size="25" className="text-black" />
+          </Link>
 
+          {/* <form 
+                  className="inline-block"
+                  onSubmit={handleSubmit} 
+                  // onChange={handleSubmit}
+                  >
+                  <label className="inline-block">
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      className="inline-block rounded-lg border-opacity-40 border-2 border-slate-300 bg-white text-sm outline-none text-black"
+                      />
+                  <button className="inline-block p-2 rounded-lg bg-slate-400 text-white"
+                  type="submit">Submit</button>
+                  </label>
+                  </form> */}
+        </div>
         <div className="flex justify-end w-[100vw] px-4">
           {!isDivVisible && isProfileOwner && (
             <button onClick={toggleDivVisibility}>
@@ -563,11 +575,43 @@ const Friend = ({
   userId: string | undefined;
   friendId: string;
 }) => {
+  const addfriend = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/addfriend`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            friendShipStatus: "PENDING",
+            userId: `${userId}`,
+            friendId: `${friendId}`,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data.success === false) {
+        const msg = "You are already friends";
+        toast.error(msg);
+        console.log(msg);
+      } else {
+        toast.success("Friend added successfully");
+        console.log(friendId, ": added successfully");
+      }
+    } catch (error: any) {
+      const msg = "Error adding friend: " + friendId;
+      toast.error(msg);
+      console.error("Error adding friend:", error.message);
+    }
+  };
   return (
     <div>
       {!isProfileOwner && (
         <div className="flex items-center justify-center text-black">
-          <button className="mx-2">
+          <button className="mx-2" onClick={addfriend}>
             <TbFriends size="25" />
           </button>
           <button className="mx-2">
@@ -588,20 +632,18 @@ const Friend = ({
 export default function Profile(params: any) {
   const { user, setUser, isDivVisible, toggleDivVisibility } = useAppContext();
 
-  const [isloaded, setIsloaded] = useState<number>(0);
   const [userFromRoutId, setuserFromRoutId] = useState<User | undefined>(
     undefined
   );
-  const [userProfil, setuserProfil] = useState<User | null>(null);
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
 
   // console.log("Rout ID: ", params.params.intraId);
   // console.log("user.intraId: ", user.intraId);
 
-  const addLogin = () => {
-    if (user?.isRegistred === false) {
+  const addLogin = (isRegistred: any) => {
+    if (isRegistred === false) {
       toggleDivVisibility();
-      toast("🌟 Please update your nickname and avatar.", {
+      toast.success("🌟 Please update your nickname and avatar.", {
         style: {
           border: "1px solid #713200",
           padding: "16px",
@@ -616,7 +658,10 @@ export default function Profile(params: any) {
     }
   };
 
+  const [isloaded, setIsloaded] = useState<number>();
   useEffect(() => {
+    setIsloaded(0);
+
     const checkJwtCookie = async () => {
       try {
         const response = await fetch(
@@ -632,9 +677,9 @@ export default function Profile(params: any) {
         var data: User = await response.json();
 
         setUser(data);
-        setIsloaded((x) => x + 1);
-        if (isloaded == 1) {
-          addLogin();
+        setIsloaded((x: any) => x + 1);
+        if (isloaded == 0) {
+          addLogin(data?.isRegistred);
         }
       } catch (error: any) {
         const msg = "Error during login" + error.message;
