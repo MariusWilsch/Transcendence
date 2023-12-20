@@ -27,8 +27,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<string, any>();
 
   handleConnection(client: any): void {
-    console.log(`Client connected: ${client.id}`);
-    this.connectedClients.set(client.id, client);
+    const userId = client.handshake.query.userId
+    console.log(`Client connected: ${userId}`);
+    this.connectedClients.set(userId, client);
   }
   
   handleDisconnect(client: any): void {
@@ -37,15 +38,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   
   @SubscribeMessage('privateChat')
-  async handlePrivateChat(client: any, payload: { to: string, message: string, data:User}): Promise<void> {
+  async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.connectedClients.get(payload.to);
-    console.log(`data : ${payload.to}`);
-    console.log(`wa arab : ${recipientSocket.id === payload.to}`);
-    if (recipientSocket.id === payload.to) {
+    // console.log(recipientSocket);
+    if (recipientSocket) {
         recipientSocket.emit('privateChat', { sender: client.id, message: payload.message });
-        console.log(payload.data.login);
         // Save the private message to the database
-        await this.prismaService.createMessage("90199", "130555", payload.message);
+        await this.prismaService.createMessage(payload.senderId, payload.to, payload.message);
         console.log(`Private message from ${client.id} to ${payload.to}: ${payload.message}`);
       } else {
         client.emit('error', { message: 'Recipient not found or offline.' });
