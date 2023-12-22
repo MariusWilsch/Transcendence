@@ -42,10 +42,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const recipientSocket = this.connectedClients.get(payload.to);
     // console.log(recipientSocket);
     if (recipientSocket) {
-        recipientSocket.emit('privateChat', { sender: client.id, message: payload.message });
+        recipientSocket.emit('privateChat', { sender: payload.senderId,senderLogin:payload.senderId, message: payload.message });
         // Save the private message to the database
         await this.prismaService.createMessage(payload.senderId, payload.to, payload.message);
-        console.log(`Private message from ${client.id} to ${payload.to}: ${payload.message}`);
+        console.log(`Private message from ${payload.senderId} to ${payload.to}: ${payload.message}`);
       } else {
         client.emit('error', { message: 'Recipient not found or offline.' });
       }
