@@ -60,7 +60,7 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
   return (
     <div className="">
       <div className="navbar">
-        <div className="navbar-start">
+        <div className="navbar-start w-[20vw]">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
               <svg
@@ -629,6 +629,228 @@ const Friend = ({
   );
 };
 
+const ShowFriends = ({
+  login,
+  intraId,
+}: {
+  login: string;
+  intraId: string | undefined;
+}) => {
+  const { user, setUser } = useAppContext();
+  const [friends, setFriends] = useState<User[] | null>(null);
+  // send a get request to get all friends
+
+  useEffect(() => {
+    // I should edit this to get only friends friendshipStatus: "ACCEPTED"
+
+    const getFriends = async () => {
+      try {
+        const response: any = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/friends`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+
+        if (response.success === false) {
+          const msg = "Error getting friends";
+          toast.error(msg);
+          console.log(msg);
+        }
+        if (data.friends) {
+          setFriends(data.friends);
+        }
+      } catch (error: any) {
+        const msg = "Error getting friends: " + error.message;
+        toast.error(msg);
+        console.error("Error getting friends:", error.message);
+      }
+    };
+    getFriends();
+  }, []);
+
+  return (
+    <div>
+      <div className="text-slate-600 m-5">Your friends : </div>
+
+      <div className="flex flex-row items-center justify-evenly">
+        {friends &&
+          friends?.map((friend: User) => (
+            <div
+              key={friend?.intraId}
+              className="flex flex-row items-center justify-center "
+            >
+              <div className="flex flex-row items-center justify-center">
+                <div className="w-[5vh] h-[5vh]">
+                  <img
+                    className="h-10 w-10 rounded-full"
+                    src={friend?.Avatar}
+                    alt=""
+                  />
+                </div>
+              </div>
+              <div className="text-slate-600">{friend?.login}</div>
+            </div>
+          ))}
+      </div>
+
+    </div>
+  );
+};
+
+
+const ShowPendingInvite = ({
+  login,
+  intraId,
+}: {
+  login: string;
+  intraId: string | undefined;
+}) => {
+  const { user, setUser } = useAppContext();
+  const [friends, setFriends] = useState<User[] | null>(null);
+
+  useEffect(() => {
+
+    const getFriends = async () => {
+      try {
+        const response: any = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/PendingInvite`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+
+        if (data.success === false) {
+          const msg = "Error getting friends";
+          toast.error(msg);
+          console.log(msg);
+        }
+        if (data.friendsDetails) {
+          setFriends(data.friendsDetails);
+        }
+      } catch (error: any) {
+        const msg = "Error getting friends: " + error.message;
+        toast.error(msg);
+        console.error("Error getting friends:", error.message);
+      }
+    };
+    getFriends();
+  }, [intraId, user]);
+
+  return (
+    <div>
+      <div className="text-slate-600 m-5">Pending invitations : </div>
+
+      <div className="flex flex-row items-center justify-evenly">
+        {friends &&
+          friends?.map((friend: User) => (
+            <div
+              key={friend?.intraId}
+              className="flex flex-row items-center justify-center "
+            >
+              <div className="flex flex-row items-center justify-center">
+                <div className="w-[5vh] h-[5vh]">
+                  <img
+                    className="h-10 w-10 rounded-full"
+                    src={friend?.Avatar}
+                    alt=""
+                  />
+                </div>
+              </div>
+              <div className="text-slate-600">{friend?.login}</div>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+};
+
+const ShowFreindrequest = ({
+  login,
+  intraId,
+}: {
+  login: string;
+  intraId: string | undefined;
+}) => {
+  const { user, setUser } = useAppContext();
+  const [friends, setFriends] = useState<User[] | null>(null);
+
+  useEffect(() => {
+
+    const getFriends = async () => {
+      try {
+        const response: any = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/freindrequest`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+
+
+        if (data.success === false) {
+          const msg = "Error getting friends";
+          toast.error(msg);
+          console.log(msg);
+        }
+        if (data.friendsDetails) {
+          setFriends(data.friendsDetails);
+        }
+      } catch (error: any) {
+        const msg = "Error getting friends: " + error.message;
+        toast.error(msg);
+        console.error("Error getting friends:", error.message);
+      }
+    };
+    getFriends();
+  }, [intraId, user]);
+
+  return (
+    <div>
+      <Link
+      href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
+      <div className="text-slate-600 m-5">Freind request : </div>
+
+      <div className="flex flex-row items-center justify-evenly">
+        {friends &&
+          friends?.map((friend: User) => (
+            <div
+              key={friend?.intraId}
+              className="flex flex-row items-center justify-center "
+            >
+              <div className="flex flex-row items-center justify-center">
+                <div className="w-[5vh] h-[5vh]">
+                  <img
+                    className="h-10 w-10 rounded-full"
+                    src={friend?.Avatar}
+                    alt=""
+                  />
+                </div>
+              </div>
+              <div className="text-slate-600">{friend?.login}</div>
+            </div>
+          ))}
+      </div>
+          </Link>
+    </div>
+  );
+};
+
+
 export default function Profile(params: any) {
   const { user, setUser, isDivVisible, toggleDivVisibility } = useAppContext();
 
@@ -658,9 +880,7 @@ export default function Profile(params: any) {
     }
   };
 
-  const [isloaded, setIsloaded] = useState<number>();
   useEffect(() => {
-    setIsloaded(0);
 
     const checkJwtCookie = async () => {
       try {
@@ -676,11 +896,11 @@ export default function Profile(params: any) {
         );
         var data: User = await response.json();
 
-        setUser(data);
-        setIsloaded((x: any) => x + 1);
-        if (isloaded == 0) {
-          addLogin(data?.isRegistred);
-        }
+        if (data !== null)
+        {
+          setUser(data);
+        }  
+
       } catch (error: any) {
         const msg = "Error during login" + error.message;
         toast.error(msg);
@@ -688,6 +908,11 @@ export default function Profile(params: any) {
       }
     };
     checkJwtCookie();
+
+  }, [user?.login]);
+
+
+  useEffect(() => {
 
     const getUserFromRoutId = async () => {
       try {
@@ -724,7 +949,7 @@ export default function Profile(params: any) {
     };
 
     getUserFromRoutId();
-  }, [userFromRoutId?.login]);
+  }, []);
 
   useEffect(() => {
     if (params.params.intraId === user?.intraId) {
@@ -740,6 +965,10 @@ export default function Profile(params: any) {
       clearTimeout(timeoutId);
     };
   }, [user]);
+
+  useEffect(() => {
+      addLogin(user?.isRegistred);
+  } , [user?.isRegistred])
 
   if (!userFromRoutId) {
     return (
@@ -777,6 +1006,8 @@ export default function Profile(params: any) {
     IntraPic = userFromRoutId?.Avatar || IntraPic;
   }
 
+  // addLogin(user?.isRegistred);
+
   return (
     <div className="h-screen w-screen ">
       <div className="flex h-screen">
@@ -794,6 +1025,9 @@ export default function Profile(params: any) {
             friendId={params.params.intraId}
           />
           <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+          <ShowFriends login={Login} intraId={intraId} />
+          <ShowPendingInvite login={Login} intraId={intraId} />
+          <ShowFreindrequest login={Login} intraId={intraId} />
 
           {/* <UserLevelCard value={level} intraId={intraId} />
           <div className="flex flex-col items-center justify-center">

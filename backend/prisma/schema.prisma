@@ -19,8 +19,8 @@ model User {
   isRegistred    Boolean   @default(false)
   isTfaEnabled   Boolean   @default(false)
   tfa            Tfa?
-  user           Friend[]  @relation("userFriends")
-  friends        Friend?   @relation("friendsUser") 
+  friends        Friend[]  @relation("userFriends")
+  user           Friend[]   @relation("friendsUser") 
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
 }

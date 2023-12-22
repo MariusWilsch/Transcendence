@@ -9,7 +9,7 @@ export class UserService {
 
   async getAllUsers() {
     try {
-      const Users =  await prisma.user.findMany({
+      const Users = await prisma.user.findMany({
         orderBy: {
           created_at: 'asc',
         },
@@ -47,7 +47,6 @@ export class UserService {
       console.log('Error in getUserbyLogin: ', error);
     }
   }
-
 
   async updateLogin(userId: string, newLogin: string): Promise<void> {
     const user = await this.getUserbyId(userId);
@@ -102,7 +101,6 @@ export class UserService {
     }
   }
 
-
   async uniqueLogin(login: string): Promise<boolean> {
     const user = await this.getUserbyLogin(login);
 
@@ -112,8 +110,7 @@ export class UserService {
     return true;
   }
 
-  async createFriend(userId: string, friendId: string)
-  {
+  async createFriend(userId: string, friendId: string) {
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
@@ -122,5 +119,70 @@ export class UserService {
       },
     });
   }
-  
+
+  async getFriends(userId: string) {
+    const friends = await prisma.friend.findMany({
+      where: {
+        OR: [
+          { userId: userId, friendshipStatus: 'ACCEPTED' },
+          { friendId: userId, friendshipStatus: 'ACCEPTED' },
+        ],
+      },
+    });
+    const userIds = friends.map((item) => item.userId);
+    const friendIds = friends.map((item) => item.friendId);
+
+    const friendsDetails = await Promise.all(
+      friendIds.map((id) => this.getUserbyId(id))
+    );
+    const uesrsDetails = await Promise.all(
+      userIds.map((id) => this.getUserbyId(id))
+    );
+
+    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter((friend) => friend.intraId !== userId);
+
+    return filteredFriendsDetails;
+  }
+
+  async PendingInvite(userId: string) {
+    const PendingInvite = await prisma.friend.findMany({
+      where: {
+        userId: userId,
+        friendshipStatus: 'PENDING',
+      },
+    });
+
+    return PendingInvite;
+  }
+
+  async freindrequest(userId: string) {
+    const freindrequest = await prisma.friend.findMany({
+      where: {
+        friendId: userId,
+        friendshipStatus: 'PENDING',
+      },
+    });
+
+    return freindrequest;
+  }
+
+  async acceptFriendRequest(userId: string, friendId: string) {
+    try {
+      const friend = await prisma.friend.update({
+        where: {
+          unique_user_friend: {
+            userId: friendId,
+            friendId: userId,
+          },
+        },
+        data: {
+          friendshipStatus: 'ACCEPTED',
+        },
+      });
+      return friend;
+    } catch (error: any) {
+      console.error('Error accept Friend Request:', error);
+      return;
+    }
+  }
 }

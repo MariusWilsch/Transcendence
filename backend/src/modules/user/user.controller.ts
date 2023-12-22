@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Req,
   Res,
   UploadedFile,
@@ -27,7 +28,7 @@ export class UserController {
   ) {}
 
   @Get()
-  async getAllUsers(@Res() res : any): Promise<User[] | undefined> {
+  async getAllUsers(@Res() res: any): Promise<User[] | undefined> {
     const data = await this.userService.getAllUsers();
     res.json(data);
     return data;
@@ -36,7 +37,7 @@ export class UserController {
   @Get(':id')
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
     const data = await this.userService.getUserbyId(id);
-    return data
+    return data;
   }
 
   @Post(':id/login')
@@ -59,7 +60,7 @@ export class UserController {
       await this.userService.updateLogin(userId, body.newLogin);
       return res.json({ success: true });
     } catch (error: any) {
-      console.error("Error login ", error);
+      console.error('Error login ', error);
       return res.json({ success: false });
     }
   }
@@ -166,10 +167,66 @@ export class UserController {
     try {
       const { userId, friendId } = body;
       const isFriend = await this.userService.createFriend(userId, friendId);
-        return res.json({ success: true });
+      return res.json({ success: true });
     } catch (error: any) {
       console.error('Error addfriend:', error);
       return res.json({ success: false });
     }
+  }
+
+  @Get(':id/friends')
+  // @UseGuards(JwtAuthGuard)
+  async getFriends(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const friends = await this.userService.getFriends(userId);
+      return res.json({ success: true, friends });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Get(':id/PendingInvite')
+  // @UseGuards(JwtAuthGuard)
+  async PendingInvite(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const PendingInvite = await this.userService.PendingInvite(userId);
+      const friendIds = PendingInvite.map((item) => item.friendId);
+      const friendsDetails = await Promise.all(
+        friendIds.map((id) => this.userService.getUserbyId(id))
+      );
+
+      return res.json({ success: true, friendsDetails });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Get(':id/freindrequest')
+  // @UseGuards(JwtAuthGuard)
+  async freindrequest(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const freindrequest = await this.userService.freindrequest(userId);
+      const friendIds = freindrequest.map((item) => item.userId);
+      const friendsDetails = await Promise.all(
+        friendIds.map((id) => this.userService.getUserbyId(id))
+      );
+
+      return res.json({ success: true, friendsDetails });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Put('/:userId/acceptFriend/:friendId')
+  // @UseGuards(JwtAuthGuard)
+  async acceptFriendRequest(
+    @Param('userId') userId: string,
+    @Param('friendId') friendId: string
+  ) {
+    const acceptFriendRequest = await this.userService.acceptFriendRequest(userId, friendId);
+    return acceptFriendRequest;
   }
 }
