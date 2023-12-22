@@ -167,6 +167,11 @@ export class UserController {
     try {
       const { userId, friendId } = body;
       const isFriend = await this.userService.createFriend(userId, friendId);
+      if (isFriend === 'alreadyFriend') {
+        return res.json({ success: true , isFriend: true});
+      } else {
+        return res.json({ success: false , isFriend: false});
+      }
       return res.json({ success: true });
     } catch (error: any) {
       console.error('Error addfriend:', error);

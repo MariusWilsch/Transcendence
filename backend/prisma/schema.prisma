@@ -20,7 +20,7 @@ model User {
   isTfaEnabled   Boolean   @default(false)
   tfa            Tfa?
   friends        Friend[]  @relation("userFriends")
-  user           Friend[]   @relation("friendsUser") 
+  user           Friend[]  @relation("friendsUser") 
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
 }
@@ -43,7 +43,7 @@ model Friend {
   user             User         @relation("userFriends", fields: [userId], references: [intraId])
   userId           String
   friend           User         @relation("friendsUser", fields: [friendId], references: [intraId])
-  friendId         String       @unique
+  friendId         String
   created_at       DateTime     @default(now())
   @@unique([userId, friendId], name: "unique_user_friend")
 }

@@ -110,7 +110,19 @@ export class UserService {
     return true;
   }
 
-  async createFriend(userId: string, friendId: string) {
+  async createFriend(userId: string, friendId: string): Promise<string> {
+
+    const ifTheFriendshipExists = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    })
+    if (ifTheFriendshipExists)
+      return 'alreadyFriend';
+    
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
@@ -118,6 +130,7 @@ export class UserService {
         friendId: friendId,
       },
     });
+    return 'newFriendship';
   }
 
   async getFriends(userId: string) {

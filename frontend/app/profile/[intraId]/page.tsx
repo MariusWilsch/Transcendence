@@ -592,14 +592,16 @@ const Friend = ({
           }),
         }
       );
+
       const data = await response.json();
+
       if (data.success === false) {
-        const msg = "You are already friends";
-        toast.error(msg);
-        console.log(msg);
-      } else {
+        toast.error("You are already friends");
+      } else if (data.isFriend === false) {
         toast.success("Friend added successfully");
-        console.log(friendId, ": added successfully");
+      }
+      else if (data.isFriend === true) {
+        toast.error("You are already friends");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -863,7 +865,7 @@ export default function Profile(params: any) {
   // console.log("user.intraId: ", user.intraId);
 
   const addLogin = (isRegistred: any) => {
-    if (isRegistred === false) {
+    if (isRegistred === false && isProfileOwner === true) {
       toggleDivVisibility();
       toast.success("🌟 Please update your nickname and avatar.", {
         style: {
@@ -909,7 +911,7 @@ export default function Profile(params: any) {
     };
     checkJwtCookie();
 
-  }, [user?.login]);
+  }, [user?.login, isProfileOwner]);
 
 
   useEffect(() => {
@@ -968,7 +970,7 @@ export default function Profile(params: any) {
 
   useEffect(() => {
       addLogin(user?.isRegistred);
-  } , [user?.isRegistred])
+  } , [user?.isRegistred, isProfileOwner])
 
   if (!userFromRoutId) {
     return (
