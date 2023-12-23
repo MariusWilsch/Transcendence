@@ -16,6 +16,17 @@ import toast, { Toaster } from "react-hot-toast";
 import { CiSearch } from "react-icons/ci";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
+import pong from "../../../public/pong.svg";
+import { IoMenuOutline } from "react-icons/io5";
+import { CiLogout } from "react-icons/ci";
+import { RiPingPongLine } from "react-icons/ri";
+import { IoChatbubblesOutline } from "react-icons/io5";
+import { GrGroup } from "react-icons/gr";
+import { FaUserFriends } from "react-icons/fa";
+import { GrAchievement } from "react-icons/gr";
+import { MdLeaderboard } from "react-icons/md";
+import { IoHome } from "react-icons/io5";
+
 
 export function Loading() {
   return (
@@ -31,8 +42,6 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
-    // Send a POST request here using the input value
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
@@ -56,94 +65,49 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
       console.error("Error:", error);
     }
   };
-  // console.log("isProfileOwner: ", isProfileOwner);
-  return (
-    <div className="">
-      <div className="navbar">
-        <div className="navbar-start w-[20vw]">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />
-              </svg>
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-            >
-              <li>
-                <a>Leaderboard</a>
-              </li>
-              <li>
-                <a>Achievements</a>
-              </li>
-              <li>
-                <a>Friends</a>
-              </li>
-              <li>
-                <a>Channels</a>
-              </li>
-              <li>
-                <a>Play</a>
-              </li>
-              <br></br>
-              <li>
-                <Link
-                  href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
-                >
-                  Log out
-                </Link>
-              </li>
-            </ul>
-          </div>
-          {/* <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
-            Profile
-          </a> */}
-        </div>
-        <div className="">
-          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
-            <CiSearch size="25" className="text-black" />
-          </Link>
 
-          {/* <form 
-                  className="inline-block"
-                  onSubmit={handleSubmit} 
-                  // onChange={handleSubmit}
-                  >
-                  <label className="inline-block">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      className="inline-block rounded-lg border-opacity-40 border-2 border-slate-300 bg-white text-sm outline-none text-black"
-                      />
-                  <button className="inline-block p-2 rounded-lg bg-slate-400 text-white"
-                  type="submit">Submit</button>
-                  </label>
-                  </form> */}
-        </div>
-        <div className="flex justify-end w-[100vw] px-4">
-          {!isDivVisible && isProfileOwner && (
-            <button onClick={toggleDivVisibility}>
-              <CiEdit className="text-black" size="25" />
-            </button>
-          )}
-          {isDivVisible && isProfileOwner && (
-            <button onClick={toggleDivVisibility}>
-              <IoIosCloseCircleOutline className="text-black" size="25" />
-            </button>
-          )}
+  return (
+    <div className="bg-[#1F212A] flex flex-row  w-[100vw]">
+      <div className="w-16 h-16 bg-[#292D39]">
+        <Image
+          src={pong}
+          alt="Description of the image"
+          property="true"
+          width={100}
+          height={100}
+          sizes=""
+          style={{ filter: "invert(100%)" }}
+        />
+      </div>
+
+      <div className="flex-grow">
+        <div className="">
+          <div className="flex-row flex justify-betweenh-16">
+            <div className="flex-row flex justify-between">
+              <div className="flex items-center p-3 md:hidden">
+                <button>
+                  <IoMenuOutline size="30" className="text-white" />
+                </button>
+              </div>
+              <div className="flex items-center md:p-3">
+                <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
+                  <CiSearch size="30" className="text-green-600" />
+                </Link>
+              </div>
+            </div>
+            <div className="flex justify-end p-4 flex-grow">
+              {!isDivVisible && isProfileOwner && (
+                <button onClick={toggleDivVisibility}>
+                  <CiEdit className="text-white" size="25" />
+                </button>
+              )}
+              {isDivVisible && isProfileOwner && (
+                <button onClick={toggleDivVisibility}>
+                  <IoIosCloseCircleOutline className="text-white" size="25" />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -449,33 +413,41 @@ const GameHistory = ({ games }: { games: string }) => {
 
 const Sidebar = () => {
   return (
-    <div>
-      <div className="text-2xl font-semibold flex flex-row text-center m-2 text-gray-200">
-        Profile
-      </div>
-      <div className="fixed h-screen text-white flex flex-col justify-center">
-        <ul className="list-none text-center">
-          <li>
-            <a href="#">Leaderboard</a>
-          </li>
-          <li>
-            <a href="#">Achievements</a>
-          </li>
-          <li>
-            <a href="#">Friends</a>
-          </li>
-          <li>
-            <a href="#">Channels</a>
-          </li>
-          <li>
-            <a href="#">Play</a>
-          </li>
-          <li>
-            <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
-              Log out
-            </Link>
-          </li>
-        </ul>
+
+    <div className=" relative custom-height bg-[#292D39]">
+      <div className="absolute buttom-0 left-0 custom-height">
+        <div className=" custom-height fixed text-black flex flex-col justify-center items-center">
+          <ul className="list-none text-center">
+            <li>
+            <IoHome size="30" className="text-slate-400"/>
+            </li>
+            <li>
+            <MdLeaderboard size="30" className="text-slate-400"/>
+            </li>
+            <li>
+            <GrAchievement size="30" className="text-slate-400"/>
+            </li>
+            <li>
+            <FaUserFriends size="30" className="text-slate-400"/>
+            </li>
+            <li>
+            <GrGroup size="30" className="text-slate-400"/>
+            </li>
+            <li>
+            <IoChatbubblesOutline  size="30" className="text-slate-400"/>
+            </li>
+            <li>
+              <RiPingPongLine size="30" className="text-slate-400"/>
+            </li>
+            <li>
+              <Link
+                href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
+              >
+                <CiLogout size="30" className="text-slate-400" />
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -599,8 +571,7 @@ const Friend = ({
         toast.error("You are already friends");
       } else if (data.isFriend === false) {
         toast.success("Friend added successfully");
-      }
-      else if (data.isFriend === true) {
+      } else if (data.isFriend === true) {
         toast.error("You are already friends");
       }
     } catch (error: any) {
@@ -700,11 +671,9 @@ const ShowFriends = ({
             </div>
           ))}
       </div>
-
     </div>
   );
 };
-
 
 const ShowPendingInvite = ({
   login,
@@ -717,7 +686,6 @@ const ShowPendingInvite = ({
   const [friends, setFriends] = useState<User[] | null>(null);
 
   useEffect(() => {
-
     const getFriends = async () => {
       try {
         const response: any = await fetch(
@@ -788,7 +756,6 @@ const ShowFreindrequest = ({
   const [friends, setFriends] = useState<User[] | null>(null);
 
   useEffect(() => {
-
     const getFriends = async () => {
       try {
         const response: any = await fetch(
@@ -802,7 +769,6 @@ const ShowFreindrequest = ({
           }
         );
         const data = await response.json();
-
 
         if (data.success === false) {
           const msg = "Error getting friends";
@@ -823,46 +789,42 @@ const ShowFreindrequest = ({
 
   return (
     <div>
-      <Link
-      href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
-      <div className="text-slate-600 m-5">Freind request : </div>
+      <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
+        <div className="text-slate-600 m-5">Freind request : </div>
 
-      <div className="flex flex-row items-center justify-evenly">
-        {friends &&
-          friends?.map((friend: User) => (
-            <div
-              key={friend?.intraId}
-              className="flex flex-row items-center justify-center "
-            >
-              <div className="flex flex-row items-center justify-center">
-                <div className="w-[5vh] h-[5vh]">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src={friend?.Avatar}
-                    alt=""
-                  />
+        <div className="flex flex-row items-center justify-evenly">
+          {friends &&
+            friends?.map((friend: User) => (
+              <div
+                key={friend?.intraId}
+                className="flex flex-row items-center justify-center "
+              >
+                <div className="flex flex-row items-center justify-center">
+                  <div className="w-[5vh] h-[5vh]">
+                    <img
+                      className="h-10 w-10 rounded-full"
+                      src={friend?.Avatar}
+                      alt=""
+                    />
+                  </div>
                 </div>
+                <div className="text-slate-600">{friend?.login}</div>
               </div>
-              <div className="text-slate-600">{friend?.login}</div>
-            </div>
-          ))}
-      </div>
-          </Link>
+            ))}
+        </div>
+      </Link>
     </div>
   );
 };
 
-
 export default function Profile(params: any) {
-  const { user, setUser, isDivVisible, toggleDivVisibility } = useAppContext();
+  const { user, setUser, isDivVisible, toggleDivVisibility, setDivVisible } =
+    useAppContext();
 
   const [userFromRoutId, setuserFromRoutId] = useState<User | undefined>(
     undefined
   );
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
-
-  // console.log("Rout ID: ", params.params.intraId);
-  // console.log("user.intraId: ", user.intraId);
 
   const addLogin = (isRegistred: any) => {
     if (isRegistred === false && isProfileOwner === true) {
@@ -883,7 +845,6 @@ export default function Profile(params: any) {
   };
 
   useEffect(() => {
-
     const checkJwtCookie = async () => {
       try {
         const response = await fetch(
@@ -898,11 +859,9 @@ export default function Profile(params: any) {
         );
         var data: User = await response.json();
 
-        if (data !== null)
-        {
+        if (data !== null) {
           setUser(data);
-        }  
-
+        }
       } catch (error: any) {
         const msg = "Error during login" + error.message;
         toast.error(msg);
@@ -910,12 +869,9 @@ export default function Profile(params: any) {
       }
     };
     checkJwtCookie();
-
   }, [user?.login, isProfileOwner]);
 
-
   useEffect(() => {
-
     const getUserFromRoutId = async () => {
       try {
         const response = await fetch(
@@ -969,8 +925,14 @@ export default function Profile(params: any) {
   }, [user]);
 
   useEffect(() => {
-      addLogin(user?.isRegistred);
-  } , [user?.isRegistred, isProfileOwner])
+    addLogin(user?.isRegistred);
+  }, [user?.isRegistred, isProfileOwner]);
+
+  useEffect(() => {
+    if (isProfileOwner === false) {
+      setDivVisible(false);
+    }
+  }, []);
 
   if (!userFromRoutId) {
     return (
@@ -1008,16 +970,17 @@ export default function Profile(params: any) {
     IntraPic = userFromRoutId?.Avatar || IntraPic;
   }
 
-  // addLogin(user?.isRegistred);
-
   return (
-    <div className="h-screen w-screen ">
-      <div className="flex h-screen">
-        <div className="w-1/5 bg-gray-800 p-4 hidden md:inline-block">
+    <div className=" h-screen w-screen ">
+      <Navbar isProfileOwner={isProfileOwner} />
+
+      <div className="flex ">
+        <div className="w-16 custom-height ">
           <Sidebar />
         </div>
-        <div className="flex-1 p-4 overflow-y-auto">
-          <Navbar isProfileOwner={isProfileOwner} />
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-10">
+
           <UserProfileImage src={IntraPic} intraId={intraId} />
 
           <UserDetailsCard value={Login} intraId={intraId} />
@@ -1032,18 +995,74 @@ export default function Profile(params: any) {
           <ShowFreindrequest login={Login} intraId={intraId} />
 
           {/* <UserLevelCard value={level} intraId={intraId} />
-          <div className="flex flex-col items-center justify-center">
-            <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
-              <UserDescriptionCard title={"42"} content={"Friends"} />
-              <UserDescriptionCard title={"42"} content={"Wins"} />
-              <UserDescriptionCard title={"42"} content={"Loses"} />
-            </div>
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
+        <UserDescriptionCard title={"42"} content={"Friends"} />
+        <UserDescriptionCard title={"42"} content={"Wins"} />
+        <UserDescriptionCard title={"42"} content={"Loses"} />
+      </div>
+    </div>
+    <Achievements Achievements={"random achievement"} />
+    <GameHistory games={"random game"} /> */}
           </div>
-          <Achievements Achievements={"random achievement"} />
-          <GameHistory games={"random game"} /> */}
+
         </div>
       </div>
       <Toaster />
     </div>
   );
+}
+
+{
+  /* <div className="dropdown">
+            <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
+              </svg>
+            </div>
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
+            >
+              <li>
+                <a>Leaderboard</a>
+              </li>
+              <li>
+                <a>Achievements</a>
+              </li>
+              <li>
+                <a>Friends</a>
+              </li>
+              <li>
+                <a>Channels</a>
+              </li>
+              <li>
+                <a>Play</a>
+              </li>
+              <br></br>
+              <li>
+                <Link
+                  href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
+                >
+                  Log out
+                </Link>
+              </li>
+            </ul>
+          </div> */
+}
+{
+  /* <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
+            Profile
+          </a> */
 }

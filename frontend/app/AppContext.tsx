@@ -15,6 +15,7 @@ export type User = {
 type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
+  setDivVisible: (isDivVisible : boolean ) => void;
   user: User | null;
   setUser: (user: User | null) => void;
 };
@@ -36,6 +37,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const contextValue: AppContextProps = {
     isDivVisible,
     toggleDivVisibility,
+    setDivVisible,
     user,
     setUser,
   };

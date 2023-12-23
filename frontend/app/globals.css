@@ -18,3 +18,7 @@ body {
 .animate-moveLeftAndRight {
   animation: moveLeftAndRight 0.5s infinite;
 }
+
+.custom-height {
+  height: calc(100vh - 64px);
+}
