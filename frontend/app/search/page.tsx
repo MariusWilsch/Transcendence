@@ -31,36 +31,74 @@ export default function Search() {
 
   const [users, setUsers] = useState<User[] | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          toast.error("User not found");
+          return;
+        }
+
+        const users: User[] = await response.json();
+        setUsers(users);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    if (inputValue === "" || inputValue === undefined || inputValue === null || inputValue === " ") {
+      return;
+    }
 
-    // Send a POST request here using the input value
     try {
+      const data = {
+        searchTerm: inputValue,
+      };
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
+          body: JSON.stringify(data),
         }
       );
       if (!response.ok) {
         toast.error("User not found");
-        console.log("User not found");
         return;
       }
 
       const users: User[] = await response.json();
       setUsers(users);
-      console.log(users);
     } catch (error) {
       console.error("Error:", error);
     }
   };
+
+  useEffect(() => {}, [inputValue]);
+
   return (
-    <div className=" h-screen w-screen bg-[#12141A]">
+    <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
 
       <div className="flex ">
@@ -89,12 +127,15 @@ export default function Search() {
                       <input
                         type="text"
                         value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
+                        onChange={(e) => {
+                          setInputValue(e.target.value);
+                          handleSubmit(e);
+                        }}
                         className="in-w-[80vw] md:min-w-[40vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
                       />
-                      &nbsp;
+                      &nbsp; &nbsp;
                       <button
-                        className="items-center justify-center p-2 rounded-lg bg-slate-400 text-white"
+                        className="items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
                         type="submit"
                       >
                         <RiSearchLine size="30" className="" />

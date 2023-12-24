@@ -12,11 +12,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { Navbar, Sidebar } from "../profile/[intraId]/page";
 import { FiCheckCircle } from "react-icons/fi";
 import { FiXCircle } from "react-icons/fi";
-import { useRouter } from "next/navigation";
 
 export default function Search() {
-  const router = useRouter();
-
   const [Change, setChange] = useState<boolean>(false);
   const togleChange = () => {
     setChange((prev) => !prev);
@@ -163,7 +160,7 @@ export default function Search() {
   };
 
   return (
-    <div className="h-screen w-screen ">
+    <div className="min-h-screen w-screen bg-[#12141A]">
       <Toaster />
       <div className=" h-screen w-screen ">
         <Navbar isProfileOwner={false} />
@@ -213,7 +210,7 @@ export default function Search() {
                           </div>
                           <div className="flex ">
                             <button
-                              className="w-full flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 "
+                              className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
                               onClick={() =>
                                 acceptFriendRequest(
                                   user?.intraId,

@@ -29,13 +29,26 @@ export class UserController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllUsers(@Res() res: any): Promise<User[] | undefined> {
     const data = await this.userService.getAllUsers();
     res.json(data);
     return data;
   }
 
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async getUser(
+    @Res() res: any,
+    @Body() name: { searchTerm: string }
+  ): Promise<User[] | undefined> {
+    const data = await this.userService.getUsersbyInput(name.searchTerm);
+    res.json(data);
+    return data;
+  }
+  
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
     const data = await this.userService.getUserbyId(id);
     return data;
@@ -233,17 +246,16 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
-    try{
-
+    try {
       const acceptFriendRequest = await this.userService.acceptFriendRequest(
         userId,
         friendId
-        );
-        return res.json({ success: true });
-      } catch (error: any) {
-        console.error('Error accept Friend Request:', error);
-        return res.json({ success: false });
-      }
+      );
+      return res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error accept Friend Request:', error);
+      return res.json({ success: false });
+    }
   }
 
   @Delete('/:userId/declineFriend/:friendId')
@@ -253,16 +265,15 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
-    try{
-
+    try {
       const declineFriendRequest = await this.userService.declineFriendRequest(
         userId,
         friendId
-        );
-        return res.json({ success: true });
-      } catch (error: any) {
-        console.error('Error decline Friend Request:', error);
-        return res.json({ success: false });
-      }
+      );
+      return res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error decline Friend Request:', error);
+      return res.json({ success: false });
+    }
   }
 }

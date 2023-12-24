@@ -111,7 +111,6 @@ export class UserService {
   }
 
   async createFriend(userId: string, friendId: string): Promise<string> {
-
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
@@ -119,12 +118,11 @@ export class UserService {
           { userId: friendId, friendId: userId },
         ],
       },
-    })
-    if (ifTheFriendshipExists)
-    {
+    });
+    if (ifTheFriendshipExists) {
       return 'alreadyFriend';
     }
-    
+
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
@@ -154,7 +152,9 @@ export class UserService {
       userIds.map((id) => this.getUserbyId(id))
     );
 
-    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter((friend) => friend.intraId !== userId);
+    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter(
+      (friend) => friend.intraId !== userId
+    );
 
     return filteredFriendsDetails;
   }
@@ -214,6 +214,23 @@ export class UserService {
       return friend;
     } catch (error: any) {
       console.error('Error decline Friend Request:', error);
+      return;
+    }
+  }
+
+  async getUsersbyInput(input: string) {
+    try {
+      const Users = await prisma.user.findMany({
+        where: {
+          login: {
+            contains: input,
+          },
+        },
+      });
+
+      return Users;
+    } catch (error: any) {
+      console.error('Error getUsersbyInput:', error);
       return;
     }
   }

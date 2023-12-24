@@ -33,7 +33,7 @@ import { CgProfile } from "react-icons/cg";
 
 export function Loading() {
   return (
-    <div className="bg-white h-screen w-screen flex items-center justify-center">
+    <div className="bg-[#12141A] custom-height flex items-center justify-center">
       <span className="loading loading-dots loading-lg"></span>
     </div>
   );
@@ -126,29 +126,6 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
     </div>
   );
 }
-
-const UserDescriptionCard = ({
-  title,
-  content,
-}: {
-  title: string;
-  content: string;
-}) => {
-  return (
-    <div className=" flex-1 flex flex-col ">
-      <div className="flex flex-col items-center justify-center">
-        <div className="bg-[#9DB2BF] rounded-xl h-[15vw] w-[15vw] md:w-[10vw] md:h-[10vw] pt-3">
-          <div className="text-white text-lg text-centerfont-mono rounded-md text-center">
-            {title}
-          </div>
-          <div className="text-[#27374D] text-center text-xs rounded-lg break-words overflow-hidden">
-            {content}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const UserLevelCard = ({
   value,
@@ -255,7 +232,7 @@ const UserDetailsCard = ({
               }}
               className=""
             >
-              <CiSaveUp2 className="text-black inline-block" size="24" />
+              <CiSaveUp2 className="text-slate-400 inline-block" size="24" />
             </button>
           </div>
         )}
@@ -271,7 +248,17 @@ const UserProfileImage = ({
   src: string;
   intraId: string | undefined;
 }) => {
-  const { isDivVisible, toggleDivVisibility } = useAppContext();
+  const {
+    user,
+    setUser,
+    isDivVisible,
+    toggleDivVisibility,
+    setDivVisible,
+    isSidebarVisible,
+    setisSidebarVisible,
+    toggleSidebarVisibleVisibility,
+  } = useAppContext();
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   useEffect(() => {
@@ -326,100 +313,106 @@ const UserProfileImage = ({
   return (
     <div>
       <div className="flex flex-col items-center justify-center">
-        <div className="backgroundDiv md:h-80 h-48 flex justify-center">
-          
         <div
-          className="w-[20vh] h-[20vh] md:mt-36 mt-16"
-          style={{ position: "relative", display: "inline-block" }}
+          className={`${
+            isSidebarVisible ? "backgroundDiv" : "backgroundDivNotVisible"
+          } backgroundDiv  md:h-80 h-48 flex justify-center`}
         >
-          {imagePreview && (
-            <Image
-              src={imagePreview}
-              alt="image Preview"
-              width={300}
-              height={300}
-              priority={true}
-              quality={100}
-              className="rounded-full border-2 border-black"
-              style={{ width: "20vh", height: "20vh" }}
-              onError={(e: any) => {
-                e.target.onerror = null;
-              }}
-            />
-          )}
-
-          <div>
-            {isDivVisible && (
+          <div
+            className="w-[20vh] h-[20vh] md:mt-36 mt-16"
+            style={{ position: "relative", display: "inline-block" }}
+          >
+            {imagePreview && (
+              <Image
+                src={imagePreview}
+                alt="image Preview"
+                width={300}
+                height={300}
+                priority={true}
+                quality={100}
+                className="rounded-full border-2 border-black"
+                style={{ width: "20vh", height: "20vh" }}
+                onError={(e: any) => {
+                  e.target.onerror = null;
+                }}
+              />
+            )}
+            {selectedFile && isDivVisible && (
               <div
-                className=""
-                style={{ position: "absolute", bottom: 0, right: 0 }}
+                style={{
+                  position: "absolute",
+                  display: "inline-block",
+                  width: "20vh",
+                  height: "20vh",
+                }}
+                className="top-0 left-0 flex flex-col items-center justify-center rounded-full
+                animate-moveLeftAndRight"
               >
-                <label htmlFor="avatar" className="cursor-pointer">
-                  <div className="bg-white mb-[1.9vh] mr-[1.9vh] md:mb-[2.2vh] md:mr-[2.2vh] rounded-full">
-                    <CiCirclePlus
-                      className="text-black "
-                      size="25"
-                      onChange={handleFileChange}
-                    />
+                <button
+                  onClick={() => {
+                    handleUpload();
+                    toggleDivVisibility();
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      display: "inline-block",
+                      width: "20vh",
+                      height: "20vh",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    className="bg-black rounded-full opacity-50 font-sans text-white text-lg font-medium"
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        display: "inline-block",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                      }}
+                    >
+                      save &nbsp;
+                      <CiSaveUp2
+                        className="text-white inline-block"
+                        size="22"
+                      />
+                    </div>
                   </div>
-
-                  <input
-                    type="file"
-                    id="avatar"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="inset-0 cursor-pointer bg-black hidden"
-                  />
-                </label>
+                </button>
               </div>
             )}
+            <div>
+              {isDivVisible && (
+                <div
+                  className=""
+                  style={{ position: "absolute", bottom: 0, right: 0 }}
+                >
+                  <label htmlFor="avatar" className="cursor-pointer">
+                    <div className="bg-slate-300 mb-[1.9vh] mr-[1.9vh] md:mb-[2.2vh] md:mr-[2.2vh] rounded-full">
+                      <CiCirclePlus
+                        className="text-black "
+                        size="25"
+                        onChange={handleFileChange}
+                      />
+                    </div>
+
+                    <input
+                      type="file"
+                      id="avatar"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="inset-0 cursor-pointer bg-black hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        </div>
-        {selectedFile && isDivVisible && (
-          <div
-            className="flex flex-col items-center justify-center m-5
-          animate-moveLeftAndRight"
-          >
-            <button
-              onClick={() => {
-                handleUpload();
-                toggleDivVisibility();
-              }}
-            >
-              <div className="inline-block font-sans text-black text-lg font-medium">
-                save &nbsp;
-              </div>
-              <CiSaveUp2 className="text-black inline-block" size="22" />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const Achievements = ({ Achievements }: { Achievements: string }) => {
-  return (
-    <div className="h-[10vh] mx-[10vw] m-[10vw]">
-      <div className="text-gray-900 text-lg  days left">
-        Your achievements :&nbsp;
-      </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
-        <div className=" days left font-sans"> {Achievements} </div>
-      </div>
-    </div>
-  );
-};
-
-const GameHistory = ({ games }: { games: string }) => {
-  return (
-    <div className="h-[10vh] mx-[10vw]">
-      <div className="text-lg  days lef font-sanst  text-gray-900">
-        Your games history :&nbsp;
-      </div>
-      <div className="flex items-center justify-center p-4 rounded-md font-sans text-gray-500">
-        <div className=" days left"> {games} </div>
       </div>
     </div>
   );
@@ -458,57 +451,79 @@ export const Sidebar = () => {
   return (
     <div className="relative custom-height bg-[#292D39] ">
       <div className="absolute buttom-0 left-0">
-        <div className=" custom-height fixed text-black flex flex-col justify-center items-center">
+        <div className=" custom-height fixed text-black ">
           <ul className="list-none text-center justify-center items-center w-[64px]">
-            <li>
-              <IoHome size="30" className="text-slate-400 mx-auto m-8" />
-            </li>
-            <li>
-              <Link
-                href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
-              >
-                <CgProfile size="30" className="text-slate-400 mx-auto m-8" />
-              </Link>
-            </li>
-            <li>
-              <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
-                <IoMdNotificationsOutline
-                  size="30"
-                  className="text-slate-400 mx-auto m-8"
-                />
-              </Link>
-            </li>
-            <li>
-              <MdLeaderboard size="30" className="text-slate-400 mx-auto m-8" />
-            </li>
-            <li>
-              <GrAchievement size="30" className="text-slate-400 mx-auto m-8" />
-            </li>
-            <li>
-              <FaUserFriends size="30" className="text-slate-400 mx-auto m-8" />
-            </li>
-            <li>
-              <GrGroup size="30" className="text-slate-400 mx-auto m-8" />
-            </li>
-            <li>
-              <IoChatbubblesOutline
-                size="30"
-                className="text-slate-400 mx-auto m-8"
-              />
-            </li>
-            <li>
-              <RiPingPongLine
-                size="30"
-                className="text-slate-400 mx-auto m-8"
-              />
-            </li>
-            <li>
-              <Link
-                href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
-              >
-                <CiLogout size="30" className="text-slate-400 mx-auto m-8" />
-              </Link>
-            </li>
+            <div className="flex flex-col justify-between custom-height">
+              <div className="">
+                <li>
+                  <IoHome size="30" className="text-slate-400 mx-auto m-8" />
+                </li>
+                <li>
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
+                  >
+                    <CgProfile
+                      size="30"
+                      className="text-slate-400 mx-auto m-8"
+                    />
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
+                    <IoMdNotificationsOutline
+                      size="30"
+                      className="text-slate-400 mx-auto m-8"
+                    />
+                  </Link>
+                </li>
+                <li>
+                  <MdLeaderboard
+                    size="30"
+                    className="text-slate-400 mx-auto m-8"
+                  />
+                </li>
+                <li>
+                  <GrAchievement
+                    size="30"
+                    className="text-slate-400 mx-auto m-8"
+                  />
+                </li>
+                <li>
+                  <FaUserFriends
+                    size="30"
+                    className="text-slate-400 mx-auto m-8"
+                  />
+                </li>
+                <li>
+                  <GrGroup size="30" className="text-slate-400 mx-auto m-8" />
+                </li>
+                <li>
+                  <IoChatbubblesOutline
+                    size="30"
+                    className="text-slate-400 mx-auto m-8"
+                  />
+                </li>
+                <li>
+                  <RiPingPongLine
+                    size="30"
+                    className="text-slate-400 mx-auto m-8"
+                  />
+                </li>
+              </div>
+
+              <div>
+                <li className="">
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
+                  >
+                    <CiLogout
+                      size="30"
+                      className="text-slate-400 mx-auto m-8"
+                    />
+                  </Link>
+                </li>
+              </div>
+            </div>
           </ul>
         </div>
       </div>
@@ -1065,7 +1080,7 @@ export default function Profile(params: any) {
   }
 
   return (
-    <div className=" h-screen w-screen bg-[#12141A]">
+    <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={isProfileOwner} />
 
       <div className="flex ">
@@ -1083,7 +1098,7 @@ export default function Profile(params: any) {
 
         <div className="flex-1 overflow-y-auto">
           <UserProfileImage src={IntraPic} intraId={intraId} />
-          <div className="p-10 md:mt-32 mt-10">
+          <div className={`${isDivVisible ? "mt-20" : "mt-16"} p-10`}>
             <UserDetailsCard value={Login} intraId={intraId} />
             <Friend
               isProfileOwner={isProfileOwner}
@@ -1094,17 +1109,6 @@ export default function Profile(params: any) {
             <ShowFriends login={Login} intraId={intraId} />
             <ShowPendingInvite login={Login} intraId={intraId} />
             <ShowFreindrequest login={Login} intraId={intraId} />
-
-            {/* <UserLevelCard value={level} intraId={intraId} />
-    <div className="flex flex-col items-center justify-center">
-      <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
-        <UserDescriptionCard title={"42"} content={"Friends"} />
-        <UserDescriptionCard title={"42"} content={"Wins"} />
-        <UserDescriptionCard title={"42"} content={"Loses"} />
-      </div>
-    </div>
-    <Achievements Achievements={"random achievement"} />
-    <GameHistory games={"random game"} /> */}
           </div>
         </div>
       </div>
