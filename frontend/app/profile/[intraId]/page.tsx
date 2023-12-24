@@ -17,6 +17,7 @@ import { CiSearch } from "react-icons/ci";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
 import pong from "../../../public/pong.svg";
+import onepeice from "../../../public/one.jpg";
 import { IoMenuOutline } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
 import { RiPingPongLine } from "react-icons/ri";
@@ -25,19 +26,31 @@ import { GrGroup } from "react-icons/gr";
 import { FaUserFriends } from "react-icons/fa";
 import { GrAchievement } from "react-icons/gr";
 import { MdLeaderboard } from "react-icons/md";
+import { FiUserPlus } from "react-icons/fi";
 import { IoHome } from "react-icons/io5";
-
+import { IoMdNotificationsOutline } from "react-icons/io";
+import { CgProfile } from "react-icons/cg";
 
 export function Loading() {
   return (
-    <div className="bg-[#DDE6ED] h-screen w-screen flex items-center justify-center">
+    <div className="bg-white h-screen w-screen flex items-center justify-center">
       <span className="loading loading-dots loading-lg"></span>
     </div>
   );
 }
 
 export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
-  const { isDivVisible, toggleDivVisibility } = useAppContext();
+  const {
+    user,
+    setUser,
+    isDivVisible,
+    toggleDivVisibility,
+    setDivVisible,
+    isSidebarVisible,
+    setisSidebarVisible,
+    toggleSidebarVisibleVisibility,
+  } = useAppContext();
+
   const [inputValue, setInputValue] = useState("");
 
   const handleSubmit = async (e: any) => {
@@ -72,7 +85,7 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
         <Image
           src={pong}
           alt="Description of the image"
-          property="true"
+          priority={true}
           width={100}
           height={100}
           sizes=""
@@ -85,13 +98,13 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
           <div className="flex-row flex justify-betweenh-16">
             <div className="flex-row flex justify-between">
               <div className="flex items-center p-3 md:hidden">
-                <button>
+                <button onClick={toggleSidebarVisibleVisibility}>
                   <IoMenuOutline size="30" className="text-white" />
                 </button>
               </div>
               <div className="flex items-center md:p-3">
                 <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
-                  <CiSearch size="30" className="text-green-600" />
+                  <CiSearch size="30" className="text-slate-400 " />
                 </Link>
               </div>
             </div>
@@ -218,7 +231,7 @@ const UserDetailsCard = ({
         className="flex items-center justify-center p-4
         rounded-md"
       >
-        <div className="text-2xl font-medium font-sans days left text-gray-900">
+        <div className="text-2xl font-medium font-sans days left text-white">
           {value}&nbsp;
         </div>
         {isDivVisible && (
@@ -226,13 +239,13 @@ const UserDetailsCard = ({
             &nbsp;
             <input
               type="text"
-              placeholder=" the new username "
+              placeholder=" the new login"
               value={newLoginInput}
               onChange={(e) => setNewLoginInput(e.target.value)}
               onKeyPress={handleKeyPress}
               className={`rounded-lg border-opacity-50 border-2 ${
                 newLoginInput !== "" ? "border-green-500" : "border-slate-300"
-              } bg-slate-50 text-sm outline-none text-black`}
+              } bg-[#1F212A] text-sm outline-none text-white`}
             />
             &nbsp;
             <button
@@ -313,8 +326,10 @@ const UserProfileImage = ({
   return (
     <div>
       <div className="flex flex-col items-center justify-center">
+        <div className="backgroundDiv md:h-80 h-48 flex justify-center">
+          
         <div
-          className="w-[25vh] h-[25vh]"
+          className="w-[20vh] h-[20vh] md:mt-36 mt-16"
           style={{ position: "relative", display: "inline-block" }}
         >
           {imagePreview && (
@@ -326,11 +341,9 @@ const UserProfileImage = ({
               priority={true}
               quality={100}
               className="rounded-full border-2 border-black"
-              style={{ width: "25vh", height: "25vh" }}
+              style={{ width: "20vh", height: "20vh" }}
               onError={(e: any) => {
-                e.target.onerror = null; // Prevent infinite loop if the fallback also fails
-                e.target.src =
-                  "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg"; // Provide a fallback avatar
+                e.target.onerror = null;
               }}
             />
           )}
@@ -342,7 +355,7 @@ const UserProfileImage = ({
                 style={{ position: "absolute", bottom: 0, right: 0 }}
               >
                 <label htmlFor="avatar" className="cursor-pointer">
-                  <div className="bg-white mb-[2.4vh] mr-[2.4vh] md:mb-[2.7vh] md:mr-[2.7vh] rounded-full">
+                  <div className="bg-white mb-[1.9vh] mr-[1.9vh] md:mb-[2.2vh] md:mr-[2.2vh] rounded-full">
                     <CiCirclePlus
                       className="text-black "
                       size="25"
@@ -361,6 +374,7 @@ const UserProfileImage = ({
               </div>
             )}
           </div>
+        </div>
         </div>
         {selectedFile && isDivVisible && (
           <div
@@ -411,39 +425,88 @@ const GameHistory = ({ games }: { games: string }) => {
   );
 };
 
-const Sidebar = () => {
-  return (
+export const Sidebar = () => {
+  const [user, setUser] = useState<User | null>(null);
 
-    <div className=" relative custom-height bg-[#292D39]">
-      <div className="absolute buttom-0 left-0 custom-height">
+  useEffect(() => {
+    const checkJwtCookie = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        var data: User = await response.json();
+
+        if (data !== null) {
+          setUser(data);
+        }
+      } catch (error: any) {
+        const msg = "Error during login" + error.message;
+        toast.error(msg);
+        console.error("Error during login:", error);
+      }
+    };
+    checkJwtCookie();
+  }, [user]);
+
+  return (
+    <div className="relative custom-height bg-[#292D39] ">
+      <div className="absolute buttom-0 left-0">
         <div className=" custom-height fixed text-black flex flex-col justify-center items-center">
-          <ul className="list-none text-center">
+          <ul className="list-none text-center justify-center items-center w-[64px]">
             <li>
-            <IoHome size="30" className="text-slate-400"/>
+              <IoHome size="30" className="text-slate-400 mx-auto m-8" />
             </li>
             <li>
-            <MdLeaderboard size="30" className="text-slate-400"/>
+              <Link
+                href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
+              >
+                <CgProfile size="30" className="text-slate-400 mx-auto m-8" />
+              </Link>
             </li>
             <li>
-            <GrAchievement size="30" className="text-slate-400"/>
+              <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
+                <IoMdNotificationsOutline
+                  size="30"
+                  className="text-slate-400 mx-auto m-8"
+                />
+              </Link>
             </li>
             <li>
-            <FaUserFriends size="30" className="text-slate-400"/>
+              <MdLeaderboard size="30" className="text-slate-400 mx-auto m-8" />
             </li>
             <li>
-            <GrGroup size="30" className="text-slate-400"/>
+              <GrAchievement size="30" className="text-slate-400 mx-auto m-8" />
             </li>
             <li>
-            <IoChatbubblesOutline  size="30" className="text-slate-400"/>
+              <FaUserFriends size="30" className="text-slate-400 mx-auto m-8" />
             </li>
             <li>
-              <RiPingPongLine size="30" className="text-slate-400"/>
+              <GrGroup size="30" className="text-slate-400 mx-auto m-8" />
+            </li>
+            <li>
+              <IoChatbubblesOutline
+                size="30"
+                className="text-slate-400 mx-auto m-8"
+              />
+            </li>
+            <li>
+              <RiPingPongLine
+                size="30"
+                className="text-slate-400 mx-auto m-8"
+              />
             </li>
             <li>
               <Link
                 href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
               >
-                <CiLogout size="30" className="text-slate-400" />
+                <CiLogout size="30" className="text-slate-400 mx-auto m-8" />
               </Link>
             </li>
           </ul>
@@ -517,15 +580,15 @@ const TwoFactorAuth = ({
         <div>
           <div className="flex flex-col items-center justify-center">
             <div>
-              <span className="label-text font-sans text-gray-800 text-base inline-block">
+              <span className="label-text font-sans text-white text-base inline-block">
                 Enable 2FA &nbsp;
               </span>
               <div className="inline-block">
                 <input
                   type="checkbox"
                   checked={isChecked}
-                  className="toggle [--tglbg:white] bg-slate-700 
-                 hover:bg-slate-600 border-bg-slate-800 "
+                  className="toggle [--tglbg:black] bg-white 
+                 hover:bg-slate-500 border-bg-slate-800 "
                   style={{ transform: "scale(0.9)", verticalAlign: "middle" }}
                   onChange={handleCheckboxChange}
                 />
@@ -583,9 +646,9 @@ const Friend = ({
   return (
     <div>
       {!isProfileOwner && (
-        <div className="flex items-center justify-center text-black">
+        <div className="flex items-center justify-center text-white">
           <button className="mx-2" onClick={addfriend}>
-            <TbFriends size="25" />
+            <FiUserPlus size="25" />
           </button>
           <button className="mx-2">
             <MdOutlineBlock size="25" />
@@ -649,7 +712,7 @@ const ShowFriends = ({
 
   return (
     <div>
-      <div className="text-slate-600 m-5">Your friends : </div>
+      <div className="text-white font-sans m-5">Your friends : </div>
 
       <div className="flex flex-row items-center justify-evenly">
         {friends &&
@@ -667,7 +730,7 @@ const ShowFriends = ({
                   />
                 </div>
               </div>
-              <div className="text-slate-600">{friend?.login}</div>
+              <div className="text-slate-100 font-sans ">{friend?.login}</div>
             </div>
           ))}
       </div>
@@ -719,7 +782,7 @@ const ShowPendingInvite = ({
 
   return (
     <div>
-      <div className="text-slate-600 m-5">Pending invitations : </div>
+      <div className="text-white font-sans m-5">Pending invitations : </div>
 
       <div className="flex flex-row items-center justify-evenly">
         {friends &&
@@ -737,7 +800,7 @@ const ShowPendingInvite = ({
                   />
                 </div>
               </div>
-              <div className="text-slate-600">{friend?.login}</div>
+              <div className="text-slate-100 font-sans">{friend?.login}</div>
             </div>
           ))}
       </div>
@@ -790,7 +853,7 @@ const ShowFreindrequest = ({
   return (
     <div>
       <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
-        <div className="text-slate-600 m-5">Freind request : </div>
+        <div className="text-white font-sans m-5">Freind request : </div>
 
         <div className="flex flex-row items-center justify-evenly">
           {friends &&
@@ -808,7 +871,7 @@ const ShowFreindrequest = ({
                     />
                   </div>
                 </div>
-                <div className="text-slate-600">{friend?.login}</div>
+                <div className="text-slate-100 font-sans">{friend?.login}</div>
               </div>
             ))}
         </div>
@@ -818,13 +881,25 @@ const ShowFreindrequest = ({
 };
 
 export default function Profile(params: any) {
-  const { user, setUser, isDivVisible, toggleDivVisibility, setDivVisible } =
-    useAppContext();
+  const {
+    user,
+    setUser,
+    isDivVisible,
+    toggleDivVisibility,
+    setDivVisible,
+    isSidebarVisible,
+    setisSidebarVisible,
+    toggleSidebarVisibleVisibility,
+  } = useAppContext();
 
   const [userFromRoutId, setuserFromRoutId] = useState<User | undefined>(
     undefined
   );
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
+
+  useEffect(() => {
+    setisSidebarVisible(window.innerWidth > 768);
+  }, []);
 
   const addLogin = (isRegistred: any) => {
     if (isRegistred === false && isProfileOwner === true) {
@@ -937,8 +1012,27 @@ export default function Profile(params: any) {
   if (!userFromRoutId) {
     return (
       <>
-        <Loading />
-        <Toaster />
+        <div className=" h-screen w-screen ">
+          <Navbar isProfileOwner={isProfileOwner} />
+
+          <div className="flex ">
+            {isSidebarVisible && (
+              <div className="w-16 custom-height ">
+                <div
+                  className={`transition-all duration-500 ease-in-out ${
+                    isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
+                  }`}
+                >
+                  <Sidebar />
+                </div>
+              </div>
+            )}
+            <div className="flex-1 overflow-y-auto">
+              <Loading />
+            </div>
+          </div>
+          <Toaster />
+        </div>
       </>
     );
   }
@@ -971,30 +1065,37 @@ export default function Profile(params: any) {
   }
 
   return (
-    <div className=" h-screen w-screen ">
+    <div className=" h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={isProfileOwner} />
 
       <div className="flex ">
-        <div className="w-16 custom-height ">
-          <Sidebar />
-        </div>
+        {isSidebarVisible && (
+          <div className="w-16 custom-height ">
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
+              }`}
+            >
+              <Sidebar />
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto">
-          <div className="p-10">
-
           <UserProfileImage src={IntraPic} intraId={intraId} />
+          <div className="p-10 md:mt-32 mt-10">
+            <UserDetailsCard value={Login} intraId={intraId} />
+            <Friend
+              isProfileOwner={isProfileOwner}
+              userId={user?.intraId}
+              friendId={params.params.intraId}
+            />
+            <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+            <ShowFriends login={Login} intraId={intraId} />
+            <ShowPendingInvite login={Login} intraId={intraId} />
+            <ShowFreindrequest login={Login} intraId={intraId} />
 
-          <UserDetailsCard value={Login} intraId={intraId} />
-          <Friend
-            isProfileOwner={isProfileOwner}
-            userId={user?.intraId}
-            friendId={params.params.intraId}
-          />
-          <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
-          <ShowFriends login={Login} intraId={intraId} />
-          <ShowPendingInvite login={Login} intraId={intraId} />
-          <ShowFreindrequest login={Login} intraId={intraId} />
-
-          {/* <UserLevelCard value={level} intraId={intraId} />
+            {/* <UserLevelCard value={level} intraId={intraId} />
     <div className="flex flex-col items-center justify-center">
       <div className="flex flex-row justify-items-center w-4/5 h-[100%]">
         <UserDescriptionCard title={"42"} content={"Friends"} />
@@ -1005,64 +1106,9 @@ export default function Profile(params: any) {
     <Achievements Achievements={"random achievement"} />
     <GameHistory games={"random game"} /> */}
           </div>
-
         </div>
       </div>
       <Toaster />
     </div>
   );
-}
-
-{
-  /* <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />
-              </svg>
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
-            >
-              <li>
-                <a>Leaderboard</a>
-              </li>
-              <li>
-                <a>Achievements</a>
-              </li>
-              <li>
-                <a>Friends</a>
-              </li>
-              <li>
-                <a>Channels</a>
-              </li>
-              <li>
-                <a>Play</a>
-              </li>
-              <br></br>
-              <li>
-                <Link
-                  href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
-                >
-                  Log out
-                </Link>
-              </li>
-            </ul>
-          </div> */
-}
-{
-  /* <a className="md:hidden btn btn-ghost text-xl text-slate-700  days left font-sans">
-            Profile
-          </a> */
 }

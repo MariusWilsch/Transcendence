@@ -22,3 +22,11 @@ body {
 .custom-height {
   height: calc(100vh - 64px);
 }
+
+.backgroundDiv {
+  background-image: url('../public/one.jpg'); /* Adjust the path */
+  background-size: cover; /* Cover the entire div */
+  background-position: center; /* Center the background image */
+  /* height: 100vh; */
+  width: calc(100vw - 64px);
+}

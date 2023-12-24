@@ -18,6 +18,9 @@ type AppContextProps = {
   setDivVisible: (isDivVisible : boolean ) => void;
   user: User | null;
   setUser: (user: User | null) => void;
+  isSidebarVisible: boolean;
+  setisSidebarVisible: (isSidebarVisible : boolean ) => void;
+  toggleSidebarVisibleVisibility: () => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -29,9 +32,14 @@ type AppProviderProps = {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isDivVisible, setDivVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isSidebarVisible, setisSidebarVisible] = useState<boolean>(true);
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);
+  };
+
+  const toggleSidebarVisibleVisibility = () => {
+    setisSidebarVisible((prev) => !prev);
   };
 
   const contextValue: AppContextProps = {
@@ -40,6 +48,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setDivVisible,
     user,
     setUser,
+    isSidebarVisible,
+    setisSidebarVisible,
+    toggleSidebarVisibleVisibility,
   };
 
   return (

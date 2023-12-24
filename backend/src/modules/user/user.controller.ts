@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -167,12 +168,12 @@ export class UserController {
     try {
       const { userId, friendId } = body;
       const isFriend = await this.userService.createFriend(userId, friendId);
+
       if (isFriend === 'alreadyFriend') {
-        return res.json({ success: true , isFriend: true});
+        return res.json({ success: true, isFriend: true });
       } else {
-        return res.json({ success: false , isFriend: false});
+        return res.json({ success: true, isFriend: false });
       }
-      return res.json({ success: true });
     } catch (error: any) {
       console.error('Error addfriend:', error);
       return res.json({ success: false });
@@ -229,9 +230,39 @@ export class UserController {
   // @UseGuards(JwtAuthGuard)
   async acceptFriendRequest(
     @Param('userId') userId: string,
-    @Param('friendId') friendId: string
+    @Param('friendId') friendId: string,
+    @Res() res: any
   ) {
-    const acceptFriendRequest = await this.userService.acceptFriendRequest(userId, friendId);
-    return acceptFriendRequest;
+    try{
+
+      const acceptFriendRequest = await this.userService.acceptFriendRequest(
+        userId,
+        friendId
+        );
+        return res.json({ success: true });
+      } catch (error: any) {
+        console.error('Error accept Friend Request:', error);
+        return res.json({ success: false });
+      }
+  }
+
+  @Delete('/:userId/declineFriend/:friendId')
+  // @UseGuards(JwtAuthGuard)
+  async declineFriendRequest(
+    @Param('userId') userId: string,
+    @Param('friendId') friendId: string,
+    @Res() res: any
+  ) {
+    try{
+
+      const declineFriendRequest = await this.userService.declineFriendRequest(
+        userId,
+        friendId
+        );
+        return res.json({ success: true });
+      } catch (error: any) {
+        console.error('Error decline Friend Request:', error);
+        return res.json({ success: false });
+      }
   }
 }

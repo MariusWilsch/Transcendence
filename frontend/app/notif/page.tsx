@@ -9,11 +9,33 @@ import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import toast, { Toaster } from "react-hot-toast";
-import { Navbar } from "../profile/[intraId]/page";
+import { Navbar, Sidebar } from "../profile/[intraId]/page";
+import { FiCheckCircle } from "react-icons/fi";
+import { FiXCircle } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 export default function Search() {
+  const router = useRouter();
+
+  const [Change, setChange] = useState<boolean>(false);
+  const togleChange = () => {
+    setChange((prev) => !prev);
+  };
+
   const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
+  const {
+    isDivVisible,
+    toggleDivVisibility,
+    setDivVisible,
+    isSidebarVisible,
+    setisSidebarVisible,
+    toggleSidebarVisibleVisibility,
+  } = useAppContext();
+
+  useEffect(() => {
+    setisSidebarVisible(window.innerWidth > 768);
+  }, []);
 
   useEffect(() => {
     const checkJwtCookie = async () => {
@@ -74,7 +96,7 @@ export default function Search() {
       }
     };
     getFriends();
-  }, [user]);
+  }, [user, Change]);
 
   const acceptFriendRequest = async (
     userId: string | undefined,
@@ -92,66 +114,141 @@ export default function Search() {
         }
       );
       const data = await response.json();
-      console.log(data);
+
       if (data.success === false) {
         const msg = "Error accepting friend request";
         toast.error(msg);
         console.log(msg);
+        togleChange();
       }
       if (data.success === true) {
         const msg = "Friend request accepted";
         toast.success(msg);
         console.log(msg);
+        togleChange();
+      }
+    }
+  };
+
+  const declineFriendRequest = async (
+    userId: string | undefined,
+    friendId: string
+  ) => {
+    if (userId !== undefined) {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${userId}/declineFriend/${friendId}`,
+        {
+          method: "delete",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+      if (data.success === false) {
+        const msg = "Error declining friend request";
+        toast.error(msg);
+        console.log(msg);
+        togleChange();
+      }
+      if (data.success === true) {
+        const msg = "Friend request declined";
+        toast.success(msg);
+        console.log(msg);
+        togleChange();
       }
     }
   };
 
   return (
     <div className="h-screen w-screen ">
-      <Navbar isProfileOwner={false} />
+      <Toaster />
+      <div className=" h-screen w-screen ">
+        <Navbar isProfileOwner={false} />
 
-      <div className="mt-4">
-        {friends &&
-          friends?.map((friend) => (
-            <div key={friend.intraId} className=" p-2 mb-2">
-              <div className="max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
-                <div className="flex-1 w-0 p-4">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 pt-0.5">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={friend.Avatar}
-                        alt=""
-                      />
-                    </div>
-                    <div className="ml-3 f">
-                      <p className="text-md font-medium text-gray-900">
-                        {friend.login}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex border-l border-gray-200 bg-green-200">
-                  <button
-                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    onClick={() =>
-                      acceptFriendRequest(user?.intraId, friend.intraId)
-                    }
-                  >
-                    accept
-                  </button>
-                </div>
-                <div className="flex border-l border-gray-200 bg-red-200">
-                  <button className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    decline
-                  </button>
-                </div>
+        <div className="flex ">
+          {isSidebarVisible && (
+            <div className="w-16 custom-height ">
+              <div
+                className={`transition-all duration-500 ease-in-out ${
+                  isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
+                }`}
+              >
+                <Sidebar />
               </div>
             </div>
-          ))}
-      </div>
+          )}
 
-      <Toaster />
+          <div className="flex-1 overflow-y-auto bg-[#12141A] custom-height">
+            <div className="p-10 ">
+              <div className="">
+                <div className="mb-5 text-white font-sans">Notifications </div>
+                <div className="border-b border-gray-500 my-4 mb-10"></div>
+
+                {friends &&
+                  friends?.map((friend) => (
+                    <div
+                      key={friend.intraId}
+                      className=" p-2 mb-2 flex justify-center"
+                    >
+                      <div className="max-w-md w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                        <div className="max-w-md w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                          <div className="flex-1 w-0 p-4">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 pt-0.5">
+                                <img
+                                  className="h-10 w-10 rounded-full"
+                                  src={friend.Avatar}
+                                  alt=""
+                                />
+                              </div>
+                              <div className="ml-3 f">
+                                <p className="text-md font-sans text-white">
+                                  {friend.login}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex ">
+                            <button
+                              className="w-full flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 "
+                              onClick={() =>
+                                acceptFriendRequest(
+                                  user?.intraId,
+                                  friend.intraId
+                                )
+                              }
+                            >
+                              <FiCheckCircle
+                                size="30"
+                                className="text-green-300"
+                              />
+                            </button>
+                          </div>
+                          <div className="flex ">
+                            <button
+                              className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+                              onClick={() =>
+                                declineFriendRequest(
+                                  user?.intraId,
+                                  friend.intraId
+                                )
+                              }
+                            >
+                              <FiXCircle size="30" className="text-red-300" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

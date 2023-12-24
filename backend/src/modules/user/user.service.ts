@@ -121,7 +121,9 @@ export class UserService {
       },
     })
     if (ifTheFriendshipExists)
+    {
       return 'alreadyFriend';
+    }
     
     const friend = await prisma.friend.create({
       data: {
@@ -195,6 +197,23 @@ export class UserService {
       return friend;
     } catch (error: any) {
       console.error('Error accept Friend Request:', error);
+      return;
+    }
+  }
+
+  async declineFriendRequest(userId: string, friendId: string) {
+    try {
+      const friend = await prisma.friend.delete({
+        where: {
+          unique_user_friend: {
+            userId: friendId,
+            friendId: userId,
+          },
+        },
+      });
+      return friend;
+    } catch (error: any) {
+      console.error('Error decline Friend Request:', error);
       return;
     }
   }
