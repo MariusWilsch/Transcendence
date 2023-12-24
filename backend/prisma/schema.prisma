@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  intraId        String    @unique
+  intraId        String    @unique @id
   fullname       String    @unique
   login          String    @unique
   email          String    @unique
@@ -23,6 +23,7 @@ model User {
   updated_at     DateTime  @updatedAt
   sentMessages   Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+  privateRooms             PrivateRoom[]
 }
 
 model Message {
@@ -33,8 +34,17 @@ model Message {
   createdAt      DateTime  @default(now())
   senderUser     User      @relation("SentMessages", fields: [sender], references: [intraId])
   recipientUser  User      @relation("ReceivedMessages", fields: [recipient], references: [intraId])
+  PrivateRoom    PrivateRoom[]
 }
 
+model PrivateRoom{
+  id            Int       @id @default(autoincrement())
+  name         String
+  participantsIds String[]
+  participants User[]
+  messages     Message[]
+  
+}
 model Tfa {
   user           User      @relation(fields: [intraId], references: [intraId])
   intraId        String    @unique
