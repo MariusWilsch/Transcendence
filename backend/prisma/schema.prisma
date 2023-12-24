@@ -16,9 +16,11 @@ model User {
   login          String    @unique
   email          String    @unique
   Avatar         String?
-  isTfaAuth      Boolean   @default(false)
+  isRegistred    Boolean   @default(false)
   isTfaEnabled   Boolean   @default(false)
   tfa            Tfa?
+  friends        Friend[]  @relation("userFriends")
+  user           Friend[]  @relation("friendsUser") 
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
   sentMessages   Message[] @relation("SentMessages")
@@ -50,4 +52,20 @@ model Tfa {
   intraId        String    @unique
   otp            String    @unique
   created_at     DateTime  @default(now())
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+model Friend {
+  friendshipStatus FriendStatus
+  user             User         @relation("userFriends", fields: [userId], references: [intraId])
+  userId           String
+  friend           User         @relation("friendsUser", fields: [friendId], references: [intraId])
+  friendId         String
+  created_at       DateTime     @default(now())
+  @@unique([userId, friendId], name: "unique_user_friend")
 }

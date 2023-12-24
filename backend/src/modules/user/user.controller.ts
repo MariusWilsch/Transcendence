@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Req,
   Res,
   UploadedFile,
@@ -27,16 +29,20 @@ export class UserController {
   ) {}
 
   @Get()
-  async getAllUsers(): Promise<User[] | undefined> {
-    return this.userService.getAllUsers();
+  async getAllUsers(@Res() res: any): Promise<User[] | undefined> {
+    const data = await this.userService.getAllUsers();
+    res.json(data);
+    return data;
   }
 
   @Get(':id')
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
-    return this.userService.getUserbyId(id);
+    const data = await this.userService.getUserbyId(id);
+    return data;
   }
 
   @Post(':id/login')
+  @UseGuards(JwtAuthGuard)
   async editlogin(
     @Param('id') userId: string,
     @Body() body: { newLogin: string },
@@ -45,7 +51,7 @@ export class UserController {
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
-        return { error: 'User not found', message: 'User not found' };
+        return res.json({ success: false });
       }
 
       const uniqueLogin = await this.userService.uniqueLogin(body.newLogin);
@@ -55,6 +61,7 @@ export class UserController {
       await this.userService.updateLogin(userId, body.newLogin);
       return res.json({ success: true });
     } catch (error: any) {
+      console.error('Error login ', error);
       return res.json({ success: false });
     }
   }
@@ -79,6 +86,7 @@ export class UserController {
         });
 
         res.cookie('jwt', jwt);
+        res.clearCookie('id');
         return res.json({ sucess: true });
       } else {
         return res.json({ sucess: false });
@@ -124,36 +132,137 @@ export class UserController {
   }
 
   @Post(':id/avatar')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async editavatar(
     @Param('id') userId: string,
-    @UploadedFile() avatar: Express.Multer.File
+    @UploadedFile() avatar: Express.Multer.File,
+    @Res() res: any
   ) {
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
-        return { error: 'User not found', message: 'User not found' };
+        return res.json({ success: false });
       }
       if (!avatar) {
-        return {
-          error: "Avatar can't be empty",
-          message: "Avatar can't be empty",
-        };
+        return res.json({ success: false });
       }
 
       const avatarFilename = avatar.filename;
       const avatarUrl = `${URL}:3001/${avatarFilename}`;
 
       await this.userService.updateAvatar(userId, avatarUrl);
-
-      return {
-        success: true,
-        message: 'Avatar updated successfully',
-        avatarFilename,
-        avatarUrl,
-      };
+      return res.json({ success: true });
     } catch (error: any) {
-      return { error: 'Failed to update Avatar', message: error.message };
+      console.error('Error avatar:', error);
+      return res.json({ success: false });
     }
+  }
+
+  @Post('addfriend')
+  // @UseGuards(JwtAuthGuard)
+  async addfriend(
+    @Body() body: { userId: string; friendId: string },
+    @Res() res: any
+  ) {
+    try {
+      const { userId, friendId } = body;
+      const isFriend = await this.userService.createFriend(userId, friendId);
+
+      if (isFriend === 'alreadyFriend') {
+        return res.json({ success: true, isFriend: true });
+      } else {
+        return res.json({ success: true, isFriend: false });
+      }
+    } catch (error: any) {
+      console.error('Error addfriend:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Get(':id/friends')
+  // @UseGuards(JwtAuthGuard)
+  async getFriends(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const friends = await this.userService.getFriends(userId);
+      return res.json({ success: true, friends });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Get(':id/PendingInvite')
+  // @UseGuards(JwtAuthGuard)
+  async PendingInvite(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const PendingInvite = await this.userService.PendingInvite(userId);
+      const friendIds = PendingInvite.map((item) => item.friendId);
+      const friendsDetails = await Promise.all(
+        friendIds.map((id) => this.userService.getUserbyId(id))
+      );
+
+      return res.json({ success: true, friendsDetails });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Get(':id/freindrequest')
+  // @UseGuards(JwtAuthGuard)
+  async freindrequest(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const freindrequest = await this.userService.freindrequest(userId);
+      const friendIds = freindrequest.map((item) => item.userId);
+      const friendsDetails = await Promise.all(
+        friendIds.map((id) => this.userService.getUserbyId(id))
+      );
+
+      return res.json({ success: true, friendsDetails });
+    } catch (error: any) {
+      console.error('Error getFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Put('/:userId/acceptFriend/:friendId')
+  // @UseGuards(JwtAuthGuard)
+  async acceptFriendRequest(
+    @Param('userId') userId: string,
+    @Param('friendId') friendId: string,
+    @Res() res: any
+  ) {
+    try{
+
+      const acceptFriendRequest = await this.userService.acceptFriendRequest(
+        userId,
+        friendId
+        );
+        return res.json({ success: true });
+      } catch (error: any) {
+        console.error('Error accept Friend Request:', error);
+        return res.json({ success: false });
+      }
+  }
+
+  @Delete('/:userId/declineFriend/:friendId')
+  // @UseGuards(JwtAuthGuard)
+  async declineFriendRequest(
+    @Param('userId') userId: string,
+    @Param('friendId') friendId: string,
+    @Res() res: any
+  ) {
+    try{
+
+      const declineFriendRequest = await this.userService.declineFriendRequest(
+        userId,
+        friendId
+        );
+        return res.json({ success: true });
+      } catch (error: any) {
+        console.error('Error decline Friend Request:', error);
+        return res.json({ success: false });
+      }
   }
 }

@@ -13,7 +13,7 @@ type User = {
   login: string;
   email: string;
   Avatar: string;
-  isTfaAuth: Boolean;
+  isRegistred: Boolean;
   isTfaEnabled: Boolean;
   created_at: Date;
   updated_at: Date;
@@ -35,8 +35,8 @@ export class AuthService {
       login: user.username,
       email: user.email,
       Avatar: user.Avatar,
-      isTfaAuth: false,
-      isTfaEnabled: true,
+      isRegistred: false,
+      isTfaEnabled: false,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -80,18 +80,12 @@ export class AuthService {
 
     const otpcode = otp;
     await this.Email2FAService.sendEmail(user.email, user.login, otp);
-
     const hash = await this.hashCode(otpcode);
-    // save the otp in the db
-
     const userIntraId = user.intraId;
-
-    // Find the existing Tfa entry for the user
     const existingTfa = await prisma.tfa.findUnique({
       where: { intraId: userIntraId },
     });
 
-    // Update the existing Tfa entry or create a new one
     if (existingTfa) {
       await prisma.tfa.update({
         where: { intraId: existingTfa.intraId },
@@ -105,11 +99,6 @@ export class AuthService {
         },
       });
     }
-
-    // Send the secret to the user (usually via email)
-    // ...
-
-    // return { secret };
   }
 
   async verifyOtp(id: string, otp: string): Promise<boolean> {
@@ -123,23 +112,22 @@ export class AuthService {
         where: { intraId: id },
       });
 
-
       await prisma.user.update({
         where: { intraId: id },
-        data: { isTfaAuth: true },
+        data: { isRegistred: true },
       });
       return true;
     }
-        return false;
+    return false;
   }
 
-  async enableOtp(userId : string) : Promise<boolean>{
+  async enableOtp(userId: string): Promise<boolean> {
     try {
       await prisma.user.update({
         where: { intraId: userId },
         data: { isTfaEnabled: true },
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error enabling otp:', error);
@@ -147,7 +135,7 @@ export class AuthService {
     }
   }
 
-  async disableOtp(userId : string) : Promise<boolean>{
+  async disableOtp(userId: string): Promise<boolean> {
     try {
       await prisma.user.update({
         where: { intraId: userId },
@@ -170,6 +158,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(code, hashedCode);
     return isMatch;
   }
+
 
 }
 
