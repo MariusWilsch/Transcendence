@@ -36,7 +36,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${client.id}`);
     this.connectedClients.delete(client.id);
   }
-  
+
+  @SubscribeMessage('createPrivateRoom')
+  async createPrivRoom(payload:{user1:string, user2:string}): Promise<void>{
+    await this.prismaService.createPrivateRoom(payload.user1, payload.user2);
+    console.log(`room named ${payload.user1+payload.user2} is created`);
+  }
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.connectedClients.get(payload.to);

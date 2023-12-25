@@ -3,8 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import io from 'socket.io-client';
-import PrivateRoom from './privateRoom/page';
-import Link from 'next/link';
 
 var data: User;
 interface Message {
@@ -21,10 +19,36 @@ type User = {
   created_at: Date;
   updated_at: Date;
 };
-const Conversations = () => {
+
+const ConversationCard = ({ user }: any, {lastMessage}:any) => {
+  console.log(lastMessage);
   return (
-    <div className="border w-1/5">
+    <div className="flex items-center p-2 my-1 border-4">
+      <div className="flex  flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+        <div><span>{user?.login}</span></div>
+        <div><span>{lastMessage}</span></div>
+      </div>
+      <Image width={56} height={56} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="My profile" className="rounded-full order-1" />
+    </div>
+  );
+} 
+const Conversations = ({user}:any) => {
+ 
+  return (
+    <div className="border w-1/5 flex flex-col ">
       <h1>Conversations</h1>
+      <div>
+        <ul>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+        </ul>
+      </div>
     </div>
   );
 };
@@ -108,13 +132,12 @@ const Messages = () => {
 }
 const ProfileInfo = () => {
   return (
-    <div className="border w-1/5">
+    <div className="border w-1/5 xl:hidden">
       <h1>Profile Info</h1>
     </div>
   );
 }
 const Chat = () => {
-  const
   const [socket, setSocket] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const [recipientUserId, setRecipientLogin] = useState('130555');
@@ -198,9 +221,9 @@ const Chat = () => {
     //   </div>
     // </div>
     <div className="flex border-4 h-screen">
-      <Conversations />
+      <Conversations user={userData} />
       {/* <Messages></Messages> */}
-      {/* <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
+      <div className="flex-1 p:2  md:hidden lg:flex sm:p-6 justify-between flex flex-col h-screen">
         <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
           <div className="relative flex items-center space-x-4">
             <div className="relative">
@@ -238,17 +261,6 @@ const Chat = () => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                 </svg>
               </button>
-              <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-              </button>
-              <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </button>
               <button type="button" onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
                 <span className="font-bold">Send</span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
@@ -258,11 +270,8 @@ const Chat = () => {
             </div>
           </div>
         </div>
-      </div> */}
-      <Link href={`/${privateRoom.id}`}>
-      <PrivateRoom />
-      </Link>
-      <ProfileInfo></ProfileInfo>
+      </div>
+      {/* <ProfileInfo></ProfileInfo> */}
     </div>
   );
 };

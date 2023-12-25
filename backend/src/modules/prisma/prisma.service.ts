@@ -17,12 +17,28 @@ export class PrismaService {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
     }
-  
+
     await this.prisma.message.create({
       data: {
         sender,
         recipient,
         content,
+      },
+    });
+  }
+
+  async createPrivateRoom(user1: string, user2: string): Promise<void> {
+    const member1 = await this.prisma.user.findUnique({ where: { intraId: user1 } });
+    const member2 = await this.prisma.user.findUnique({ where: { intraId: user2 } });
+    if (!member1 || !member2) {
+      // Handle the case where either sender or recipient does not exist
+      throw new Error('Sender or recipient not found.');
+    }
+    const romeName  = member1.intraId > member2.intraId ? member1.intraId + member2.intraId :member2.intraId + member1.intraId;
+    await this.prisma.privateRoom.create({
+      data: {
+        name:romeName,
+        participantsIds:[member1.intraId, member2.intraId],
       },
     });
   }
@@ -57,7 +73,7 @@ export class PrismaService {
   async getAllUsers(): Promise<any[]> {
     return this.prisma.user.findMany();
   }
-  
+
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
   }

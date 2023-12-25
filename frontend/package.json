@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mantine/core": "^7.3.2",
+    "@mantine/hooks": "^7.3.2",
+    "@mantine/nprogress": "^7.3.2",
     "jose": "^5.1.3",
     "jsonwebtoken": "^9.0.2",
     "next": "^14.0.3",
