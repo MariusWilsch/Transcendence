@@ -14,7 +14,7 @@ import { BiMessageRounded } from "react-icons/bi";
 import { IoGameControllerOutline } from "react-icons/io5";
 import toast, { Toaster } from "react-hot-toast";
 import { CiSearch } from "react-icons/ci";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, redirect, useRouter } from "next/navigation";
 import pong from "../../../public/pong.svg";
 import { IoMenuOutline } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
@@ -51,26 +51,12 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
   } = useAppContext();
 
   const [inputValue, setInputValue] = useState("");
-
   const router = useRouter();
-  // router.push("http://localhost:3000/search?ssearch=imad");
 
   const handleSubmit = async () => {
-    // try {
-    //   const queryParams = new URLSearchParams({ searchTerm: inputValue }).toString();
-    //   const url = `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?${queryParams}`;
-    //   const response = await fetch(url, {
-    //     method: "GET",
-    //     headers: {
-    //       "Accept": "application/json",  // Changed to Accept since we're expecting JSON response
-    //     },
-    //     credentials: "include",
-    //   });
-    //   // Process your response here
-    //   // Example: const responseData = await response.json();
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // }
+    return router.push(
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?searchTerm=${inputValue}`
+    );
   };
 
   return (
@@ -479,10 +465,10 @@ export const Sidebar = () => {
 
   return (
     <div className="relative custom-height bg-[#292D39] ">
-      <div className="absolute buttom-0 left-0">
-        <div className=" custom-height fixed text-black ">
-          <ul className="list-none text-center justify-center items-center w-[64px]">
-            <div className="flex flex-col justify-between custom-height">
+      <div className="absolute buttom-0 left-0 bg-[#292D39]">
+        <div className=" custom-height fixed text-black bg-[#292D39]">
+          <ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
+            <div className="flex flex-col justify-between custom-height bg-[#292D39]">
               <div className="">
                 <li>
                   <IoHome

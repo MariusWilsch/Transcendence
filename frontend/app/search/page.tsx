@@ -35,49 +35,52 @@ export default function Search(params: any) {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    // const ssearchTerm = params.searchParams.ssearch;
-    // console.log("ssearchTerm", ssearchTerm);
-    // console.log("params: ", params);
+    const searchTerm = params.searchParams.query;
+    console.log("searchTerm: ", searchTerm);
 
-    const handleSearchQuery = async (ssearchTerm: string) => {
+    const handleSearchQuery = async (searchTerm: string) => {
       if (
-        ssearchTerm === "" ||
-        ssearchTerm === undefined ||
-        ssearchTerm === null ||
-        ssearchTerm === " "
+        searchTerm === "" ||
+        searchTerm === undefined ||
+        searchTerm === null ||
+        searchTerm === " "
       ) {
         return;
       }
 
-      // try {
-      //   const data = {
-      //     searchTerm: ssearchTerm,
-      //   };
+      try {
+        const data = {
+          searchTerm: searchTerm,
+        };
 
-      //   const response = await fetch(
-      //     `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       credentials: "include",
-      //       body: JSON.stringify(data),
-      //     }
-      //   );
-      //   if (!response.ok) {
-      //     toast.error("User not found");
-      //     return;
-      //   }
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+          }
+        );
+        if (!response.ok) {
+          toast.error("User not found");
+          return;
+        }
 
-      //   const users: User[] = await response.json();
-      //   setUsers(users);
-      // } catch (error) {
-      //   console.error("Error:", error);
-      // }
+        
+        const users: User[] = await response.json();
+        console.log("users: ", users);
 
-      handleSearchQuery("ssearchTerm");
+
+        setUsers(users);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+
     };
+    handleSearchQuery(searchTerm);
   }, []);
 
   const handleSubmit = async (e: any) => {

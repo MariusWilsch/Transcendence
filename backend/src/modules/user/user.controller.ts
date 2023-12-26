@@ -49,13 +49,13 @@ export class UserController {
     return data;
   }
 
-  // @Get('search')
-  // // @Redirect('http://localhost:3000/search?query')
-  // async search(@Res() res, @Query('searchTerm') searchTerm: string) {
-  //   console.log('searchTerm', encodeURIComponent(searchTerm));
-  //   const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(searchTerm)}`;
-  //   return res.redirect(targetURL);
-  // }
+  @Get('search')
+  async search(@Res() res, @Query('searchTerm') searchTerm: string) {
+    const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(
+      searchTerm
+    )}`;
+    return res.redirect(targetURL);
+  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
