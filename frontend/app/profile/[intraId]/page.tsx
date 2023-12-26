@@ -14,10 +14,8 @@ import { BiMessageRounded } from "react-icons/bi";
 import { IoGameControllerOutline } from "react-icons/io5";
 import toast, { Toaster } from "react-hot-toast";
 import { CiSearch } from "react-icons/ci";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 import pong from "../../../public/pong.svg";
-import onepeice from "../../../public/one.jpg";
 import { IoMenuOutline } from "react-icons/io5";
 import { CiLogout } from "react-icons/ci";
 import { RiPingPongLine } from "react-icons/ri";
@@ -30,6 +28,7 @@ import { FiUserPlus } from "react-icons/fi";
 import { IoHome } from "react-icons/io5";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { CgProfile } from "react-icons/cg";
+import { usePathname } from "next/navigation";
 
 export function Loading() {
   return (
@@ -53,30 +52,25 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
 
   const [inputValue, setInputValue] = useState("");
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok) {
-        toast.error("User not found");
-        console.log("User not found");
-        return;
-      }
+  const router = useRouter();
+  // router.push("http://localhost:3000/search?ssearch=imad");
 
-      const users: User[] = await response.json();
-      console.log(users);
-    } catch (error) {
-      console.error("Error:", error);
-    }
+  const handleSubmit = async () => {
+    // try {
+    //   const queryParams = new URLSearchParams({ searchTerm: inputValue }).toString();
+    //   const url = `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?${queryParams}`;
+    //   const response = await fetch(url, {
+    //     method: "GET",
+    //     headers: {
+    //       "Accept": "application/json",  // Changed to Accept since we're expecting JSON response
+    //     },
+    //     credentials: "include",
+    //   });
+    //   // Process your response here
+    //   // Example: const responseData = await response.json();
+    // } catch (error) {
+    //   console.error("Error:", error);
+    // }
   };
 
   return (
@@ -95,7 +89,7 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
 
       <div className="flex-grow">
         <div className="">
-          <div className="flex-row flex justify-betweenh-16">
+          <div className="flex-row flex">
             <div className="flex-row flex justify-between">
               <div className="flex items-center p-3 md:hidden">
                 <button onClick={toggleSidebarVisibleVisibility}>
@@ -106,6 +100,22 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
                 <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
                   <CiSearch size="30" className="text-slate-400 " />
                 </Link>
+                <div className="md:inline-block hidden">
+                  <form className="" onSubmit={handleSubmit}>
+                    <label className="">
+                      <input
+                        type="text"
+                        value={inputValue}
+                        placeholder="  Search ..."
+                        onChange={(e) => {
+                          setInputValue(e.target.value);
+                          // handleSubmit(e);
+                        }}
+                        className=" bg-[#1E2028] items-center justify-center p-2 rounded-lg text-sm outline-none text-white"
+                      />
+                    </label>
+                  </form>
+                </div>
               </div>
             </div>
             <div className="flex justify-end p-4 flex-grow">
@@ -203,7 +213,7 @@ const UserDetailsCard = ({
   };
 
   return (
-    <div className="flex items-center justify-center h-[7vh] ">
+    <div className="flex items-center justify-center">
       <div
         className="flex items-center justify-center p-4
         rounded-md"
@@ -232,7 +242,10 @@ const UserDetailsCard = ({
               }}
               className=""
             >
-              <CiSaveUp2 className="text-slate-400 inline-block" size="24" />
+              <CiSaveUp2
+                className="md:hidden text-slate-400 inline-block"
+                size="24"
+              />
             </button>
           </div>
         )}
@@ -331,7 +344,13 @@ const UserProfileImage = ({
                 priority={true}
                 quality={100}
                 className="rounded-full border-2 border-black"
-                style={{ width: "20vh", height: "20vh" }}
+                style={{
+                  width: "20vh",
+                  height: "20vh",
+
+                  minWidth: "10vw",
+                  minHeight: "10vw",
+                }}
                 onError={(e: any) => {
                   e.target.onerror = null;
                 }}
@@ -344,6 +363,8 @@ const UserProfileImage = ({
                   display: "inline-block",
                   width: "20vh",
                   height: "20vh",
+                  minWidth: "10vw",
+                  minHeight: "10vw",
                 }}
                 className="top-0 left-0 flex flex-col items-center justify-center rounded-full
                 animate-moveLeftAndRight"
@@ -360,6 +381,9 @@ const UserProfileImage = ({
                       display: "inline-block",
                       width: "20vh",
                       height: "20vh",
+                      minWidth: "10vw",
+                      minHeight: "10vw",
+
                       top: "50%",
                       left: "50%",
                       transform: "translate(-50%, -50%)",
@@ -385,12 +409,12 @@ const UserProfileImage = ({
                 </button>
               </div>
             )}
-            <div>
+            <div
+              className="mb-[4.5vh] mr-[4.5vh] md:mb-[4.2vh] md:mr-[4.2vh]"
+              style={{ position: "absolute", bottom: 0, right: 0 }}
+            >
               {isDivVisible && (
-                <div
-                  className=""
-                  style={{ position: "absolute", bottom: 0, right: 0 }}
-                >
+                <div className="absolute">
                   <label htmlFor="avatar" className="cursor-pointer">
                     <div className="bg-slate-300 mb-[1.9vh] mr-[1.9vh] md:mb-[2.2vh] md:mr-[2.2vh] rounded-full">
                       <CiCirclePlus
@@ -421,6 +445,14 @@ const UserProfileImage = ({
 export const Sidebar = () => {
   const [user, setUser] = useState<User | null>(null);
 
+  const [RouterName, setRouterName] = useState("profile");
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const segments = pathname.split("/");
+    setRouterName(segments[1]);
+  }, [pathname]);
+
   useEffect(() => {
     const checkJwtCookie = async () => {
       try {
@@ -428,9 +460,6 @@ export const Sidebar = () => {
           `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           }
         );
@@ -446,7 +475,7 @@ export const Sidebar = () => {
       }
     };
     checkJwtCookie();
-  }, [user]);
+  }, []);
 
   return (
     <div className="relative custom-height bg-[#292D39] ">
@@ -456,7 +485,12 @@ export const Sidebar = () => {
             <div className="flex flex-col justify-between custom-height">
               <div className="">
                 <li>
-                  <IoHome size="30" className="text-slate-400 mx-auto m-8" />
+                  <IoHome
+                    size="30"
+                    className={`${
+                      RouterName === "home" ? "text-slate-50" : "text-slate-400"
+                    } mx-auto m-8`}
+                  />
                 </li>
                 <li>
                   <Link
@@ -464,7 +498,11 @@ export const Sidebar = () => {
                   >
                     <CgProfile
                       size="30"
-                      className="text-slate-400 mx-auto m-8"
+                      className={`${
+                        RouterName === "profile"
+                          ? "text-slate-50"
+                          : "text-slate-400"
+                      } mx-auto m-8`}
                     />
                   </Link>
                 </li>
@@ -472,41 +510,72 @@ export const Sidebar = () => {
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
                     <IoMdNotificationsOutline
                       size="30"
-                      className="text-slate-400 mx-auto m-8"
+                      className={`${
+                        RouterName === "notif"
+                          ? "text-slate-50"
+                          : "text-slate-400"
+                      } mx-auto m-8`}
                     />
                   </Link>
                 </li>
                 <li>
                   <MdLeaderboard
                     size="30"
-                    className="text-slate-400 mx-auto m-8"
+                    className={`${
+                      RouterName === "leaderboard"
+                        ? "text-slate-50"
+                        : "text-slate-400"
+                    } mx-auto m-8`}
                   />
                 </li>
                 <li>
                   <GrAchievement
                     size="30"
-                    className="text-slate-400 mx-auto m-8"
+                    className={`${
+                      RouterName === "acheivements"
+                        ? "text-slate-50"
+                        : "text-slate-400"
+                    } mx-auto m-8`}
                   />
                 </li>
                 <li>
-                  <FaUserFriends
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}
+                  >
+                    <FaUserFriends
+                      size="30"
+                      className={`${
+                        RouterName === "friends"
+                          ? "text-slate-50"
+                          : "text-slate-400"
+                      } mx-auto m-8`}
+                    />
+                  </Link>
+                </li>
+                <li>
+                  <GrGroup
                     size="30"
-                    className="text-slate-400 mx-auto m-8"
+                    className={`${
+                      RouterName === "groups"
+                        ? "text-slate-50"
+                        : "text-slate-400"
+                    } mx-auto m-8`}
                   />
-                </li>
-                <li>
-                  <GrGroup size="30" className="text-slate-400 mx-auto m-8" />
                 </li>
                 <li>
                   <IoChatbubblesOutline
                     size="30"
-                    className="text-slate-400 mx-auto m-8"
+                    className={`${
+                      RouterName === "chat" ? "text-slate-50" : "text-slate-400"
+                    } mx-auto m-8`}
                   />
                 </li>
                 <li>
                   <RiPingPongLine
                     size="30"
-                    className="text-slate-400 mx-auto m-8"
+                    className={`${
+                      RouterName === "play" ? "text-slate-50" : "text-slate-400"
+                    } mx-auto m-8`}
                   />
                 </li>
               </div>
@@ -518,7 +587,7 @@ export const Sidebar = () => {
                   >
                     <CiLogout
                       size="30"
-                      className="text-slate-400 mx-auto m-8"
+                      className={`text-slate-400 mx-auto m-8 hover:text-red-400`}
                     />
                   </Link>
                 </li>
@@ -551,9 +620,6 @@ const TwoFactorAuth = ({
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/enableOtp`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         }
       );
@@ -571,9 +637,6 @@ const TwoFactorAuth = ({
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/disableOtp`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         }
       );
@@ -636,7 +699,6 @@ const Friend = ({
           },
           credentials: "include",
           body: JSON.stringify({
-            friendShipStatus: "PENDING",
             userId: `${userId}`,
             friendId: `${friendId}`,
           }),
@@ -646,11 +708,44 @@ const Friend = ({
       const data = await response.json();
 
       if (data.success === false) {
-        toast.error("You are already friends");
+        toast.error("Error adding friend");
       } else if (data.isFriend === false) {
-        toast.success("Friend added successfully");
+        toast.success("Friend request sent");
       } else if (data.isFriend === true) {
-        toast.error("You are already friends");
+        toast.error("Friend request deleted");
+      }
+    } catch (error: any) {
+      const msg = "Error adding friend: " + friendId;
+      toast.error(msg);
+      console.error("Error adding friend:", error.message);
+    }
+  };
+
+  const blockFriend = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/blockfriend`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: `${userId}`,
+            friendId: `${friendId}`,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success === false) {
+        toast.error("Error blocking friend");
+      } else if (data.isBlocked === false) {
+        toast.success("Friend blocked successfully");
+      } else if (data.isBlocked === true) {
+        toast.error("Friend unblocked successfully");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -665,7 +760,7 @@ const Friend = ({
           <button className="mx-2" onClick={addfriend}>
             <FiUserPlus size="25" />
           </button>
-          <button className="mx-2">
+          <button className="mx-2" onClick={blockFriend}>
             <MdOutlineBlock size="25" />
           </button>
           <button className="mx-2">
@@ -676,221 +771,6 @@ const Friend = ({
           </button>
         </div>
       )}
-    </div>
-  );
-};
-
-const ShowFriends = ({
-  login,
-  intraId,
-}: {
-  login: string;
-  intraId: string | undefined;
-}) => {
-  const { user, setUser } = useAppContext();
-  const [friends, setFriends] = useState<User[] | null>(null);
-  // send a get request to get all friends
-
-  useEffect(() => {
-    // I should edit this to get only friends friendshipStatus: "ACCEPTED"
-
-    const getFriends = async () => {
-      try {
-        const response: any = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/friends`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-
-        if (response.success === false) {
-          const msg = "Error getting friends";
-          toast.error(msg);
-          console.log(msg);
-        }
-        if (data.friends) {
-          setFriends(data.friends);
-        }
-      } catch (error: any) {
-        const msg = "Error getting friends: " + error.message;
-        toast.error(msg);
-        console.error("Error getting friends:", error.message);
-      }
-    };
-    getFriends();
-  }, []);
-
-  return (
-    <div>
-      <div className="text-white font-sans m-5">Your friends : </div>
-
-      <div className="flex flex-row items-center justify-evenly">
-        {friends &&
-          friends?.map((friend: User) => (
-            <div
-              key={friend?.intraId}
-              className="flex flex-row items-center justify-center "
-            >
-              <div className="flex flex-row items-center justify-center">
-                <div className="w-[5vh] h-[5vh]">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src={friend?.Avatar}
-                    alt=""
-                  />
-                </div>
-              </div>
-              <div className="text-slate-100 font-sans ">{friend?.login}</div>
-            </div>
-          ))}
-      </div>
-    </div>
-  );
-};
-
-const ShowPendingInvite = ({
-  login,
-  intraId,
-}: {
-  login: string;
-  intraId: string | undefined;
-}) => {
-  const { user, setUser } = useAppContext();
-  const [friends, setFriends] = useState<User[] | null>(null);
-
-  useEffect(() => {
-    const getFriends = async () => {
-      try {
-        const response: any = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/PendingInvite`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-
-        if (data.success === false) {
-          const msg = "Error getting friends";
-          toast.error(msg);
-          console.log(msg);
-        }
-        if (data.friendsDetails) {
-          setFriends(data.friendsDetails);
-        }
-      } catch (error: any) {
-        const msg = "Error getting friends: " + error.message;
-        toast.error(msg);
-        console.error("Error getting friends:", error.message);
-      }
-    };
-    getFriends();
-  }, [intraId, user]);
-
-  return (
-    <div>
-      <div className="text-white font-sans m-5">Pending invitations : </div>
-
-      <div className="flex flex-row items-center justify-evenly">
-        {friends &&
-          friends?.map((friend: User) => (
-            <div
-              key={friend?.intraId}
-              className="flex flex-row items-center justify-center "
-            >
-              <div className="flex flex-row items-center justify-center">
-                <div className="w-[5vh] h-[5vh]">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src={friend?.Avatar}
-                    alt=""
-                  />
-                </div>
-              </div>
-              <div className="text-slate-100 font-sans">{friend?.login}</div>
-            </div>
-          ))}
-      </div>
-    </div>
-  );
-};
-
-const ShowFreindrequest = ({
-  login,
-  intraId,
-}: {
-  login: string;
-  intraId: string | undefined;
-}) => {
-  const { user, setUser } = useAppContext();
-  const [friends, setFriends] = useState<User[] | null>(null);
-
-  useEffect(() => {
-    const getFriends = async () => {
-      try {
-        const response: any = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/freindrequest`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-
-        if (data.success === false) {
-          const msg = "Error getting friends";
-          toast.error(msg);
-          console.log(msg);
-        }
-        if (data.friendsDetails) {
-          setFriends(data.friendsDetails);
-        }
-      } catch (error: any) {
-        const msg = "Error getting friends: " + error.message;
-        toast.error(msg);
-        console.error("Error getting friends:", error.message);
-      }
-    };
-    getFriends();
-  }, [intraId, user]);
-
-  return (
-    <div>
-      <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
-        <div className="text-white font-sans m-5">Freind request : </div>
-
-        <div className="flex flex-row items-center justify-evenly">
-          {friends &&
-            friends?.map((friend: User) => (
-              <div
-                key={friend?.intraId}
-                className="flex flex-row items-center justify-center "
-              >
-                <div className="flex flex-row items-center justify-center">
-                  <div className="w-[5vh] h-[5vh]">
-                    <img
-                      className="h-10 w-10 rounded-full"
-                      src={friend?.Avatar}
-                      alt=""
-                    />
-                  </div>
-                </div>
-                <div className="text-slate-100 font-sans">{friend?.login}</div>
-              </div>
-            ))}
-        </div>
-      </Link>
     </div>
   );
 };
@@ -941,9 +821,6 @@ export default function Profile(params: any) {
           `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           }
         );
@@ -968,9 +845,6 @@ export default function Profile(params: any) {
           `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${params.params.intraId}`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           }
         );
@@ -1106,9 +980,6 @@ export default function Profile(params: any) {
               friendId={params.params.intraId}
             />
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
-            <ShowFriends login={Login} intraId={intraId} />
-            <ShowPendingInvite login={Login} intraId={intraId} />
-            <ShowFreindrequest login={Login} intraId={intraId} />
           </div>
         </div>
       </div>
