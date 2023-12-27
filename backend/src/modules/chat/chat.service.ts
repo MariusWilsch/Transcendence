@@ -1,12 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
-
+import { User, Room, Message } from './dto/chat.dto';
 @Injectable()
 export class ChatService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async sendPrivateMessage(sender: string, recipient: string, message: string): Promise<void> {
     // Additional business logic if needed
     await this.prismaService.createMessage(sender, recipient, message);
+  }
+  async getAllPrivateRooms(): Promise<any> {
+    const data = await this.prismaService.getAllRooms();
+    return data;
+  }
+  async getPrivateRoom(roomId: string) {
+    const data = await this.prismaService.getRoom(roomId);
+    return data;
+  }
+  async getMessagesByUser(userId:string): Promise<any>{
+    const data = await this.prismaService.getMessagesByUser(userId);
+    return data;
   }
 }

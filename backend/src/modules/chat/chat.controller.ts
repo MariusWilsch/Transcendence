@@ -1,11 +1,33 @@
 // chat.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res,Param } from '@nestjs/common';
 import { ChatService } from './chat.service';
+import { Room , User, Message } from './dto/chat.dto';
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Get()
+  async getAllRooms(@Res() res:any): Promise<Room | undefined>{
+    const data = await this.chatService.getAllPrivateRooms();
+    res.json(data);
+    console.log(data);
+    return data;
+  }
+  @Get(':id')
+  async getRoom(@Param('id') id: string, @Res() res:any) :Promise<void>{
+    const data = await this.chatService.getPrivateRoom(id);
+    console.log(data.messages);
+    res.json(data);
+    return data;
+  }
+  @Get(':id/messages')
+  async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
+    const data = await this.chatService.getMessagesByUser(id);
+    res.json(data);
+    console.log(data);
+    return data;
+  }
   @Post('private-message')
   async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
     const { sender, recipient, message } = data;

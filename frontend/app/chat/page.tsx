@@ -1,8 +1,9 @@
 // components/Chat.tsx
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import Image from 'next/image';
 import io from 'socket.io-client';
+import { useAppContext } from '../AppContext';
 
 var data: User;
 interface Message {
@@ -25,28 +26,30 @@ const ConversationCard = ({ user }: any, {lastMessage}:any) => {
   return (
     <div className="flex items-center p-2 my-1 border-4">
       <div className="flex  flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-        <div><span>{user?.login}</span></div>
-        <div><span>{lastMessage}</span></div>
+        <div className="sm:hidden"><span>{user?.login}</span></div>
+        {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
       </div>
       <Image width={56} height={56} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="My profile" className="rounded-full order-1" />
     </div>
   );
-} 
+}
+
+const SearchStart = () => {
+  return (
+    <div className="flex items-center p-2 my-1 border-4">
+      <input type='button' placeholder='find or start a new conversation' />
+    </div>
+  );
+}
 const Conversations = ({user}:any) => {
  
   return (
-    <div className="border w-1/5 flex flex-col ">
-      <h1>Conversations</h1>
+    <div className="border w-1/5 flex flex-col  p-3">
+      <SearchStart />
+      <h1 className='text-center text-lg'>Conversations</h1>
       <div>
         <ul>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
-          <ConversationCard user={user}  lastMessage = {"hi it s  me working on the chatApp"}/>
+          <ConversationCard user={user}/>
         </ul>
       </div>
     </div>
@@ -72,64 +75,64 @@ const SingleMessageSent = ({ message }: any, { user }: any) => {
     </div>
   );
 }
-const Messages = () => {
+// const Messages = () => {
 
-  return (
-    <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
-      <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
-        <div className="relative flex items-center space-x-4">
-          <div className="relative">
-            <span style={{ display: "" }} className="absolute text-green-500 right-0 bottom-0">
-              <svg width="20" height="20">
-                <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
-              </svg>
-            </span>
-            <Image width={144} height={144} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
-          </div>
-          <div className="flex flex-col leading-tight">
-            <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">Zessadqu</span>
-            </div>
-            <span style={{ display: "" }} className="text-lg text-gray-600">Actif</span>
-          </div>
-        </div>
-      </div>
-      <div className="chat-message border-8 h-screen  flex  p-2 overflow-x-auto overflow-y-auto">
-        <SingleMessageReceived message={"khiiiiiiiiiiiiiar"} />
-        <SingleMessageSent message={"hi it s  me working on the chatApp"} />
-      </div>
-      <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
-        <div className="relative flex">
-          <input type="text" placeholder="Write your message!" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3" />
-          <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
-            <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-              </svg>
-            </button>
-            <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-            </button>
-            <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </button>
-            <button type="button" className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-              <span className="font-bold">Send</span>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
+//       <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
+//         <div className="relative flex items-center space-x-4">
+//           <div className="relative">
+//             <span style={{ display: "" }} className="absolute text-green-500 right-0 bottom-0">
+//               <svg width="20" height="20">
+//                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
+//               </svg>
+//             </span>
+//             <Image width={144} height={144} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
+//           </div>
+//           <div className="flex flex-col leading-tight">
+//             <div className="text-2xl mt-1 flex items-center">
+//               <span className="text-gray-700 mr-3">Zessadqu</span>
+//             </div>
+//             <span style={{ display: "" }} className="text-lg text-gray-600">Actif</span>
+//           </div>
+//         </div>
+//       </div>
+//       <div className="chat-message border-8 h-screen  flex  p-2 overflow-x-auto overflow-y-auto">
+//         <SingleMessageReceived message={"khiiiiiiiiiiiiiar"} />
+//         <SingleMessageSent message={"hi it s  me working on the chatApp"} />
+//       </div>
+//       <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
+//         <div className="relative flex">
+//           <input type="text" placeholder="Write your message!" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3" />
+//           <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
+//             <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+//               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+//               </svg>
+//             </button>
+//             <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+//               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+//               </svg>
+//             </button>
+//             <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+//               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+//               </svg>
+//             </button>
+//             <button type="button" className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
+//               <span className="font-bold">Send</span>
+//               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
+//                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+//               </svg>
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 const ProfileInfo = () => {
   return (
     <div className="border w-1/5 xl:hidden">
@@ -140,9 +143,9 @@ const ProfileInfo = () => {
 const Chat = () => {
   const [socket, setSocket] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
-  const [recipientUserId, setRecipientLogin] = useState('130555');
   const [messageText, setMessageText] = useState('');
   const [userData, setUserData] = useState(null);
+  const recipientHandler = useAppContext();
   useEffect(() => {
     const fetchDataAndSetupSocket = async () => {
       try {
@@ -180,12 +183,13 @@ const Chat = () => {
 
 
   const sendPrivateMessage = () => {
-    if (socket && recipientUserId && messageText) {
-      socket.emit('privateChat', { to: recipientUserId, message: messageText, senderId: userData?.intraId });
+    if (socket && recipientHandler.recipientUserId && messageText) {
+      socket.emit('privateChat', { to: recipientHandler.recipientUserId, message: messageText, senderId: userData?.intraId });
       setMessageText('');
     }
   };
-
+  const desplayedMessages = messages.toReversed();
+  console.log(desplayedMessages);
   return (
     // <div>
     //   <div>
@@ -223,7 +227,7 @@ const Chat = () => {
     <div className="flex border-4 h-screen">
       <Conversations user={userData} />
       {/* <Messages></Messages> */}
-      <div className="flex-1 p:2  md:hidden lg:flex sm:p-6 justify-between flex flex-col h-screen">
+      <div className="flex-1 p:2 lg:flex sm:p-6 justify-between flex flex-col h-screen">
         <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
           <div className="relative flex items-center space-x-4">
             <div className="relative">
@@ -242,9 +246,9 @@ const Chat = () => {
             </div>
           </div>
         </div>
-        <div className="chat-message border-8 h-screen  flex flex-col p-2 overflow-x-auto overflow-y-auto">
-          {messages.map((msg, index) => (
-            (msg.sender == userData?.intraId && <SingleMessageSent message={msg.message} />) || (msg.sender != userData?.intraId && <SingleMessageReceived message={msg.message} />)
+        <div className="chat-message border-8 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto">
+          {desplayedMessages.map((msg, index) => (
+            (msg.sender == userData?.intraId && <SingleMessageSent key={index} message={msg.message} />) || (msg.sender != userData?.intraId && <SingleMessageReceived key={index}  message={msg.message} />)
           ))}
         </div>
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
@@ -258,7 +262,7 @@ const Chat = () => {
             <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
               <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                 </svg>
               </button>
               <button type="button" onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">

@@ -1,5 +1,6 @@
 'use client'
 // import type { Metadata } from 'next'
+import '@mantine/spotlight/styles.css';
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from './AppContext';

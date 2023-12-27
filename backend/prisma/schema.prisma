@@ -41,11 +41,12 @@ model Message {
 
 model PrivateRoom{
   id            Int       @id @default(autoincrement())
-  name         String
+  name         String     @unique
   participantsIds String[]
   participants User[]
   messages     Message[]
-  
+  createdAt      DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 }
 model Tfa {
   user           User      @relation(fields: [intraId], references: [intraId])

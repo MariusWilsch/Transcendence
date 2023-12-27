@@ -2,6 +2,25 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 
+type User = {
+  intraId: string;
+  fullname: string;
+  login: string;
+  email: string;
+  Avatar: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+type Room = {
+  id :number
+  name:string
+  participantsIds: string[]
+  participants : User[]
+  messages     : any[]
+  createdAt    : string
+  updated_at   : string
+}
 @Injectable()
 export class PrismaService {
   private readonly prisma: PrismaClient;
@@ -74,6 +93,26 @@ export class PrismaService {
     return this.prisma.user.findMany();
   }
 
+  async getAllRooms() {
+    try {
+      const rooms = await this.prisma.privateRoom.findMany({
+        orderBy: {
+          updated_at: 'asc',
+        },
+      });
+
+      return rooms;
+    } catch (e) {
+      console.log('Error in getAllRooms: ', e);
+    }
+  }
+  async getRoom(roomId:string) :Promise<any>{
+    return await this.prisma.privateRoom.findUnique({
+      where: {
+        name: roomId,
+      },
+    });
+  }
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
   }

@@ -2,16 +2,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { PrismaService } from 'modules/prisma/prisma.service';
-
-type User = {
-  intraId: string;
-  fullname: string;
-  login: string;
-  email: string;
-  Avatar: string;
-  created_at: Date;
-  updated_at: Date;
-};
+import { User } from './dto/chat.dto';
 
 @WebSocketGateway({
     cors: {
@@ -45,8 +36,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.connectedClients.get(payload.to);
+    const recip = await this.prismaService.getUserById(payload.to);
     // console.log(recipientSocket);
-    if (recipientSocket) {
+    if (recipientSocket || recip) {
         recipientSocket.emit('privateChat', { sender: payload.senderId,senderLogin:payload.senderId, message: payload.message });
         // Save the private message to the database
         await this.prismaService.createMessage(payload.senderId, payload.to, payload.message);
