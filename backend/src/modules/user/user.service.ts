@@ -111,7 +111,6 @@ export class UserService {
   }
 
   async createFriend(userId: string, friendId: string): Promise<string> {
-
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
@@ -119,15 +118,55 @@ export class UserService {
           { userId: friendId, friendId: userId },
         ],
       },
-    })
-    if (ifTheFriendshipExists)
-    {
+    });
+
+    if (ifTheFriendshipExists) {
+      await prisma.friend.deleteMany({
+        where: {
+          OR: [
+            { userId: userId, friendId: friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
       return 'alreadyFriend';
     }
-    
+
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
+        userId: userId,
+        friendId: friendId,
+      },
+    });
+    return 'newFriendship';
+  }
+
+  async blockFriend(userId: string, friendId: string): Promise<string> {
+    const ifTheFriendshipExists = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+    if (ifTheFriendshipExists) {
+
+      await prisma.friend.deleteMany({
+        where: {
+          OR: [
+            { userId: userId, friendId: friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
+      return 'alreadyFriend';
+    }
+
+    const friend = await prisma.friend.create({
+      data: {
+        friendshipStatus: 'BLOCKED',
         userId: userId,
         friendId: friendId,
       },
@@ -154,7 +193,9 @@ export class UserService {
       userIds.map((id) => this.getUserbyId(id))
     );
 
-    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter((friend) => friend.intraId !== userId);
+    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter(
+      (friend) => friend.intraId !== userId
+    );
 
     return filteredFriendsDetails;
   }
@@ -168,6 +209,17 @@ export class UserService {
     });
 
     return PendingInvite;
+  }
+
+  async BlockedFriends(userId: string) {
+    const BlockedFriends = await prisma.friend.findMany({
+      where: {
+        userId: userId,
+        friendshipStatus: 'BLOCKED',
+      },
+    });
+
+    return BlockedFriends;
   }
 
   async freindrequest(userId: string) {
@@ -214,6 +266,23 @@ export class UserService {
       return friend;
     } catch (error: any) {
       console.error('Error decline Friend Request:', error);
+      return;
+    }
+  }
+
+  async getUsersbyInput(input: string) {
+    try {
+      const Users = await prisma.user.findMany({
+        where: {
+          login: {
+            contains: input,
+          },
+        },
+      });
+
+      return Users;
+    } catch (error: any) {
+      console.error('Error getUsersbyInput:', error);
       return;
     }
   }

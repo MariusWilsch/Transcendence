@@ -13,7 +13,7 @@ import { Navbar } from "../profile/[intraId]/page";
 import { Sidebar } from "../profile/[intraId]/page";
 import { RiSearchLine } from "react-icons/ri";
 
-export default function Search() {
+export default function Search(params: any) {
   const {
     user,
     setUser,
@@ -25,42 +25,107 @@ export default function Search() {
     toggleSidebarVisibleVisibility,
   } = useAppContext();
 
+  // console.log("params: ", params);
+
   useEffect(() => {
     setisSidebarVisible(window.innerWidth > 768);
   }, []);
 
   const [users, setUsers] = useState<User[] | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    const searchTerm = params.searchParams.query;
+    console.log("searchTerm: ", searchTerm);
+
+    const handleSearchQuery = async (searchTerm: string) => {
+      if (
+        searchTerm === "" ||
+        searchTerm === undefined ||
+        searchTerm === null ||
+        searchTerm === " "
+      ) {
+        return;
+      }
+
+      try {
+        const data = {
+          searchTerm: searchTerm,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+          }
+        );
+        if (!response.ok) {
+          toast.error("User not found");
+          return;
+        }
+
+        
+        const users: User[] = await response.json();
+        console.log("users: ", users);
+
+
+        setUsers(users);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+
+    };
+    handleSearchQuery(searchTerm);
+  }, []);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    if (
+      inputValue === "" ||
+      inputValue === undefined ||
+      inputValue === null ||
+      inputValue === " "
+    ) {
+      return;
+    }
 
-    // Send a POST request here using the input value
     try {
+      const data = {
+        searchTerm: inputValue,
+      };
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
+          body: JSON.stringify(data),
         }
       );
       if (!response.ok) {
         toast.error("User not found");
-        console.log("User not found");
         return;
       }
 
       const users: User[] = await response.json();
       setUsers(users);
-      console.log(users);
     } catch (error) {
       console.error("Error:", error);
     }
   };
+
+  useEffect(() => {}, [inputValue]);
+
   return (
-    <div className=" h-screen w-screen bg-[#12141A]">
+    <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
 
       <div className="flex ">
@@ -82,25 +147,34 @@ export default function Search() {
               <div className="mb-5 text-white font-sans">Search </div>
               <div className="border-b border-gray-500 my-4 mb-10"></div>
 
-              <div className="flex items-center justify-center">
-                <div className="">
-                  <form className="" onSubmit={handleSubmit}>
-                    <label className="flex flex-row ">
-                      <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        className="in-w-[80vw] md:min-w-[40vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
-                      />
-                      &nbsp;
-                      <button
-                        className="items-center justify-center p-2 rounded-lg bg-slate-400 text-white"
-                        type="submit"
-                      >
-                        <RiSearchLine size="30" className="" />
-                      </button>
-                    </label>
-                  </form>
+              <div className="w-full flex items-center justify-center mb-6">
+                <div className="md:w-[50vw] w-full flex items-center justify-center">
+                  <div className="md:w-[50vw] w-full flex flex-row-reverse">
+                    <form className="w-full" onSubmit={handleSubmit}>
+                      <label className=" flex flex-grow ">
+                        <input
+                          id="searchField"
+                          name="searchTerm"
+                          type="text"
+                          value={inputValue}
+                          placeholder="Search ..."
+                          onChange={(e) => {
+                            setInputValue(e.target.value);
+                            handleSubmit(e);
+                          }}
+                          className="w-full bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
+                        />
+                        <div className="md:hidden">&nbsp; &nbsp;</div>
+                        <button
+                          onClick={handleSubmit}
+                          className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
+                          type="submit"
+                        >
+                          <RiSearchLine size="30" className="" />
+                        </button>
+                      </label>
+                    </form>
+                  </div>
                 </div>
               </div>
               <div className="mt-4 flex  justify-center ">
