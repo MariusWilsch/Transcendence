@@ -50,6 +50,7 @@ export class UserController {
   }
 
   @Get('search')
+  @UseGuards(JwtAuthGuard)
   async search(@Res() res, @Query('searchTerm') searchTerm: string) {
     const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(
       searchTerm
@@ -236,6 +237,18 @@ export class UserController {
     }
   }
 
+  @Get(':id/onlinefriends')
+  @UseGuards(JwtAuthGuard)
+  async getonlineFriends(@Param('id') userId: string, @Res() res: any) {
+    try {
+      const onlinefriends = await this.userService.getonlineFriends(userId);
+      return res.json({ success: true, onlinefriends });
+    } catch (error: any) {
+      console.error('Error getonlineFriends:', error);
+      return res.json({ success: false });
+    }
+  }
+
   @Get(':id/PendingInvite')
   @UseGuards(JwtAuthGuard)
   async PendingInvite(@Param('id') userId: string, @Res() res: any) {
@@ -325,3 +338,5 @@ export class UserController {
     }
   }
 }
+
+// todo : handel sending friend request to blocked user

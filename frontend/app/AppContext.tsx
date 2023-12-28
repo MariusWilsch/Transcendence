@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { io, Socket } from "socket.io-client";
+import Cookies from "universal-cookie";
 
 export type User = {
   intraId: string;
@@ -10,17 +18,20 @@ export type User = {
   isTfaEnabled: boolean;
   created_at: Date;
   updated_at: Date;
+  status: string;
 };
 
 type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
-  setDivVisible: (isDivVisible : boolean ) => void;
+  setDivVisible: (isDivVisible: boolean) => void;
   user: User | null;
   setUser: (user: User | null) => void;
   isSidebarVisible: boolean;
-  setisSidebarVisible: (isSidebarVisible : boolean ) => void;
+  setisSidebarVisible: (isSidebarVisible: boolean) => void;
   toggleSidebarVisibleVisibility: () => void;
+  socket: Socket | null;
+  setsocket: (socket: Socket | null) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -33,6 +44,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isDivVisible, setDivVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isSidebarVisible, setisSidebarVisible] = useState<boolean>(true);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);
@@ -51,6 +63,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
+    socket,
+    setsocket: setSocket,
   };
 
   return (

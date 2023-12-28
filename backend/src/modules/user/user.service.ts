@@ -200,6 +200,33 @@ export class UserService {
     return filteredFriendsDetails;
   }
 
+  async getonlineFriends(userId: string) {
+    const friends = await prisma.friend.findMany({
+      where: {
+        OR: [
+          { userId: userId, friendshipStatus: 'ACCEPTED' },
+          { friendId: userId, friendshipStatus: 'ACCEPTED' },
+        ],
+      },
+    });
+    const userIds = friends.map((item) => item.userId);
+    const friendIds = friends.map((item) => item.friendId);
+
+    const friendsDetails = await Promise.all(
+      friendIds.map((id) => this.getUserbyId(id))
+    );
+    const uesrsDetails = await Promise.all(
+      userIds.map((id) => this.getUserbyId(id))
+    );
+
+    const filteredFriendsDetails = [...uesrsDetails, ...friendsDetails].filter(
+      (friend) => friend.intraId !== userId && friend.status === 'ONLINE'
+    );
+
+    return filteredFriendsDetails;
+  }
+
+
   async PendingInvite(userId: string) {
     const PendingInvite = await prisma.friend.findMany({
       where: {
@@ -283,6 +310,25 @@ export class UserService {
       return Users;
     } catch (error: any) {
       console.error('Error getUsersbyInput:', error);
+      return;
+    }
+  }
+
+  async updateUserState(userId : string, status : "ONLINE" | "OFFLINE" | "INGAME")
+  {
+    try{
+      const friend = await prisma.user.update({
+        where: {
+          intraId : userId
+        },
+        data: {
+          status : status
+        }
+      })
+    }
+    catch(error : any)
+    {
+      console.error('Error updateUserState:', error);
       return;
     }
   }

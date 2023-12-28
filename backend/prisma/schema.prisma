@@ -18,6 +18,7 @@ model User {
   Avatar         String?
   isRegistred    Boolean   @default(false)
   isTfaEnabled   Boolean   @default(false)
+  status         Status    @default(ONLINE)
   tfa            Tfa?
   friends        Friend[]  @relation("userFriends")
   user           Friend[]  @relation("friendsUser") 
@@ -30,6 +31,12 @@ model Tfa {
   intraId        String    @unique
   otp            String    @unique
   created_at     DateTime  @default(now())
+}
+
+enum Status {
+  ONLINE
+  OFFLINE
+  INGAME
 }
 
 enum FriendStatus {
