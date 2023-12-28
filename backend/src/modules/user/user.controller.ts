@@ -337,6 +337,20 @@ export class UserController {
       return res.json({ success: false });
     }
   }
+
+  @Get('/:userId/FriendshipStatus/:friendId')
+  @UseGuards(JwtAuthGuard)
+  async FriendshipStatus(
+    @Param('userId') userId: string,
+    @Param('friendId') friendId: string,
+    @Res() res: any
+  ) {
+    const friend = await this.userService.FriendshipStatus(
+      userId,
+      friendId
+    );
+    return res.json({ success: true , friend})
+  }
 }
 
 // todo : handel sending friend request to blocked user

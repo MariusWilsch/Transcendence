@@ -22,9 +22,10 @@ export default function Friends() {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    socket,
-    setsocket,
+    // socket,
+    // setsocket,
   } = useAppContext();
+  const [socket, setsocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     const checkJwtCookie = async () => {

@@ -700,6 +700,8 @@ const Friend = ({
   userId: string | undefined;
   friendId: string;
 }) => {
+  const [status, setStatus] = useState("NOTFRIENDS");
+
   const addfriend = async () => {
     try {
       const response = await fetch(
@@ -765,6 +767,54 @@ const Friend = ({
       console.error("Error adding friend:", error.message);
     }
   };
+
+  // const [status, setStatus] = useState<
+  //   "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+  // >("NOTFRIENDS");
+
+  const FriendshipStatus = async () => {
+    if (!userId) {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${userId}/FriendshipStatus/${friendId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data: any = await response.json();
+      if (data.success === false) {
+        toast.error("Error during FriendshipStatus");
+        return;
+      }
+      console.log(
+        "data.friend.friendshipStatus: ",
+        data.friend.friendshipStatus
+      );
+
+      if (data.friend === null) {
+        setStatus("NOTFRIENDS");
+        console.log("New status set: NOTFRIENDS");
+      } else {
+        setStatus(data.friend.friendshipStatus as string);
+        console.log("New status set: ", data.friend.friendshipStatus);
+      }
+
+      // console.log("FriendshipStatus: ", status);
+    } catch (error: any) {
+      toast.error("Error during FriendshipStatus");
+      console.error("Error during FriendshipStatus");
+    }
+  };
+
+  console.log("status : ", status);
+
+  useEffect(() => {
+    FriendshipStatus();
+  }, [userId]);
+
   return (
     <div>
       {!isProfileOwner && (
@@ -773,7 +823,7 @@ const Friend = ({
             <FiUserPlus size="25" />
           </button>
           <button className="mx-2" onClick={blockFriend}>
-            <MdOutlineBlock size="25" />
+            <MdOutlineBlock size="25" className="text-red-200" />
           </button>
           <button className="mx-2">
             <BiMessageRounded size="25" />
@@ -797,9 +847,11 @@ export default function Profile(params: any) {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    socket,
-    setsocket,
+    // socket,
+    // setsocket,
   } = useAppContext();
+
+  const [socket, setsocket] = useState<Socket | null>(null);
 
   const [userFromRoutId, setuserFromRoutId] = useState<User | undefined>(
     undefined
@@ -872,8 +924,6 @@ export default function Profile(params: any) {
       if (contentType && contentType.includes("application/json")) {
         var data: User = await response.json();
         setuserFromRoutId(data);
-
-        console.log("data.status: ", data.status);
       } else {
         toast.error("User not found");
         console.log("User not found");

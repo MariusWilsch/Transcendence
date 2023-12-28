@@ -152,7 +152,6 @@ export class UserService {
       },
     });
     if (ifTheFriendshipExists) {
-
       await prisma.friend.deleteMany({
         where: {
           OR: [
@@ -225,7 +224,6 @@ export class UserService {
 
     return filteredFriendsDetails;
   }
-
 
   async PendingInvite(userId: string) {
     const PendingInvite = await prisma.friend.findMany({
@@ -314,22 +312,34 @@ export class UserService {
     }
   }
 
-  async updateUserState(userId : string, status : "ONLINE" | "OFFLINE" | "INGAME")
-  {
-    try{
+  async updateUserState(
+    userId: string,
+    status: 'ONLINE' | 'OFFLINE' | 'INGAME'
+  ) {
+    try {
       const friend = await prisma.user.update({
         where: {
-          intraId : userId
+          intraId: userId,
         },
         data: {
-          status : status
-        }
-      })
-    }
-    catch(error : any)
-    {
+          status: status,
+        },
+      });
+    } catch (error: any) {
       console.error('Error updateUserState:', error);
       return;
     }
+  }
+
+  async FriendshipStatus(userId: string, friendId: string) {
+    const FriendshipStatus = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+    return FriendshipStatus;
   }
 }
