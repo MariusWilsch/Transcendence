@@ -30,8 +30,11 @@ export class PrismaService {
   }
 
   async createMessage(sender: string, recipient: string, content: string): Promise<void> {
+    console.log('this is sender id', sender);
+    console.log('this is receipent id', recipient);
     const senderUser = await this.prisma.user.findUnique({ where: { intraId: sender } });
     const recipientUser = await this.prisma.user.findUnique({ where: { intraId: recipient } });
+    const PrivateRoomName = senderUser.intraId > recipientUser.intraId ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
     if (!senderUser || !recipientUser) {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
@@ -42,11 +45,13 @@ export class PrismaService {
         sender,
         recipient,
         content,
+        PrivateRoomName,
       },
     });
   }
 
   async createPrivateRoom(user1: string, user2: string): Promise<void> {
+  
     const member1 = await this.prisma.user.findUnique({ where: { intraId: user1 } });
     const member2 = await this.prisma.user.findUnique({ where: { intraId: user2 } });
     if (!member1 || !member2) {
@@ -114,7 +119,14 @@ export class PrismaService {
     });
   }
   async getRoomMessages(roomId:string) :Promise<any>{
-    return 
+    return await this.prisma.message.findMany({
+      where:{
+        PrivateRoomName:roomId,
+      },
+      orderBy:{
+        createdAt:'asc',
+      }
+    })
   }
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();

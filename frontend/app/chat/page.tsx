@@ -142,7 +142,6 @@ const ProfileInfo = () => {
   );
 }
 const Chat = () => {
-  const [friends, setFriends] = useState<any>(null);
   const context = useAppContext();
   useEffect(() => {
     const fetchDataAndSetupSocket = async () => {
@@ -164,21 +163,18 @@ const Chat = () => {
           credentials: "include",
         });
         const friends = await response2.json();
-        setFriends(friends);
+        context.setFriends(friends);
         console.log("user data:", userData);
         // console.log("friends:", friends);
         const newSocket = io('http://localhost:3001', {
           query: { userId: userData.intraId },
         });
-
         context.setSocket(newSocket);
-
-        newSocket.on('privateChat', (data: Message) => {
-          context.setMessages((prevMessages:any) => [...prevMessages, data]);
+        context.socket.on('privateChat', (data: Message) => {
+          setMessages((prevMessages:Message[]) => [...prevMessages, data]);
         });
-
         return () => {
-          newSocket.disconnect();
+          context.socket.disconnect();
         };
       } catch (error) {
         console.error("Error during login:", error);
@@ -227,7 +223,7 @@ const Chat = () => {
     //   </div>
     // </div>
     <div className="flex border-4 h-screen">
-      <Conversations friends={friends} />
+      <Conversations friends={context.friendsData} />
       {/* <Messages></Messages> */}
       {/* <div className="flex-1 p:2 lg:flex sm:p-6 justify-between flex flex-col h-screen">
         <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
@@ -277,7 +273,9 @@ const Chat = () => {
           </div>
         </div>
       </div> */}
-      { context.recipientUserId && <PrivateRoom  params={{roomId:"13055590199"}} />}
+      { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
+      ?<PrivateRoom  params={{roomId: context.userData?.intraId+context.recipientUserId}} />
+      :<PrivateRoom  params={{roomId: context.recipientUserId + context.userData?.intraId}} />)}
       {/* <ProfileInfo></ProfileInfo> */}
     </div>
   );

@@ -40,7 +40,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // console.log(recipientSocket);
     if (recipientSocket || recip) {
         recipientSocket.emit('privateChat', { sender: payload.senderId,senderLogin:payload.senderId, message: payload.message });
-        // Save the private message to the database
+        // Save the private message to the databasee
         await this.prismaService.createMessage(payload.senderId, payload.to, payload.message);
         console.log(`Private message from ${payload.senderId} to ${payload.to}: ${payload.message}`);
       } else {

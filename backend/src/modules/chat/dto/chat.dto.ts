@@ -18,6 +18,7 @@ export type User = {
     createdAt: Date;
     senderUser: User;
     recipientUser: User;
+    PrivateRoomName:string
     PrivateRoom: Room[]
   }
   

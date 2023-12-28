@@ -1,5 +1,5 @@
 'use client';
-import { FC } from 'react';
+import { FC, use, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { User, useAppContext } from '@/app/AppContext';
@@ -16,7 +16,9 @@ import { User, useAppContext } from '@/app/AppContext';
 // }
 interface Message {
   sender: string;
+  recipient: string;
   message: string;
+  privateRommName: string;
 }
 
 interface Room {
@@ -33,23 +35,26 @@ interface PageProps {
   }
 }
 
-const SingleMessageReceived = ({ message }: any, { user }: any) => {
+const SingleMessageReceived = ({ message }: any) => {
+  const context = useAppContext();
+  const user = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
   return (
     <div className="flex items-end p-2 my-1">
       <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
         <div><span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{message}</span></div>
       </div>
-      <Image width={24} height={24} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="My profile" className="w-6 h-6 rounded-full order-1" />
+      <Image width={24} height={24} src={user?.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
     </div>
   );
 }
-const SingleMessageSent = ({ message }: any, { user }: any) => {
+const SingleMessageSent = ({ message }: any) => {
+  const context = useAppContext();
   return (
     <div className="flex items-end justify-end p-2 my-1">
       <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
         <div><span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">{message}</span></div>
       </div>
-      <Image width={24} height={24} src={user.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
+      <Image width={24} height={24} src={context.userData?.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
     </div>
   );
 }
@@ -64,20 +69,35 @@ async function getMessages(roomId: string): Promise<any> {
   const room = await res.json();
   return room.messages;
 }
+// async function getRecipientData(userId: string): Promise<any> {
+//   const res = await fetch(`http://localhost:3001/users/${userId}`);
+//   const user = await res.json();
+//   return user;
+// }
 const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
+  const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
+  const[messageText, setMessageText] = useState('');
+  const context = useAppContext();
+  // useEffect(() => {
+  
+  //   return () => {
+  //     setMessages([]);
+  //   }
+  // }, [context.recipientUserId]);
   // const room: Promise<Room> = getRoom(params.roomId);
   // if (!room) {
   //   return <div>Loading...</div>;
   // }
-  const context = useAppContext();
-
+  // const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const sendPrivateMessage = () => {
-    if (context.socket && context.recipientUserId && context.messageText) {
-      context.socket.emit('privateChat', { to: context.recipientUserId, message: context.messageText, senderId: context.user?.intraId });
-      context.setMessages((prevMessages:any) => [...prevMessages, { sender: context.userData?.intraId, message: context.messageText }]);
-      context.setMessageText('');
+    if (context.socket && context.recipientUserId && messageText) {
+      context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText, senderId: context.userData?.intraId });
+      setMessages((prevMessages:any) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, message: messageText, PrivateRoomName:params.roomId}]);
+      setMessageText('');
     }
   };
+  const recipientData = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
+  const desplayedMessages = messages.toReversed();
   return (
     <div className="flex-1 p:2  md:hidden lg:flex sm:p-6 justify-between flex flex-col h-screen">
       <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
@@ -88,7 +108,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
               </svg>
             </span>
-            <Image width={144} height={144} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
+            <Image width={144} height={144} src={recipientData.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
@@ -98,9 +118,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           </div>
         </div>
       </div>
-      <div className="chat-message border-8 h-screen  flex flex-col p-2 overflow-x-auto overflow-y-auto">
-        {context.messages.map((msg:any) => (
-          (msg.sender == context.user?.intraId && <SingleMessageSent message={msg.message} />) || (msg.sender != context.user?.intraId && <SingleMessageReceived message={msg.message} />)
+      <div className="chat-message border-8 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto">
+        {desplayedMessages?.map((msg:any) => (
+          (msg.sender == context.userData?.intraId && <SingleMessageSent message={msg.message} />) || (msg.sender != context.userData?.intraId && <SingleMessageReceived message={msg.message} />)
         ))}
       </div>
       <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
@@ -108,8 +128,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           <input
             type="text"
             placeholder="Write your message!"
-            value={context.messageText}
-            onChange={(e) => context.setMessageText(e.target.value)}
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
             className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3" />
           <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
             <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">

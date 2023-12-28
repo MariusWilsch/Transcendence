@@ -36,7 +36,8 @@ model Message {
   createdAt      DateTime  @default(now())
   senderUser     User      @relation("SentMessages", fields: [sender], references: [intraId])
   recipientUser  User      @relation("ReceivedMessages", fields: [recipient], references: [intraId])
-  PrivateRoom    PrivateRoom[]
+  PrivateRoomName    String
+  PrivateRoom       PrivateRoom[]
 }
 
 model PrivateRoom{
