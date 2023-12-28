@@ -170,11 +170,11 @@ const Chat = () => {
           query: { userId: userData.intraId },
         });
         context.setSocket(newSocket);
-        context.socket.on('privateChat', (data: Message) => {
-          setMessages((prevMessages:Message[]) => [...prevMessages, data]);
-        });
+        // context.socket?.on('privateChat', (data: Message) => {
+        //   setMessages((prevMessages:Message[]) => [...prevMessages, data]);
+        // });
         return () => {
-          context.socket.disconnect();
+          context.socket?.disconnect();
         };
       } catch (error) {
         console.error("Error during login:", error);
@@ -188,6 +188,7 @@ const Chat = () => {
   // console.log(`those are my real friends ${friends?.friends[0].Avatar}`);
   // console.log('this is the recipient id', context.recipientUserId);
   // console.log(`it s me ${context.user?.intraId}`);
+
   return (
     // <div>
     //   <div>

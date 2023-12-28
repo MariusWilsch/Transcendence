@@ -30,22 +30,29 @@ export class PrismaService {
   }
 
   async createMessage(sender: string, recipient: string, content: string): Promise<void> {
-    console.log('this is sender id', sender);
-    console.log('this is receipent id', recipient);
     const senderUser = await this.prisma.user.findUnique({ where: { intraId: sender } });
     const recipientUser = await this.prisma.user.findUnique({ where: { intraId: recipient } });
-    const PrivateRoomName = senderUser.intraId > recipientUser.intraId ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
+    const privateRoomName = parseInt(senderUser.intraId) > parseInt(recipientUser.intraId) ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
+    const room = await this.prisma.privateRoom.findUnique({
+      where:{
+        name:privateRoomName,
+      }
+    });
     if (!senderUser || !recipientUser) {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
     }
-
+    if (!room)
+    {
+      await this.createPrivateRoom(sender, recipient);
+      console.log('room created succefully');
+    };
     await this.prisma.message.create({
       data: {
-        sender,
-        recipient,
-        content,
-        PrivateRoomName,
+        sender:sender,
+        recipient:recipient,
+        content:content,
+        PrivateRoomName:privateRoomName,
       },
     });
   }
@@ -58,7 +65,7 @@ export class PrismaService {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
     }
-    const romeName  = member1.intraId > member2.intraId ? member1.intraId + member2.intraId :member2.intraId + member1.intraId;
+    const romeName  = parseInt(member1.intraId) > parseInt(member2.intraId) ? member1.intraId + member2.intraId :member2.intraId + member1.intraId;
     await this.prisma.privateRoom.create({
       data: {
         name:romeName,

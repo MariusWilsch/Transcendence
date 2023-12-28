@@ -15,6 +15,7 @@ type User = {
   Avatar: string;
   isRegistred: Boolean;
   isTfaEnabled: Boolean;
+  Status: string;
   created_at: Date;
   updated_at: Date;
 };
@@ -37,6 +38,7 @@ export class AuthService {
       Avatar: user.Avatar,
       isRegistred: false,
       isTfaEnabled: false,
+      Status: 'ONLINE',
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -51,6 +53,26 @@ export class AuthService {
   getUserFromCookie(req: any): User | undefined {
     const jwt = req.jwt;
 
+    if (!jwt) {
+      return undefined;
+    }
+
+    try {
+      const payload = this.jwtService.verify(jwt, {
+        secret: JWT_SECRET,
+      });
+
+      const user = payload.userWithoutDate;
+
+      // console.log('payload: ', payload);
+      return user;
+    } catch (error) {
+      console.error('JWT Verification Error:', error);
+      return undefined;
+    }
+  }
+
+  getUserFromJwt(jwt: any): User | undefined {
     if (!jwt) {
       return undefined;
     }
@@ -158,8 +180,6 @@ export class AuthService {
     const isMatch = await bcrypt.compare(code, hashedCode);
     return isMatch;
   }
-
-
 }
 
 // TODO:

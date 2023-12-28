@@ -22,16 +22,17 @@ export class ChatController {
   }
   @Get(':id/messages')
   async getRoomMessages(@Param('id') id: string, @Res() res:any) :Promise<void>{
+    console.log('id');
     const data = await this.chatService.getPrivateRoomMessages(id);
     res.json(data);
     return data;
   }
-  @Get(':id/message')
-  async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
-    const data = await this.chatService.getMessagesByUser(id);
-    res.json(data);
-    return data;
-  }
+  // @Get(':id/message')
+  // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
+  //   const data = await this.chatService.getMessagesByUser(id);
+  //   res.json(data);
+  //   return data;
+  //  }
   @Post('private-message')
   async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
     const { sender, recipient, message } = data;

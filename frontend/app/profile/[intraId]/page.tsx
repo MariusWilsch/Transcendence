@@ -29,6 +29,10 @@ import { IoHome } from "react-icons/io5";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { CgProfile } from "react-icons/cg";
 import { usePathname } from "next/navigation";
+import { io, Socket } from "socket.io-client";
+import Cookies from "universal-cookie";
+import { FaCircle } from "react-icons/fa";
+import { PiGameControllerLight } from "react-icons/pi";
 
 export function Loading() {
   return (
@@ -53,7 +57,16 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
   const [inputValue, setInputValue] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async () => {
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
+    if (
+      inputValue === "" ||
+      inputValue === undefined ||
+      inputValue === null ||
+      inputValue.trim().length === 0
+    ) {
+      return;
+    }
     return router.push(
       `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?searchTerm=${inputValue}`
     );
@@ -92,10 +105,9 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
                       <input
                         type="text"
                         value={inputValue}
-                        placeholder="  Search ..."
+                        placeholder="Search ..."
                         onChange={(e) => {
                           setInputValue(e.target.value);
-                          // handleSubmit(e);
                         }}
                         className=" bg-[#1E2028] items-center justify-center p-2 rounded-lg text-sm outline-none text-white"
                       />
@@ -122,25 +134,6 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
     </div>
   );
 }
-
-const UserLevelCard = ({
-  value,
-  intraId,
-}: {
-  value: string;
-  intraId: string | undefined;
-}) => {
-  return (
-    <div className="flex items-center justify-center h-[7vh] text-gray-900">
-      <div
-        className="flex items-center justify-center p-4
-        rounded-md"
-      >
-        <div className="text-base-100  days left"> {value} </div>
-      </div>
-    </div>
-  );
-};
 
 const UserDetailsCard = ({
   value,
@@ -241,9 +234,13 @@ const UserDetailsCard = ({
 };
 
 const UserProfileImage = ({
+  status,
+  isProfileOwner,
   src,
   intraId,
 }: {
+  status: string | undefined;
+  isProfileOwner: boolean;
   src: string;
   intraId: string | undefined;
 }) => {
@@ -342,6 +339,35 @@ const UserProfileImage = ({
                 }}
               />
             )}
+            {!isProfileOwner && (
+              <div className="absolute right-[4.5vw] bottom-[4.5vw] md:right-8 md:bottom-8">
+                <div className="">
+                  <FaCircle
+                    className={`${
+                      status === "ONLINE"
+                        ? "text-green-600 border-slate-950 border rounded-full"
+                        : ""
+                    } ${
+                      status === "OFFLINE"
+                        ? "text-red-600 border-slate-950 border rounded-full"
+                        : ""
+                    } ${
+                      status != "ONLINE" && status != "OFFLINE" ? "hidden" : ""
+                    }`}
+                    size="20"
+                  />
+                  <div
+                    className={`${status != "INGAME" ? "hidden" : ""} ${
+                      status === "INGAME"
+                        ? "text-white bg-black opacity-80 rounded-full p-2"
+                        : ""
+                    }`}
+                  >
+                    <PiGameControllerLight size="25" />
+                  </div>
+                </div>
+              </div>
+            )}
             {selectedFile && isDivVisible && (
               <div
                 style={{
@@ -349,7 +375,7 @@ const UserProfileImage = ({
                   display: "inline-block",
                   width: "20vh",
                   height: "20vh",
-                  minWidth: "10vw",
+                  minWidth: "8vw",
                   minHeight: "10vw",
                 }}
                 className="top-0 left-0 flex flex-col items-center justify-center rounded-full
@@ -474,8 +500,8 @@ export const Sidebar = () => {
                   <IoHome
                     size="30"
                     className={`${
-                      RouterName === "home" ? "text-slate-50" : "text-slate-400"
-                    } mx-auto m-8`}
+                      RouterName === "home" ? "text-slate-50" : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
                 <li>
@@ -487,8 +513,8 @@ export const Sidebar = () => {
                       className={`${
                         RouterName === "profile"
                           ? "text-slate-50"
-                          : "text-slate-400"
-                      } mx-auto m-8`}
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
                     />
                   </Link>
                 </li>
@@ -499,8 +525,8 @@ export const Sidebar = () => {
                       className={`${
                         RouterName === "notif"
                           ? "text-slate-50"
-                          : "text-slate-400"
-                      } mx-auto m-8`}
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
                     />
                   </Link>
                 </li>
@@ -510,8 +536,8 @@ export const Sidebar = () => {
                     className={`${
                       RouterName === "leaderboard"
                         ? "text-slate-50"
-                        : "text-slate-400"
-                    } mx-auto m-8`}
+                        : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
                 <li>
@@ -520,8 +546,8 @@ export const Sidebar = () => {
                     className={`${
                       RouterName === "acheivements"
                         ? "text-slate-50"
-                        : "text-slate-400"
-                    } mx-auto m-8`}
+                        : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
                 <li>
@@ -533,8 +559,8 @@ export const Sidebar = () => {
                       className={`${
                         RouterName === "friends"
                           ? "text-slate-50"
-                          : "text-slate-400"
-                      } mx-auto m-8`}
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
                     />
                   </Link>
                 </li>
@@ -544,24 +570,24 @@ export const Sidebar = () => {
                     className={`${
                       RouterName === "groups"
                         ? "text-slate-50"
-                        : "text-slate-400"
-                    } mx-auto m-8`}
+                        : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
                 <li>
                   <IoChatbubblesOutline
                     size="30"
                     className={`${
-                      RouterName === "chat" ? "text-slate-50" : "text-slate-400"
-                    } mx-auto m-8`}
+                      RouterName === "chat" ? "text-slate-50" : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
                 <li>
                   <RiPingPongLine
                     size="30"
                     className={`${
-                      RouterName === "play" ? "text-slate-50" : "text-slate-400"
-                    } mx-auto m-8`}
+                      RouterName === "play" ? "text-slate-50" : "text-slate-500"
+                    } hover:text-slate-50 mx-auto m-8`}
                   />
                 </li>
               </div>
@@ -771,7 +797,11 @@ export default function Profile(params: any) {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
+    // socket,
+    // setsocket,
   } = useAppContext();
+
+ const [socket, setsocket] = useState<Socket | null>(null);
 
   const [userFromRoutId, setuserFromRoutId] = useState<User | undefined>(
     undefined
@@ -824,38 +854,40 @@ export default function Profile(params: any) {
     checkJwtCookie();
   }, [user?.login, isProfileOwner]);
 
-  useEffect(() => {
-    const getUserFromRoutId = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${params.params.intraId}`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          toast.error("User not found");
-          console.log("User not found");
-          return;
+  const getUserFromRoutId = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${params.params.intraId}`,
+        {
+          method: "GET",
+          credentials: "include",
         }
-        const contentType = response.headers.get("content-type");
+      );
 
-        if (contentType && contentType.includes("application/json")) {
-          var data: User = await response.json();
-          setuserFromRoutId(data);
-        } else {
-          toast.error("User not found");
-          console.log("User not found");
-        }
-      } catch (error: any) {
-        const msg = "Error during login" + error.message;
-        toast.error(msg);
-        console.error("Error during login:", error);
+      if (!response.ok) {
+        toast.error("User not found");
+        console.log("User not found");
+        return;
       }
-    };
+      const contentType = response.headers.get("content-type");
 
+      if (contentType && contentType.includes("application/json")) {
+        var data: User = await response.json();
+        setuserFromRoutId(data);
+
+        console.log("data.status: ", data.status);
+      } else {
+        toast.error("User not found");
+        console.log("User not found");
+      }
+    } catch (error: any) {
+      const msg = "Error during login" + error.message;
+      toast.error(msg);
+      console.error("Error during login:", error);
+    }
+  };
+
+  useEffect(() => {
     getUserFromRoutId();
   }, []);
 
@@ -878,11 +910,42 @@ export default function Profile(params: any) {
     addLogin(user?.isRegistred);
   }, [user?.isRegistred, isProfileOwner]);
 
+  const createsocket = () => {
+    const handleClientsConnection = `${process.env.NEXT_PUBLIC_API_URL}:3002/handleClientsConnection`;
+
+    const cookies = new Cookies();
+    const newSocket = io(handleClientsConnection, {
+      auth: { jwt: cookies.get("jwt") },
+    });
+
+    setsocket(newSocket);
+  };
+
+  const listenForEvents = () => {
+    if (socket !== null) {
+      socket.on("update", () => {
+        getUserFromRoutId();
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!socket) {
+      createsocket();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      listenForEvents();
+    }
+  }, [socket]);
+
   useEffect(() => {
     if (isProfileOwner === false) {
       setDivVisible(false);
     }
-  }, []);
+  }, [user]);
 
   if (!userFromRoutId) {
     return (
@@ -957,7 +1020,12 @@ export default function Profile(params: any) {
         )}
 
         <div className="flex-1 overflow-y-auto">
-          <UserProfileImage src={IntraPic} intraId={intraId} />
+          <UserProfileImage
+            status={userFromRoutId?.status}
+            isProfileOwner={isProfileOwner}
+            src={IntraPic}
+            intraId={intraId}
+          />
           <div className={`${isDivVisible ? "mt-20" : "mt-16"} p-10`}>
             <UserDetailsCard value={Login} intraId={intraId} />
             <Friend

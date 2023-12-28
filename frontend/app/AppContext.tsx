@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { io, Socket } from "socket.io-client";
+import Cookies from "universal-cookie";
 
 interface Message {
   sender: string;
@@ -15,16 +23,17 @@ export type User = {
   isTfaEnabled: boolean;
   created_at: Date;
   updated_at: Date;
+  status: string;
 };
 
 type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
-  setDivVisible: (isDivVisible : boolean ) => void;
+  setDivVisible: (isDivVisible: boolean) => void;
   user: User | null;
   setUser: (user: User | null) => void;
   isSidebarVisible: boolean;
-  setisSidebarVisible: (isSidebarVisible : boolean ) => void;
+  setisSidebarVisible: (isSidebarVisible: boolean) => void;
   toggleSidebarVisibleVisibility: () => void;
   recipientUserId: string;
   setRecipientLogin: (recipientUserId: string) => void;
@@ -36,8 +45,8 @@ type AppContextProps = {
   messages: Message[];
   messageText: string;
   setMessageText: (messageText: string) => void;
-  socket: any;
-  setSocket: (socket: any) => void;
+  socket: Socket | null;
+  setSocket: (socket: Socket | null) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -55,7 +64,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [friendsData, setFriends] = useState(null);
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const [messageText, setMessageText] = useState('');
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);

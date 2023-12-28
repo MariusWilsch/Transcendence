@@ -18,6 +18,11 @@ export class ChatService {
     return data;
   }
   async getPrivateRoomMessages(roomId: string) {
+    const room = await this.getPrivateRoom(roomId);
+    if (!room)
+    {
+      throw ('no such room');
+    }
     const data = await this.prismaService.getRoomMessages(roomId);
     return data;
   }

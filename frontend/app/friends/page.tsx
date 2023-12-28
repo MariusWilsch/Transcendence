@@ -8,8 +8,11 @@ import toast, { Toaster } from "react-hot-toast";
 import { Navbar } from "../profile/[intraId]/page";
 import { Sidebar } from "../profile/[intraId]/page";
 import { RiSearchLine } from "react-icons/ri";
+import { io, Socket } from "socket.io-client";
+import Cookies from "universal-cookie";
+import { FaCircle } from "react-icons/fa";
 
-export default function Search() {
+export default function Friends() {
   const {
     user,
     setUser,
@@ -19,7 +22,11 @@ export default function Search() {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
+    // socket,
+    // setsocket,
   } = useAppContext();
+
+  const [socket, setsocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     const checkJwtCookie = async () => {
@@ -54,57 +61,28 @@ export default function Search() {
 
   const [users, setUsers] = useState<User[] | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
-  const [selectedFeild, setselectedFeild] = useState("All");
+  const [selectedFeild, setselectedFeild] = useState("Online");
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-      if (!response.ok) {
-        toast.error("User not found");
-        return;
-      }
+  // const fetchUsers = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
+  //       {
+  //         method: "GET",
+  //         credentials: "include",
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       toast.error("User not found");
+  //       return;
+  //     }
 
-      const users: User[] = await response.json();
-      setUsers(users);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  const getFriends = async () => {
-    if (!user) {
-      return;
-    }
-    try {
-      const response: any = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/friends`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-      const data = await response.json();
-
-      if (response.success === false) {
-        const msg = "Error getting friends";
-        toast.error(msg);
-        console.log(msg);
-      }
-      if (data.friends) {
-        setUsers(data.friends);
-      }
-    } catch (error: any) {
-      const msg = "Error getting friends: " + error.message;
-      toast.error(msg);
-      console.error("Error getting friends:", error.message);
-    }
-  };
+  //     const users: User[] = await response.json();
+  //     setUsers(users);
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
 
   const PendingInvite = async () => {
     if (!user) {
@@ -163,9 +141,6 @@ export default function Search() {
       console.error("Error getting friends:", error.message);
     }
   };
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -173,7 +148,7 @@ export default function Search() {
       inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue === " "
+      inputValue.trim().length === 0
     ) {
       return;
     }
@@ -206,7 +181,102 @@ export default function Search() {
     }
   };
 
+  const getFriends = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/friends`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.success === false) {
+        const msg = "Error getting friends";
+        toast.error(msg);
+        console.log(msg);
+      }
+      if (data.friends) {
+        setUsers(data.friends);
+
+        // console.log("User friends ", users);
+      }
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
+
+  const onlineFriends = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/onlinefriends`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.success === false) {
+        const msg = "Error getting friends";
+        toast.error(msg);
+        console.log(msg);
+      }
+      if (data.onlinefriends) {
+        setUsers(data.onlinefriends);
+      }
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    onlineFriends();
+  }, [user]);
+
   useEffect(() => {}, [inputValue]);
+
+  const createsocket = () => {
+    const handleClientsConnection = `${process.env.NEXT_PUBLIC_API_URL}:3002/handleClientsConnection`;
+
+    const cookies = new Cookies();
+    const newSocket = io(handleClientsConnection, {
+      auth: { jwt: cookies.get("jwt") },
+    });
+
+    setsocket(newSocket);
+  };
+
+  const listenForEvents = () => {
+    if (socket !== null) {
+      socket.on("update", () => {
+        onlineFriends();
+        setselectedFeild("Online");
+        console.log("Online");
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!socket) {
+      createsocket();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      listenForEvents();
+    }
+  }, [socket]);
 
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
@@ -235,24 +305,24 @@ export default function Search() {
                   <button
                     className="w-full"
                     onClick={() => {
-                      getFriends();
-                      setselectedFeild("Friends");
+                      onlineFriends();
+                      setselectedFeild("Online");
                     }}
                   >
                     <div
                       className={`${
-                        selectedFeild === "Friends"
+                        selectedFeild === "Online"
                           ? "underline underline-offset-8 text-slate-200"
                           : "text-slate-300"
                       } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
                     >
-                      Friends
+                      Online
                     </div>
                   </button>
                   <button
                     className="w-full"
                     onClick={() => {
-                      fetchUsers();
+                      getFriends();
                       setselectedFeild("All");
                     }}
                   >
@@ -346,13 +416,38 @@ export default function Search() {
                         <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                           <div className="flex-1 w-0 p-4">
                             <div className="flex items-start">
-                              <div className="flex-shrink-0 pt-0.5">
+                              <div className="relative flex-shrink-0 pt-0.5">
                                 <img
                                   className="h-10 w-10 rounded-full"
                                   src={user.Avatar}
                                   alt=""
                                 />
+                                {(selectedFeild === "Online" ||
+                                  selectedFeild === "All") && (
+                                  <div className="absolute right-0 bottom-0">
+                                    <div className="">
+                                      <FaCircle
+                                        className={`${
+                                          user.status === "ONLINE"
+                                            ? "text-green-600 border-slate-950 border rounded-full"
+                                            : ""
+                                        } ${
+                                          user.status === "OFFLINE"
+                                            ? "text-red-600 border-slate-950 border rounded-full"
+                                            : ""
+                                        } ${
+                                          user.status != "ONLINE" &&
+                                          user.status != "OFFLINE"
+                                            ? "hidden"
+                                            : ""
+                                        }`}
+                                        size="14"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
+
                               <div className="ml-3 f">
                                 <p className="text-md font-sans text-white">
                                   {user.login}

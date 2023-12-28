@@ -25,8 +25,6 @@ export default function Search(params: any) {
     toggleSidebarVisibleVisibility,
   } = useAppContext();
 
-  // console.log("params: ", params);
-
   useEffect(() => {
     setisSidebarVisible(window.innerWidth > 768);
   }, []);
@@ -36,7 +34,6 @@ export default function Search(params: any) {
 
   useEffect(() => {
     const searchTerm = params.searchParams.query;
-    console.log("searchTerm: ", searchTerm);
 
     const handleSearchQuery = async (searchTerm: string) => {
       if (
@@ -47,7 +44,6 @@ export default function Search(params: any) {
       ) {
         return;
       }
-
       try {
         const data = {
           searchTerm: searchTerm,
@@ -68,12 +64,7 @@ export default function Search(params: any) {
           toast.error("User not found");
           return;
         }
-
-        
         const users: User[] = await response.json();
-        console.log("users: ", users);
-
-
         setUsers(users);
       } catch (error) {
         console.error("Error:", error);
@@ -89,7 +80,7 @@ export default function Search(params: any) {
       inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue === " "
+      inputValue.trim().length === 0
     ) {
       return;
     }
