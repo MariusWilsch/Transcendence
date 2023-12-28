@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import Image from 'next/image';
 import io from 'socket.io-client';
 import { useAppContext } from '../AppContext';
+import PrivateRoom from './[roomId]/page';
 
 var data: User;
 interface Message {
@@ -22,14 +23,15 @@ type User = {
 };
 
 const ConversationCard = ({ user }: any, {lastMessage}:any) => {
-  console.log(lastMessage);
+  const context = useAppContext();
+
   return (
-    <div className="flex items-center p-2 my-1 border-4">
+    <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center p-2 my-1 border-4">
       <div className="flex  flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-        <div className="sm:hidden"><span>{user?.login}</span></div>
+        <div><span>{user?.login}</span></div>
         {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
       </div>
-      <Image width={56} height={56} src="https://cdn.intra.42.fr/users/b3084a191fa21003419890965f63f753/zessadqu.jpg" alt="My profile" className="rounded-full order-1" />
+      <Image width={56} height={56} src={user.Avatar} alt="My profile" className="rounded-full order-1" />
     </div>
   );
 }
@@ -41,16 +43,15 @@ const SearchStart = () => {
     </div>
   );
 }
-const Conversations = ({user}:any) => {
- 
+const Conversations = ({friends}:any) => {
   return (
     <div className="border w-1/5 flex flex-col  p-3">
-      <SearchStart />
+    {/* <SearchStart /> */}
       <h1 className='text-center text-lg'>Conversations</h1>
       <div>
-        <ul>
-          <ConversationCard user={user}/>
-        </ul>
+        {friends?.friends.map((friend:any, index:any) => (
+          <ConversationCard key={index} user={friend} lastMessage={"last message"} />
+        ))}
       </div>
     </div>
   );
@@ -141,11 +142,8 @@ const ProfileInfo = () => {
   );
 }
 const Chat = () => {
-  const [socket, setSocket] = useState<any>(null);
-  const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
-  const [messageText, setMessageText] = useState('');
-  const [userData, setUserData] = useState(null);
-  const recipientHandler = useAppContext();
+  const [friends, setFriends] = useState<any>(null);
+  const context = useAppContext();
   useEffect(() => {
     const fetchDataAndSetupSocket = async () => {
       try {
@@ -157,17 +155,26 @@ const Chat = () => {
           credentials: "include",
         });
         const userData = await response.json();
-        setUserData(userData);
-        // console.log("user data:", userData);
-
+        context.setUserData(userData);
+        const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        const friends = await response2.json();
+        setFriends(friends);
+        console.log("user data:", userData);
+        // console.log("friends:", friends);
         const newSocket = io('http://localhost:3001', {
           query: { userId: userData.intraId },
         });
 
-        setSocket(newSocket);
+        context.setSocket(newSocket);
 
         newSocket.on('privateChat', (data: Message) => {
-          setMessages((prevMessages) => [...prevMessages, data]);
+          context.setMessages((prevMessages:any) => [...prevMessages, data]);
         });
 
         return () => {
@@ -179,17 +186,12 @@ const Chat = () => {
     };
 
     fetchDataAndSetupSocket();
-  }, []);
+  }, [context.recipientUserId]);
 
-
-  const sendPrivateMessage = () => {
-    if (socket && recipientHandler.recipientUserId && messageText) {
-      socket.emit('privateChat', { to: recipientHandler.recipientUserId, message: messageText, senderId: userData?.intraId });
-      setMessageText('');
-    }
-  };
-  const desplayedMessages = messages.toReversed();
-  console.log(desplayedMessages);
+  // const desplayedMessages = context.messages.length !=0? context.messages.toReversed():[];
+  // console.log(`those are my real friends ${friends?.friends[0].Avatar}`);
+  // console.log('this is the recipient id', context.recipientUserId);
+  // console.log(`it s me ${context.user?.intraId}`);
   return (
     // <div>
     //   <div>
@@ -225,9 +227,9 @@ const Chat = () => {
     //   </div>
     // </div>
     <div className="flex border-4 h-screen">
-      <Conversations user={userData} />
+      <Conversations friends={friends} />
       {/* <Messages></Messages> */}
-      <div className="flex-1 p:2 lg:flex sm:p-6 justify-between flex flex-col h-screen">
+      {/* <div className="flex-1 p:2 lg:flex sm:p-6 justify-between flex flex-col h-screen">
         <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
           <div className="relative flex items-center space-x-4">
             <div className="relative">
@@ -248,7 +250,7 @@ const Chat = () => {
         </div>
         <div className="chat-message border-8 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto">
           {desplayedMessages.map((msg, index) => (
-            (msg.sender == userData?.intraId && <SingleMessageSent key={index} message={msg.message} />) || (msg.sender != userData?.intraId && <SingleMessageReceived key={index}  message={msg.message} />)
+            (msg.sender == context.userData?.intraId && <SingleMessageSent key={index} message={msg.message} />) || (msg.sender != context.userData?.intraId && <SingleMessageReceived key={index}  message={msg.message} />)
           ))}
         </div>
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
@@ -274,7 +276,8 @@ const Chat = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
+      { context.recipientUserId && <PrivateRoom  params={{roomId:"13055590199"}} />}
       {/* <ProfileInfo></ProfileInfo> */}
     </div>
   );

@@ -113,6 +113,9 @@ export class PrismaService {
       },
     });
   }
+  async getRoomMessages(roomId:string) :Promise<any>{
+    return 
+  }
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
   }

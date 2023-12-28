@@ -17,8 +17,13 @@ export class ChatController {
   @Get(':id')
   async getRoom(@Param('id') id: string, @Res() res:any) :Promise<void>{
     const data = await this.chatService.getPrivateRoom(id);
-    console.log(data.messages);
-    res.json(data);
+    res.json({success:true, data});
+    return data;
+  }
+  @Get(':id/messages')
+  async getRoomMessages(@Param('id') id: string, @Res() res:any) :Promise<void>{
+    const data = await this.chatService.getPrivateRoomMessages(id);
+    res.json({success:true, data});
     return data;
   }
   @Get(':id/messages')

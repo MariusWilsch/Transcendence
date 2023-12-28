@@ -17,6 +17,10 @@ export class ChatService {
     const data = await this.prismaService.getRoom(roomId);
     return data;
   }
+  async getPrivateRoomMessages(roomId: string) {
+    const data = await this.prismaService.getRoomMessages(roomId);
+    return data;
+  }
   async getMessagesByUser(userId:string): Promise<any>{
     const data = await this.prismaService.getMessagesByUser(userId);
     return data;
