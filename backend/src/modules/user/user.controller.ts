@@ -193,11 +193,7 @@ export class UserController {
       const { userId, friendId } = body;
       const isFriend = await this.userService.createFriend(userId, friendId);
 
-      if (isFriend === 'alreadyFriend') {
-        return res.json({ success: true, isFriend: true });
-      } else {
-        return res.json({ success: true, isFriend: false });
-      }
+      return res.json({ success: true });
     } catch (error: any) {
       console.error('Error addfriend:', error);
       return res.json({ success: false });
@@ -215,10 +211,27 @@ export class UserController {
       const isBlocked = await this.userService.blockFriend(userId, friendId);
 
       if (isBlocked === 'alreadyFriend') {
-        return res.json({ success: true, isBlocked: true });
+        return res.json({ success: true });
       } else {
         return res.json({ success: true, isBlocked: false });
       }
+    } catch (error: any) {
+      console.error('Error addfriend:', error);
+      return res.json({ success: false });
+    }
+  }
+
+  @Post('removefrinship')
+  @UseGuards(JwtAuthGuard)
+  async removefrinship(
+    @Body() body: { userId: string; friendId: string },
+    @Res() res: any
+  ) {
+    try {
+      const { userId, friendId } = body;
+      await this.userService.removefrinship(userId, friendId);
+
+      return res.json({ success: true });
     } catch (error: any) {
       console.error('Error addfriend:', error);
       return res.json({ success: false });

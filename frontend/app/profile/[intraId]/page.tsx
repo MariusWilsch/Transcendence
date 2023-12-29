@@ -578,15 +578,15 @@ export const Sidebar = () => {
                   />
                 </li>
                 <li>
-                <Link
-                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
-                  >
-                  <IoChatbubblesOutline
-                    size="30"
-                    className={`${
-                      RouterName === "chat" ? "text-slate-50" : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
+                    <IoChatbubblesOutline
+                      size="30"
+                      className={`${
+                        RouterName === "chat"
+                          ? "text-slate-50"
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
+                    />
                   </Link>
                 </li>
                 <li>
@@ -736,11 +736,10 @@ const Friend = ({
       const data = await response.json();
 
       if (data.success === false) {
+        setStatus("NOTFRIENDS");
         toast.error("Error adding friend");
-      } else if (data.isFriend === false) {
+      } else {
         toast.success("Friend request sent");
-      } else if (data.isFriend === true) {
-        toast.error("Friend request deleted");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -770,10 +769,8 @@ const Friend = ({
 
       if (data.success === false) {
         toast.error("Error blocking friend");
-      } else if (data.isBlocked === false) {
+      } else {
         toast.success("Friend blocked successfully");
-      } else if (data.isBlocked === true) {
-        toast.success("Friend unblocked successfully");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -781,6 +778,40 @@ const Friend = ({
       console.error("Error adding friend:", error.message);
     }
   };
+
+  const removefrinship = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/removefrinship`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: `${userId}`,
+            friendId: `${friendId}`,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success === false) {
+        toast.error("Error removing the friend");
+      } else if (data.success === true) {
+        //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+        // setStatus("NOTFRIENDS");
+        toast.success("Friendship removed");
+      }
+    } catch (error: any) {
+      toast.error("Error adding friend ");
+      console.error("Error adding friend:", error.message);
+    }
+  };
+
+  const [blocked, setblocked] = useState<boolean>(false);
 
   const FriendshipStatus = async () => {
     if (!userId) {
@@ -805,6 +836,15 @@ const Friend = ({
       } else {
         setStatus(data.friend.friendshipStatus);
       }
+      if (data.friend && data.friend.friendshipStatus) {
+        if (
+          data.friend &&
+          data.friend.friendshipStatus === "BLOCKED" &&
+          data.friend.friendId === userId
+        ) {
+          setblocked(true);
+        }
+      }
     } catch (error: any) {
       toast.error("Error during FriendshipStatus");
     }
@@ -812,32 +852,33 @@ const Friend = ({
 
   useEffect(() => {
     FriendshipStatus();
-  }, [userId, friendshipStatus]);
+  }, [userId]);
 
-  //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
 
   return (
     <div>
       {!isProfileOwner && (
-        <div className="flex items-center justify-center text-white">
+        <div
+          className={`flex items-center justify-center text-white ${blocked ? " pointer-events-none" : ""}`}
+        >
           <div className="mx-2">
-            {(friendshipStatus === "NOTFRIENDS" ||
-              friendshipStatus === "BLOCKED") && (
-              <button
-                className=""
-                onClick={() => {
-                  addfriend();
-                  setStatus("PENDING");
-                }}
-              >
-                <FiUserPlus size="25" />
-              </button>
-            )}
+            {friendshipStatus !== "ACCEPTED" &&
+              friendshipStatus !== "PENDING" && (
+                <button
+                  className=""
+                  onClick={() => {
+                    addfriend();
+                    setStatus("PENDING");
+                  }}
+                >
+                  <FiUserPlus size="25" />
+                </button>
+              )}
             {friendshipStatus === "PENDING" && (
               <button
                 className=""
                 onClick={() => {
-                  addfriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
@@ -848,7 +889,7 @@ const Friend = ({
               <button
                 className=""
                 onClick={() => {
-                  addfriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
@@ -861,11 +902,11 @@ const Friend = ({
               <button
                 className=""
                 onClick={() => {
-                  blockFriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
-                <MdOutlineBlock size="25" className="text-red-200" />
+                <CgUnblock size="27" className="text-white rotate-90" />
               </button>
             )}
             {friendshipStatus !== "BLOCKED" && (
@@ -876,7 +917,7 @@ const Friend = ({
                   setStatus("BLOCKED");
                 }}
               >
-                <CgUnblock size="25" className="text-red-200" />
+                <MdOutlineBlock size="25" className="text-red-200" />
               </button>
             )}
           </div>

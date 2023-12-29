@@ -110,36 +110,7 @@ export class UserService {
     return true;
   }
 
-  async createFriend(userId: string, friendId: string): Promise<string> {
-    const ifTheFriendshipExists = await prisma.friend.findFirst({
-      where: {
-        OR: [
-          {
-            userId: userId,
-            friendId: friendId,
-            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
-          },
-          {
-            userId: friendId,
-            friendId: userId,
-            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
-          },
-        ],
-      },
-    });
-
-    if (ifTheFriendshipExists) {
-      await prisma.friend.deleteMany({
-        where: {
-          OR: [
-            { userId: userId, friendId: friendId },
-            { userId: friendId, friendId: userId },
-          ],
-        },
-      });
-      return 'alreadyFriend';
-    }
-
+  async createFriend(userId: string, friendId: string) {
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
@@ -147,7 +118,6 @@ export class UserService {
         friendId: friendId,
       },
     });
-    return 'newFriendship';
   }
 
   async blockFriend(userId: string, friendId: string): Promise<string> {
@@ -168,7 +138,6 @@ export class UserService {
           ],
         },
       });
-      // console.log('ifTheFriendshipExists ',ifTheFriendshipExists)
 
       return 'alreadyFriend';
     }
@@ -200,7 +169,6 @@ export class UserService {
           friendshipStatus: 'BLOCKED',
         },
       });
-      // console.log('ifTheFriendshipExists2 ',ifTheFriendshipExists2)
       return 'alreadyFriend';
     }
 
@@ -212,6 +180,18 @@ export class UserService {
       },
     });
     return 'newFriendship';
+  }
+
+  async removefrinship(userId: string, friendId: string) {
+    const removefrinship = await prisma.friend.deleteMany({
+      where: {
+        OR: [
+          { userId: userId, friendId: friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+    return removefrinship;
   }
 
   async getFriends(userId: string) {
