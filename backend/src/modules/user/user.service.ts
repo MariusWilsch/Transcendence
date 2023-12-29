@@ -114,8 +114,16 @@ export class UserService {
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          {
+            userId: userId,
+            friendId: friendId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
         ],
       },
     });
@@ -146,13 +154,12 @@ export class UserService {
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          { userId: userId, friendId: friendId, friendshipStatus: 'BLOCKED' },
+          { userId: friendId, friendId: userId, friendshipStatus: 'BLOCKED' },
         ],
       },
     });
     if (ifTheFriendshipExists) {
-
       await prisma.friend.deleteMany({
         where: {
           OR: [
@@ -161,6 +168,39 @@ export class UserService {
           ],
         },
       });
+      // console.log('ifTheFriendshipExists ',ifTheFriendshipExists)
+
+      return 'alreadyFriend';
+    }
+    const ifTheFriendshipExists2 = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          {
+            userId: userId,
+            friendId: friendId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+        ],
+      },
+    });
+    if (ifTheFriendshipExists2) {
+      await prisma.friend.update({
+        where: {
+          unique_user_friend: {
+            userId: ifTheFriendshipExists2.userId,
+            friendId: ifTheFriendshipExists2.friendId,
+          },
+        },
+        data: {
+          friendshipStatus: 'BLOCKED',
+        },
+      });
+      // console.log('ifTheFriendshipExists2 ',ifTheFriendshipExists2)
       return 'alreadyFriend';
     }
 
@@ -225,7 +265,6 @@ export class UserService {
 
     return filteredFriendsDetails;
   }
-
 
   async PendingInvite(userId: string) {
     const PendingInvite = await prisma.friend.findMany({
@@ -314,21 +353,38 @@ export class UserService {
     }
   }
 
-  async updateUserState(userId : string, status : "ONLINE" | "OFFLINE" | "INGAME")
-  {
-    try{
+  async updateUserState(
+    userId: string,
+    status: 'ONLINE' | 'OFFLINE' | 'INGAME'
+  ) {
+    try {
       const friend = await prisma.user.update({
         where: {
-          intraId : userId
+          intraId: userId,
         },
         data: {
-          status : status
-        }
-      })
-    }
-    catch(error : any)
-    {
+          status: status,
+        },
+      });
+    } catch (error: any) {
       console.error('Error updateUserState:', error);
+      return;
+    }
+  }
+
+  async FriendshipStatus(userId: string, friendId: string) {
+    try {
+      const FriendshipStatus = await prisma.friend.findFirst({
+        where: {
+          OR: [
+            { userId: userId, friendId: friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
+      return FriendshipStatus;
+    } catch (error: any) {
+      console.error('Error FriendshipStatus:', error);
       return;
     }
   }

@@ -57,7 +57,7 @@ export class handleClientsConnection
       this.addClient(client);
       if (client.handshake.auth && client.handshake.auth.jwt) {
         const user = this.authService.getUserFromJwt(client.handshake.auth.jwt);
-        console.log('user connected ', user.login);
+        // console.log('user connected ', user.login);
         if (user) {
           this.server.emit('update');
 
@@ -75,7 +75,7 @@ export class handleClientsConnection
       this.removeClient(client);
       if (client.handshake.auth && client.handshake.auth.jwt) {
         const user = this.authService.getUserFromJwt(client.handshake.auth.jwt);
-        console.log('user disconnected ', user.login);
+        // console.log('user disconnected ', user.login);
         if (user) {
           this.server.emit('update');
           await this.UserService.updateUserState(user.intraId, 'OFFLINE');

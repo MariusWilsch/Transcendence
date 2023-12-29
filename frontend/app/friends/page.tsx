@@ -25,7 +25,6 @@ export default function Friends() {
     // socket,
     // setsocket,
   } = useAppContext();
-
   const [socket, setsocket] = useState<Socket | null>(null);
 
   useEffect(() => {
