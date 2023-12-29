@@ -15,9 +15,10 @@ import { User, useAppContext } from '@/app/AppContext';
 //   PrivateRoom: Room[]
 // }
 interface Message {
+  id: number;
   sender: string;
   recipient: string;
-  message: string;
+  content: string;
   privateRommName: string;
 }
 
@@ -91,6 +92,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   );
     if (context.socket) {
       context.socket.on('privateChat', (message: Message) => {
+        console.log('privateChat');
+        console.log(message);
         setMessages((prevMessages:Message[]) => [...prevMessages, message]);
       });
     }
@@ -106,14 +109,14 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const sendPrivateMessage = () => {
     if (context.socket && context.recipientUserId && messageText) {
       context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText, senderId: context.userData?.intraId });
-      setMessages((prevMessages:any) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, message: messageText, PrivateRoomName:params.roomId}]);
+      setMessages((prevMessages:any) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, content: messageText, PrivateRoomName:params.roomId}]);
       setMessageText('');
     }
   };
   const recipientData = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
-  const desplayedMessages = messages.toReversed();
+  const desplayedMessages :Message[] = messages.toReversed();
   return (
-    <div className="flex-1 p:2  md:hidden lg:flex sm:p-6 justify-between flex flex-col h-screen">
+    <div className="flex-1 p:2  lg:flex sm:p-6 justify-between flex flex-col h-screen">
       <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
         <div className="relative flex items-center space-x-4">
           <div className="relative">
@@ -126,15 +129,15 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">Zessadqu</span>
+              <span className="text-gray-700 mr-3">{recipientData.login}</span>
             </div>
             <span style={{ display: "" }} className="text-lg text-gray-600">Actif</span>
           </div>
         </div>
       </div>
       <div className="chat-message border-8 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto">
-        {desplayedMessages?.map((msg:any) => (
-          (msg.sender == context.userData?.intraId && <SingleMessageSent message={msg.content} />) || (msg.sender != context.userData?.intraId && <SingleMessageReceived message={msg.content} />)
+        {desplayedMessages?.map((msg:any, index) => (
+          (msg.sender == context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) || (msg.sender != context.userData?.intraId && <SingleMessageReceived key={index} message={msg.content} />)
         ))}
       </div>
       <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">

@@ -30,7 +30,7 @@ export class ChatController {
   // @Get(':id/message')
   // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
   //   const data = await this.chatService.getMessagesByUser(id);
-  //   res.json(data);
+  //   res.json(data)
   //   return data;
   //  }
   @Post('private-message')

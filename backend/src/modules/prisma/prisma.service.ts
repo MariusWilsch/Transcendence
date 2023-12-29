@@ -44,9 +44,8 @@ export class PrismaService {
     }
     if (!room)
     {
-      await this.createPrivateRoom(sender, recipient);
-      console.log('room created succefully');
-    };
+      throw('no such channel');
+    }
     await this.prisma.message.create({
       data: {
         sender:sender,
@@ -58,14 +57,26 @@ export class PrismaService {
   }
 
   async createPrivateRoom(user1: string, user2: string): Promise<void> {
-  
+
+    const romeName  = parseInt(user1) > parseInt(user2) ? user1 + user2 :user2 + user1;
+
+    const room = await this.prisma.privateRoom.findUnique({
+      where:{
+        
+        name:romeName,
+      }
+    });
+    if (room)
+    {
+      console.log('room already exist');
+      return;
+    }
     const member1 = await this.prisma.user.findUnique({ where: { intraId: user1 } });
     const member2 = await this.prisma.user.findUnique({ where: { intraId: user2 } });
     if (!member1 || !member2) {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
     }
-    const romeName  = parseInt(member1.intraId) > parseInt(member2.intraId) ? member1.intraId + member2.intraId :member2.intraId + member1.intraId;
     await this.prisma.privateRoom.create({
       data: {
         name:romeName,

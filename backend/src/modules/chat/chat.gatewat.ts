@@ -29,18 +29,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('createPrivateRoom')
-  async createPrivRoom(payload:{user1:string, user2:string}): Promise<void>{
+  async createPrivRoom(client :any, payload:{user1:string, user2:string}): Promise<void>{
     await this.prismaService.createPrivateRoom(payload.user1, payload.user2);
-    console.log(`room named ${payload.user1+payload.user2} is created`);
   }
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.connectedClients.get(payload.to);
     const recip = await this.prismaService.getUserById(payload.to);
-    // console.log(recipientSocket);
+    console.log(recip);
     if (recipientSocket || recip) {
-        recipientSocket.emit('privateChat', { sender: payload.senderId,senderLogin:payload.senderId, message: payload.message });
-        // Save the private message to the databasee
+      if (recipientSocket)
+      {
+        recipientSocket.emit('privateChat', { sender: payload.senderId,content: payload.message,senderLogin:payload.senderId });
+      }
+        // Save the private message to the database
         await this.prismaService.createMessage(payload.senderId, payload.to, payload.message);
         console.log(`Private message from ${payload.senderId} to ${payload.to}: ${payload.message}`);
       } else {
