@@ -30,8 +30,10 @@ type AppContextProps = {
   isSidebarVisible: boolean;
   setisSidebarVisible: (isSidebarVisible: boolean) => void;
   toggleSidebarVisibleVisibility: () => void;
-  socket: Socket | null;
-  setsocket: (socket: Socket | null) => void;
+  // friendshipStatus: "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED";
+  // setStatus: (
+  //   status: "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+  // ) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -44,7 +46,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isDivVisible, setDivVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isSidebarVisible, setisSidebarVisible] = useState<boolean>(true);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // const [friendshipStatus, setStatus] = useState<
+  //   "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+  // >("NOTFRIENDS");
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);
@@ -63,8 +67,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    socket,
-    setsocket: setSocket,
+    // friendshipStatus,
+    // setStatus,
   };
 
   return (

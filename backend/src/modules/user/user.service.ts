@@ -114,8 +114,16 @@ export class UserService {
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          {
+            userId: userId,
+            friendId: friendId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
         ],
       },
     });
@@ -146,8 +154,8 @@ export class UserService {
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          { userId: userId, friendId: friendId, friendshipStatus: 'BLOCKED' },
+          { userId: friendId, friendId: userId, friendshipStatus: 'BLOCKED' },
         ],
       },
     });
@@ -160,6 +168,39 @@ export class UserService {
           ],
         },
       });
+      // console.log('ifTheFriendshipExists ',ifTheFriendshipExists)
+
+      return 'alreadyFriend';
+    }
+    const ifTheFriendshipExists2 = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          {
+            userId: userId,
+            friendId: friendId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+            friendshipStatus: { in: ['ACCEPTED', 'PENDING'] },
+          },
+        ],
+      },
+    });
+    if (ifTheFriendshipExists2) {
+      await prisma.friend.update({
+        where: {
+          unique_user_friend: {
+            userId: ifTheFriendshipExists2.userId,
+            friendId: ifTheFriendshipExists2.friendId,
+          },
+        },
+        data: {
+          friendshipStatus: 'BLOCKED',
+        },
+      });
+      // console.log('ifTheFriendshipExists2 ',ifTheFriendshipExists2)
       return 'alreadyFriend';
     }
 
@@ -332,14 +373,19 @@ export class UserService {
   }
 
   async FriendshipStatus(userId: string, friendId: string) {
-    const FriendshipStatus = await prisma.friend.findFirst({
-      where: {
-        OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
-        ],
-      },
-    });
-    return FriendshipStatus;
+    try {
+      const FriendshipStatus = await prisma.friend.findFirst({
+        where: {
+          OR: [
+            { userId: userId, friendId: friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
+      return FriendshipStatus;
+    } catch (error: any) {
+      console.error('Error FriendshipStatus:', error);
+      return;
+    }
   }
 }

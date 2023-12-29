@@ -10,6 +10,7 @@ import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { TbFriends } from "react-icons/tb";
 import { MdOutlineBlock } from "react-icons/md";
+import { CgUnblock } from "react-icons/cg";
 import { BiMessageRounded } from "react-icons/bi";
 import { IoGameControllerOutline } from "react-icons/io5";
 import toast, { Toaster } from "react-hot-toast";
@@ -33,6 +34,8 @@ import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
 import { FaCircle } from "react-icons/fa";
 import { PiGameControllerLight } from "react-icons/pi";
+import { TbUserOff } from "react-icons/tb";
+import { FaUserTimes } from "react-icons/fa";
 
 export function Loading() {
   return (
@@ -575,12 +578,16 @@ export const Sidebar = () => {
                   />
                 </li>
                 <li>
+                <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
+                  >
                   <IoChatbubblesOutline
                     size="30"
                     className={`${
                       RouterName === "chat" ? "text-slate-50" : "text-slate-500"
                     } hover:text-slate-50 mx-auto m-8`}
                   />
+                  </Link>
                 </li>
                 <li>
                   <RiPingPongLine
@@ -700,7 +707,14 @@ const Friend = ({
   userId: string | undefined;
   friendId: string;
 }) => {
-  const [status, setStatus] = useState("NOTFRIENDS");
+  // const {
+  //   friendshipStatus,
+  //   setStatus,
+  // } = useAppContext();
+
+  const [friendshipStatus, setStatus] = useState<
+    "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+  >("NOTFRIENDS");
 
   const addfriend = async () => {
     try {
@@ -759,7 +773,7 @@ const Friend = ({
       } else if (data.isBlocked === false) {
         toast.success("Friend blocked successfully");
       } else if (data.isBlocked === true) {
-        toast.error("Friend unblocked successfully");
+        toast.success("Friend unblocked successfully");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -767,10 +781,6 @@ const Friend = ({
       console.error("Error adding friend:", error.message);
     }
   };
-
-  // const [status, setStatus] = useState<
-  //   "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
-  // >("NOTFRIENDS");
 
   const FriendshipStatus = async () => {
     if (!userId) {
@@ -784,53 +794,102 @@ const Friend = ({
           credentials: "include",
         }
       );
+
       const data: any = await response.json();
-      if (data.success === false) {
+      if (!data.success) {
         toast.error("Error during FriendshipStatus");
         return;
       }
-      console.log(
-        "data.friend.friendshipStatus: ",
-        data.friend.friendshipStatus
-      );
-
-      if (data.friend === null) {
+      if (!data.friend) {
         setStatus("NOTFRIENDS");
-        console.log("New status set: NOTFRIENDS");
       } else {
-        setStatus(data.friend.friendshipStatus as string);
-        console.log("New status set: ", data.friend.friendshipStatus);
+        setStatus(data.friend.friendshipStatus);
       }
-
-      // console.log("FriendshipStatus: ", status);
     } catch (error: any) {
       toast.error("Error during FriendshipStatus");
-      console.error("Error during FriendshipStatus");
     }
   };
 
-  console.log("status : ", status);
-
   useEffect(() => {
     FriendshipStatus();
-  }, [userId]);
+  }, [userId, friendshipStatus]);
+
+  //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
 
   return (
     <div>
       {!isProfileOwner && (
         <div className="flex items-center justify-center text-white">
-          <button className="mx-2" onClick={addfriend}>
-            <FiUserPlus size="25" />
-          </button>
-          <button className="mx-2" onClick={blockFriend}>
-            <MdOutlineBlock size="25" className="text-red-200" />
-          </button>
-          <button className="mx-2">
-            <BiMessageRounded size="25" />
-          </button>
-          <button className="mx-2">
-            <IoGameControllerOutline size="25" />
-          </button>
+          <div className="mx-2">
+            {(friendshipStatus === "NOTFRIENDS" ||
+              friendshipStatus === "BLOCKED") && (
+              <button
+                className=""
+                onClick={() => {
+                  addfriend();
+                  setStatus("PENDING");
+                }}
+              >
+                <FiUserPlus size="25" />
+              </button>
+            )}
+            {friendshipStatus === "PENDING" && (
+              <button
+                className=""
+                onClick={() => {
+                  addfriend();
+                  setStatus("NOTFRIENDS");
+                }}
+              >
+                <FaUserTimes size="25" className="text-red-200" />
+              </button>
+            )}
+            {friendshipStatus === "ACCEPTED" && (
+              <button
+                className=""
+                onClick={() => {
+                  addfriend();
+                  setStatus("NOTFRIENDS");
+                }}
+              >
+                <TbUserOff size="25" className="text-red-200" />
+              </button>
+            )}
+          </div>
+          <div className="mx-2">
+            {friendshipStatus === "BLOCKED" && (
+              <button
+                className=""
+                onClick={() => {
+                  blockFriend();
+                  setStatus("NOTFRIENDS");
+                }}
+              >
+                <MdOutlineBlock size="25" className="text-red-200" />
+              </button>
+            )}
+            {friendshipStatus !== "BLOCKED" && (
+              <button
+                className=""
+                onClick={() => {
+                  blockFriend();
+                  setStatus("BLOCKED");
+                }}
+              >
+                <CgUnblock size="25" className="text-red-200" />
+              </button>
+            )}
+          </div>
+          <div>
+            <button className="mx-2">
+              <BiMessageRounded size="25" />
+            </button>
+          </div>
+          <div>
+            <button className="mx-2">
+              <IoGameControllerOutline size="25" />
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -847,8 +906,8 @@ export default function Profile(params: any) {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    // socket,
-    // setsocket,
+    // friendshipStatus,
+    // setStatus,
   } = useAppContext();
 
   const [socket, setsocket] = useState<Socket | null>(null);

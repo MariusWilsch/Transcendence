@@ -345,11 +345,13 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
-    const friend = await this.userService.FriendshipStatus(
-      userId,
-      friendId
-    );
-    return res.json({ success: true , friend})
+    try {
+      const friend = await this.userService.FriendshipStatus(userId, friendId);
+      return res.json({ success: true, friend });
+    } catch (error: any) {
+      console.error('Error FriendshipStatus:', error);
+      return res.json({ success: false });
+    }
   }
 }
 
