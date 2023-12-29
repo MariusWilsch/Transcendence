@@ -213,7 +213,7 @@ const Chat = () => {
       )}
 
       <div className="flex-1 overflow-y-auto">
-      <div className="flex border-4 h-screen">
+      <div className="flex border-4 custom-height">
       <Conversations friends={context.friendsData} />
       { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
       ?<PrivateRoom  params={{roomId: context.userData?.intraId+context.recipientUserId}} />
