@@ -1,31 +1,20 @@
 // components/Chat.tsx
 'use client';
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, use } from 'react';
 import Image from 'next/image';
 import io from 'socket.io-client';
-import { useAppContext } from '../AppContext';
+import { Room, useAppContext, User } from '../AppContext';
 import PrivateRoom from './[roomId]/page';
 import { Navbar, Sidebar } from '../profile/[intraId]/page';
 import { Toaster } from 'react-hot-toast';
-
-var data: User;
-interface Message {
-  sender: string;
-  message: string;
-}
-
-type User = {
-  intraId: string;
-  fullname: string;
-  login: string;
-  email: string;
-  Avatar: string;
-  created_at: Date;
-  updated_at: Date;
-};
+import { ImBubbles2 } from "react-icons/im";
+import { MdGroups } from "react-icons/md";
+import { BsPersonLinesFill } from "react-icons/bs";
 
 const ConversationCard = ({ user }: any, {lastMessage}:any) => {
   const context = useAppContext();
+  const roomName = parseInt(context.userData?.intraId) > parseInt(user.intraId)?context.userData?.intraId+user.intraId:user.intraId+context.userData?.intraId;
+  const link = `/chat/${roomName}`;
   return (
     <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center text-xs  my-1 hover:bg-gray-800 ">
       <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
@@ -46,15 +35,41 @@ const SearchStart = () => {
 }
 const Conversations = ({friends}:any) => {
   const context = useAppContext();
+  const [selected, setSelected] = useState<string>('messages');
+  const style = {borderBottom: "1px solid gray"};
   return (
-    <div  className=" w-1/5 flex flex-col ">
+    <div  className=" w-1/5 flex flex-col h-full p-4">
     {/* <SearchStart /> */}
-      <h1 className='text-center text-lg text-white hidden sm:block'>Conversations</h1>
-      <div>
+      {/* <h1 className='text-center text-lg text-white hidden sm:block'>Conversations</h1> */}
+      <div className='flex justify-center py-3'>
+        <ImBubbles2
+        style={selected === 'messages'?style:{}}
+        onClick={()=>{
+          selected !== 'messages' && setSelected('messages');
+        }}
+        className='h-8 w-1/3'
+        />
+        <MdGroups
+        style={selected === 'channels'?style:{}}
+         onClick={()=>{
+          selected !== 'channels' && setSelected('channels');
+        }}
+        className='h-8 w-1/3' />
+        <BsPersonLinesFill
+        style={selected === 'onlineFriends'?style:{}}
+         onClick={()=>{
+          selected !== 'onlineFriends' && setSelected('onlineFriends');
+        }}
+        className='h-8 w-1/3 ' />
+      </div>
+      {
+        selected === 'messages' &&
+        <div>
         {friends?.friends.map((friend:any, index:any) => (
           <ConversationCard key={index} user={friend} lastMessage={"last message"} />
-        ))}
+          ))}
       </div>
+        }
     </div>
   );
 };
@@ -68,6 +83,7 @@ const ProfileInfo = () => {
 }
 const Chat = () => {
   const context = useAppContext();
+  const [romms, setRooms] = useState<Room[]>([]);
   useEffect(() => {
     const fetchDataAndSetupSocket = async () => {
       try {
@@ -109,14 +125,21 @@ const Chat = () => {
 
     fetchDataAndSetupSocket();
   }, [context.recipientUserId]);
-
+  useEffect(() => {
+    const rooms:Room[] = [];
+    if (context.socket && context.recipientUserId){
+      const roomId = parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)?context.userData?.intraId+context.recipientUserId:context.recipientUserId+context.userData?.intraId;
+      context.socket.on('privateChat',()=>{
+        
+      })
+    }
+  } , [context.socket]);
   return (
 
 
 
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />
-
     <div className="flex ">
       {context.isSidebarVisible && (
         <div className="w-16 custom-height ">

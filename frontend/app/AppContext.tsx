@@ -8,9 +8,23 @@ import React, {
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
 
-interface Message {
+export interface Message {
+  id: number;
   sender: string;
-  message: string;
+  recipient: string;
+  content: string;
+  createdAt: Date;
+  privateRommName: string;
+}
+
+export interface Room {
+  id: number;
+  name: string;
+  paraticipants: string[];
+  participants: User[];
+  messages: Message[];
+  createdAt:      Date
+  updated_at:    Date
 }
 
 export type User = {

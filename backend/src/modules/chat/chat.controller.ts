@@ -14,6 +14,11 @@ export class ChatController {
     console.log(data);
     return data;
   }
+  @Get(':id/privateRooms')
+  async getPrivateRoomsByUser(@Param(':id') id:string , @Res() res:any)
+  {
+    // const data = await this.chatService.getPr
+  }
   @Get(':id')
   async getRoom(@Param('id') id: string, @Res() res:any) :Promise<void>{
     const data = await this.chatService.getPrivateRoom(id);

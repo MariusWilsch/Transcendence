@@ -2,33 +2,7 @@
 import { FC, use, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import { User, useAppContext } from '@/app/AppContext';
-
-// export type Message = {
-//   id: number;
-//   sender: string;
-//   recipient: string;
-//   content: string;
-//   createdAt: Date;
-//   senderUser: User;
-//   recipientUser: User;
-//   PrivateRoom: Room[]
-// }
-interface Message {
-  id: number;
-  sender: string;
-  recipient: string;
-  content: string;
-  privateRommName: string;
-}
-
-interface Room {
-  id: number;
-  name: string;
-  paraticipants: string[];
-  participants: User[];
-  messages: Message[];
-}
+import { User, useAppContext,Message, Room} from '@/app/AppContext';
 
 interface PageProps {
   params: {
@@ -38,7 +12,7 @@ interface PageProps {
 
 const SingleMessageReceived = ({ message }: any) => {
   const context = useAppContext();
-  const user = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
+  const user = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
   return (
     <div className="flex items-end p-2 my-1">
       <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
@@ -60,11 +34,11 @@ const SingleMessageSent = ({ message }: any) => {
   );
 }
 
-// async function getRoom(userId: string, otherId:string): Promise<Room> {
-//   const res = await fetch(`http://localhost:3001/api/privateRoom/${roomId}`);
-//   const room = await res.json();
-//   return room;
-// }
+async function getRoom(userId: string, otherId:string): Promise<Room> {
+  const res = await fetch(`http://localhost:3001/chat/${roomId}`);
+  const room = await res.json();
+  return room;
+}
 async function getMessages(roomId: string) : Promise<Message[]> {
   const res = await fetch(`http://localhost:3001/chat/${roomId}/messages`);
   const room =  res.json();
@@ -112,7 +86,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const sendPrivateMessage = () => {
     if (context.socket && context.recipientUserId && messageText) {
       context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText, senderId: context.userData?.intraId });
-      setMessages((prevMessages:any) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, content: messageText, PrivateRoomName:params.roomId}]);
+      setMessages((prevMessages:Message[]) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, content: messageText, PrivateRoomName:params.roomId}]);
       setMessageText('');
     }
   };
@@ -121,25 +95,25 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       sendPrivateMessage();
     }
   }
-  const recipientData = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
+  const recipientData = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
   const desplayedMessages :Message[] = messages.length ? messages.toReversed():[];
   return (
     <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
       <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
         <div className="relative flex items-center space-x-4">
           <div className="relative">
-            <span style={{ display: recipientData.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
+            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
               <svg width="20" height="20">
                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
               </svg>
             </span>
-            <Image width={144} height={144} src={recipientData.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
+            <Image width={144} height={144} src={recipientData?.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">{recipientData.login}</span>
+              <span className="text-gray-700 mr-3">{recipientData?.login}</span>
             </div>
-            <span style={{ display: recipientData.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
+            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
           </div>
         </div>
       </div>

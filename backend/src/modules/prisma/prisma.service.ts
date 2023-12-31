@@ -146,6 +146,9 @@ export class PrismaService {
       }
     })
   }
+  async getRoomsByUser(userId:string)
+  {
+  }
   async disconnect(): Promise<void> {
     await this.prisma.$disconnect();
   }
