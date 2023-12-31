@@ -2,48 +2,38 @@
 import React, { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider } from "../AppContext";
 import { Loading } from "../profile/[intraId]/page";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import Cookies from "universal-cookie";
 import { User } from "../AppContext";
+import toast, { Toaster } from "react-hot-toast";
+import { IoIosMail } from "react-icons/io";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 const cookies = new Cookies();
 
 const TwoFactorVerification = () => {
-
-  const [ id , setId ] = useState("");
+  const [id, setId] = useState("");
 
   useEffect(() => {
-    const id = cookies.get('id');
-    console.log("id: ", id);
+    const id = cookies.get("id");
     setId(id);
-  } ,[]);
+  }, []);
 
   const [otp, setOtp] = useState("");
-  const [isVerified, setIsVerified] = useState(false);
   const router = useRouter();
 
-  const [yourCookieValue, setYourCookieValue] = useState('');
-
-  if (!id) {
-    return <Loading />;
-  }
-
-  const handleResend = async () => {
-    // Make an API call to verify the OTP on the server
-    // ...
-
-    // Update the state based on the API response
-    setIsVerified(true); // Set to true if OTP is verified
-  };
+  // if (!id) {
+  //   return <Loading />;
+  // }
 
   const handleVerify = async () => {
-
-    if (otp.length != 6) {
-      console.log("Invalid OTP");
-      return;
-    }
     try {
-      console.log("valid OTP");
+      if (otp.length != 6) {
+        toast.error("Invalid OTP");
+        return;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${id}/verifyOtp`,
         {
@@ -54,58 +44,76 @@ const TwoFactorVerification = () => {
           credentials: "include",
           body: JSON.stringify({ otp: otp }),
         }
-      )
+      );
       const responseData = await response.json();
-      console.log("responseData: ", responseData.sucess);
 
       if (responseData.sucess) {
-        router.push(`/profile/${id}`)
+        router.push(`/profile/${id}`);
       } else {
-        console.log("OTP not verified");
+        toast.error("OTP not verified");
       }
     } catch (error: any) {
+      toast.error("Error uploading otp");
       console.error("Error uploading otp: ", error.message);
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleVerify();
+    }
+  };
+
   return (
-    <div className="h-screen bg-slate-400 flex flex-row">
-      <div className="flex flex-col justify-center items-center w-1/2">
-        <h1 className="text-4xl font-bold text-white mb-4">2FA Verification</h1>
-        <p className="text-white text-center">
-          Enter the OTP sent to your registered email address to verify your
-          account.
-        </p>
-      </div>
-      <div className="w-1/2 bg-slate-300 flex items-center">
-        <div className="max-w-md mx-auto p-4 bg-slate-300 rounded-md shadow-md">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-black font-sans">
-              Two-Factor Authentication Verification
-            </h2>
-            <label className="block mb-4 text-black font-sans">
-              Enter OTP:
-              <input
-                type="number"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="block w-full border p-2 mt-1 rounded-md bg-slate-100 focus:outline-none focus:border-stone-400"
-              />
-            </label>
-            <button
-              onClick={handleVerify}
-              className="bg-slate-600 text-white px-4 py-2 rounded-md hover:bg-slate-700 focus:outline-none focus:ring focus:border-blue-300"
-            >
-              Verify
-            </button>
-            &nbsp;
-            <button
-              onClick={handleResend}
-              className="bg-slate-400 text-white px-4 py-2 rounded-md mt-4 hover:bg-slate-500 focus:outline-none focus:ring focus:border-blue-300"
-            >
-              Resend OTP
-            </button>
+    <div className="h-screen w-screen bg-[#12141A]">
+      <div>
+        <div className="h-screen twofabackround flex flex-row">
+          <div className="hidden md:flex justify-end items-center md:w-1/3 ">
+            <Image
+              src={"/sogo.svg"}
+              priority={true}
+              width={200}
+              height={200}
+              alt="Sogo Logo"
+              className="opacity-80"
+            />
           </div>
+          <div className="w-full md:w-2/3 flex items-center">
+            <div className="mx-auto p-10 bg-[#292D39] backdrop-blur-3xl opacity-90 rounded-md shadow-md">
+              <div>
+                <h2 className="text-2xl font-semibold mb-5 text-white font-sans">
+                  Two-Factor Authentication
+                </h2>
+                <div className="text-md mb-5 text-slate-50 font-sans">
+                  A verification code has been sent to your 42 email
+                </div>
+                <div className="flex flex-row w-full justify-end  items-center">
+                  <label className="relative text-slate-100 font-sans flex-grow flex items-center">
+                    <input
+                      type="text"
+                      value={otp}
+                      placeholder="Enter the code"
+                      onChange={(e) => setOtp(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="p-2 px-8 relative h-10 bg-[#12141A] focus:outline-none focus:border-stone-400 appearance-none  w-full border rounded-md "
+                    />
+                    <div className="absolute left-0 p-2">
+                      <IoIosMail size="20" />
+                    </div>
+                  </label>
+                  &nbsp;
+                  <button
+                    onClick={handleVerify}
+                    // onClick={() => setStartAnimation(true)}
+                    className="bg-slate-600 w-1/6 min-w-10 h-10 text-white rounded-md hover:bg-slate-500 focus:outline-none focus:ring focus:border-blue-200"
+                  >
+                    Verify
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <Toaster />
         </div>
       </div>
     </div>

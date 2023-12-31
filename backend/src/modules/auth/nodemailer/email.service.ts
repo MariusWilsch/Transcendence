@@ -53,7 +53,7 @@ Thank you for signing up in Transcendance! To complete your registration, here i
 </p>
 
 <p>
-This code will expire in 5 minutes. If you did not sign up for Transcendance, please ignore this email.
+If you did not sign up for Transcendance, please ignore this email.
 </p>
 
 

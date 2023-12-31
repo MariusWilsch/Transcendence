@@ -33,9 +33,15 @@ export class UserController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAllUsers(@Res() res: any): Promise<User[] | undefined> {
-    const data = await this.userService.getAllUsers();
-    res.json(data);
-    return data;
+    try {
+      const data = await this.userService.getAllUsers();
+      res.json(data);
+      return data;
+    }
+    catch (error) {
+      console.error('Error getAllUsers:', error);
+      return undefined;
+    }
   }
 
   @Post()
@@ -44,9 +50,15 @@ export class UserController {
     @Res() res: any,
     @Body() name: { searchTerm: string }
   ): Promise<User[] | undefined> {
-    const data = await this.userService.getUsersbyInput(name.searchTerm);
-    res.json(data);
-    return data;
+    try {
+      const data = await this.userService.getUsersbyInput(name.searchTerm);
+      res.json(data);
+      return data;
+    }
+    catch (error) {
+      console.error('Error getUser:', error);
+      return undefined;
+    }
   }
 
   @Get('search')
@@ -61,8 +73,14 @@ export class UserController {
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
-    const data = await this.userService.getUserbyId(id);
-    return data;
+    try {
+      const data = await this.userService.getUserbyId(id);
+      return data;
+    }
+    catch (error) {
+      console.error('Error getUserbyId:', error);
+      return undefined;
+    }
   }
 
   @Post(':id/login')

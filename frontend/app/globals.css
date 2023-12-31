@@ -3,14 +3,15 @@
 @tailwind utilities;
 
 body {
-  background-color: white; /* Set your desired background color */
+  background-color: white;
 }
 
 @keyframes moveLeftAndRight {
   50% {
     transform: translateX(0);
   }
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(3px);
   }
 }
@@ -28,16 +29,22 @@ body {
 }
 
 .backgroundDiv {
-  background-image: url('../public/one.jpg'); /* Adjust the path */
-  background-size: cover; /* Cover the entire div */
-  background-position: center; /* Center the background image */
-  /* height: 100vh; */
+  background-image: url("../public/one.jpg");
+  background-size: cover;
+  background-position: center;
   width: calc(100vw - 64px);
 }
 
 .backgroundDivNotVisible {
-  background-image: url('../public/one.jpg'); /* Adjust the path */
-  background-size: cover; /* Cover the entire div */
-  background-position: center; /* Center the background image */
+  background-image: url("../public/one.jpg");
+  background-size: cover;
+  background-position: center;
   width: 100vw;
+}
+
+.twofabackround {
+  background-image: url("../public/abstract-cubes-dark-shapes.jpeg");
+  background-size: cover;
+  background-position: center;
+  width: calc(100vw);
 }

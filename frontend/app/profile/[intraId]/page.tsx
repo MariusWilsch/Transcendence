@@ -36,6 +36,7 @@ import { FaCircle } from "react-icons/fa";
 import { PiGameControllerLight } from "react-icons/pi";
 import { TbUserOff } from "react-icons/tb";
 import { FaUserTimes } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Loading() {
   return (
@@ -279,8 +280,6 @@ const UserProfileImage = ({
     if (selectedFile) {
       const formData = new FormData();
       formData.append("avatar", selectedFile);
-
-      console.log("formData", formData);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/avatar`,
@@ -323,6 +322,8 @@ const UserProfileImage = ({
           >
             {imagePreview && (
               <Image
+                placeholder="empty"
+                blurDataURL="/Users/imimouni/Desktop/Transcendence/frontend/public/42_Logo.svg"
                 src={imagePreview}
                 alt="image Preview"
                 width={300}
@@ -339,9 +340,13 @@ const UserProfileImage = ({
                 }}
                 onError={(e: any) => {
                   e.target.onerror = null;
+                  setImagePreview(
+                    "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg"
+                  );
                 }}
               />
             )}
+
             {!isProfileOwner && (
               <div className="absolute right-[4.5vw] bottom-[4.5vw] md:right-8 md:bottom-8">
                 <div className="">
@@ -854,12 +859,13 @@ const Friend = ({
     FriendshipStatus();
   }, [userId]);
 
-
   return (
     <div>
       {!isProfileOwner && (
         <div
-          className={`flex items-center justify-center text-white ${blocked ? " pointer-events-none" : ""}`}
+          className={`flex items-center justify-center text-white ${
+            blocked ? " pointer-events-none" : ""
+          }`}
         >
           <div className="mx-2">
             {friendshipStatus !== "ACCEPTED" &&

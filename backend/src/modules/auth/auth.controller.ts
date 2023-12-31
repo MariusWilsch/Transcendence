@@ -28,7 +28,7 @@ export class AuthController {
   ) {}
 
   @Get('user')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;
@@ -38,11 +38,9 @@ export class AuthController {
         return undefined;
       }
 
-      return res.redirect(
-        `${URL}:3001/users/${userfromcookie.intraId}`
-      );
+      return res.redirect(`${URL}:3001/users/${userfromcookie.intraId}`);
     } catch (e) {
-      console.log('Error: ', e);
+      console.log('Error auth user : ', e);
     }
   }
 
@@ -66,10 +64,8 @@ export class AuthController {
             isRegistred: true,
           },
         });
-        
+
         if (this.authService.getUserFromCookie(req.cookies) === undefined) {
-
-
           const { created_at, updated_at, ...userWithoutDate } = userExists;
 
           const payload = { userWithoutDate };
@@ -77,7 +73,7 @@ export class AuthController {
             secret: JWT_SECRET,
           });
           res.cookie('jwt', jwt);
-          
+
           if (userExists.isTfaEnabled === true) {
             res.cookie('id', userExists.intraId);
             res.clearCookie('jwt');
@@ -111,7 +107,7 @@ export class AuthController {
       // res.cookie('id', user.intraId);
       return res.redirect(`${URL}:3000/profile/${user.intraId}`);
     } catch (e) {
-      console.log('Error: ', e);
+      console.log('Error auth cllback : ', e);
     }
   }
 
@@ -123,15 +119,7 @@ export class AuthController {
       res.redirect(`${URL}:3000`);
       return 'logout';
     } catch (e) {
-      console.log('Error: ', e);
-      res.status(500).send('Internal Server Error');
+      console.log('Error logout: ', e);
     }
   }
 }
-
-// TODO
-// 1- user logs in to 42, ans issues a token (JWT)
-// 2- the broswer store the JWT in a cookie or local storage
-// 3- on every request, the browser sends the JWT in the header
-// 4- the server validates the JWT and sends the response
-// 5- the server sends a new JWT if the old one is expired
