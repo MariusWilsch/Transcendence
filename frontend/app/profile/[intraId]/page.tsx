@@ -496,114 +496,187 @@ export const Sidebar = () => {
             <div className="flex flex-col justify-between custom-height bg-[#292D39]">
               <div className="">
                 <li>
-                  <IoHome
-                    size="30"
-                    className={`${
-                      RouterName === "home" ? "text-slate-50" : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
+                  >
+                    <IoHome
+                      size="30"
+                      className={`${
+                        RouterName === "home"
+                          ? "text-slate-50"
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
+                    />
+                  </motion.div>
                 </li>
                 <li>
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
                   >
-                    <CgProfile
-                      size="30"
-                      className={`${
-                        RouterName === "profile"
-                          ? "text-slate-50"
-                          : "text-slate-500"
-                      } hover:text-slate-50 mx-auto m-8`}
-                    />
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <CgProfile
+                        size="30"
+                        className={`${
+                          RouterName === "profile"
+                            ? "text-slate-50"
+                            : "text-slate-500"
+                        } hover:text-slate-50 mx-auto m-8`}
+                      />
+                    </motion.div>
                   </Link>
                 </li>
                 <li>
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
-                    <IoMdNotificationsOutline
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <IoMdNotificationsOutline
+                        size="30"
+                        className={`${
+                          RouterName === "notif"
+                            ? "text-slate-50"
+                            : "text-slate-500"
+                        } hover:text-slate-50 mx-auto m-8`}
+                      />
+                    </motion.div>
+                  </Link>
+                </li>
+                <li>
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
+                  >
+                    <MdLeaderboard
                       size="30"
                       className={`${
-                        RouterName === "notif"
+                        RouterName === "leaderboard"
                           ? "text-slate-50"
                           : "text-slate-500"
                       } hover:text-slate-50 mx-auto m-8`}
                     />
-                  </Link>
+                  </motion.div>
                 </li>
                 <li>
-                  <MdLeaderboard
-                    size="30"
-                    className={`${
-                      RouterName === "leaderboard"
-                        ? "text-slate-50"
-                        : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
-                </li>
-                <li>
-                  <GrAchievement
-                    size="30"
-                    className={`${
-                      RouterName === "acheivements"
-                        ? "text-slate-50"
-                        : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
+                  >
+                    <GrAchievement
+                      size="30"
+                      className={`${
+                        RouterName === "acheivements"
+                          ? "text-slate-50"
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
+                    />
+                  </motion.div>
                 </li>
                 <li>
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}
                   >
-                    <FaUserFriends
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <FaUserFriends
+                        size="30"
+                        className={`${
+                          RouterName === "friends"
+                            ? "text-slate-50"
+                            : "text-slate-500"
+                        } hover:text-slate-50 mx-auto m-8`}
+                      />
+                    </motion.div>
+                  </Link>
+                </li>
+                <li>
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
+                  >
+                    <GrGroup
                       size="30"
                       className={`${
-                        RouterName === "friends"
+                        RouterName === "groups"
                           ? "text-slate-50"
                           : "text-slate-500"
                       } hover:text-slate-50 mx-auto m-8`}
                     />
-                  </Link>
-                </li>
-                <li>
-                  <GrGroup
-                    size="30"
-                    className={`${
-                      RouterName === "groups"
-                        ? "text-slate-50"
-                        : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  </motion.div>
                 </li>
                 <li>
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
-                    <IoChatbubblesOutline
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <IoChatbubblesOutline
+                        size="30"
+                        className={`${
+                          RouterName === "chat"
+                            ? "text-slate-50"
+                            : "text-slate-500"
+                        } hover:text-slate-50 mx-auto m-8`}
+                      />
+                    </motion.div>
+                  </Link>
+                </li>
+                <li>
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
+                  >
+                    <RiPingPongLine
                       size="30"
                       className={`${
-                        RouterName === "chat"
+                        RouterName === "play"
                           ? "text-slate-50"
                           : "text-slate-500"
                       } hover:text-slate-50 mx-auto m-8`}
                     />
-                  </Link>
-                </li>
-                <li>
-                  <RiPingPongLine
-                    size="30"
-                    className={`${
-                      RouterName === "play" ? "text-slate-50" : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  </motion.div>
                 </li>
               </div>
-
               <div>
                 <li className="">
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
                   >
-                    <CiLogout
-                      size="30"
-                      className={`text-slate-400 mx-auto m-8 hover:text-red-400`}
-                    />
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <CiLogout
+                        size="30"
+                        className={`text-slate-400 mx-auto m-8 hover:text-red-400`}
+                      />
+                    </motion.div>
                   </Link>
                 </li>
               </div>
@@ -797,8 +870,6 @@ const Friend = ({
       if (data.success === false) {
         toast.error("Error removing the friend");
       } else if (data.success === true) {
-        //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
-        // setStatus("NOTFRIENDS");
         toast.success("Friendship removed");
       }
     } catch (error: any) {
@@ -873,7 +944,7 @@ const Friend = ({
                     whileTap={{ scale: 0.9 }}
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
+                    transition={{ delay: 0.02 }}
                   >
                     <FiUserPlus size="25" />
                   </motion.div>
@@ -887,12 +958,13 @@ const Friend = ({
                   setStatus("NOTFRIENDS");
                 }}
               >
+
                 <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <FaUserTimes size="25" className="text-red-200" />
                 </motion.div>
@@ -911,7 +983,7 @@ const Friend = ({
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <TbUserOff size="25" className="text-red-200" />
                 </motion.div>
@@ -932,7 +1004,7 @@ const Friend = ({
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <CgUnblock size="27" className="text-white rotate-90" />
                 </motion.div>
@@ -951,7 +1023,7 @@ const Friend = ({
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <MdOutlineBlock size="25" className="text-red-200" />
                 </motion.div>
@@ -965,7 +1037,7 @@ const Friend = ({
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.02 }}
               >
                 <BiMessageRounded size="25" />
               </motion.div>
@@ -978,7 +1050,7 @@ const Friend = ({
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.02 }}
               >
                 <IoGameControllerOutline size="25" />
               </motion.div>
@@ -1182,8 +1254,7 @@ export default function Profile(params: any) {
   let isTfaEnabled = false;
   let level = "Level 6.31";
   let email = "Email";
-  let IntraPic =
-    "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg";
+  let IntraPic = "/gon.jpg";
 
   if (isProfileOwner) {
     Login = user?.login || "Login";
@@ -1232,11 +1303,6 @@ export default function Profile(params: any) {
               isDivVisible ? "md:mt-28 mt-10" : "md:mt-24 mt-12"
             } p-10`}
           >
-            {/* <motion.div
-              initial={{ opacity: 0, y: -100, x: -100 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            > */}
             <UserDetailsCard value={Login} intraId={intraId} />
             <Friend
               isProfileOwner={isProfileOwner}
@@ -1244,7 +1310,6 @@ export default function Profile(params: any) {
               friendId={params.params.intraId}
             />
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
-            {/* </motion.div> */}
           </div>
         </div>
       </div>
