@@ -49,7 +49,7 @@ export class handleClientsConnection
 
   afterInit(server: Server) {
     console.log('handleClientsConnection server initialized');
-    this.logger.log('APP server Initialized!');
+    // this.logger.log('APP server Initialized!');
   }
 
   async handleConnection(client: Socket) {
@@ -62,11 +62,11 @@ export class handleClientsConnection
           this.server.emit('update');
 
           await this.UserService.updateUserState(user.intraId, 'ONLINE');
-          this.logger.log(`${user.login} connected`);
+          // this.logger.log(`${user.login} connected`);
         }
       }
     } catch (error) {
-      this.logger.error('Error in handleConnection:', error);
+      // this.logger.error('Error in handleConnection:', error);
     }
   }
 
@@ -79,11 +79,11 @@ export class handleClientsConnection
         if (user) {
           this.server.emit('update');
           await this.UserService.updateUserState(user.intraId, 'OFFLINE');
-          this.logger.log(`${user.login} disconnected`);
+          // this.logger.log(`${user.login} disconnected`);
         }
       }
     } catch (error) {
-      this.logger.error('Error in handleDisconnect:', error);
+      // this.logger.error('Error in handleDisconnect:', error);
     }
   }
 }

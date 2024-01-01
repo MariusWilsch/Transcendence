@@ -438,6 +438,9 @@ export default function Friends() {
                                       className="h-10 w-10 rounded-full"
                                       src={user.Avatar}
                                       alt=""
+                                      onError={(e: any) => {
+                                        e.target.onerror = null;
+                                      }}
                                     />
                                     {(selectedFeild === "Online" ||
                                       selectedFeild === "All") && (

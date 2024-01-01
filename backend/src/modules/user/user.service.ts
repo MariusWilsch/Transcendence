@@ -1,5 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaClient, Prisma, User } from '@prisma/client';
+import { JWT_SECRET, URL } from '../auth/constants';
+import * as fs from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -28,6 +30,48 @@ export class UserService {
           intraId: id,
         },
       });
+      if (!User.Avatar) {
+        await prisma.user.update({
+          where: {
+            intraId: id,
+          },
+          data: {
+            Avatar:
+              'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+          },
+        });
+        return User;
+      }
+      if (!User.Avatar.includes('http://')) {
+        await prisma.user.update({
+          where: {
+            intraId: id,
+          },
+          data: {
+            Avatar:
+              'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+          },
+        });
+        return User;
+      }
+      const s = User.Avatar.split('/');
+
+      if (s[s.length - 2]) {
+        if ('http://' + s[s.length - 2] === `${URL}:3001`) {
+          const path = './Avataruploads/' + s[s.length - 1];
+          if (!fs.existsSync(path)) {
+            await prisma.user.update({
+              where: {
+                intraId: id,
+              },
+              data: {
+                Avatar:
+                  'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+              },
+            });
+          }
+        }
+      }
 
       return User;
     } catch (error: any) {
