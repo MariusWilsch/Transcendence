@@ -1,5 +1,6 @@
 // components/Chat.tsx
 'use client';
+import { BiConversation } from "react-icons/bi";
 import { useEffect, useState, useRef, useContext, use } from 'react';
 import Image from 'next/image';
 import io from 'socket.io-client';
@@ -10,12 +11,15 @@ import { Toaster } from 'react-hot-toast';
 import { ImBubbles2 } from "react-icons/im";
 import { MdGroups } from "react-icons/md";
 import { BsPersonLinesFill } from "react-icons/bs";
+import Link from "next/link";
 
-const ConversationCard = ({ user }: any, {lastMessage}:any) => {
+export const ConversationCard = ({ user }: any, {lastMessage}:any) => {
   const context = useAppContext();
   const roomName = parseInt(context.userData?.intraId) > parseInt(user.intraId)?context.userData?.intraId+user.intraId:user.intraId+context.userData?.intraId;
-  const link = `/chat/${roomName}`;
   return (
+    <Link
+    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
+    >
     <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center text-xs  my-1 hover:bg-gray-800 ">
       <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
         <div><span className='hidden sm:block'>{user?.login}</span></div>
@@ -23,6 +27,7 @@ const ConversationCard = ({ user }: any, {lastMessage}:any) => {
       </div>
       <Image width={50} height={50} src={user.Avatar} alt="My profile" className="rounded-full order-1" />
     </div>
+    </Link>
   );
 }
 
@@ -33,7 +38,15 @@ const SearchStart = () => {
     </div>
   );
 }
-const Conversations = ({friends}:any) => {
+export const ConversationNotSelected = () => {
+  return (
+    <div className="flex  flex-1 flex-col items-center justify-center p-2 my-1  w-screen">
+      <BiConversation className="h-40 w-40  " />
+      <h1> no Conversation has been selected</h1>
+    </div>
+  );
+}
+export const Conversations = ({friends}:any) => {
   const context = useAppContext();
   const [selected, setSelected] = useState<string>('messages');
   const style = {borderBottom: "1px solid gray"};
@@ -104,11 +117,12 @@ const Chat = () => {
           credentials: "include",
         });
         const friends = await response2.json();
-        context.setFriends(friends);
-        const newSocket = io('http://localhost:3001', {
+        const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3003/chat`;
+        const newSocket = io(chatNameSpace, {
           query: { userId: userData.intraId },
         });
         context.setSocket(newSocket);
+        context.setFriends(friends);
         // context.socket?.on('privateChat', (data: Message) => {
         //   setMessages((prevMessages:Message[]) => [...prevMessages, data]);
         // });
@@ -124,20 +138,17 @@ const Chat = () => {
     };
 
     fetchDataAndSetupSocket();
-  }, [context.recipientUserId]);
-  useEffect(() => {
-    const rooms:Room[] = [];
-    if (context.socket && context.recipientUserId){
-      const roomId = parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)?context.userData?.intraId+context.recipientUserId:context.recipientUserId+context.userData?.intraId;
-      context.socket.on('privateChat',()=>{
+  }, []);
+  // useEffect(() => {
+  //   const rooms:Room[] = [];
+  //   if (context.socket && context.recipientUserId){
+  //     const roomId = parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)?context.userData?.intraId+context.recipientUserId:context.recipientUserId+context.userData?.intraId;
+  //     context.socket.on('privateChat',()=>{
         
-      })
-    }
-  } , [context.socket]);
+  //     })
+  //   }
+  // } , [context.socket]);
   return (
-
-
-
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />
     <div className="flex ">
@@ -156,23 +167,16 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto">
       <div className="flex custom-height">
       <Conversations friends={context.friendsData} />
-      { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
+      {/* { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
       ?<PrivateRoom  params={{roomId: context.userData?.intraId+context.recipientUserId}} />
-      :<PrivateRoom  params={{roomId: context.recipientUserId + context.userData?.intraId}} />)}
+      :<PrivateRoom  params={{roomId: context.recipientUserId + context.userData?.intraId}} />)} */}
+      <ConversationNotSelected />
       {/* <ProfileInfo></ProfileInfo> */}
     </div>
       </div>
     </div>
     <Toaster />
   </div>
-
-
-
-
-
-
-
-
   );
 };
 

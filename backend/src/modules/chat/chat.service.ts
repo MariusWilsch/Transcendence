@@ -1,25 +1,156 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 @Injectable()
 export class ChatService {
   constructor(private readonly prismaService: PrismaService) { }
+  async createMessage(sender: string, recipient: string, content: string): Promise<void> {
+    const senderUser = await prisma.user.findUnique({ where: { intraId: sender } });
+    const recipientUser = await prisma.user.findUnique({ where: { intraId: recipient } });
+    const privateRoomName = parseInt(senderUser.intraId) > parseInt(recipientUser.intraId) ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
+    const room = await prisma.privateRoom.findUnique({
+      where:{
+        name:privateRoomName,
+      }
+    });
+    if (!senderUser || !recipientUser) {
+      throw new Error('Sender or recipient not found.');
+    }
+    if (!room)
+    {
+      throw('no such channel');
+    }
+    await prisma.message.create({
+      data: {
+        sender:sender,
+        recipient:recipient,
+        content:content,
+        PrivateRoomName:privateRoomName,
+      },
+    });
+  }
 
+  async createPrivateRoom(user1: string, user2: string): Promise<void> {
+
+    const romeName  = parseInt(user1) > parseInt(user2) ? user1 + user2 :user2 + user1;
+
+    const room = await prisma.privateRoom.findUnique({
+      where:{
+        
+        name:romeName,
+      }
+    });
+    if (room)
+    {
+      console.log('room already exist');
+      return;
+    }
+    const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
+    const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
+    if (!member1 || !member2) {
+      // Handle the case where either sender or recipient does not exist
+      throw new Error('Sender or recipient not found.');
+    }
+    await prisma.privateRoom.create({
+      data: {
+        name:romeName,
+        participantsIds:[member1.intraId, member2.intraId],
+      },
+    });
+  }
+
+  async getMessagesByUsr(userId: string): Promise<any[]> {
+    return prisma.message.findMany({
+      where: {
+        OR: [
+          { sender: userId },
+          { recipient: userId },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
+  // You can add other methods for more database operations as needed
+  async getAllMessages(): Promise<any[]> {
+    return prisma.message.findMany();
+  }
+  //get user by id
+  async getUserById(userId: string): Promise<any> {
+    return prisma.user.findUnique({
+      where: {
+        intraId: userId,
+      },
+    });
+  }
+  //get all users
+  async getAllUsers(): Promise<any[]> {
+    return prisma.user.findMany();
+  }
+
+  async getAllRooms() {
+    try {
+      const rooms = await prisma.privateRoom.findMany({
+        orderBy: {
+          updated_at: 'asc',
+        },
+      });
+
+      return rooms;
+    } catch (e) {
+      console.log('Error in getAllRooms: ', e);
+    }
+  }
+  async getRoom(roomId:string) :Promise<any>{
+    return await prisma.privateRoom.findUnique({
+      where: {
+        name: roomId,
+      },
+    });
+  }
+  async getRoomMessages(roomId:string) :Promise<any>{
+    return await prisma.message.findMany({
+      where:{
+        PrivateRoomName:roomId,
+      },
+      orderBy:{
+        createdAt:'asc',
+      }
+    })
+  }
+  async getRoomsByUser(userId:string) :Promise<any>
+  {
+    return  await prisma.privateRoom.findMany({
+      where:{
+        participantsIds:{
+          has: userId,
+        },
+      },
+      orderBy:{
+        updated_at:'asc',
+      }
+    })
+  }
   async sendPrivateMessage(sender: string, recipient: string, message: string): Promise<void> {
-    // Additional business logic if needed
-    await this.prismaService.createMessage(sender, recipient, message);
+    await this.createMessage(sender, recipient, message);
   }
   async getAllPrivateRooms(): Promise<any> {
-    const data = await this.prismaService.getAllRooms();
+    const data = await this.getAllRooms();
     return data;
   }
   async getPrivateRoom(roomId: string) {
-    const data = await this.prismaService.getRoom(roomId);
+    const data = await this.getRoom(roomId);
     return data;
   }
   async getPrivateRoomsByUser(userId:string)
   {
-    // const data = await this.prismaService.createMessage();
+    const data = await this.getRoomsByUser(userId);
+    return data;
   }
   async getPrivateRoomMessages(roomId: string){
     const room = await this.getPrivateRoom(roomId);
@@ -27,11 +158,11 @@ export class ChatService {
     {
       throw ('no such room');
     }
-    const data = await this.prismaService.getRoomMessages(roomId);
+    const data = await this.getRoomMessages(roomId);
     return data;
   }
   async getMessagesByUser(userId:string): Promise<any>{
-    const data = await this.prismaService.getMessagesByUser(userId);
+    const data = await this.getMessagesByUsr(userId);
     return data;
   }
 }

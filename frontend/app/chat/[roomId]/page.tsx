@@ -2,7 +2,11 @@
 import { FC, use, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import { User, useAppContext,Message, Room} from '@/app/AppContext';
+import { User, useAppContext,Message, Room, AppContextProps} from '@/app/AppContext';
+import { Navbar, Sidebar } from '@/app/profile/[intraId]/page';
+import { Conversations } from '../page';
+import toast, { Toaster } from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 interface PageProps {
   params: {
@@ -34,11 +38,11 @@ const SingleMessageSent = ({ message }: any) => {
   );
 }
 
-async function getRoom(userId: string, otherId:string): Promise<Room> {
-  const res = await fetch(`http://localhost:3001/chat/${roomId}`);
-  const room = await res.json();
-  return room;
-}
+// async function getRoom(userId: string, otherId:string): Promise<Room> {
+//   const res = await fetch(`http://localhost:3001/chat/${roomId}`);
+//   const room = await res.json();
+//   return room;
+// }
 async function getMessages(roomId: string) : Promise<Message[]> {
   const res = await fetch(`http://localhost:3001/chat/${roomId}/messages`);
   const room =  res.json();
@@ -54,39 +58,110 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const[messageText, setMessageText] = useState('');
   const context = useAppContext();
 
-  useEffect(() => {
-  const dataMessages = getMessages(params.roomId);
-  dataMessages.then((data) => {
-    setMessages(data);
-    return data;
-  }).catch((err) => {
-    console.log(err);
+const directAcess = (roomId:string, context:AppContextProps) => {
+  const checkJwtCookie = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+        );
+        var data: User = await response.json();
+        
+        if (data !== null) {
+          context.setUserData(data);
+        }
+      } catch (error: any) {
+        const msg = "Error during login" + error.message;
+        toast.error(msg);
+        console.error("Error during login:", error);
+      }
+    };
+    checkJwtCookie();
+    const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3003/chat`;
+    const newSocket = io(chatNameSpace, {
+      query: { userId: context.userData.intraId },
+    });
+    context.setSocket(newSocket);
+    const fetchFriends = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${context.userData?.intraId}/friends`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        var data = await response.json();
+        if (data !== null) {
+          context.setFriends(data);
+        }
+      } catch (error: any) {
+        const msg = "Error during login" + error.message;
+        toast.error(msg);
+        console.error("Error during login:", error);
+      }
+    };
+    fetchFriends();
+    const recipientUserId = roomId.replace(context.userData?.intraId, '');
+    context.setRecipientLogin(recipientUserId);
+    return context;
   }
-  );
+  useEffect(() => {
+    if (!context){
+      directAcess(params.roomId, context);
+    }
+    const fetchData = async () => {
+      try {
+        const dataMessages = await getMessages(params.roomId);
+        setMessages(dataMessages);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    fetchData();
+  
+    const handlePrivateChat = (message: Message) => {
+      setMessages((prevMessages: Message[]) => [...prevMessages, message]);
+    };
     if (context.socket) {
-      context.socket.on('privateChat', (message: Message) => {
-        setMessages((prevMessages:Message[]) => [...prevMessages, message]);
-      });
+      context.socket.on('privateChat', handlePrivateChat);
     }
+  
+    // Cleanup function
     return () => {
-      setMessages([]);
-    }
-  }, [context.socket, params.roomId]);
-  // useEffect(() => {
-  //   if (context.socket) {
-  //     console.log('status updated');
-  //     const recipient = context.friendsData.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
-  //   }
-  // }, []);
-  // const room: Promise<Room> = getRoom(params.roomId);
-  // if (!room) {
-  //   return <div>Loading...</div>;
-  // }
-  // const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
+      if (context.socket) {
+        context.socket.off('privateChat', handlePrivateChat);
+      }
+    };
+  }, [params.roomId]);
+
   const sendPrivateMessage = () => {
     if (context.socket && context.recipientUserId && messageText) {
+
       context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText, senderId: context.userData?.intraId });
-      setMessages((prevMessages:Message[]) => [...prevMessages, { sender: context.userData?.intraId, reciepent:context.recipientUserId, content: messageText, PrivateRoomName:params.roomId}]);
+      setMessages((prevMessages:Message[]) =>{
+        const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
+
+        let currentDateVariable: Date = new Date();
+        
+        const singleMsg: Message = {
+          id: 0,
+          sender: context.userData?.intraId,
+          recipient: context.recipientUserId,
+          content: messageText,
+          createdAt: currentDateVariable,
+          privateRommName: params.roomId,
+        };
+      
+        newMessages.push(singleMsg);
+      
+        return newMessages;
+      }
+      );
       setMessageText('');
     }
   };
@@ -98,6 +173,24 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const recipientData = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
   const desplayedMessages :Message[] = messages.length ? messages.toReversed():[];
   return (
+    <div className=" min-h-screen w-screen  bg-[#12141A]">
+    <Navbar isProfileOwner={false} />
+    <div className="flex ">
+      {context.isSidebarVisible && (
+        <div className="w-16 custom-height ">
+          <div
+            className={`transition-all duration-500 ease-in-out ${
+              context.isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
+            }`}
+          >
+            <Sidebar />
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto">
+      <div className="flex custom-height">
+      <Conversations friends={context.friendsData} />
     <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
       <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
         <div className="relative flex items-center space-x-4">
@@ -130,7 +223,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
+            className="w-full focus:outline-none focus:placeholder-gray-400  placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
           <div className="absolute right-0 items-center inset-y-0">
             <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
@@ -147,6 +240,11 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
       </div>
     </div>
+     </div>
+       </div>
+     </div>
+     <Toaster />
+   </div>
   );
 }
 

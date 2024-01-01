@@ -40,7 +40,7 @@ export type User = {
   status: string;
 };
 
-type AppContextProps = {
+export type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
   setDivVisible: (isDivVisible: boolean) => void;
