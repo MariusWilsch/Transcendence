@@ -36,6 +36,7 @@ import { FaCircle } from "react-icons/fa";
 import { PiGameControllerLight } from "react-icons/pi";
 import { TbUserOff } from "react-icons/tb";
 import { FaUserTimes } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Loading() {
   return (
@@ -106,6 +107,7 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
                   <form className="" onSubmit={handleSubmit}>
                     <label className="">
                       <input
+                        id="handleSubmit"
                         type="text"
                         value={inputValue}
                         placeholder="Search ..."
@@ -195,16 +197,16 @@ const UserDetailsCard = ({
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center ">
       <div
         className="flex items-center justify-center p-4
-        rounded-md"
+        rounded-md "
       >
         <div className="text-2xl font-medium font-sans days left text-white">
           {value}&nbsp;
         </div>
         {isDivVisible && (
-          <div className="">
+          <div className="flex flex-row">
             &nbsp;
             <input
               type="text"
@@ -279,8 +281,6 @@ const UserProfileImage = ({
     if (selectedFile) {
       const formData = new FormData();
       formData.append("avatar", selectedFile);
-
-      console.log("formData", formData);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${intraId}/avatar`,
@@ -318,7 +318,7 @@ const UserProfileImage = ({
           } backgroundDiv  md:h-80 h-48 flex justify-center`}
         >
           <div
-            className="w-[20vh] h-[20vh] md:mt-36 mt-16"
+            className="w-48 h-48 md:w-72 md:h-72 md:mt-36 mt-16"
             style={{ position: "relative", display: "inline-block" }}
           >
             {imagePreview && (
@@ -329,21 +329,18 @@ const UserProfileImage = ({
                 height={300}
                 priority={true}
                 quality={100}
-                className="rounded-full border-2 border-black"
-                style={{
-                  width: "20vh",
-                  height: "20vh",
-
-                  minWidth: "10vw",
-                  minHeight: "10vw",
-                }}
+                className="rounded-full border-2 border-black w-48 h-48 md:w-72 md:h-72"
                 onError={(e: any) => {
                   e.target.onerror = null;
+                  // setImagePreview(
+                  //   "http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg"
+                  // );
                 }}
               />
             )}
+
             {!isProfileOwner && (
-              <div className="absolute right-[4.5vw] bottom-[4.5vw] md:right-8 md:bottom-8">
+              <div className="absolute right-[20px] bottom-[20px]  md:right-[37px] md:bottom-[37px] opacity-90">
                 <div className="">
                   <FaCircle
                     className={`${
@@ -376,12 +373,8 @@ const UserProfileImage = ({
                 style={{
                   position: "absolute",
                   display: "inline-block",
-                  width: "20vh",
-                  height: "20vh",
-                  minWidth: "8vw",
-                  minHeight: "10vw",
                 }}
-                className="top-0 left-0 flex flex-col items-center justify-center rounded-full
+                className="w-48 h-48 md:w-72 md:h-72 top-0 left-0 flex flex-col items-center justify-center rounded-full
                 animate-moveLeftAndRight"
               >
                 <button
@@ -394,16 +387,11 @@ const UserProfileImage = ({
                     style={{
                       position: "absolute",
                       display: "inline-block",
-                      width: "20vh",
-                      height: "20vh",
-                      minWidth: "10vw",
-                      minHeight: "10vw",
-
                       top: "50%",
                       left: "50%",
                       transform: "translate(-50%, -50%)",
                     }}
-                    className="bg-black rounded-full opacity-50 font-sans text-white text-lg font-medium"
+                    className="bg-black w-48 h-48 md:w-72 md:h-72 rounded-full opacity-50 font-sans text-white text-lg font-medium"
                   >
                     <div
                       style={{
@@ -425,29 +413,37 @@ const UserProfileImage = ({
               </div>
             )}
             <div
-              className="mb-[4.5vh] mr-[4.5vh] md:mb-[4.2vh] md:mr-[4.2vh]"
+              className="mb-10 mr-10 md:mb-[58px] md:mr-[58px] opacity-90"
               style={{ position: "absolute", bottom: 0, right: 0 }}
             >
               {isDivVisible && (
-                <div className="absolute">
-                  <label htmlFor="avatar" className="cursor-pointer">
-                    <div className="bg-slate-300 mb-[1.9vh] mr-[1.9vh] md:mb-[2.2vh] md:mr-[2.2vh] rounded-full">
-                      <CiCirclePlus
-                        className="text-black "
-                        size="25"
-                        onChange={handleFileChange}
-                      />
-                    </div>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div className="absolute">
+                    <label htmlFor="avatar" className="cursor-pointer">
+                      <div className="bg-slate-300 mb-10 mr-10  md:mb-10 md:mr-10 rounded-full">
+                        <CiCirclePlus
+                          className="text-black "
+                          size="25"
+                          onChange={handleFileChange}
+                        />
+                      </div>
 
-                    <input
-                      type="file"
-                      id="avatar"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="inset-0 cursor-pointer bg-black hidden"
-                    />
-                  </label>
-                </div>
+                      <input
+                        type="file"
+                        id="avatar"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="inset-0 cursor-pointer bg-black hidden"
+                      />
+                    </label>
+                  </div>
+                </motion.div>
               )}
             </div>
           </div>
@@ -578,15 +574,15 @@ export const Sidebar = () => {
                   />
                 </li>
                 <li>
-                <Link
-                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
-                  >
-                  <IoChatbubblesOutline
-                    size="30"
-                    className={`${
-                      RouterName === "chat" ? "text-slate-50" : "text-slate-500"
-                    } hover:text-slate-50 mx-auto m-8`}
-                  />
+                  <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
+                    <IoChatbubblesOutline
+                      size="30"
+                      className={`${
+                        RouterName === "chat"
+                          ? "text-slate-50"
+                          : "text-slate-500"
+                      } hover:text-slate-50 mx-auto m-8`}
+                    />
                   </Link>
                 </li>
                 <li>
@@ -736,11 +732,10 @@ const Friend = ({
       const data = await response.json();
 
       if (data.success === false) {
+        setStatus("NOTFRIENDS");
         toast.error("Error adding friend");
-      } else if (data.isFriend === false) {
+      } else {
         toast.success("Friend request sent");
-      } else if (data.isFriend === true) {
-        toast.error("Friend request deleted");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -770,10 +765,8 @@ const Friend = ({
 
       if (data.success === false) {
         toast.error("Error blocking friend");
-      } else if (data.isBlocked === false) {
+      } else {
         toast.success("Friend blocked successfully");
-      } else if (data.isBlocked === true) {
-        toast.success("Friend unblocked successfully");
       }
     } catch (error: any) {
       const msg = "Error adding friend: " + friendId;
@@ -781,6 +774,40 @@ const Friend = ({
       console.error("Error adding friend:", error.message);
     }
   };
+
+  const removefrinship = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/removefrinship`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            userId: `${userId}`,
+            friendId: `${friendId}`,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success === false) {
+        toast.error("Error removing the friend");
+      } else if (data.success === true) {
+        //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+        // setStatus("NOTFRIENDS");
+        toast.success("Friendship removed");
+      }
+    } catch (error: any) {
+      toast.error("Error adding friend ");
+      console.error("Error adding friend:", error.message);
+    }
+  };
+
+  const [blocked, setblocked] = useState<boolean>(false);
 
   const FriendshipStatus = async () => {
     if (!userId) {
@@ -805,6 +832,15 @@ const Friend = ({
       } else {
         setStatus(data.friend.friendshipStatus);
       }
+      if (data.friend && data.friend.friendshipStatus) {
+        if (
+          data.friend &&
+          data.friend.friendshipStatus === "BLOCKED" &&
+          data.friend.friendId === userId
+        ) {
+          setblocked(true);
+        }
+      }
     } catch (error: any) {
       toast.error("Error during FriendshipStatus");
     }
@@ -812,47 +848,73 @@ const Friend = ({
 
   useEffect(() => {
     FriendshipStatus();
-  }, [userId, friendshipStatus]);
-
-  //     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
+  }, [userId]);
 
   return (
     <div>
       {!isProfileOwner && (
-        <div className="flex items-center justify-center text-white">
+        <div
+          className={`flex items-center justify-center text-white ${
+            blocked ? " pointer-events-none" : ""
+          }`}
+        >
           <div className="mx-2">
-            {(friendshipStatus === "NOTFRIENDS" ||
-              friendshipStatus === "BLOCKED") && (
-              <button
-                className=""
-                onClick={() => {
-                  addfriend();
-                  setStatus("PENDING");
-                }}
-              >
-                <FiUserPlus size="25" />
-              </button>
-            )}
+            {friendshipStatus !== "ACCEPTED" &&
+              friendshipStatus !== "PENDING" && (
+                <button
+                  className=""
+                  onClick={() => {
+                    addfriend();
+                    setStatus("PENDING");
+                  }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <FiUserPlus size="25" />
+                  </motion.div>
+                </button>
+              )}
             {friendshipStatus === "PENDING" && (
               <button
                 className=""
                 onClick={() => {
-                  addfriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
-                <FaUserTimes size="25" className="text-red-200" />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <FaUserTimes size="25" className="text-red-200" />
+                </motion.div>
               </button>
             )}
             {friendshipStatus === "ACCEPTED" && (
               <button
                 className=""
                 onClick={() => {
-                  addfriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
-                <TbUserOff size="25" className="text-red-200" />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <TbUserOff size="25" className="text-red-200" />
+                </motion.div>
               </button>
             )}
           </div>
@@ -861,11 +923,19 @@ const Friend = ({
               <button
                 className=""
                 onClick={() => {
-                  blockFriend();
+                  removefrinship();
                   setStatus("NOTFRIENDS");
                 }}
               >
-                <MdOutlineBlock size="25" className="text-red-200" />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <CgUnblock size="27" className="text-white rotate-90" />
+                </motion.div>
               </button>
             )}
             {friendshipStatus !== "BLOCKED" && (
@@ -876,18 +946,42 @@ const Friend = ({
                   setStatus("BLOCKED");
                 }}
               >
-                <CgUnblock size="25" className="text-red-200" />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <MdOutlineBlock size="25" className="text-red-200" />
+                </motion.div>
               </button>
             )}
           </div>
           <div>
             <button className="mx-2">
-              <BiMessageRounded size="25" />
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <BiMessageRounded size="25" />
+              </motion.div>
             </button>
           </div>
           <div>
             <button className="mx-2">
-              <IoGameControllerOutline size="25" />
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <IoGameControllerOutline size="25" />
+              </motion.div>
             </button>
           </div>
         </div>
@@ -1133,7 +1227,16 @@ export default function Profile(params: any) {
             src={IntraPic}
             intraId={intraId}
           />
-          <div className={`${isDivVisible ? "mt-20" : "mt-16"} p-10`}>
+          <div
+            className={`${
+              isDivVisible ? "md:mt-28 mt-10" : "md:mt-24 mt-12"
+            } p-10`}
+          >
+            {/* <motion.div
+              initial={{ opacity: 0, y: -100, x: -100 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            > */}
             <UserDetailsCard value={Login} intraId={intraId} />
             <Friend
               isProfileOwner={isProfileOwner}
@@ -1141,6 +1244,7 @@ export default function Profile(params: any) {
               friendId={params.params.intraId}
             />
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+            {/* </motion.div> */}
           </div>
         </div>
       </div>

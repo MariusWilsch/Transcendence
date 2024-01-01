@@ -144,7 +144,7 @@ export default function Search(params: any) {
                     <form className="w-full" onSubmit={handleSubmit}>
                       <label className=" flex flex-grow ">
                         <input
-                          id="searchField"
+                          id="handleSubmit"
                           name="searchTerm"
                           type="text"
                           value={inputValue}

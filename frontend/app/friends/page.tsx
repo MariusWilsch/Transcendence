@@ -10,6 +10,7 @@ import { Sidebar } from "../profile/[intraId]/page";
 import { RiSearchLine } from "react-icons/ri";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
+import { motion } from "framer-motion";
 import { FaCircle } from "react-icons/fa";
 
 export default function Friends() {
@@ -260,7 +261,6 @@ export default function Friends() {
       socket.on("update", () => {
         onlineFriends();
         setselectedFeild("Online");
-        console.log("Online");
       });
     }
   };
@@ -373,101 +373,124 @@ export default function Friends() {
               </div>
               {selectedFeild === "All" && (
                 <div className="w-full flex items-center justify-center mb-6">
-                  <div className="md:w-[50vw] w-full flex items-center justify-center">
-                    <div className="md:w-[50vw] w-full flex flex-row-reverse">
-                      <form className="w-full" onSubmit={handleSubmit}>
-                        <label className=" flex flex-grow ">
-                          <input
-                            id="searchField"
-                            name="searchTerm"
-                            type="text"
-                            value={inputValue}
-                            placeholder="Search ..."
-                            onChange={(e) => {
-                              setInputValue(e.target.value);
-                              handleSubmit(e);
-                            }}
-                            className="w-full bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
-                          />
-                          <div className="md:hidden">&nbsp; &nbsp;</div>
-                          <button
-                            onClick={handleSubmit}
-                            className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
-                            type="submit"
-                          >
-                            <RiSearchLine size="30" className="" />
-                          </button>
-                        </label>
-                      </form>
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    initial={{ opacity: 0, x: -100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="md:w-[50vw] w-full flex items-center justify-center">
+                      <div className="md:w-[50vw] w-full flex flex-row-reverse">
+                        <form className="w-full" onSubmit={handleSubmit}>
+                          <label className=" flex flex-grow ">
+                            <input
+                              id="searchField"
+                              name="searchTerm"
+                              type="text"
+                              value={inputValue}
+                              placeholder="Search ..."
+                              onChange={(e) => {
+                                setInputValue(e.target.value);
+                                handleSubmit(e);
+                              }}
+                              className="w-full bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
+                            />
+                            <div className="md:hidden">&nbsp; &nbsp;</div>
+                            <button
+                              onClick={handleSubmit}
+                              className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
+                              type="submit"
+                            >
+                              <RiSearchLine size="30" className="" />
+                            </button>
+                          </label>
+                        </form>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               )}
 
-              <div className="mt-4 flex  justify-center ">
-                <div className="mt-4 w-full flex flex-col items-center">
-                  {users &&
-                    users?.map((user) => (
-                      <div
-                        key={user.intraId}
-                        className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
-                      >
-                        <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
-                          <div className="flex-1 w-0 p-4">
-                            <div className="flex items-start">
-                              <div className="relative flex-shrink-0 pt-0.5">
-                                <img
-                                  className="h-10 w-10 rounded-full"
-                                  src={user.Avatar}
-                                  alt=""
-                                />
-                                {(selectedFeild === "Online" ||
-                                  selectedFeild === "All") && (
-                                  <div className="absolute right-0 bottom-0">
-                                    <div className="">
-                                      <FaCircle
-                                        className={`${
-                                          user.status === "ONLINE"
-                                            ? "text-green-600 border-slate-950 border rounded-full"
-                                            : ""
-                                        } ${
-                                          user.status === "OFFLINE"
-                                            ? "text-red-600 border-slate-950 border rounded-full"
-                                            : ""
-                                        } ${
-                                          user.status != "ONLINE" &&
-                                          user.status != "OFFLINE"
-                                            ? "hidden"
-                                            : ""
-                                        }`}
-                                        size="14"
-                                      />
-                                    </div>
+              <motion.div
+                initial={{ opacity: 0, y: -100 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="mt-4 flex  justify-center ">
+                  <div className="mt-4 w-full flex flex-col items-center">
+                    {users &&
+                      users?.map((user) => (
+                        <div
+                          key={user.intraId}
+                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                        >
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            initial={{ opacity: 0, y: -100 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                              <div className="flex-1 w-0 p-4">
+                                <div className="flex items-start">
+                                  <div className="relative flex-shrink-0 pt-0.5">
+                                    <img
+                                      className="h-10 w-10 rounded-full"
+                                      src={user.Avatar}
+                                      alt=""
+                                      onError={(e: any) => {
+                                        e.target.onerror = null;
+                                      }}
+                                    />
+                                    {(selectedFeild === "Online" ||
+                                      selectedFeild === "All") && (
+                                      <div className="absolute right-0 bottom-0">
+                                        <div className="">
+                                          <FaCircle
+                                            className={`${
+                                              user.status === "ONLINE"
+                                                ? "text-green-600 border-slate-950 border rounded-full"
+                                                : ""
+                                            } ${
+                                              user.status === "OFFLINE"
+                                                ? "text-red-600 border-slate-950 border rounded-full"
+                                                : ""
+                                            } ${
+                                              user.status != "ONLINE" &&
+                                              user.status != "OFFLINE"
+                                                ? "hidden"
+                                                : ""
+                                            }`}
+                                            size="14"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
 
-                              <div className="ml-3 f">
-                                <p className="text-md font-sans text-white">
-                                  {user.login}
-                                </p>
+                                  <div className="ml-3 f">
+                                    <p className="text-md font-sans text-white">
+                                      {user.login}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex border-l border-gray-900">
+                                <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                  <Link
+                                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+                                  >
+                                    Profile
+                                  </Link>
+                                </button>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex border-l border-gray-900">
-                            <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                              <Link
-                                href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
-                              >
-                                Profile
-                              </Link>
-                            </button>
-                          </div>
+                          </motion.div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
