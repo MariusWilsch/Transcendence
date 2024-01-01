@@ -41,17 +41,17 @@ export class UserService {
         });
         return User;
       }
-      if (!User.Avatar.includes('http://')) {
-        await prisma.user.update({
-          where: {
-            intraId: id,
-          },
-          data: {
-            Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
-          },
-        });
-        return User;
-      }
+      // if (!User.Avatar.includes('http://')) {
+      //   await prisma.user.update({
+      //     where: {
+      //       intraId: id,
+      //     },
+      //     data: {
+      //       Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
+      //     },
+      //   });
+      //   return User;
+      // }
       const s = User.Avatar.split('/');
 
       if (s[s.length - 2]) {
