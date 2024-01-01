@@ -377,7 +377,7 @@ export default function Friends() {
                     whileHover={{ scale: 1.1 }}
                     initial={{ opacity: 0, x: -100 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
+                    transition={{ delay: 0.02 }}
                   >
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
                       <div className="md:w-[50vw] w-full flex flex-row-reverse">
@@ -414,79 +414,80 @@ export default function Friends() {
               <motion.div
                 initial={{ opacity: 0, y: -100 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.02 }}
               >
                 <div className="mt-4 flex  justify-center ">
                   <div className="mt-4 w-full flex flex-col items-center">
                     {users &&
                       users?.map((user) => (
-                        <div
-                          key={user.intraId}
-                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                        <Link
+                          href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
                         >
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            initial={{ opacity: 0, y: -100 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
+                          <div
+                            key={user.intraId}
+                            className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
                           >
-                            <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
-                              <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
-                                  <div className="relative flex-shrink-0 pt-0.5">
-                                    <img
-                                      className="h-10 w-10 rounded-full"
-                                      src={user.Avatar}
-                                      alt=""
-                                      onError={(e: any) => {
-                                        e.target.onerror = null;
-                                      }}
-                                    />
-                                    {(selectedFeild === "Online" ||
-                                      selectedFeild === "All") && (
-                                      <div className="absolute right-0 bottom-0">
-                                        <div className="">
-                                          <FaCircle
-                                            className={`${
-                                              user.status === "ONLINE"
-                                                ? "text-green-600 border-slate-950 border rounded-full"
-                                                : ""
-                                            } ${
-                                              user.status === "OFFLINE"
-                                                ? "text-red-600 border-slate-950 border rounded-full"
-                                                : ""
-                                            } ${
-                                              user.status != "ONLINE" &&
-                                              user.status != "OFFLINE"
-                                                ? "hidden"
-                                                : ""
-                                            }`}
-                                            size="14"
-                                          />
+                            <motion.div
+                              whileTap={{ scale: 0.9 }}
+                              whileHover={{ scale: 1.1 }}
+                              initial={{ opacity: 0, y: -100 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.02 }}
+                            >
+                              <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                                <div className="flex-1 w-0 p-4">
+                                  <div className="flex items-start">
+                                    <div className="relative flex-shrink-0 pt-0.5">
+                                      <img
+                                        className="h-10 w-10 rounded-full"
+                                        src={user.Avatar}
+                                        alt=""
+                                        onError={(e: any) => {
+                                          e.target.onerror = null;
+                                        }}
+                                      />
+                                      {(selectedFeild === "Online" ||
+                                        selectedFeild === "All") && (
+                                        <div className="absolute right-0 bottom-0">
+                                          <div className="">
+                                            <FaCircle
+                                              className={`${
+                                                user.status === "ONLINE"
+                                                  ? "text-green-600 border-slate-950 border rounded-full"
+                                                  : ""
+                                              } ${
+                                                user.status === "OFFLINE"
+                                                  ? "text-red-600 border-slate-950 border rounded-full"
+                                                  : ""
+                                              } ${
+                                                user.status != "ONLINE" &&
+                                                user.status != "OFFLINE"
+                                                  ? "hidden"
+                                                  : ""
+                                              }`}
+                                              size="14"
+                                            />
+                                          </div>
                                         </div>
-                                      </div>
-                                    )}
-                                  </div>
+                                      )}
+                                    </div>
 
-                                  <div className="ml-3 f">
-                                    <p className="text-md font-sans text-white">
-                                      {user.login}
-                                    </p>
+                                    <div className="ml-3 f">
+                                      <p className="text-md font-sans text-white">
+                                        {user.login}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="flex border-l border-gray-900">
-                                <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                  <Link
-                                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
-                                  >
+                                <div className="flex border-l border-gray-900">
+                                  <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     Profile
-                                  </Link>
-                                </button>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        </div>
+                            </motion.div>
+                          </div>
+                        </Link>
                       ))}
                   </div>
                 </div>

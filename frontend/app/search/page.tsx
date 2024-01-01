@@ -12,6 +12,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Navbar } from "../profile/[intraId]/page";
 import { Sidebar } from "../profile/[intraId]/page";
 import { RiSearchLine } from "react-icons/ri";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Search(params: any) {
   const {
@@ -69,7 +70,6 @@ export default function Search(params: any) {
       } catch (error) {
         console.error("Error:", error);
       }
-
     };
     handleSearchQuery(searchTerm);
   }, []);
@@ -170,41 +170,51 @@ export default function Search(params: any) {
               </div>
               <div className="mt-4 flex  justify-center ">
                 <div className="mt-4 w-full flex flex-col items-center">
-                  {users &&
-                    users?.map((user) => (
-                      <div
-                        key={user.intraId}
-                        className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
-                      >
-                        <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
-                          <div className="flex-1 w-0 p-4">
-                            <div className="flex items-start">
-                              <div className="flex-shrink-0 pt-0.5">
-                                <img
-                                  className="h-10 w-10 rounded-full"
-                                  src={user.Avatar}
-                                  alt=""
-                                />
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.02 }}
+                  >
+                    {users &&
+                      users?.map((user) => (
+                        <Link
+                          href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+                          className=""
+                        >
+                          <div
+                            key={user.intraId}
+                            className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                          >
+                            <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                              <div className="flex-1 w-0 p-4">
+                                <div className="flex items-start">
+                                  <div className="flex-shrink-0 pt-0.5">
+                                    <img
+                                      className="h-10 w-10 rounded-full"
+                                      src={user.Avatar}
+                                      alt=""
+                                    />
+                                  </div>
+                                  <div className="ml-3 f">
+                                    <p className="text-md font-sans text-white">
+                                      {user.login}
+                                    </p>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="ml-3 f">
-                                <p className="text-md font-sans text-white">
-                                  {user.login}
-                                </p>
+
+                              <div className="flex border-l border-gray-900">
+                                <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 ">
+                                  Profile
+                                </button>
                               </div>
                             </div>
                           </div>
-                          <div className="flex border-l border-gray-900">
-                            <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                              <Link
-                                href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
-                              >
-                                Profile
-                              </Link>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        </Link>
+                      ))}
+                  </motion.div>
                 </div>
               </div>
             </div>

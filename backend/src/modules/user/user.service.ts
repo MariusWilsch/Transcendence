@@ -36,8 +36,7 @@ export class UserService {
             intraId: id,
           },
           data: {
-            Avatar:
-              'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+            Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
           },
         });
         return User;
@@ -48,8 +47,7 @@ export class UserService {
             intraId: id,
           },
           data: {
-            Avatar:
-              'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+            Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
           },
         });
         return User;
@@ -65,8 +63,7 @@ export class UserService {
                 intraId: id,
               },
               data: {
-                Avatar:
-                  'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
+                Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
               },
             });
           }
