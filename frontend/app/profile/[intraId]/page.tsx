@@ -455,9 +455,57 @@ const UserProfileImage = ({
 
 export const Sidebar = () => {
   const [user, setUser] = useState<User | null>(null);
-
   const [RouterName, setRouterName] = useState("profile");
   const pathname = usePathname();
+
+  const context = useAppContext();
+
+  const getFriends = async () => {
+    try {
+      if (user?.intraId) {
+        const response: any = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user.intraId}/freindrequest`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+
+        console.log("data.empty ", data.empty);
+
+        if (data.success === true && data.empty == false) {
+          context.setnotif(true);
+        }
+        if (data.success === true && data.empty == true) {
+          context.setnotif(false);
+        }
+      }
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
+
+  const handleFriendshipRequest = () => {
+    getFriends();
+  };
+
+  const listenForFriendships = () => {
+    if (context.notifSocket !== null) {
+      context.notifSocket.on("FriendShipRequest", handleFriendshipRequest);
+    }
+  };
+
+  useEffect(() => {
+    if (context.notifSocket) {
+      listenForFriendships();
+    }
+  }, [user, context.notifSocket]);
 
   useEffect(() => {
     const segments = pathname.split("/");
@@ -498,7 +546,7 @@ export const Sidebar = () => {
                 <li>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.01 }}
                   >
@@ -518,7 +566,7 @@ export const Sidebar = () => {
                   >
                     <motion.div
                       whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0, y: -5 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.01 }}
                     >
@@ -537,7 +585,7 @@ export const Sidebar = () => {
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
                     <motion.div
                       whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0, y: -5 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.01 }}
                     >
@@ -549,13 +597,14 @@ export const Sidebar = () => {
                             : "text-slate-500"
                         } hover:text-slate-50 mx-auto m-8`}
                       />
+                      {context.notif && <div className="">kayna notif</div>}
                     </motion.div>
                   </Link>
                 </li>
                 <li>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.01 }}
                   >
@@ -572,7 +621,7 @@ export const Sidebar = () => {
                 <li>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.01 }}
                   >
@@ -592,7 +641,7 @@ export const Sidebar = () => {
                   >
                     <motion.div
                       whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0, y: -5 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.01 }}
                     >
@@ -610,7 +659,7 @@ export const Sidebar = () => {
                 <li>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.01 }}
                   >
@@ -628,7 +677,7 @@ export const Sidebar = () => {
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
                     <motion.div
                       whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0, y: -5 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.01 }}
                     >
@@ -646,7 +695,7 @@ export const Sidebar = () => {
                 <li>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0, y: -5 }}
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.01 }}
                   >
@@ -668,7 +717,7 @@ export const Sidebar = () => {
                   >
                     <motion.div
                       whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0, y: -5 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.01 }}
                     >
@@ -776,10 +825,7 @@ const Friend = ({
   userId: string | undefined;
   friendId: string;
 }) => {
-  // const {
-  //   friendshipStatus,
-  //   setStatus,
-  // } = useAppContext();
+  const context = useAppContext();
 
   const [friendshipStatus, setStatus] = useState<
     "NOTFRIENDS" | "PENDING" | "ACCEPTED" | "BLOCKED"
@@ -936,6 +982,12 @@ const Friend = ({
                   className=""
                   onClick={() => {
                     addfriend();
+                    if (context.notifSocket) {
+                      context.notifSocket.emit("FriendShipRequest", {
+                        userId: `${userId}`,
+                        friendId: `${friendId}`,
+                      });
+                    }
                     setStatus("PENDING");
                   }}
                 >
@@ -958,7 +1010,6 @@ const Friend = ({
                   setStatus("NOTFRIENDS");
                 }}
               >
-
                 <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -1183,6 +1234,8 @@ export default function Profile(params: any) {
     addLogin(user?.isRegistred);
   }, [user?.isRegistred, isProfileOwner]);
 
+  const context = useAppContext();
+
   const createsocket = () => {
     const handleClientsConnection = `${process.env.NEXT_PUBLIC_API_URL}:3002/handleClientsConnection`;
 
@@ -1192,14 +1245,7 @@ export default function Profile(params: any) {
     });
 
     setsocket(newSocket);
-  };
-
-  const listenForEvents = () => {
-    if (socket !== null) {
-      socket.on("update", () => {
-        getUserFromRoutId();
-      });
-    }
+    context.setNotifSocket(newSocket);
   };
 
   useEffect(() => {
@@ -1208,9 +1254,33 @@ export default function Profile(params: any) {
     }
   }, []);
 
+  // const listenForFriendships = () => {
+  //   if (socket !== null) {
+  //     socket.on("FriendShipRequest", () => {
+  //       console.log("FriendShipRequest");
+  //       toast.success("New friend request");
+  //       // getUserFromRoutId();
+  //     });
+  //   }
+  // };
+
   useEffect(() => {
+    const listenForEvents = () => {
+      if (socket !== null) {
+        socket.on("update", () => {
+          getUserFromRoutId();
+        });
+      }
+    };
+
     if (socket) {
       listenForEvents();
+
+      // listenForFriendships();
+      return () => {
+        socket.off("update");
+        // socket.off("FriendShipRequest");
+      };
     }
   }, [socket]);
 

@@ -21,6 +21,7 @@ import { AuthService } from 'modules/auth/auth.service';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET, URL } from '../auth/constants';
+import { empty } from '@prisma/client/runtime/library';
 
 @Controller('users')
 export class UserController {
@@ -307,7 +308,11 @@ export class UserController {
         friendIds.map((id) => this.userService.getUserbyId(id))
       );
 
-      return res.json({ success: true, friendsDetails });
+      if (friendsDetails.length === 0) {
+        return res.json({ success: true, friendsDetails : null , empty : true});
+      }
+
+      return res.json({ success: true, friendsDetails , empty : false });
     } catch (error: any) {
       console.error('Error getFriends:', error);
       return res.json({ success: false });
