@@ -8,6 +8,8 @@ const prisma = new PrismaClient();
 export class ChatService {
   constructor(private readonly prismaService: PrismaService) { }
   async createMessage(sender: string, recipient: string, content: string): Promise<void> {
+    const date = new Date();
+    const dateToIso : string = date.toISOString(); 
     const senderUser = await prisma.user.findUnique({ where: { intraId: sender } });
     const recipientUser = await prisma.user.findUnique({ where: { intraId: recipient } });
     const privateRoomName = parseInt(senderUser.intraId) > parseInt(recipientUser.intraId) ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
@@ -31,6 +33,15 @@ export class ChatService {
         PrivateRoomName:privateRoomName,
       },
     });
+    await prisma.privateRoom.update({
+      where: {
+        name: privateRoomName,
+      },
+      data:{
+        updated_at:dateToIso,
+      },
+    });
+
   }
 
   async createPrivateRoom(user1: string, user2: string): Promise<void> {
@@ -39,7 +50,6 @@ export class ChatService {
 
     const room = await prisma.privateRoom.findUnique({
       where:{
-        
         name:romeName,
       }
     });
@@ -54,6 +64,8 @@ export class ChatService {
       // Handle the case where either sender or recipient does not exist
       throw new Error('Sender or recipient not found.');
     }
+    console.log(member1),
+    console.log(member2);
     await prisma.privateRoom.create({
       data: {
         name:romeName,

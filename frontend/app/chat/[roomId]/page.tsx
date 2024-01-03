@@ -3,10 +3,13 @@ import { FC, use, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { User, useAppContext,Message, Room, AppContextProps} from '@/app/AppContext';
-import { Navbar, Sidebar } from '@/app/profile/[intraId]/page';
-import { Conversations } from '../page';
+import Profile, { Loading, Navbar, Sidebar } from '@/app/profile/[intraId]/page';
+import { Conversations, PermissionDenied, getRooms } from '../page';
 import toast, { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import Chat from '@/app/chat/page'; 
+import { Cookie } from 'next/font/google';
+import Cookies from 'universal-cookie';
 
 interface PageProps {
   params: {
@@ -38,13 +41,13 @@ const SingleMessageSent = ({ message }: any) => {
   );
 }
 
-// async function getRoom(userId: string, otherId:string): Promise<Room> {
-//   const res = await fetch(`http://localhost:3001/chat/${roomId}`);
-//   const room = await res.json();
-//   return room;
-// }
-async function getMessages(roomId: string) : Promise<Message[]> {
-  const res = await fetch(`http://localhost:3001/chat/${roomId}/messages`);
+async function getMessages(userId: string) : Promise<Message[]> {
+  const res = await fetch(`http://localhost:3001/chat/${userId}/messages`,
+  {
+    method: "GET",
+    credentials: "include"
+  },
+  );
   const room =  res.json();
   return room;
 }
@@ -56,88 +59,133 @@ async function getMessages(roomId: string) : Promise<Message[]> {
 const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const[messageText, setMessageText] = useState('');
+  const [permission, setPermission] = useState<boolean>(false);
+  const [recipient, setRecipient] = useState<User | null>(null); // Provide a type for the recipient state
+  const [loading, setLoading] = useState<boolean>(true);
   const context = useAppContext();
-
-const directAcess = (roomId:string, context:AppContextProps) => {
-  const checkJwtCookie = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-        );
-        var data: User = await response.json();
-        
-        if (data !== null) {
-          context.setUserData(data);
-        }
-      } catch (error: any) {
-        const msg = "Error during login" + error.message;
-        toast.error(msg);
-        console.error("Error during login:", error);
-      }
-    };
-    checkJwtCookie();
-    const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3003/chat`;
-    const newSocket = io(chatNameSpace, {
-      query: { userId: context.userData.intraId },
-    });
-    context.setSocket(newSocket);
-    const fetchFriends = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${context.userData?.intraId}/friends`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        var data = await response.json();
-        if (data !== null) {
-          context.setFriends(data);
-        }
-      } catch (error: any) {
-        const msg = "Error during login" + error.message;
-        toast.error(msg);
-        console.error("Error during login:", error);
-      }
-    };
-    fetchFriends();
-    const recipientUserId = roomId.replace(context.userData?.intraId, '');
-    context.setRecipientLogin(recipientUserId);
-    return context;
-  }
+// const directAcess = async (roomId:string, context:AppContextProps) => {
+//   const checkJwtCookie = async () :Promise<void> => {
+//     try {
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+//         {
+//           method: "GET",
+//           credentials: "include",
+//         }
+//         );
+//         let data: User = await response.json();
+//         if (data !== null) {
+//           context.setUserData(data);
+//           const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+//           const newSocket = io(chatNameSpace, {
+//             query: { userId: context.userData?.intraId },
+//           });
+//           context.setSocket(newSocket);
+//         }
+//       } catch (error: any) {
+//         const msg = "Error during login" + error.message;
+//         toast.error(msg);
+//         console.error("Error during login:", error);
+//       }
+//     };
+//     await checkJwtCookie();
+//     const fetchFriends = async () => {
+//       try {
+//         const response = await fetch(
+//           `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${context.userData?.intraId}/friends`,
+//           {
+//             method: "GET",
+//             credentials: "include",
+//           }
+//         );
+//         let data = await response.json();
+//         if (data !== null) {
+//           context.setFriends(data);
+//         }
+//       } catch (error: any) {
+//         const msg = "Error during login" + error.message;
+//         toast.error(msg);
+//         console.error("Error during login:", error);
+//       }
+//       const recipientUserId = roomId.replace(context.userData?.intraId, '');
+//       context.setRecipientLogin(recipientUserId);
+//       setLoading(true);
+//     };
+//     await fetchFriends();
+//   }
   useEffect(() => {
-    if (!context){
-      directAcess(params.roomId, context);
+    const checker = params.roomId.includes(context.userData?.intraId) && params.roomId.includes(context.recipientUserId);
+    setPermission(checker);
+    if (!context.socket)
+    {
+      const fetchDataAndSetupSocket = async () => {
+        try {
+          const response = await fetch("http://localhost:3001/auth/user", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          const userData = await response.json();
+          context.setUserData(userData);
+          const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          const friends = await response2.json();
+          const recipientData = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
+          setRecipient(recipientData);
+          const rooms = await getRooms(userData.intraId);
+          context.setRooms(rooms);
+          const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+          if (!context.socket) {
+            const newSocket = io(chatNameSpace, {
+              query: { userId: userData.intraId },
+            });
+            context.setSocket(newSocket);
+          }
+          context.setFriends(friends);
+          if (context.recipientUserId && context.socket) {
+            context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
+          }
+        } catch (error) {
+          console.error("Error during login:", error);
+        }
+      };
+      fetchDataAndSetupSocket();
     }
-    const fetchData = async () => {
-      try {
-        const dataMessages = await getMessages(params.roomId);
-        setMessages(dataMessages);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
-    fetchData();
-  
-    const handlePrivateChat = (message: Message) => {
-      setMessages((prevMessages: Message[]) => [...prevMessages, message]);
+    if (checker){
+      const fetchData = async () => {
+        try {
+          const dataMessages = await getMessages(params.roomId);
+          setMessages(dataMessages);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      
+      fetchData();
+      const handlePrivateChat = (message: Message) => {
+        setMessages((prevMessages: Message[]) => {
+          const newMessages = Array.isArray(prevMessages) ? [...prevMessages, message] : [];
+        return newMessages;
+      });
     };
     if (context.socket) {
-      context.socket.on('privateChat', handlePrivateChat);
+      context.socket.on('privateChat',(message:Message)=> handlePrivateChat(message));
     }
-  
+  }
     // Cleanup function
     return () => {
       if (context.socket) {
-        context.socket.off('privateChat', handlePrivateChat);
+        context.socket.off('privateChat');
       }
     };
-  }, [params.roomId]);
+  }, [context.socket, params.roomId, context.recipientUserId]);
 
   const sendPrivateMessage = () => {
     if (context.socket && context.recipientUserId && messageText) {
@@ -170,9 +218,9 @@ const directAcess = (roomId:string, context:AppContextProps) => {
       sendPrivateMessage();
     }
   }
-  const recipientData = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
   const desplayedMessages :Message[] = messages.length ? messages.toReversed():[];
   return (
+    loading ?
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />
     <div className="flex ">
@@ -187,26 +235,26 @@ const directAcess = (roomId:string, context:AppContextProps) => {
           </div>
         </div>
       )}
-
       <div className="flex-1 overflow-y-auto">
       <div className="flex custom-height">
-      <Conversations friends={context.friendsData} />
+      <Conversations />
+      {permission &&
     <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
       <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
         <div className="relative flex items-center space-x-4">
           <div className="relative">
-            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
+            <span style={{ display: recipient?.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
               <svg width="20" height="20">
                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
               </svg>
             </span>
-            <Image width={144} height={144} src={recipientData?.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
+            <Image width={144} height={144} src={recipient?.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">{recipientData?.login}</span>
+              <span className="text-gray-700 mr-3">{recipient?.login}</span>
             </div>
-            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
+            <span style={{ display: recipient?.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
           </div>
         </div>
       </div>
@@ -230,8 +278,8 @@ const directAcess = (roomId:string, context:AppContextProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
               </svg>
             </button>
-            <button type="button" onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-              <span className="font-bold hidden sm:block">Send</span>
+            <button type="button" style={{display:messageText.length ?"":"none"}} onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
+              {/* <span className="font-bold hidden sm:block">Send</span> */}
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
               </svg>
@@ -240,11 +288,14 @@ const directAcess = (roomId:string, context:AppContextProps) => {
         </div>
       </div>
     </div>
+    }
+    {/* {!permission && <PermissionDenied />} */}
      </div>
        </div>
      </div>
      <Toaster />
    </div>
+   :<Loading />
   );
 }
 

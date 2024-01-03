@@ -11,21 +11,69 @@ import { Toaster } from 'react-hot-toast';
 import { ImBubbles2 } from "react-icons/im";
 import { MdGroups } from "react-icons/md";
 import { BsPersonLinesFill } from "react-icons/bs";
+import { CgDanger } from "react-icons/cg";
 import Link from "next/link";
 
-export const ConversationCard = ({ user }: any, {lastMessage}:any) => {
+
+export async function getRooms(userId: string): Promise<Room[]> {
+  const res = await fetch(`http://localhost:3001/chat/${userId}/privateRooms/`,
+  {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  
+  });
+  const room = await res.json();
+  return room;
+}
+
+export const FriendsCard = () => {
   const context = useAppContext();
-  const roomName = parseInt(context.userData?.intraId) > parseInt(user.intraId)?context.userData?.intraId+user.intraId:user.intraId+context.userData?.intraId;
+  const users = context.friendsData.friends;
+  const roomIdExtractor =(user1:string, user2:string) => {
+    return parseInt(user1) > parseInt(user2)?user1+user2:user2+user1;
+  }
+  const creatRoomEvent = (user:User) => {
+    context.setRecipientLogin(user.intraId);
+    context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:user.intraId });
+  }
+  return (
+    <div>
+      {users.map((user:User, index:number) => (
+          <Link
+          onClick={()=>creatRoomEvent(user)}
+          href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomIdExtractor(context.userData?.intraId, user.intraId)}`}
+          key={index}
+          >
+        <div key={index} className="flex items-center text-xs p-3  my-1 hover:bg-gray-800 ">
+          <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
+            <div><span className='hidden sm:block'>{user?.login}</span></div>
+            {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
+          </div>
+          <Image width={50} height={50} src={user.Avatar} alt="My profile" className="w-10 sm:w-10 h-10 sm:h-10 rounded-full" />
+        </div>
+          </Link>
+      ))}
+    </div>
+  );
+}
+export const ConversationCard = ({room}:any) => {
+  const context = useAppContext();
+  const roomName = room.name;
+  console.log(room);
+  const user = context.friendsData.friends.find((user:User) => user.intraId === room.participantsIds[0]);
   return (
     <Link
     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
     >
-    <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center text-xs  my-1 hover:bg-gray-800 ">
+    <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center p-3 text-xs  my-1 hover:bg-gray-800 ">
       <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
         <div><span className='hidden sm:block'>{user?.login}</span></div>
         {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
       </div>
-      <Image width={50} height={50} src={user.Avatar} alt="My profile" className="rounded-full order-1" />
+      <Image width={50} height={50} src={user.Avatar} alt="My profile" className="w-10 sm:w-10 h-10 sm:h-10 rounded-full" />
     </div>
     </Link>
   );
@@ -46,9 +94,23 @@ export const ConversationNotSelected = () => {
     </div>
   );
 }
-export const Conversations = ({friends}:any) => {
+export const PermissionDenied = () => {
+  return (
+    <div className="flex  flex-1 flex-col items-center justify-center p-2 my-1  w-screen">
+      <CgDanger className="h-40 w-40  " />
+      <h1> Permission Denied</h1>
+    </div>
+  );
+}
+export const Conversations = () => {
   const context = useAppContext();
   const [selected, setSelected] = useState<string>('messages');
+  const activeRoom = Array.isArray(context.rooms)? context.rooms.map((room:Room) => {
+    room.participantsIds = room.participantsIds.filter((id:string) => id !== context.userData?.intraId);
+    return room;
+  }):[];
+  activeRoom.sort((a:Room, b:Room) => {
+    return a.updated_at > b.updated_at ? -1 : 1;});
   const style = {borderBottom: "1px solid gray"};
   return (
     <div  className=" w-1/5 flex flex-col h-full p-4">
@@ -78,10 +140,14 @@ export const Conversations = ({friends}:any) => {
       {
         selected === 'messages' &&
         <div>
-        {friends?.friends.map((friend:any, index:any) => (
-          <ConversationCard key={index} user={friend} lastMessage={"last message"} />
+        {activeRoom?.map((room:any, index:any) => (
+          <ConversationCard key={index} room={room} />
           ))}
       </div>
+        }
+        {
+        selected === 'onlineFriends' &&
+        <FriendsCard />
         }
     </div>
   );
@@ -96,7 +162,7 @@ const ProfileInfo = () => {
 }
 const Chat = () => {
   const context = useAppContext();
-  const [romms, setRooms] = useState<Room[]>([]);
+  let trigger = 1;
   useEffect(() => {
     const fetchDataAndSetupSocket = async () => {
       try {
@@ -117,28 +183,32 @@ const Chat = () => {
           credentials: "include",
         });
         const friends = await response2.json();
-        const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3003/chat`;
-        const newSocket = io(chatNameSpace, {
-          query: { userId: userData.intraId },
-        });
-        context.setSocket(newSocket);
+        const rooms = await getRooms(userData.intraId);
+        context.setRooms(rooms);
+        const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+        if (!context.socket) {
+          const newSocket = io(chatNameSpace, {
+            query: { userId: userData.intraId },
+          });
+          context.setSocket(newSocket);
+        }
         context.setFriends(friends);
-        // context.socket?.on('privateChat', (data: Message) => {
-        //   setMessages((prevMessages:Message[]) => [...prevMessages, data]);
-        // });
         if (context.recipientUserId && context.socket) {
           context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
         }
-        return () => {
-          context.socket?.disconnect();
-        };
       } catch (error) {
         console.error("Error during login:", error);
       }
     };
-
     fetchDataAndSetupSocket();
-  }, []);
+    context.socket?.on('privateChat', () => {
+      trigger++;
+      fetchDataAndSetupSocket();
+    })
+    return () => {
+      context.socket?.disconnect();
+    };
+  }, [context.socket, trigger]);
   // useEffect(() => {
   //   const rooms:Room[] = [];
   //   if (context.socket && context.recipientUserId){
@@ -148,6 +218,7 @@ const Chat = () => {
   //     })
   //   }
   // } , [context.socket]);
+  // console.log(context.rooms);
   return (
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />
@@ -166,7 +237,7 @@ const Chat = () => {
 
       <div className="flex-1 overflow-y-auto">
       <div className="flex custom-height">
-      <Conversations friends={context.friendsData} />
+      <Conversations />
       {/* { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
       ?<PrivateRoom  params={{roomId: context.userData?.intraId+context.recipientUserId}} />
       :<PrivateRoom  params={{roomId: context.recipientUserId + context.userData?.intraId}} />)} */}

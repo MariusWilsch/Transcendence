@@ -5,7 +5,7 @@ import { PrismaService } from 'modules/prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
 
-@WebSocketGateway(3003,{
+@WebSocketGateway(3002,{
   namespace:'chat',
     cors: {
         origin: `${process.env.URL}:3000`,
@@ -32,6 +32,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('createPrivateRoom')
   async createPrivRoom(client :any, payload:{user1:string, user2:string}): Promise<void>{
+    console.log(`this is he first user ${payload.user1}`);
+    console.log(`this is he second user ${payload.user2}`);
     await this.chatService.createPrivateRoom(payload.user1, payload.user2);
   }
   @SubscribeMessage('privateChat')

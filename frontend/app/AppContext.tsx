@@ -21,6 +21,7 @@ export interface Room {
   id: number;
   name: string;
   paraticipants: string[];
+  participantsIds: string[];
   participants: User[];
   messages: Message[];
   createdAt:      Date
@@ -61,6 +62,8 @@ export type AppContextProps = {
   setMessageText: (messageText: string) => void;
   socket: Socket | null;
   setSocket: (socket: Socket | null) => void;
+  rooms: Room[];
+  setRooms: (rooms: Room[]) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -79,6 +82,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const [messageText, setMessageText] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);
@@ -88,6 +92,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setisSidebarVisible((prev) => !prev);
   };
   const contextValue: AppContextProps = {
+    rooms,
+    setRooms,
     socket,
     setSocket,
     messages,
