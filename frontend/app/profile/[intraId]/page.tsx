@@ -37,6 +37,7 @@ import { PiGameControllerLight } from "react-icons/pi";
 import { TbUserOff } from "react-icons/tb";
 import { FaUserTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaCircleDot } from "react-icons/fa6";
 
 export function Loading() {
   return (
@@ -474,9 +475,6 @@ export const Sidebar = () => {
           }
         );
         const data = await response.json();
-
-        console.log("data.empty ", data.empty);
-
         if (data.success === true && data.empty == false) {
           context.setnotif(true);
         }
@@ -582,7 +580,10 @@ export const Sidebar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}
+                    className="relative"
+                  >
                     <motion.div
                       whileTap={{ scale: 0.8 }}
                       initial={{ opacity: 0 }}
@@ -595,9 +596,16 @@ export const Sidebar = () => {
                           RouterName === "notif"
                             ? "text-slate-50"
                             : "text-slate-500"
-                        } hover:text-slate-50 mx-auto m-8`}
+                        } hover:text-slate-50 mx-auto m-8 `}
                       />
-                      {context.notif && <div className="">kayna notif</div>}
+                      {context.notif && (
+                        <div className="absolute top-0 right-4">
+                          <FaCircleDot
+                            size="16"
+                            className="text-red-500 opacity-40"
+                          />
+                        </div>
+                      )}
                     </motion.div>
                   </Link>
                 </li>
@@ -1007,6 +1015,12 @@ const Friend = ({
                 className=""
                 onClick={() => {
                   removefrinship();
+                  if (context.notifSocket) {
+                    context.notifSocket.emit("FriendShipRequest", {
+                      userId: `${userId}`,
+                      friendId: `${friendId}`,
+                    });
+                  }
                   setStatus("NOTFRIENDS");
                 }}
               >

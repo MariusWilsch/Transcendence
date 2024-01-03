@@ -72,7 +72,7 @@ export class handleClientsConnection
   ) {
     // notify other clients about this new user
     this.server.emit('FriendShipRequest');
-    console.log('FriendShipRequest : ', data);
+    // console.log('FriendShipRequest : ', data);
   }
 
   async handleConnection(client: Socket) {
