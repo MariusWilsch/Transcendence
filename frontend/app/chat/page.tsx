@@ -62,7 +62,7 @@ export const FriendsCard = () => {
 export const ConversationCard = ({room}:any) => {
   const context = useAppContext();
   const roomName = room.name;
-  console.log(room);
+  // console.log(room);
   const user = context.friendsData.friends.find((user:User) => user.intraId === room.participantsIds[0]);
   return (
     <Link
@@ -196,6 +196,9 @@ const Chat = () => {
         if (context.recipientUserId && context.socket) {
           context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
         }
+        return () => {
+          context.socket?.disconnect();
+        };
       } catch (error) {
         console.error("Error during login:", error);
       }
@@ -205,9 +208,6 @@ const Chat = () => {
       trigger++;
       fetchDataAndSetupSocket();
     })
-    return () => {
-      context.socket?.disconnect();
-    };
   }, [context.socket, trigger]);
   // useEffect(() => {
   //   const rooms:Room[] = [];

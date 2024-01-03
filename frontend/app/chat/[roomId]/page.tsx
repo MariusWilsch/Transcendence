@@ -60,7 +60,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const[messageText, setMessageText] = useState('');
   const [permission, setPermission] = useState<boolean>(false);
-  const [recipient, setRecipient] = useState<User | null>(null); // Provide a type for the recipient state
+  const [recipient, setRecipient] = useState<User>(); // Provide a type for the recipient state
   const [loading, setLoading] = useState<boolean>(true);
   const context = useAppContext();
 // const directAcess = async (roomId:string, context:AppContextProps) => {
@@ -137,7 +137,10 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
             credentials: "include",
           });
           const friends = await response2.json();
-          const recipientData = context.friendsData?.friends?.find((friend: any) => friend.intraId === context.recipientUserId);
+          context.setFriends(friends);
+          const recp = params.roomId.replace(userData.intraId, '');
+          context.setRecipientLogin(recp);
+          const recipientData = friends?.friends?.find((friend: User) => friend.intraId === recp);
           setRecipient(recipientData);
           const rooms = await getRooms(userData.intraId);
           context.setRooms(rooms);
@@ -148,7 +151,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
             });
             context.setSocket(newSocket);
           }
-          context.setFriends(friends);
           if (context.recipientUserId && context.socket) {
             context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
           }
@@ -219,6 +221,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     }
   }
   const desplayedMessages :Message[] = messages.length ? messages.toReversed():[];
+  const recipientData = context.friendsData?.friends?.find((friend: User) => friend.intraId === context.recipientUserId);
   return (
     loading ?
     <div className=" min-h-screen w-screen  bg-[#12141A]">
@@ -243,16 +246,16 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
         <div className="relative flex items-center space-x-4">
           <div className="relative">
-            <span style={{ display: recipient?.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
+            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="absolute text-green-500 right-0 bottom-0">
               <svg width="20" height="20">
                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
               </svg>
             </span>
-            <Image width={144} height={144} src={recipient?.Avatar} alt="" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
+            <Image width={144} height={144} src={recipientData?.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">{recipient?.login}</span>
+              <span className="text-gray-700 mr-3">{recipientData?.login}</span>
             </div>
             <span style={{ display: recipient?.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
           </div>
@@ -289,7 +292,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       </div>
     </div>
     }
-    {/* {!permission && <PermissionDenied />} */}
+    {!permission && <PermissionDenied />}
      </div>
        </div>
      </div>
