@@ -13,7 +13,117 @@ import { MdGroups } from "react-icons/md";
 import { BsPersonLinesFill } from "react-icons/bs";
 import { CgDanger } from "react-icons/cg";
 import Link from "next/link";
+import { useDisclosure } from '@mantine/hooks';
+import { Modal} from '@mantine/core';
+import { IoMdAdd } from "react-icons/io";
 
+const CreateChannelForm = () => {
+  const [channelName, setChannelName] = useState('');
+  const [channelType, setChannelType] = useState('');
+  const [password, setPassword] = useState('');
+  const context = useAppContext();
+
+  const handleSubmit = (event:any) => {
+    event.preventDefault();
+    setChannelName('');
+    setPassword('');
+  };
+  const handleSelectChange = (e:any)=>{
+    setChannelType(e.target.value);
+  }
+  const createAChannel = (e:any)=>{
+    e.preventDefault();
+    if (context.socket && channelName)
+    {
+      context.socket.emit("createChannel", {owner:context.userData.intraId,name:channelName, typePass:{type:channelType, password:password}}, ()=>{
+        console.log({owner:context.userData.intraId,name:channelName, typePass:{type:channelType, password:password}})
+      });
+      handleSubmit(e);
+    }
+  }
+  // useEffect(()=>{
+  //   console.log('i did mount');
+  // }, [channelType]);
+  return (
+    // <form onSubmit={createAChannel} className="max-w-md mx-auto mt-8">
+    <>
+      <div className="mb-4">
+        <label  className="block text-gray-700 font-bold mb-2">
+          Channel Name
+        </label>
+        <input
+          type="text"
+          id="channelName"
+          name="channelName"
+          value={channelName}
+          onChange={(e) => setChannelName(e.target.value)}
+          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+          />
+      </div>
+      <div>
+        <label className="block text-gray-700 font-bold mb-2" >
+          Type
+        </label>
+        <select
+        id="choseBox"
+        value={channelType}
+        onChange={handleSelectChange}
+        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        >
+          <option value="" disabled>
+          Select the channel type
+        </option>
+        <option value="PUBLIC">Public</option>
+        <option value="PROTECTED">Protected</option>
+        <option value="PRIVATE">Private</option>
+        </select>
+      </div>
+      {
+        channelType ==="PROTECTED" &&
+        <div className="mb-4">
+        <label htmlFor="password" className="block text-gray-700 font-bold mb-2">
+          Password
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+          />
+      </div>
+      }
+      <div className="flex items-center justify-between">
+        <button
+          onClick={createAChannel}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+          Create Channel
+        </button>
+      </div>
+    {/* </form> */}
+      </>
+  );
+};
+
+const  Demo =()=> {
+  const [opened, { open, close }] = useDisclosure(false);
+
+  return (
+    <>
+      <Modal opened={opened} onClose={close} title="Create A Channel" centered>
+        <CreateChannelForm />
+      </Modal>
+      <div className= "flex flex-row justify-center space-x-3 text-white">
+        <h2>channels</h2>
+      <IoMdAdd className='hover:cursor-pointer' onClick={open} />
+      </div>
+    </>
+  );
+}
 
 export async function getRooms(userId: string): Promise<Room[]> {
   const res = await fetch(`http://localhost:3001/chat/${userId}/privateRooms/`,
@@ -68,7 +178,8 @@ export const ConversationCard = ({room}:any) => {
     <Link
     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
     >
-    <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center p-3 text-xs  my-1 hover:bg-gray-800 ">
+    <div onClick={()=>context.setRecipientLogin(user.intraId)} className="flex items-center p-3 text-xs h-max
+      my-1 hover:bg-gray-800 ">
       <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
         <div><span className='hidden sm:block'>{user?.login}</span></div>
         {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
@@ -122,20 +233,20 @@ export const Conversations = () => {
         onClick={()=>{
           selected !== 'messages' && setSelected('messages');
         }}
-        className='h-8 w-1/3'
+        className='h-8 w-1/3 text-gray-400'
         />
         <MdGroups
         style={selected === 'channels'?style:{}}
          onClick={()=>{
           selected !== 'channels' && setSelected('channels');
         }}
-        className='h-8 w-1/3' />
+        className='h-8 w-1/3  text-gray-400' />
         <BsPersonLinesFill
         style={selected === 'onlineFriends'?style:{}}
          onClick={()=>{
           selected !== 'onlineFriends' && setSelected('onlineFriends');
         }}
-        className='h-8 w-1/3 ' />
+        className='h-8 w-1/3  text-gray-400' />
       </div>
       {
         selected === 'messages' &&
@@ -148,6 +259,10 @@ export const Conversations = () => {
         {
         selected === 'onlineFriends' &&
         <FriendsCard />
+        }
+        {
+          selected == 'channels' &&
+          <Demo />
         }
     </div>
   );
@@ -204,21 +319,18 @@ const Chat = () => {
       }
     };
     fetchDataAndSetupSocket();
-    context.socket?.on('privateChat', () => {
-      trigger++;
-      fetchDataAndSetupSocket();
-    })
+    if (context.socket)
+    {
+      context.socket.on("createChannel", (data:any)=>
+      {
+        console.log(data);
+      })
+      context.socket?.on('privateChat', () => {
+        trigger++;
+        fetchDataAndSetupSocket();
+      })
+    } 
   }, [context.socket, trigger]);
-  // useEffect(() => {
-  //   const rooms:Room[] = [];
-  //   if (context.socket && context.recipientUserId){
-  //     const roomId = parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)?context.userData?.intraId+context.recipientUserId:context.recipientUserId+context.userData?.intraId;
-  //     context.socket.on('privateChat',()=>{
-        
-  //     })
-  //   }
-  // } , [context.socket]);
-  // console.log(context.rooms);
   return (
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />
@@ -238,9 +350,6 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto">
       <div className="flex custom-height">
       <Conversations />
-      {/* { context.recipientUserId && (parseInt(context.userData?.intraId) > parseInt(context.recipientUserId)
-      ?<PrivateRoom  params={{roomId: context.userData?.intraId+context.recipientUserId}} />
-      :<PrivateRoom  params={{roomId: context.recipientUserId + context.userData?.intraId}} />)} */}
       <ConversationNotSelected />
       {/* <ProfileInfo></ProfileInfo> */}
     </div>

@@ -38,6 +38,11 @@ export class ChatController {
     res.json(data);
     return data;
   }
+  @Get('channels/public')
+  @UseGuards(JwtAuthGuard)
+  async getPublicChannels(){
+    
+  }
   // @Get(':id/message')
   // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
   //   const data = await this.chatService.getMessagesByUser(id);

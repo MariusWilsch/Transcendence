@@ -11,22 +11,47 @@ datasource db {
 }
 
 model User {
-  intraId        String    @unique @id
-  fullname       String    @unique
-  login          String    @unique
-  email          String    @unique
+  intraId        String          @unique @id
+  fullname       String          @unique
+  login          String          @unique
+  email          String          @unique
   Avatar         String?
-  isRegistred    Boolean   @default(false)
-  isTfaEnabled   Boolean   @default(false)
-  status         Status    @default(ONLINE)
+  isRegistred    Boolean         @default(false)
+  isTfaEnabled   Boolean         @default(false)
+  status         Status          @default(ONLINE)
   tfa            Tfa?
-  friends        Friend[]  @relation("userFriends")
-  user           Friend[]  @relation("friendsUser") 
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  sentMessages   Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  privateRooms             PrivateRoom[]
+  friends        Friend[]        @relation("userFriends")
+  user           Friend[]        @relation("friendsUser") 
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  sentMessages   Message[]       @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  privateRooms   PrivateRoom[]
+  membership       MemberShip[] 
+}
+
+model Channel {
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  type           String      @default("")
+  ownerId        String          @unique
+  password       String          @default("")
+  members        MemberShip[]
+  description    String?
+}
+
+model MemberShip {
+  id             Int             @id @default(autoincrement())
+  memberId         String        @unique
+  intraId         String         @unique
+  isOwner        Boolean @default(false)
+  isModerator    Boolean @default(false)
+  isBanned       Boolean @default(false)
+  isMuted        Boolean @default(false)
+  mutedTime      DateTime
+  joined_at      DateTime        @default(now())
+  channel        Channel  @relation(fields: [memberId], references: [name])
+  user           User     @relation(fields: [intraId], references: [intraId])
 }
 
 model Message {
@@ -68,6 +93,12 @@ enum FriendStatus {
   ACCEPTED
   BLOCKED
 }
+
+// enum ChannelType{
+//   PUBLIC
+//   PROTECTED
+//   PRIVATE
+// }
 
 model Friend {
   friendshipStatus FriendStatus

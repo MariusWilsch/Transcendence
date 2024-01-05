@@ -2,7 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
 import { PrismaClient } from '@prisma/client';
+import { Public } from '@prisma/client/runtime/library';
+import * as bcrypt from 'bcrypt';
 
+enum ChannelType {
+  Public = 1,
+  PROTECTED,
+  PRIVATE
+}
 const prisma = new PrismaClient();
 @Injectable()
 export class ChatService {
@@ -176,5 +183,31 @@ export class ChatService {
   async getMessagesByUser(userId:string): Promise<any>{
     const data = await this.getMessagesByUsr(userId);
     return data;
+  }
+  async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}){
+    const name = channelName + "#" + ownerId;
+    let password:string;
+    const saltRounds = 10;
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name,
+      },
+    })
+    if (channel)
+    {
+      throw ('channle already exist');
+    }
+    if (typePass.type == "PROTECTED")
+    {
+      password = await bcrypt.hash(typePass.password, saltRounds);
+    }
+    await prisma.channel.create({
+      data:{
+        name,
+        ownerId,
+        type:typePass.type,
+        password,
+      },
+    })
   }
 }

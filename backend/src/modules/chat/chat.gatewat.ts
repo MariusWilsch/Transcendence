@@ -53,4 +53,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('error', { message: 'Recipient not found or offline.' });
       }
   }
+  @SubscribeMessage('createChannel')
+  async createChannel(client :any, payload:{owner:string,name:string, typePass:{type:string, password:string}}){
+    try{
+      await this.chatService.createChannel(payload.owner, payload.name, payload.typePass);
+      console.log('channel created');
+    }
+    catch(e){
+      client.emit(e);
+    }
+  }
+  @SubscribeMessage('JoinAChannel')
+  async joinChannel(client:any, payload:{}){
+
+  }
 }

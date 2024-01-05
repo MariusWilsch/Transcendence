@@ -63,56 +63,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [recipient, setRecipient] = useState<User>(); // Provide a type for the recipient state
   const [loading, setLoading] = useState<boolean>(true);
   const context = useAppContext();
-// const directAcess = async (roomId:string, context:AppContextProps) => {
-//   const checkJwtCookie = async () :Promise<void> => {
-//     try {
-//       const response = await fetch(
-//         `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
-//         {
-//           method: "GET",
-//           credentials: "include",
-//         }
-//         );
-//         let data: User = await response.json();
-//         if (data !== null) {
-//           context.setUserData(data);
-//           const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-//           const newSocket = io(chatNameSpace, {
-//             query: { userId: context.userData?.intraId },
-//           });
-//           context.setSocket(newSocket);
-//         }
-//       } catch (error: any) {
-//         const msg = "Error during login" + error.message;
-//         toast.error(msg);
-//         console.error("Error during login:", error);
-//       }
-//     };
-//     await checkJwtCookie();
-//     const fetchFriends = async () => {
-//       try {
-//         const response = await fetch(
-//           `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${context.userData?.intraId}/friends`,
-//           {
-//             method: "GET",
-//             credentials: "include",
-//           }
-//         );
-//         let data = await response.json();
-//         if (data !== null) {
-//           context.setFriends(data);
-//         }
-//       } catch (error: any) {
-//         const msg = "Error during login" + error.message;
-//         toast.error(msg);
-//         console.error("Error during login:", error);
-//       }
-//       const recipientUserId = roomId.replace(context.userData?.intraId, '');
-//       context.setRecipientLogin(recipientUserId);
-//       setLoading(true);
-//     };
-//     await fetchFriends();
-//   }
+  let trigger = 1;
   useEffect(() => {
     const checker = params.roomId.includes(context.userData?.intraId) && params.roomId.includes(context.recipientUserId);
     setPermission(checker);
@@ -139,9 +90,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           const friends = await response2.json();
           context.setFriends(friends);
           const recp = params.roomId.replace(userData.intraId, '');
-          context.setRecipientLogin(recp);
           const recipientData = friends?.friends?.find((friend: User) => friend.intraId === recp);
-          setRecipient(recipientData);
+
+          context.setRecipientLogin(recp);
           const rooms = await getRooms(userData.intraId);
           context.setRooms(rooms);
           const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
@@ -178,7 +129,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       });
     };
     if (context.socket) {
-      context.socket.on('privateChat',(message:Message)=> handlePrivateChat(message));
+      context.socket.on('privateChat',(message:Message)=>{
+        handlePrivateChat(message);
+      })
     }
   }
     // Cleanup function
@@ -187,7 +140,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         context.socket.off('privateChat');
       }
     };
-  }, [context.socket, params.roomId, context.recipientUserId]);
+  }, [context.socket, params.roomId,messages]);
 
   const sendPrivateMessage = () => {
     if (context.socket && context.recipientUserId && messageText) {
@@ -255,9 +208,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           </div>
           <div className="flex flex-col leading-tight">
             <div className="text-2xl mt-1 flex items-center">
-              <span className="text-gray-700 mr-3">{recipientData?.login}</span>
+              <span className="text-white mr-3">{recipientData?.login}</span>
             </div>
-            <span style={{ display: recipient?.status=="ONLINE"?"":"none" }} className="text-lg text-gray-600">Actif</span>
+            <span style={{ display: recipientData?.status=="ONLINE"?"":"none" }} className="text-lg text-white">Active</span>
           </div>
         </div>
       </div>
