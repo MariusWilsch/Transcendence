@@ -115,6 +115,14 @@ export default function Search(params: any) {
 
   useEffect(() => {}, [inputValue]);
 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const toggleselectedId = (prev: any) => {
+    // if (prev === null) {
+    //   return null;
+    // }
+    return null;
+  };
+
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
@@ -145,7 +153,7 @@ export default function Search(params: any) {
                       <label className=" flex flex-grow ">
                         <input
                           id="handleSubmit"
-                          name="searchTerm"
+                          name={`searchTerm${Math.random()}`}
                           type="text"
                           value={inputValue}
                           placeholder="Search ..."
@@ -170,19 +178,19 @@ export default function Search(params: any) {
               </div>
               <div className="mt-4 flex  justify-center ">
                 <div className="mt-4 w-full flex flex-col items-center">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.02 }}
-                  >
-                    {users &&
-                      users?.map((user) => (
-                        <Link
-                          key={user.intraId}
-                          href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
-                          className=""
+                  {users &&
+                    users?.map((user) => (
+                      <Link
+                        key={user.intraId}
+                        href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+                        className=""
+                      >
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.02 }}
                         >
                           <div
                             key={user.intraId}
@@ -213,9 +221,9 @@ export default function Search(params: any) {
                               </div>
                             </div>
                           </div>
-                        </Link>
-                      ))}
-                  </motion.div>
+                        </motion.div>
+                      </Link>
+                    ))}
                 </div>
               </div>
             </div>

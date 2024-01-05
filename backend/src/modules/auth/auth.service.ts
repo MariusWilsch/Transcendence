@@ -1,5 +1,5 @@
 import { Injectable, Req } from '@nestjs/common';
-import { authDto } from './auth.tdo';
+import { authDto, signeinDto } from './auth.tdo';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { Email2FAService } from './nodemailer/email.service';
@@ -15,7 +15,7 @@ type User = {
   Avatar: string;
   isRegistred: Boolean;
   isTfaEnabled: Boolean;
-  Status: string;
+  status: string;
   created_at: Date;
   updated_at: Date;
 };
@@ -38,7 +38,7 @@ export class AuthService {
       Avatar: user.Avatar,
       isRegistred: false,
       isTfaEnabled: false,
-      Status: 'ONLINE',
+      status: 'ONLINE',
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -170,6 +170,7 @@ export class AuthService {
       return false;
     }
   }
+
   async hashCode(code: string): Promise<string> {
     const saltRounds = 2;
     const hashedCode = await bcrypt.hash(code, saltRounds);
@@ -180,9 +181,44 @@ export class AuthService {
     const isMatch = await bcrypt.compare(code, hashedCode);
     return isMatch;
   }
+
+  async create(user: signeinDto) {
+
+    const pass = await this.hashCode(user.password);
+    const newUser = await prisma.user.create({
+      data: {
+        intraId: `${Date.now()}`,
+        fullname: user.usual_full_name,
+        login: user.username,
+        email: user.email,
+        isRegistred: false,
+        isTfaEnabled: false,
+        status: 'ONLINE',
+        password: pass,
+      },
+    });
+    return newUser;
+  }
+
+  async findsignup(body : { login : string , password : string }): Promise<User | undefined> {
+    const userexit = await prisma.user.findUnique(
+      {
+        where: 
+        {
+          login: body.login,
+        },
+      }
+    );
+    if (userexit) {
+      const isMatch = await bcrypt.compare(body.password, userexit.password);
+      if (isMatch) {
+        return userexit;
+      }
+      else {
+        return undefined;
+      }
+    }
+  }
+
+
 }
-
-// TODO:
-
-// -authentication
-// -authorization: jwt, passport, session, cookies

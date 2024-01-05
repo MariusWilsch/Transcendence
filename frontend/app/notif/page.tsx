@@ -58,7 +58,6 @@ export default function Search() {
   }, []);
 
   const getFriends = async () => {
-    console.log("context.user?.intraId", context.user?.intraId);
     try {
       if (context.user?.intraId) {
         const response: any = await fetch(
@@ -112,13 +111,11 @@ export default function Search() {
       if (data.success === false) {
         const msg = "Error accepting friend request";
         toast.error(msg);
-        console.log(msg);
         getFriends();
       }
       if (data.success === true) {
         const msg = "Friend request accepted";
         toast.success(msg);
-        console.log(msg);
         getFriends();
       }
     }
@@ -140,17 +137,14 @@ export default function Search() {
         }
       );
       const data = await response.json();
-      console.log(data);
       if (data.success === false) {
         const msg = "Error declining friend request";
         toast.error(msg);
-        console.log(msg);
         getFriends();
       }
       if (data.success === true) {
         const msg = "Friend request declined";
         toast.success(msg);
-        console.log(msg);
         getFriends();
       }
     }
@@ -171,11 +165,8 @@ export default function Search() {
   };
 
   useEffect(() => {
-    console.log("context.notifSocket", context.notifSocket);
     if (context.notifSocket) {
       listenForFriendships();
-
-      console.log("listening for friendships");
     }
   }, [context.user, context.notifSocket]);
 

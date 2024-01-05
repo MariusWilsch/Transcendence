@@ -21,3 +21,27 @@ export class authDto {
   @IsString()
   Avatar: string;
 }
+
+export class signeinDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  usual_full_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  UId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @IsString()
+  Avatar: string;
+}

@@ -372,20 +372,20 @@ export default function Friends() {
                 </div>
               </div>
               {selectedFeild === "All" && (
-                <div className="w-full flex items-center justify-center mb-6">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    initial={{ opacity: 0, x: -100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.02 }}
-                  >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.02 }}
+                >
+                  <div className="w-full flex items-center justify-center mb-6">
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
                       <div className="md:w-[50vw] w-full flex flex-row-reverse">
                         <form className="w-full" onSubmit={handleSubmit}>
                           <label className=" flex flex-grow ">
                             <input
                               id="searchField"
-                              name="searchTerm"
+                              name={`inputValue${Math.random()}`}
                               type="text"
                               value={inputValue}
                               placeholder="Search ..."
@@ -407,8 +407,8 @@ export default function Friends() {
                         </form>
                       </div>
                     </div>
-                  </motion.div>
-                </div>
+                  </div>
+                </motion.div>
               )}
 
               <motion.div
@@ -421,7 +421,7 @@ export default function Friends() {
                     {users &&
                       users?.map((user) => (
                         <Link
-                        key={user.intraId}
+                          key={user.intraId}
                           href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
                         >
                           <div

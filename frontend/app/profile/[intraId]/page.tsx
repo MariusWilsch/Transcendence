@@ -109,6 +109,7 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
                     <label className="">
                       <input
                         id="handleSubmit"
+                        name={`searchTerm${Math.random()}`}
                         type="text"
                         value={inputValue}
                         placeholder="Search ..."
@@ -212,6 +213,7 @@ const UserDetailsCard = ({
             <input
               type="text"
               placeholder=" the new login"
+              name={`login${Math.random()}`}
               value={newLoginInput}
               onChange={(e) => setNewLoginInput(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -421,9 +423,9 @@ const UserProfileImage = ({
                 <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
+                  initial={{ opacity: 0, y: -100, x: -100 }}
+                  animate={{ opacity: 1, x: 0, y: 0 }}
+                  transition={{ delay: 0.02 }}
                 >
                   <div className="absolute">
                     <label htmlFor="avatar" className="cursor-pointer">
@@ -579,16 +581,16 @@ export const Sidebar = () => {
                     </motion.div>
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}
-                    className="relative"
+                <li className="relative">
+                  <motion.div
+                    whileTap={{ scale: 0.8 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.01 }}
                   >
-                    <motion.div
-                      whileTap={{ scale: 0.8 }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.01 }}
+                    <Link
+                      href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}
+                      // className="relative"
                     >
                       <IoMdNotificationsOutline
                         size="30"
@@ -596,18 +598,18 @@ export const Sidebar = () => {
                           RouterName === "notif"
                             ? "text-slate-50"
                             : "text-slate-500"
-                        } hover:text-slate-50 mx-auto m-8 `}
+                        } hover:text-slate-50 mx-auto m-8`}
                       />
                       {context.notif && (
-                        <div className="absolute top-0 right-4">
+                        <div className="absolute top-0 right-4 flex items-end">
                           <FaCircleDot
-                            size="16"
-                            className="text-red-500 opacity-40"
+                            size="14"
+                            className="text-red-600 opacity-80 animate-ping"
                           />
                         </div>
                       )}
-                    </motion.div>
-                  </Link>
+                    </Link>
+                  </motion.div>
                 </li>
                 <li>
                   <motion.div
@@ -933,6 +935,7 @@ const Friend = ({
   };
 
   const [blocked, setblocked] = useState<boolean>(false);
+  const [sender, setSender] = useState<boolean>(false);
 
   const FriendshipStatus = async () => {
     if (!userId) {
@@ -959,11 +962,18 @@ const Friend = ({
       }
       if (data.friend && data.friend.friendshipStatus) {
         if (
-          data.friend &&
           data.friend.friendshipStatus === "BLOCKED" &&
           data.friend.friendId === userId
         ) {
           setblocked(true);
+        }
+      }
+      if (data.friend && data.friend.friendshipStatus) {
+        if (
+          data.friend.friendshipStatus === "PENDING" &&
+          data.friend.userId === userId
+        ) {
+          setSender(true);
         }
       }
     } catch (error: any) {
@@ -976,18 +986,18 @@ const Friend = ({
   }, [userId]);
 
   return (
-    <div>
+    <div className="mt-6">
       {!isProfileOwner && (
         <div
           className={`flex items-center justify-center text-white ${
-            blocked ? " pointer-events-none" : ""
+            blocked ? "cursor-not-allowed" : ""
           }`}
         >
           <div className="mx-2">
             {friendshipStatus !== "ACCEPTED" &&
               friendshipStatus !== "PENDING" && (
                 <button
-                  className=""
+                  className={`${blocked ? "pointer-events-none" : ""}`}
                   onClick={() => {
                     addfriend();
                     if (context.notifSocket) {
@@ -1012,7 +1022,8 @@ const Friend = ({
               )}
             {friendshipStatus === "PENDING" && (
               <button
-                className=""
+                className={`${blocked ? "  pointer-events-none" : ""}
+                ${!sender ? "  pointer-events-none" : ""}`}
                 onClick={() => {
                   removefrinship();
                   if (context.notifSocket) {
@@ -1037,7 +1048,7 @@ const Friend = ({
             )}
             {friendshipStatus === "ACCEPTED" && (
               <button
-                className=""
+                className={`${blocked ? "  pointer-events-none" : ""}`}
                 onClick={() => {
                   removefrinship();
                   setStatus("NOTFRIENDS");
@@ -1058,7 +1069,7 @@ const Friend = ({
           <div className="mx-2">
             {friendshipStatus === "BLOCKED" && (
               <button
-                className=""
+                className={`${blocked ? "  pointer-events-none" : ""}`}
                 onClick={() => {
                   removefrinship();
                   setStatus("NOTFRIENDS");
@@ -1077,7 +1088,7 @@ const Friend = ({
             )}
             {friendshipStatus !== "BLOCKED" && (
               <button
-                className=""
+                className={`${blocked ? "  pointer-events-none" : ""}`}
                 onClick={() => {
                   blockFriend();
                   setStatus("BLOCKED");
@@ -1096,7 +1107,9 @@ const Friend = ({
             )}
           </div>
           <div>
-            <button className="mx-2">
+            <button
+              className={`mx-2 ${blocked ? "  pointer-events-none" : ""}`}
+            >
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1109,7 +1122,9 @@ const Friend = ({
             </button>
           </div>
           <div>
-            <button className="mx-2">
+            <button
+              className={`mx-2 ${blocked ? "  pointer-events-none" : ""}`}
+            >
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
