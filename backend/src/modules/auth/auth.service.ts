@@ -183,8 +183,27 @@ export class AuthService {
   }
 
   async create(user: signeinDto) {
-
     const pass = await this.hashCode(user.password);
+
+    const userexit = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            login: user.username,
+          },
+          {
+            email: user.email,
+          },
+          {
+            fullname: user.usual_full_name,
+          },
+        ],
+      },
+    });
+    if (userexit) {
+      return undefined;
+    }
+
     const newUser = await prisma.user.create({
       data: {
         intraId: `${Date.now()}`,
@@ -200,25 +219,30 @@ export class AuthService {
     return newUser;
   }
 
-  async findsignup(body : { login : string , password : string }): Promise<User | undefined> {
-    const userexit = await prisma.user.findUnique(
-      {
-        where: 
-        {
-          login: body.login,
-        },
-      }
-    );
+  async findsignup(body: {
+    username: string;
+    password: string;
+  }): Promise<User | undefined | string> {
+    const userexit = await prisma.user.findUnique({
+      where: {
+        login: body.username,
+      },
+    });
     if (userexit) {
       const isMatch = await bcrypt.compare(body.password, userexit.password);
       if (isMatch) {
-        return userexit;
+        if (userexit.isTfaEnabled === false) {
+          return userexit;
+        }
+        else {
+          this.generateOtp(userexit); 
+          return '2FA';
+        }
+      } else {
+        return 'wrong password';
       }
-      else {
-        return undefined;
-      }
+    } else {
+      return undefined;
     }
   }
-
-
 }

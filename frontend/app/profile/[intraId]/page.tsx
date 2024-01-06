@@ -72,6 +72,10 @@ export function Navbar({ isProfileOwner }: { isProfileOwner: boolean }) {
     ) {
       return;
     }
+    if (
+      inputValue.trim().length > 10) {
+      return toast.error("TOO LONG");
+    }
     return router.push(
       `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?searchTerm=${inputValue}`
     );
@@ -154,6 +158,11 @@ const UserDetailsCard = ({
   const [newLoginInput, setNewLoginInput] = useState("");
 
   const updateLogin = async () => {
+    
+    if (newLoginInput.trim().length > 20 || newLoginInput.trim().length < 3) {
+      toast.error("Login must be between 3 and 20 characters");
+      return;
+    }
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
       try {
         const response = await fetch(

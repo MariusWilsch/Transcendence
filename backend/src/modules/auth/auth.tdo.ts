@@ -36,12 +36,5 @@ export class signeinDto {
 
   @IsString()
   @IsNotEmpty()
-  UId: string;
-
-  @IsString()
-  @IsNotEmpty()
   password: string;
-
-  @IsString()
-  Avatar: string;
 }

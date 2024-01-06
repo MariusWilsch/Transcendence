@@ -85,6 +85,15 @@ export class AuthController {
         return res.redirect(`${URL}:3000/profile/${userExists.intraId}`);
       }
 
+      const checklogin = await prisma.user.findUnique({
+        where: {
+          login: req.user.username,
+        },
+      });
+      if (checklogin) {
+        return res.redirect(`${URL}:3000`);
+      }
+
       const user = await prisma.user.create({
         data: {
           intraId: req.user.UId,
@@ -105,7 +114,6 @@ export class AuthController {
         secret: JWT_SECRET,
       });
       res.cookie('jwt', jwt);
-      // res.cookie('id', user.intraId);
       return res.redirect(`${URL}:3000/profile/${user.intraId}`);
     } catch (e) {
       console.log('Error auth cllback : ', e);
@@ -125,27 +133,12 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() body: any, @Res() res: any) {
+  async signup(@Body() body: any, @Res() res: any, @Res() response: Response) {
     try {
       const user = await this.authService.create(body);
-      const { created_at, updated_at, ...userWithoutDate } = user;
-      const payload = { userWithoutDate };
-      const jwt = this.jwtService.sign(payload, {
-        secret: JWT_SECRET,
-      });
-      res.cookie('jwt', jwt);
-      return res.redirect(`${URL}:3000/profile/${user.intraId}`);
-    } catch (e) {
-      console.log('Error signup: ', e);
-    }
-  }
 
-  @Post('login')
-  async login(@Body() body: any, @Res() res: any) {
-    try {
-      const user = await this.authService.findsignup(body);
       if (user === undefined) {
-        return res.redirect(`${URL}:3000/login`);
+        return res.json({ succes: false, message: 'User already exists' });
       }
       const { created_at, updated_at, ...userWithoutDate } = user;
       const payload = { userWithoutDate };
@@ -153,10 +146,43 @@ export class AuthController {
         secret: JWT_SECRET,
       });
       res.cookie('jwt', jwt);
-      res.cookie('id', user.intraId);
-      return res.redirect(`${URL}:3000/profile/${user.intraId}`);
+      return res.json({ succes: true, Id: user.intraId });
+    } catch (e) {
+      console.log('Error signup: ', e);
+      return res.json({ succes: false, message: 'User created' });
+    }
+  }
+
+  @Post('login')
+  async login(@Body() body: any, @Res() res: any) {
+    try {
+      const user: any = await this.authService.findsignup(body);
+      if (user === undefined) {
+        return res.json({ succes: false, message: 'Wrong user name' });
+      } else if (user === 'wrong password') {
+        return res.json({ succes: false, message: 'Wrong password' });
+      } else if (user === '2FA') {
+        res.clearCookie('jwt');
+        const userexit = await prisma.user.findUnique({
+          where: {
+            login: body.username,
+          },
+        });
+        res.cookie('id', userexit.intraId);
+        return res.json({ succes: true, message: 'Two factor authentication' });
+      } else if (user !== 'wrong login' && user !== undefined) {
+        const { created_at, updated_at, ...userWithoutDate } = user;
+        const payload = { userWithoutDate };
+        const jwt = this.jwtService.sign(payload, {
+          secret: JWT_SECRET,
+        });
+        res.cookie('jwt', jwt);
+
+        return res.json({ succes: true, Id: user.intraId });
+      }
     } catch (e) {
       console.log('Error login: ', e);
+      return res.json({ succes: false, message: 'User created' });
     }
   }
 }
