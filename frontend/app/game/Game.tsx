@@ -4,14 +4,17 @@ import * as PIXI from 'pixi.js';
 
 interface gameVars {
 	backgroundColor: number;
+	// Paddle
 	paddleWidth: number;
 	paddleHeight: number;
 	paddleColor: number;
 	paddleVelocity: number;
+	// Ball
 	ballColor: number;
 	ballRadius: number;
 	ballVelocityX: number;
 	ballVelocityY: number;
+	playerScores: { player1: number; player2: number };
 }
 
 const gameVars = {
@@ -19,11 +22,12 @@ const gameVars = {
 	paddleWidth: 20,
 	paddleHeight: 100,
 	paddleColor: 0xde3249,
-	paddleVelocity: 5,
+	paddleVelocity: 10,
 	ballColor: 0xffffff,
 	ballRadius: 20,
-	ballVelocityX: 0,
-	ballVelocityY: 2,
+	ballVelocityX: 5,
+	ballVelocityY: 5,
+	playerScores: { player1: 0, player2: 0 },
 };
 
 interface vec2 {
@@ -61,7 +65,22 @@ class Paddle implements PaddleProps {
 		this.color = color;
 		this.input = input;
 	}
+	getCenter() {
+		return createVec2(
+			this.pos.x + this.width / 2,
+			this.pos.y + this.height / 2,
+		);
+	}
+	getHalfWidth() {
+		return this.width / 2;
+	}
+	getHalfHeight() {
+		return this.height / 2;
+	}
 	draw(graphics: PIXI.Graphics) {
+		if (this.pos.y <= 0) this.pos.y = 0;
+		if (this.pos.y >= window.innerHeight - this.height)
+			this.pos.y = window.innerHeight - this.height;
 		graphics.beginFill(this.color);
 		graphics.lineStyle(4, 0xff3300, 1);
 		graphics.drawRect(this.pos.x, this.pos.y, this.width, this.height);
@@ -95,8 +114,21 @@ class Ball implements BallProps {
 	getBallCenter() {
 		return createVec2(this.pos.x + this.radius, this.pos.y + this.radius);
 	}
+	getAllEdges() {
+		return {
+			left: this.pos.x - this.radius,
+			right: this.pos.x + this.radius,
+			top: this.pos.y - this.radius,
+			bottom: this.pos.y + this.radius,
+		};
+	}
+	resetBallToCenter() {
+		this.pos.x = window.innerWidth / 2;
+		this.pos.y = window.innerHeight / 2;
+	}
 	draw(graphics: PIXI.Graphics) {
-		graphics.beginFill(this.color);
+		graphics.lineStyle(4, 0xffffff, 1);
+		graphics.beginFill(this.color, 1);
 		graphics.drawCircle(this.pos.x, this.pos.y, this.radius);
 		graphics.endFill();
 	}
@@ -135,6 +167,36 @@ function initGameObjects() {
 	return { leftPaddle, rightPaddle, ball };
 }
 
+const choosePaddle = (
+	ball: Ball,
+	leftPaddle: Paddle,
+	rightPaddle: Paddle,
+): Paddle => {
+	return ball.pos.x < window.innerWidth / 2 ? leftPaddle : rightPaddle;
+};
+
+const initText = (app: PIXI.Application) => {
+	const player1Score = new PIXI.Text('0', {
+		fontFamily: 'Arial',
+		fontSize: 36,
+		fill: 0xffffff,
+		align: 'center',
+	});
+	const player2Score = new PIXI.Text('0', {
+		fontFamily: 'Arial',
+		fontSize: 36,
+		fill: 0xffffff,
+		align: 'center',
+	});
+	player1Score.x = window.innerWidth / 2 - 50;
+	player1Score.y = 20;
+	player2Score.x = window.innerWidth / 2 + 50;
+	player2Score.y = 20;
+	app.stage.addChild(player1Score);
+	app.stage.addChild(player2Score);
+	return { player1Score, player2Score };
+};
+
 const Game: React.FC = () => {
 	const pixiContainer = useRef<HTMLDivElement>(null);
 
@@ -145,23 +207,52 @@ const Game: React.FC = () => {
 			width: window.innerWidth, // Width of the canvas
 			height: window.innerHeight, // Height of the canvas
 			backgroundColor: 0x1099bb, // Background color
+			// antialias: true, // Anti-aliasing
 		});
 
 		pixiContainer.current.appendChild(app.view);
 
-		// Add your PixiJS application logic here
+		//! Add your PixiJS application logic here
 
 		// Draw leftPaddle
 		const graphics = new PIXI.Graphics();
 		const { leftPaddle, rightPaddle, ball } = initGameObjects();
 		app.stage.addChild(graphics);
-
+		const { player1Score, player2Score } = initText(app);
 		function onWallCollision() {
-			if (
-				ball.getBallCenter().y <= 0 ||
-				ball.getBallCenter().y >= window.innerHeight
-			)
-				ball.velocity.y *= -1;
+			// Check if ball is not close to world edges of the screen then return early
+			if (ball.pos.y > 100 && ball.pos.y < window.innerHeight - 100) return;
+			if (ball.pos.x < 100 && ball.pos.x > window.innerWidth - 100) return;
+			// Check if ball is colliding with world's edges
+			const allEdges = ball.getAllEdges();
+			if (allEdges.top <= 0 || allEdges.bottom > window.innerHeight)
+				return (ball.velocity.y *= -1);
+			if (allEdges.left <= 0 || allEdges.right > window.innerWidth) {
+				// Stop the ball
+				ball.resetBallToCenter();
+				if (allEdges.left <= 0) {
+					gameVars.playerScores.player1 += 1;
+					player1Score.text = `${gameVars.playerScores.player1}`;
+				} else {
+					gameVars.playerScores.player2 += 1;
+					player2Score.text = `${gameVars.playerScores.player2}`;
+				}
+			}
+		}
+
+		function ballPaddleCollision(ball: Ball, paddle: Paddle) {
+			// If ball is not in the vecinity of the paddle, return
+			if (ball.pos.x > 100 && ball.pos.x < window.innerWidth - 100) return;
+			// Get the distance between the center of the ball and the paddle
+			let dx = Math.abs(ball.pos.x - paddle.getCenter().x) as number;
+			let dy = Math.abs(ball.pos.y - paddle.getCenter().y) as number;
+			// Distance between edge of the paddle and the center ball
+			let compareX = ball.radius + paddle.getHalfWidth();
+			let compareY = ball.radius + paddle.getHalfHeight();
+			if (dx <= compareX && dy <= compareY) {
+				// Collision detected
+				ball.velocity.x *= -1;
+			}
 		}
 
 		document.addEventListener('keydown', (e) => {
@@ -198,6 +289,8 @@ const Game: React.FC = () => {
 			}
 		});
 
+		// Text
+
 		function draw() {
 			graphics.clear();
 			leftPaddle.draw(graphics);
@@ -206,16 +299,17 @@ const Game: React.FC = () => {
 		}
 
 		function update(deltaTime: number) {
-			leftPaddle.update(deltaTime);
-			rightPaddle.update(deltaTime);
-			ball.update(deltaTime);
+			// leftPaddle.update(deltaTime);
+			// rightPaddle.update(deltaTime);
+			// ball.update(deltaTime);
 			onWallCollision();
+			ballPaddleCollision(ball, choosePaddle(ball, leftPaddle, rightPaddle));
 		}
 
 		app.ticker.add((deltaTime) => {
 			update(deltaTime);
 			draw();
-			console.log(app.ticker.FPS);
+			// console.log(app.ticker.FPS);
 		});
 
 		return () => {
@@ -226,8 +320,8 @@ const Game: React.FC = () => {
 			}
 		};
 	}, []);
-
 	return <div ref={pixiContainer} />;
 };
 
 export default Game;
+

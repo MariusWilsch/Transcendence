@@ -1,1 +1,1 @@
-export * from './game/gameReducer';
+export * from './reducers/gameReducer';
