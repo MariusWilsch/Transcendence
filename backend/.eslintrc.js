@@ -27,7 +27,7 @@ module.exports = {
 		'@typescript-eslint/explicit-function-return-type': 'off',
 		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
-		'lines-between-class-members': 'off',
+		'@typescript-eslint/lines-between-class-members': 'off',
 		// Add other rules from the guide or adjust as per your project needs
 		indent: ['error', 'tab'], // Set indent rule to use tabs
 	},
