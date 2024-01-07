@@ -53,9 +53,11 @@ export type AppContextProps = {
   recipientUserId: string;
   setRecipientLogin: (recipientUserId: string) => void;
   setUserData: (userData: any) => void;
+  userData: any;
+  setUsersData: (userData: any) => void;
+  usersData: any;
   friendsData: any;
   setFriends: (userData: any) => void;
-  userData: any;
   setMessages: (messages: Message[]) => void;
   messages: Message[];
   messageText: string;
@@ -78,6 +80,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isSidebarVisible, setisSidebarVisible] = useState<boolean>(true);
   const [recipientUserId, setRecipientLogin] = useState<string>('');
   const [userData, setUserData] = useState(null);
+  const [usersData, setUsersData] = useState(null);
   const [friendsData, setFriends] = useState(null);
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const [messageText, setMessageText] = useState('');
@@ -92,6 +95,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setisSidebarVisible((prev) => !prev);
   };
   const contextValue: AppContextProps = {
+    setUsersData,
+    usersData,
     rooms,
     setRooms,
     socket,

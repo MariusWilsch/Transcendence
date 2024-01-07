@@ -136,6 +136,7 @@ export async function getRooms(userId: string): Promise<Room[]> {
   
   });
   const room = await res.json();
+  console.log(room)
   return room;
 }
 

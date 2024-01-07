@@ -49,6 +49,7 @@ async function getMessages(userId: string) : Promise<Message[]> {
   },
   );
   const room =  res.json();
+
   return room;
 }
 // async function getRecipientData(userId: string): Promise<any> {
@@ -59,39 +60,42 @@ async function getMessages(userId: string) : Promise<Message[]> {
 const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
   const[messageText, setMessageText] = useState('');
-  const [permission, setPermission] = useState<boolean>(false);
+  const [permission, setPermission] = useState<boolean>(true);
   const [recipient, setRecipient] = useState<User>(); // Provide a type for the recipient state
   const [loading, setLoading] = useState<boolean>(true);
   const context = useAppContext();
   let trigger = 1;
   useEffect(() => {
-    const checker = params.roomId.includes(context.userData?.intraId) && params.roomId.includes(context.recipientUserId);
-    setPermission(checker);
     if (!context.socket)
     {
       const fetchDataAndSetupSocket = async () => {
         try {
           const response = await fetch("http://localhost:3001/auth/user", {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           });
           const userData = await response.json();
           context.setUserData(userData);
           const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           });
           const friends = await response2.json();
           context.setFriends(friends);
+          const response3 = await fetch(`http://localhost:3001/users`, {
+            method: "GET",
+            credentials: "include",
+          });
+          const users = await response3.json();
+          context.setUsersData(users);
+          console.log(users);
           const recp = params.roomId.replace(userData.intraId, '');
-          const recipientData = friends?.friends?.find((friend: User) => friend.intraId === recp);
-
+          const recipientData = users.find((friend: User) => friend.intraId === recp);
+          if (!recipientData)
+          {
+            setPermission(false);
+            return;
+          }
           context.setRecipientLogin(recp);
           const rooms = await getRooms(userData.intraId);
           context.setRooms(rooms);
@@ -111,11 +115,13 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       };
       fetchDataAndSetupSocket();
     }
-    if (checker){
       const fetchData = async () => {
         try {
           const dataMessages = await getMessages(params.roomId);
-          setMessages(dataMessages);
+          if (dataMessages)
+          {
+            setMessages(dataMessages);
+          }
         } catch (error) {
           console.log(error);
         }
@@ -133,7 +139,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         handlePrivateChat(message);
       })
     }
-  }
     // Cleanup function
     return () => {
       if (context.socket) {

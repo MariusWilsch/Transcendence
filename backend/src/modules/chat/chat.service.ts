@@ -4,6 +4,7 @@ import { User, Room, Message } from './dto/chat.dto';
 import { PrismaClient } from '@prisma/client';
 import { Public } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 enum ChannelType {
   Public = 1,
@@ -184,6 +185,10 @@ export class ChatService {
     const data = await this.getMessagesByUsr(userId);
     return data;
   }
+  generateRandomId(): string {
+    const randomId = crypto.randomBytes(8).toString('hex');
+    return randomId;
+  }
   async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}){
     const name = channelName + "#" + ownerId;
     let password:string;
@@ -209,5 +214,14 @@ export class ChatService {
         password,
       },
     })
+  //   await prisma.memberShip.create({
+  //     data:{
+  //       intraId:ownerId,
+  //       memberId: this.generateRandomId(),
+  //       channelId:name,
+  //       isOwner:true,
+  //       isModerator:true,
+  //     },
+  //   })
   }
 }

@@ -33,24 +33,26 @@ model User {
 model Channel {
   id             Int             @id @default(autoincrement())
   name           String          @unique
-  type           String      @default("")
-  ownerId        String          @unique
+  type           String          @default("")
+  ownerId        String          
   password       String          @default("")
   members        MemberShip[]
   description    String?
+  messages       ChannelMessage[] 
 }
 
 model MemberShip {
   id             Int             @id @default(autoincrement())
   memberId         String        @unique
-  intraId         String         @unique
+  intraId         String
+  channelId       String
   isOwner        Boolean @default(false)
   isModerator    Boolean @default(false)
   isBanned       Boolean @default(false)
   isMuted        Boolean @default(false)
   mutedTime      DateTime
   joined_at      DateTime        @default(now())
-  channel        Channel  @relation(fields: [memberId], references: [name])
+  channel        Channel  @relation(fields: [channelId], references  : [name])
   user           User     @relation(fields: [intraId], references: [intraId])
 }
 
@@ -64,6 +66,15 @@ model Message {
   recipientUser  User      @relation("ReceivedMessages", fields: [recipient], references: [intraId])
   PrivateRoomName    String
   PrivateRoom       PrivateRoom  @relation(fields: [PrivateRoomName], references: [name])
+}
+model ChannelMessage {
+  id             Int       @id @default(autoincrement())
+  channelId      String
+  sender         String
+  recipient      String
+  content        String
+  createdAt      DateTime  @default(now())
+  senderUser     Channel      @relation(fields: [channelId], references: [name])
 }
 
 model PrivateRoom{
