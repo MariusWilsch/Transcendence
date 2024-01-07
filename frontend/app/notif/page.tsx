@@ -9,7 +9,8 @@ import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import toast, { Toaster } from "react-hot-toast";
-import { Navbar, Sidebar } from "../profile/[intraId]/page";
+import { Navbar } from "../components/Navbar";
+import { Sidebar } from "../components/Sidebar";
 import { FiCheckCircle } from "react-icons/fi";
 import { FiXCircle } from "react-icons/fi";
 

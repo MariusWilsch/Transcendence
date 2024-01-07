@@ -1,7 +1,7 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider } from "../AppContext";
-import { Loading } from "../profile/[intraId]/page";
+import { Loading } from "../components/Loading"
 import { useRouter } from "next/navigation";
 import Cookies from "universal-cookie";
 import { User } from "../AppContext";

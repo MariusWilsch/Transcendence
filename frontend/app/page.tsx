@@ -63,10 +63,6 @@ export default function Home() {
 
       const data = await res.json();
       if (data.succes === true) {
-        toast.success("succesfully signed up");
-        setTimeout(() => {
-          toast.success("Loading ...");
-        }, 400);
         return router.push(
           `${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${data.Id}`
         );
@@ -102,10 +98,6 @@ export default function Home() {
       const data = await res.json();
 
       if (data.succes === true) {
-        toast.success("succesfully logged in");
-        setTimeout(() => {
-          toast.success("Loading ...");
-        }, 400);
         if (data.Id) {
           return router.push(
             `${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${data.Id}`

@@ -1,6 +1,4 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { verify, JsonWebTokenError, NotBeforeError, TokenExpiredError } from 'jsonwebtoken';
-
 
 export default async function middleware(req: NextRequest, res: NextResponse) {
     const path = req.nextUrl.pathname;
