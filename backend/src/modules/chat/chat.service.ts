@@ -5,6 +5,8 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { Public } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { JwtService } from '@nestjs/jwt';
+import { JWT_SECRET } from 'modules/auth/constants';
 
 enum ChannelType {
   Public = 1,
@@ -14,12 +16,15 @@ enum ChannelType {
 const prisma = new PrismaClient();
 @Injectable()
 export class ChatService {
-  constructor(private readonly prismaService: PrismaService) { }
-  async createMessage(sender: string, recipient: string, content: string): Promise<void> {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly jwtService: JwtService
+    ) { }
+  async createMessage(sender: string, recipient: string, content: string): Promise<any> {
     const date = new Date();
     const dateToIso : string = date.toISOString(); 
-    const senderUser = await prisma.user.findUnique({ where: { intraId: sender } });
-    const recipientUser = await prisma.user.findUnique({ where: { intraId: recipient } });
+    const senderUser:User = await prisma.user.findUnique({ where: { intraId: sender } });
+    const recipientUser:User = await prisma.user.findUnique({ where: { intraId: recipient } });
     const privateRoomName = parseInt(senderUser.intraId) > parseInt(recipientUser.intraId) ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
     const room = await prisma.privateRoom.findUnique({
       where:{
@@ -33,7 +38,7 @@ export class ChatService {
     {
       throw('no such channel');
     }
-    await prisma.message.create({
+     const message = await prisma.message.create({
       data: {
         sender:sender,
         recipient:recipient,
@@ -49,7 +54,28 @@ export class ChatService {
         updated_at:dateToIso,
       },
     });
+    console.log(message);
+    return message;
+  }
 
+  getUserFromJwt(jwt: any): User | undefined {
+    if (!jwt) {
+      return undefined;
+    }
+
+    try {
+      const payload = this.jwtService.verify(jwt, {
+        secret: JWT_SECRET,
+      });
+
+      const user = payload.userWithoutDate;
+
+      // console.log('payload: ', payload);
+      return user;
+    } catch (error) {
+      console.error('JWT Verification Error:', error);
+      return undefined;
+    }
   }
 
   async createPrivateRoom(user1: string, user2: string): Promise<void> {
@@ -234,18 +260,10 @@ export class ChatService {
       console.log("creating memeber successfully failed");
     }
   }
-  async getAllPublicChannels() {
+  async getAllTypeChannels(type:string) {
     const data = prisma.channel.findMany({
       where:{
-        type:"PUBLIC",
-      },
-    })
-    return data;
-  }
-  async getAllProtectedChannels() {
-    const data = prisma.channel.findMany({
-      where:{
-        type:"PROTECTED",
+        type,
       },
     })
     return data;

@@ -3,13 +3,15 @@ import { FC, use, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { User, useAppContext,Message, Room, AppContextProps} from '@/app/AppContext';
-import Profile, { Loading, Navbar, Sidebar } from '@/app/profile/[intraId]/page';
 import { Conversations, PermissionDenied, getRooms } from '../page';
 import toast, { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import Chat from '@/app/chat/page'; 
 import { Cookie } from 'next/font/google';
 import Cookies from 'universal-cookie';
+import { Navbar } from '@/app/components/Navbar';
+import { Sidebar } from '@/app/components/Sidebar';
+import { Loading } from '@/app/components/Loading';
 
 interface PageProps {
   params: {
@@ -41,7 +43,7 @@ const SingleMessageSent = ({ message }: any) => {
   );
 }
 
-async function getMessages(userId: string) : Promise<Message[]> {
+async function getMessages(userId: string) : Promise<any> {
   const res = await fetch(`http://localhost:3001/chat/${userId}/messages`,
   {
     method: "GET",
@@ -65,92 +67,107 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const context = useAppContext();
   let trigger = 1;
+  const fetchDataAndSetupSocket = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/auth/user", {
+        method: "GET",
+        credentials: "include",
+      });
+      const userData = await response.json();
+      context.setUserData(userData);
+      const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const friends = await response2.json();
+      context.setFriends(friends);
+      const response3 = await fetch(`http://localhost:3001/users`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const users = await response3.json();
+      context.setUsersData(users);
+      console.log(users);
+      const recp = params.roomId.replace(userData.intraId, '');
+      const recipientData = users.find((friend: User) => friend.intraId === recp);
+      if (!recipientData)
+      {
+        setPermission(false);
+        return;
+      }
+      context.setRecipientLogin(recp);
+      const rooms = await getRooms(userData.intraId);
+      context.setRooms(rooms);
+      const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+      if (!context.socket) {
+        const cookie = new Cookies();
+        const newSocket = io(chatNameSpace, {
+          query: { user:cookie.get('jwt') },
+        });
+        context.setSocket(newSocket);
+      }
+      if (context.recipientUserId && context.socket) {
+        context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+  };
   useEffect(() => {
     if (!context.socket)
     {
-      const fetchDataAndSetupSocket = async () => {
-        try {
-          const response = await fetch("http://localhost:3001/auth/user", {
-            method: "GET",
-            credentials: "include",
-          });
-          const userData = await response.json();
-          context.setUserData(userData);
-          const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
-            method: "GET",
-            credentials: "include",
-          });
-          const friends = await response2.json();
-          context.setFriends(friends);
-          const response3 = await fetch(`http://localhost:3001/users`, {
-            method: "GET",
-            credentials: "include",
-          });
-          const users = await response3.json();
-          context.setUsersData(users);
-          console.log(users);
-          const recp = params.roomId.replace(userData.intraId, '');
-          const recipientData = users.find((friend: User) => friend.intraId === recp);
-          if (!recipientData)
-          {
-            setPermission(false);
-            return;
-          }
-          context.setRecipientLogin(recp);
-          const rooms = await getRooms(userData.intraId);
-          context.setRooms(rooms);
-          const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-          if (!context.socket) {
-            const newSocket = io(chatNameSpace, {
-              query: { userId: userData.intraId },
-            });
-            context.setSocket(newSocket);
-          }
-          if (context.recipientUserId && context.socket) {
-            context.socket?.emit('createPrivateRoom', { user1:context.userData?.intraId, user2:context.recipientUserId });
-          }
-        } catch (error) {
-          console.error("Error during login:", error);
-        }
-      };
       fetchDataAndSetupSocket();
     }
+    if (context.socket)
+    {
+
       const fetchData = async () => {
-        try {
+        try {  
+          // const itExist = context.rooms.filter((room)=>room.name == params.roomId);
           const dataMessages = await getMessages(params.roomId);
           if (dataMessages)
           {
-            setMessages(dataMessages);
+            if (dataMessages.response !=="no such room")
+            {
+              setMessages(dataMessages);
+            }
           }
         } catch (error) {
           console.log(error);
         }
       };
-      
       fetchData();
       const handlePrivateChat = (message: Message) => {
-        setMessages((prevMessages: Message[]) => {
-          const newMessages = Array.isArray(prevMessages) ? [...prevMessages, message] : [];
-        return newMessages;
-      });
-    };
-    if (context.socket) {
-      context.socket.on('privateChat',(message:Message)=>{
-        handlePrivateChat(message);
-      })
-    }
+        console.log('this is the message private room id', message.PrivateRommName);
+        console.log('this is the message private room id', params.roomId);
+        console.log(message);
+        if (message.PrivateRoomName === params.roomId)
+        {
+          setMessages((prevMessages: Message[]) => {
+            const newMessages = Array.isArray(prevMessages) ? [...prevMessages, message] : [];
+            return newMessages;
+          });
+        }
+      };
+        context.socket.on('privateChat',(message:any)=>{
+          handlePrivateChat(message);
+          trigger++;
+          console.log(trigger);
+        });
+    } 
+    console.log("it renders n-times");
     // Cleanup function
     return () => {
       if (context.socket) {
         context.socket.off('privateChat');
       }
     };
-  }, [context.socket, params.roomId,messages]);
+  }, [context.socket, trigger]);
 
   const sendPrivateMessage = () => {
-    if (context.socket && context.recipientUserId && messageText) {
+    if (context.socket && context.recipientUserId && messageText.trimStart().trimEnd()) {
 
-      context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText, senderId: context.userData?.intraId });
+      context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText.trimStart().trimEnd(), senderId: context.userData?.intraId });
       setMessages((prevMessages:Message[]) =>{
         const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
 
@@ -162,7 +179,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           recipient: context.recipientUserId,
           content: messageText,
           createdAt: currentDateVariable,
-          privateRommName: params.roomId,
+          PrivateRommName: params.roomId,
         };
       
         newMessages.push(singleMsg);

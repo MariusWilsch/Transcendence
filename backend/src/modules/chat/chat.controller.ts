@@ -34,14 +34,19 @@ export class ChatController {
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
   async getRoomMessages(@Param('id') id: string, @Res() res:any) :Promise<void>{
-    const data = await this.chatService.getPrivateRoomMessages(id);
-    res.json(data);
-    return data;
+    try{
+      const data = await this.chatService.getPrivateRoomMessages(id);
+      res.json(data);
+      return data;
+    }
+    catch(e){
+      res.json({response:e});
+    }
   }
   @Get('channels/public')
   @UseGuards(JwtAuthGuard)
   async getPublicChannels(@Res() res:any): Promise<Channel | undefined>{
-    const data = await this.chatService.getAllPublicChannels();``
+    const data = await this.chatService.getAllTypeChannels("PUBLIC");
     const dataBeta = res.json(data);
     console.log(data);
     return dataBeta;
@@ -49,7 +54,7 @@ export class ChatController {
   @Get('channels/protected')
   @UseGuards(JwtAuthGuard)
   async getProtectedChannels(@Res() res:any): Promise<Channel | undefined>{
-    const data = await this.chatService.getAllProtectedChannels();``
+    const data = await this.chatService.getAllTypeChannels("PROTECTED");
     const dataBeta = res.json(data);
     console.log(data);
     return dataBeta;

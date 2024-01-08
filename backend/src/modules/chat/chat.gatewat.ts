@@ -5,6 +5,7 @@ import { PrismaService } from 'modules/prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
 
+
 @WebSocketGateway(3002,{
   namespace:'chat',
     cors: {
@@ -13,23 +14,65 @@ import { User } from './dto/chat.dto';
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // chat.gateway.ts
-    constructor(private readonly chatService: ChatService) {}
+    constructor(
+      private readonly chatService: ChatService,
+      ) {}
 
   @WebSocketServer() server: Server;
 
   private connectedClients = new Map<string, any>();
 
   handleConnection(client: any): void {
-    const userId = client.handshake.query.userId
-    console.log(`Client connected: ${userId}`);
-    this.connectedClients.set(userId, client);
+    const user = this.chatService.getUserFromJwt(client.handshake.query.user);
+    if (user)
+    {
+      console.log(`Client connected: ${user.intraId}`);
+      if (this.connectedClients.has(user.intraId))
+      {
+        this.connectedClients.get(user.intraId).push(client);
+      }
+      else{
+        this.connectedClients.set(user.intraId, [client]);
+      }
+
+    }
   }
   
   handleDisconnect(client: any): void {
-    console.log(`Client disconnected: ${client.id}`);
+    console.log(`Client connected: ${client.id}`);
     this.connectedClients.delete(client.id);
   }
 
+  // handleConnection(client:any ) {
+  //   // Get the user ID from the socket connection
+  //   const userId = client.handshake.query.userId;
+
+  //   // Store the socket in the connectedSockets map
+  //   if (userId) {
+  //     if (this.connectedClients.has(userId)) {
+  //       this.connectedClients.get(userId).push(client);
+  //     } else {
+  //       this.connectedClients.set(userId, [client]);
+  //     }
+  //   }
+  // }
+
+  // handleDisconnect(client: any) {
+  //   // Remove the disconnected socket from the connectedSockets map
+  //   for (const [userId, sockets] of this.connectedClients.entries()) {
+  //     const index = sockets.indexOf(client);
+  //     if (index !== -1) {
+  //       sockets.splice(index, 1);
+  //       if (sockets.length === 0) {
+  //         this.connectedClients.delete(userId);
+  //       }
+  //       break;
+  //     }
+  //   }
+  // }
+  getAllSocketsByUserId(userId: string): any | [] {
+    return this.connectedClients.get(userId) || [];
+  }
   @SubscribeMessage('createPrivateRoom')
   async createPrivRoom(client :any, payload:{user1:string, user2:string}): Promise<void>{
     console.log(`this is he first user ${payload.user1}`);
@@ -38,17 +81,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
-    const recipientSocket = this.connectedClients.get(payload.to);
-    const recip = await this.chatService.getUserById(payload.to);
-    console.log(recip);
-    if (recipientSocket || recip) {
-      if (recipientSocket)
-      {
-        recipientSocket.emit('privateChat', { sender: payload.senderId,content: payload.message,senderLogin:payload.senderId });
-      }
+    const recipientSocket = this.getAllSocketsByUserId(payload.to);
+    // const recip = await this.chatService.getUserById(payload.to);
+    // console.log(recip):
+    if (recipientSocket) {
+      const message = await this.chatService.createMessage(payload.senderId, payload.to, payload.message);
+          recipientSocket.map((client:any) =>client.emit('privateChat',message));
         // Save the private message to the database
-        await this.chatService.createMessage(payload.senderId, payload.to, payload.message);
-        console.log(`Private message from ${payload.senderId} to ${payload.to}: ${payload.message}`);
+        console.log(`Private message from ${payload.senderId} to ${payload.to}: ${message.content}`);
       } else {
         client.emit('error', { message: 'Recipient not found or offline.' });
       }

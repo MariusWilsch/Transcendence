@@ -14,7 +14,7 @@ export interface Message {
   recipient: string;
   content: string;
   createdAt: Date;
-  privateRommName: string;
+  PrivateRommName: string;
 }
 
 export interface Room {
@@ -66,6 +66,10 @@ export type AppContextProps = {
   setSocket: (socket: Socket | null) => void;
   rooms: Room[];
   setRooms: (rooms: Room[]) => void;
+  notifSocket: Socket | null;
+  setNotifSocket: (notifSocket: Socket | null) => void;
+  notif: boolean;
+  setnotif: (notif: boolean) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -86,6 +90,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [messageText, setMessageText] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
+  const [notifSocket, setNotifSocket] = useState<Socket | null>(null);
+  const [notif, setnotif] = useState<boolean>(false);
+
 
   const toggleDivVisibility = () => {
     setDivVisible((prev) => !prev);
@@ -119,6 +126,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
+    notifSocket,
+    setNotifSocket,
+    notif,
+    setnotif,
   };
 
   return (

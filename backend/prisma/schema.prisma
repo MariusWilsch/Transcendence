@@ -16,9 +16,10 @@ model User {
   login          String          @unique
   email          String          @unique
   Avatar         String?
-  isRegistred    Boolean         @default(false)
-  isTfaEnabled   Boolean         @default(false)
-  status         Status          @default(ONLINE)
+  password       String?
+  isRegistred    Boolean   @default(false)
+  isTfaEnabled   Boolean   @default(false)
+  status         Status    @default(ONLINE)
   tfa            Tfa?
   friends        Friend[]        @relation("userFriends")
   user           Friend[]        @relation("friendsUser") 

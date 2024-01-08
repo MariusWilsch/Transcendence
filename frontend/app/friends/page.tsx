@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppContext, User } from "../AppContext";
 import toast, { Toaster } from "react-hot-toast";
-import { Navbar } from "../profile/[intraId]/page";
-import { Sidebar } from "../profile/[intraId]/page";
+import { Navbar } from "../components/Navbar";
+import { Sidebar } from "../components/Sidebar";
 import { RiSearchLine } from "react-icons/ri";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
@@ -62,27 +62,6 @@ export default function Friends() {
   const [users, setUsers] = useState<User[] | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
   const [selectedFeild, setselectedFeild] = useState("Online");
-
-  // const fetchUsers = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}:3001/users`,
-  //       {
-  //         method: "GET",
-  //         credentials: "include",
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       toast.error("User not found");
-  //       return;
-  //     }
-
-  //     const users: User[] = await response.json();
-  //     setUsers(users);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
 
   const PendingInvite = async () => {
     if (!user) {
@@ -372,20 +351,19 @@ export default function Friends() {
                 </div>
               </div>
               {selectedFeild === "All" && (
-                <div className="w-full flex items-center justify-center mb-6">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    initial={{ opacity: 0, x: -100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.02 }}
-                  >
+                <motion.div
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.02 }}
+                >
+                  <div className="w-full flex items-center justify-center mb-6">
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
                       <div className="md:w-[50vw] w-full flex flex-row-reverse">
-                        <form className="w-full" onSubmit={handleSubmit}>
+                        <form className="min-w-[80vw] md:min-w-[50vw]" onSubmit={handleSubmit}>
                           <label className=" flex flex-grow ">
                             <input
                               id="searchField"
-                              name="searchTerm"
+                              name={`inputValue${Math.random()}`}
                               type="text"
                               value={inputValue}
                               placeholder="Search ..."
@@ -393,7 +371,7 @@ export default function Friends() {
                                 setInputValue(e.target.value);
                                 handleSubmit(e);
                               }}
-                              className="w-full bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
+                              className="min-w-[80vw] md:min-w-[50vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
                             />
                             <div className="md:hidden">&nbsp; &nbsp;</div>
                             <button
@@ -407,8 +385,8 @@ export default function Friends() {
                         </form>
                       </div>
                     </div>
-                  </motion.div>
-                </div>
+                  </div>
+                </motion.div>
               )}
 
               <motion.div
@@ -421,6 +399,7 @@ export default function Friends() {
                     {users &&
                       users?.map((user) => (
                         <Link
+                          key={user.intraId}
                           href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
                         >
                           <div

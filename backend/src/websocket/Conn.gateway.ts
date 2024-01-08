@@ -32,11 +32,24 @@ export class handleClientsConnection
 
   //================================================================
   private connectedClients: Map<string, string> = new Map();
+
+  // printConnectedClients = () => {
+  //   console.log('|| => connected clients: ');
+  //   for (const [key, value] of this.connectedClients.entries()) {
+  //     const user = this.authService.getUserFromJwt(key);
+  //     console.log('login :', user.login);
+  //     console.log('socket Id :', value);
+  //   }
+
+  //   console.log('=====================\n');
+  // };
+
   addClient(client: Socket) {
     const jwt = client.handshake.auth.jwt as string;
     if (jwt && client.id) {
       if (!this.connectedClients.has(client.id)) {
-        this.connectedClients.set(client.id, jwt);
+        // this.connectedClients.set(client.id, jwt);
+        this.connectedClients.set(jwt, client.id);
       }
     }
   }
@@ -52,21 +65,30 @@ export class handleClientsConnection
     // this.logger.log('APP server Initialized!');
   }
 
+  @SubscribeMessage('FriendShipRequest')
+  handleFriendRequest(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: any
+  ) {
+    // notify other clients about this new user
+    this.server.emit('FriendShipRequest');
+    // console.log('FriendShipRequest : ', data);
+  }
+
   async handleConnection(client: Socket) {
     try {
       this.addClient(client);
+      // this.printConnectedClients();
       if (client.handshake.auth && client.handshake.auth.jwt) {
         const user = this.authService.getUserFromJwt(client.handshake.auth.jwt);
-        // console.log('user connected ', user.login);
+        // console.log('user connected : ', user.login, '\n');
         if (user) {
           this.server.emit('update');
-
           await this.UserService.updateUserState(user.intraId, 'ONLINE');
-          // this.logger.log(`${user.login} connected`);
         }
       }
     } catch (error) {
-      // this.logger.error('Error in handleConnection:', error);
+      this.logger.error('Error in handleConnection:', error);
     }
   }
 
@@ -79,11 +101,10 @@ export class handleClientsConnection
         if (user) {
           this.server.emit('update');
           await this.UserService.updateUserState(user.intraId, 'OFFLINE');
-          // this.logger.log(`${user.login} disconnected`);
         }
       }
     } catch (error) {
-      // this.logger.error('Error in handleDisconnect:', error);
+      this.logger.error('Error in handleDisconnect:', error);
     }
   }
 }

@@ -379,6 +379,14 @@ export class UserService {
     status: 'ONLINE' | 'OFFLINE' | 'INGAME'
   ) {
     try {
+      const userexist = await prisma.user.findUnique({
+        where: {
+          intraId: userId,
+        },
+      });
+      if (!userexist) {
+        return;
+      }
       const friend = await prisma.user.update({
         where: {
           intraId: userId,

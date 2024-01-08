@@ -9,17 +9,14 @@ import { CiSaveUp2 } from "react-icons/ci";
 import { CiEdit } from "react-icons/ci";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import toast, { Toaster } from "react-hot-toast";
-import { Navbar, Sidebar } from "../profile/[intraId]/page";
+import { Navbar } from "../components/Navbar";
+import { Sidebar } from "../components/Sidebar";
 import { FiCheckCircle } from "react-icons/fi";
 import { FiXCircle } from "react-icons/fi";
 
 export default function Search() {
-  const [Change, setChange] = useState<boolean>(false);
-  const togleChange = () => {
-    setChange((prev) => !prev);
-  };
+  const context = useAppContext();
 
-  const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
   const {
     isDivVisible,
@@ -50,7 +47,7 @@ export default function Search() {
         var data: User = await response.json();
 
         if (data !== null) {
-          setUser(data);
+          context.setUser(data);
         }
       } catch (error: any) {
         const msg = "Error during login" + error.message;
@@ -61,39 +58,39 @@ export default function Search() {
     checkJwtCookie();
   }, []);
 
-  useEffect(() => {
-    const getFriends = async () => {
-      try {
-        if (user?.intraId) {
-          const response: any = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user.intraId}/freindrequest`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include",
-            }
-          );
-          const data = await response.json();
+  const getFriends = async () => {
+    try {
+      if (context.user?.intraId) {
+        const response: any = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${context.user.intraId}/freindrequest`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
 
-          if (data.success === false) {
-            const msg = "Error getting friends";
-            toast.error(msg);
-            console.log(msg);
-          }
-          if (data.success === true && data.friendsDetails) {
-            setFriends(data.friendsDetails);
-          }
+        if (data.success === false) {
+          const msg = "Error getting friends";
+          toast.error(msg);
+          console.log(msg);
         }
-      } catch (error: any) {
-        const msg = "Error getting friends: " + error.message;
-        toast.error(msg);
-        console.error("Error getting friends:", error.message);
+        if (data.success === true && data.friendsDetails) {
+          setFriends(data.friendsDetails);
+        }
+        if (data.success === true && !data.friendsDetails) {
+          setFriends([]);
+        }
       }
-    };
-    getFriends();
-  }, [user, Change]);
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
 
   const acceptFriendRequest = async (
     userId: string | undefined,
@@ -115,14 +112,12 @@ export default function Search() {
       if (data.success === false) {
         const msg = "Error accepting friend request";
         toast.error(msg);
-        console.log(msg);
-        togleChange();
+        getFriends();
       }
       if (data.success === true) {
         const msg = "Friend request accepted";
         toast.success(msg);
-        console.log(msg);
-        togleChange();
+        getFriends();
       }
     }
   };
@@ -143,21 +138,38 @@ export default function Search() {
         }
       );
       const data = await response.json();
-      console.log(data);
       if (data.success === false) {
         const msg = "Error declining friend request";
         toast.error(msg);
-        console.log(msg);
-        togleChange();
+        getFriends();
       }
       if (data.success === true) {
         const msg = "Friend request declined";
         toast.success(msg);
-        console.log(msg);
-        togleChange();
+        getFriends();
       }
     }
   };
+
+  const handleFriendshipRequest = () => {
+    getFriends();
+  };
+
+  useEffect(() => {
+    getFriends();
+  }, [context.user]);
+
+  const listenForFriendships = () => {
+    if (context.notifSocket !== null) {
+      context.notifSocket.on("FriendShipRequest", handleFriendshipRequest);
+    }
+  };
+
+  useEffect(() => {
+    if (context.notifSocket) {
+      listenForFriendships();
+    }
+  }, [context.user, context.notifSocket]);
 
   return (
     <div className="min-h-screen w-screen bg-[#12141A]">
@@ -211,12 +223,15 @@ export default function Search() {
                           <div className="flex ">
                             <button
                               className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-                              onClick={() =>
+                              onClick={() => {
                                 acceptFriendRequest(
-                                  user?.intraId,
+                                  context.user?.intraId,
                                   friend.intraId
-                                )
-                              }
+                                );
+                                if (context.notifSocket) {
+                                  context.notifSocket.emit("FriendShipRequest");
+                                }
+                              }}
                             >
                               <FiCheckCircle
                                 size="30"
@@ -227,12 +242,15 @@ export default function Search() {
                           <div className="flex ">
                             <button
                               className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-                              onClick={() =>
+                              onClick={() => {
                                 declineFriendRequest(
-                                  user?.intraId,
+                                  context.user?.intraId,
                                   friend.intraId
-                                )
-                              }
+                                );
+                                if (context.notifSocket) {
+                                  context.notifSocket.emit("FriendShipRequest");
+                                }
+                              }}
                             >
                               <FiXCircle size="30" className="text-red-300" />
                             </button>

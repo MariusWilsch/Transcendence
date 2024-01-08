@@ -6,7 +6,8 @@ import Image from 'next/image';
 import io from 'socket.io-client';
 import { Room, useAppContext, User } from '../AppContext';
 import PrivateRoom from './[roomId]/page';
-import { Navbar, Sidebar } from '../profile/[intraId]/page';
+import {Navbar}   from '../components/Navbar';
+import {Sidebar}   from '../components/Sidebar';
 import { Toaster } from 'react-hot-toast';
 import { ImBubbles2 } from "react-icons/im";
 import { MdGroups } from "react-icons/md";
@@ -16,6 +17,7 @@ import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
 import { Modal} from '@mantine/core';
 import { IoMdAdd } from "react-icons/io";
+import Cookies from "universal-cookie";
 
 const CreateChannelForm = () => {
   const [channelName, setChannelName] = useState('');
@@ -303,10 +305,11 @@ const Chat = () => {
         context.setRooms(rooms);
         const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
         if (!context.socket) {
-          const newSocket = io(chatNameSpace, {
-            query: { userId: userData.intraId },
-          });
-          context.setSocket(newSocket);
+          const cookie = new Cookies();
+        const newSocket = io(chatNameSpace, {
+          query: { user:cookie.get('jwt') },
+        });
+        context.setSocket(newSocket);
         }
         context.setFriends(friends);
         if (context.recipientUserId && context.socket) {
