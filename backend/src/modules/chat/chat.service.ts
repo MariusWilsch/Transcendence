@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { Public } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -189,7 +189,10 @@ export class ChatService {
     const randomId = crypto.randomBytes(8).toString('hex');
     return randomId;
   }
-  async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}){
+  async createMember(intraId:string, channelId:string, isOwner:boolean):Promise<void> {
+    const memberId = this.generateRandomId();
+  }
+  async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}):Promise<void> {
     const name = channelName + "#" + ownerId;
     let password:string;
     const saltRounds = 10;
@@ -213,15 +216,15 @@ export class ChatService {
         type:typePass.type,
         password,
       },
-    })
-  //   await prisma.memberShip.create({
-  //     data:{
-  //       intraId:ownerId,
-  //       memberId: this.generateRandomId(),
-  //       channelId:name,
-  //       isOwner:true,
-  //       isModerator:true,
-  //     },
-  //   })
+    });
+    await prisma.memberShip.create({
+      data:{
+        memberId:this.generateRandomId(),
+        intraId:ownerId,
+        channelId:name,
+        isOwner:true,
+        mutedTime:"0",
+      },
+    });
   }
 }
