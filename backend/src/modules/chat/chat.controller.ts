@@ -1,7 +1,7 @@
 // chat.controller.ts
 import { Controller, Post, Body, Get, Res,Param, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { Room , User, Message } from './dto/chat.dto';
+import { Room , User, Message, Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 
 @Controller('chat')
@@ -40,13 +40,24 @@ export class ChatController {
   }
   @Get('channels/public')
   @UseGuards(JwtAuthGuard)
-  async getPublicChannels(){
-    
+  async getPublicChannels(@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllPublicChannels();``
+    const dataBeta = res.json(data);
+    console.log(data);
+    return dataBeta;
+  }
+  @Get('channels/protected')
+  @UseGuards(JwtAuthGuard)
+  async getProtectedChannels(@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllProtectedChannels();``
+    const dataBeta = res.json(data);
+    console.log(data);
+    return dataBeta;
   }
   // @Get(':id/message')
   // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
   //   const data = await this.chatService.getMessagesByUser(id);
-  //   res.json(data)
+  //   res.json(data) ??
   //   return data;
   //  }
   @Post('private-message')

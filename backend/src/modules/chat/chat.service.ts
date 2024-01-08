@@ -191,6 +191,14 @@ export class ChatService {
   }
   async createMember(intraId:string, channelId:string, isOwner:boolean):Promise<void> {
     const memberId = this.generateRandomId();
+    await prisma.memberShip.create({
+      data:{
+        memberId:this.generateRandomId(),
+        intraId,
+        channelId,
+        isOwner:true,
+      },
+    });
   }
   async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}):Promise<void> {
     const name = channelName + "#" + ownerId;
@@ -217,14 +225,29 @@ export class ChatService {
         password,
       },
     });
-    await prisma.memberShip.create({
-      data:{
-        memberId:this.generateRandomId(),
-        intraId:ownerId,
-        channelId:name,
-        isOwner:true,
-        mutedTime:"0",
+    try{
+
+      await this.createMember(ownerId, name, true);
+    }
+    catch(e)
+    {
+      console.log("creating memeber successfully failed");
+    }
+  }
+  async getAllPublicChannels() {
+    const data = prisma.channel.findMany({
+      where:{
+        type:"PUBLIC",
       },
-    });
+    })
+    return data;
+  }
+  async getAllProtectedChannels() {
+    const data = prisma.channel.findMany({
+      where:{
+        type:"PROTECTED",
+      },
+    })
+    return data;
   }
 }

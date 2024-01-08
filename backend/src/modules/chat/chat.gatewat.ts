@@ -57,7 +57,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async createChannel(client :any, payload:{owner:string,name:string, typePass:{type:string, password:string}}){
     try{
       await this.chatService.createChannel(payload.owner, payload.name, payload.typePass);
-      console.log('channel created');
     }
     catch(e){
       client.emit(e);

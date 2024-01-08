@@ -36,7 +36,7 @@ model Channel {
   type           String          @default("")
   ownerId        String          
   password       String          @default("")
-  members        MemberShip[]
+  members        MemberShip[]    @relation("channelMember")
   description    String?
   messages       ChannelMessage[] 
 }
@@ -51,7 +51,7 @@ model MemberShip {
   isMuted        Boolean @default(false)
   mutedTime      DateTime? 
   joined_at      DateTime        @default(now())
-  channel        Channel  @relation(fields: [channelId], references  : [name])
+  channel        Channel  @relation("channelMember",fields: [channelId], references  : [name])
   user           User     @relation(fields: [intraId], references: [intraId])
 }
 

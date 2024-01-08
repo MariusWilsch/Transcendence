@@ -32,3 +32,12 @@ export type User = {
       createdAt: Date;
       updated_at: Date;
     }
+
+  export type Channel = {
+      id: number;
+      name: string;
+      type: string;
+      ownerId: string;
+      password: string;
+      description: string;
+  }
