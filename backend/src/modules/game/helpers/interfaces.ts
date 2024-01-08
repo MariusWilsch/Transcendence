@@ -20,10 +20,10 @@ interface Ball {
 	velocity: Vector;
 }
 
-interface Score {
-	player1: number;
-	player2: number;
-}
+// interface Score {
+// 	player1: number;
+// 	player2: number;
+// }
 
 //* Not sure if this is needed
 // export interface PaddleMove {
@@ -46,12 +46,15 @@ interface Score {
 
 // Structure to represent the state of the game (paddles, ball, score, etc.)
 export interface GameState {
-	paddles: {
-		player1: Paddle;
-		player2: Paddle;
+	player1: {
+		Paddle: Paddle;
+		score: number;
+	};
+	player2: {
+		Paddle: Paddle;
+		score: number;
 	};
 	ball: Ball;
-	score: Score;
 	canvas: {
 		//! Should that be in the game config?
 		width: number;
@@ -60,10 +63,10 @@ export interface GameState {
 }
 
 // Structure to keep track of player associations within a game session
-export interface PlayerSession {
-	playersID: string[];
-	gameState: GameState;
-}
+// export interface PlayerSession {
+// 	playersID: string[];
+// 	gameState: GameState;
+// }
 
 // export interface GameSessions {
 // 	[roomID: string]: GameState;
