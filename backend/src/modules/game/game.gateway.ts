@@ -48,16 +48,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		// Join both Sockets to a Socket.io room
-		player1.join(roomID);
-		player2.join(roomID);
-
-		// Associate the room ID with each Socket
-		player1.data = { roomID };
-		player2.data = { roomID };
-
 		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(roomID, [player1.id, player2.id]);
+		this.gameService.createGameSession(roomID, player1, player2);
 
 		//? Emit an event to both Sockets in the room
 		this.Server.to(roomID).emit(
@@ -119,6 +111,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			client.data.roomID,
 			payload.direction
 		);
+		// Further processing...
+	}
+	@SubscribeMessage('onScoreChange')
+	handleScoreChange(client: IO, payload: any): void {
+		console.log('ROOM ID', client.data.roomID, 'by', client.id);
+
+		// payload could include details like the player ID and the new paddle position
+		// Update the game state based on this information
+		// this.gameService.updateScore(client.data.roomID, payload);
 		// Further processing...
 	}
 }

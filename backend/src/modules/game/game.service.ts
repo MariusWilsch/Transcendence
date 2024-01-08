@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GAME_CONFIG } from './helpers/game.constants';
-import { PlayerSession } from './helpers/interfaces';
+import { GameState, PlayerSession } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 
 // Helper functions
@@ -10,7 +10,7 @@ const createSize = (width: number, height: number) => ({ width, height });
 
 @Injectable()
 export class GameService {
-	private gameSessions: Map<string, PlayerSession> = new Map();
+	private gameStates: Map<string, GameState> = new Map();
 
 	// private GameSessions: Map<//RoomID (string), GameState (object)> = new Map();
 
@@ -56,13 +56,17 @@ export class GameService {
 
 	//* Business logic
 
-	public createGameSession(roomID: string, playersID: string[]) {
-		const newPlayerSession: PlayerSession = {
-			playersID,
-			gameState: this.initGameState(),
-		};
-		this.gameSessions.set(roomID, newPlayerSession);
-		console.log('Player IDS', this.gameSessions.get(roomID).playersID);
+	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
+		// Join both Sockets to a Socket.io room
+		player1.join(roomID);
+		player2.join(roomID);
+
+		// Associate the room ID with each Socket
+		player1.data = { roomID };
+		player2.data = { roomID };
+
+		// Create a new game session and store it in the Map
+		this.gameStates.set(roomID, this.initGameState());
 	}
 
 	public updateGameState(roomID: string, deltaTime: number) {
@@ -80,24 +84,18 @@ export class GameService {
 	public updatePaddleState(client: Socket, roomID: string, direction: string) {
 		console.log('Paddle move event received');
 		// 1. Get the game state
-		const gameState = this.getGameState(roomID);
+		const gameState = this.gameStates.get(roomID);
 		// Update the paddle position based on the direction
 		// Update the game state
 		// Further processing...
 	}
 
-	//* Getters
-
-	public getGameState(roomID: string) {
-		return this.gameSessions.get(roomID).gameState;
-	}
-
-	public getMapSize = () => this.gameSessions.size;
+	public getMapSize = () => this.gameStates.size;
 
 	//* Private
 
 	private updateBall(roomID: string, deltaTime: number) {
-		const { ball, canvas } = this.gameSessions.get(roomID).gameState;
+		const { ball, canvas } = this.gameStates.get(roomID);
 		// console.log(ball.position.x, ball.position.y);
 		ball.position.x += ball.velocity.x * deltaTime;
 		ball.position.y += ball.velocity.y * deltaTime;
@@ -112,9 +110,15 @@ export class GameService {
 	} //! Improve collision detection
 
 	private updatePaddles(roomID: string, deltaTime: number) {
-		const { paddles, canvas } = this.gameSessions.get(roomID).gameState;
+		const { paddles, canvas } = this.gameStates.get(roomID);
 		// paddles.player1.position.y *= deltaTime;
 		// paddles.player2.position.y *= deltaTime;
+	}
+
+	//* Getters
+
+	public getGameState(roomID: string): GameState {
+		return this.gameStates.get(roomID);
 	}
 }
 
