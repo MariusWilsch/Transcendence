@@ -138,7 +138,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       };
       fetchData();
       const handlePrivateChat = (message: Message) => {
-        console.log('this is the message private room id', message.PrivateRommName);
+        console.log('this is the message private room id', message.PrivateRoomName);
         console.log('this is the message private room id', params.roomId);
         console.log(message);
         if (message.PrivateRoomName === params.roomId)
@@ -179,7 +179,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           recipient: context.recipientUserId,
           content: messageText,
           createdAt: currentDateVariable,
-          PrivateRommName: params.roomId,
+          PrivateRoomName: params.roomId,
         };
       
         newMessages.push(singleMsg);

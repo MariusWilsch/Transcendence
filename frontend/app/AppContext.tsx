@@ -14,7 +14,7 @@ export interface Message {
   recipient: string;
   content: string;
   createdAt: Date;
-  PrivateRommName: string;
+  PrivateRoomName: string;
 }
 
 export interface Room {
