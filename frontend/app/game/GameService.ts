@@ -37,6 +37,8 @@ export class GameService {
 		paddle.endFill();
 	}
 
+
+
 	//* Public methods
 
 	public initGameElements(ballProps: GameState['ball'], paddles: GameState['paddles']) {
@@ -50,7 +52,7 @@ export class GameService {
 
 		// Add elements to stage
 		this.app.stage.addChild(this.ball, this.leftPaddle, this.rightPaddle);
-		this.isGameCleared = false;
+		// this.isGameCleared = false;
 	}
 
 	public updateGameElements(ballProps: GameState['ball'], paddles: GameState['paddles']) {

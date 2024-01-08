@@ -81,7 +81,7 @@ class Paddle implements PaddleProps {
 		if (this.pos.y <= 0) this.pos.y = 0;
 		if (this.pos.y >= window.innerHeight - this.height)
 			this.pos.y = window.innerHeight - this.height;
-		graphics.beginFill(this.color);
+	graphics.beginFill(this.color);
 		graphics.lineStyle(4, 0xff3300, 1);
 		graphics.drawRect(this.pos.x, this.pos.y, this.width, this.height);
 		graphics.endFill();

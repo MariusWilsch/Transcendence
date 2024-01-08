@@ -1,6 +1,6 @@
 'use Client'
 import { useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 
 //* Refactor idea:
@@ -16,6 +16,13 @@ const useSocket = (initGame: Function, updateGame: Function, clearGame: Function
 		socket.on('connect', () => {
 				console.log('Connected to server');
 		});
+
+// socket.on('disconnect', function(this: any){	
+    
+// 	var self = this;
+//     var rooms = Object.keys(self.rooms);
+// 		console.log(rooms);
+// });
 			
 		socket.on('disconnect', () => {
 			console.log('Disconnected from server');
@@ -24,6 +31,8 @@ const useSocket = (initGame: Function, updateGame: Function, clearGame: Function
 			
 		socket.on('createGame', (gameState) => {
 			console.log('Creating game');
+			console.log(gameState);
+			
 			initGame(gameState);
 		})
 			

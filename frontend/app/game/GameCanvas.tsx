@@ -4,9 +4,7 @@ import { GameState } from '../GlobalRedux/features'
 import useSocket from '../useSocket'
 
 interface PlayerMove {
-	playerID: number;
-	direction: 'up' | 'down';
-
+	direction: 'up' | 'down' | 'stop'
 }
 
 const GameCanvas = () => {
@@ -14,12 +12,11 @@ const GameCanvas = () => {
 	const	serviceRef = React.useRef<GameService | null>(null);
 	const [sendToServer, setSendToServer] = useState<(data: any) => void>();
 
-	const createMovePayload = (playerID: number, direction: 'up' | 'down') => {
-		return {
-			playerID,
-			direction
-		}
-	}
+	// const createMovePayload = (direction: 'up' | 'down') => {
+	// 	return {
+	// 		direction
+	// 	}
+	// }
 	
 	React.useEffect(() => {
 		let payload: PlayerMove; //! Change later
@@ -27,14 +24,12 @@ const GameCanvas = () => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			switch (e.key) {
 				case 'w':
-					console.log('Player 1 move up');
-					payload = createMovePayload(1, 'up');
+				case 'ArrowUp':
+					payload = {direction: 'up'}
 					break
 				case 's':
-					break
-				case 'ArrowUp':
-					break
 				case 'ArrowDown':
+					payload = {direction: 'down'}
 					break
 			}
 			if (payload && sendToServer) sendToServer(payload)
@@ -42,7 +37,16 @@ const GameCanvas = () => {
 		
 		const handleKeyUp = (e: KeyboardEvent) => {
 			switch (e.key) {
-				case 'w': payload = createMovePayload(1, 'down'); break;
+				case 'w': 
+				case 's':
+					console.log('Player 1 stop');
+					payload = {direction: 'stop'}
+					break
+				case 'ArrowUp':
+				case 'ArrowDown':
+					console.log('Player 2 stop');
+					payload = {direction: 'stop'}
+					break
 			}
 			if (payload && sendToServer) sendToServer(payload)
 		}

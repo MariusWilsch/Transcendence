@@ -26,7 +26,6 @@ export interface GameState {
   };
   score: { player1: number; player2: number };
 	canvas: { width: number; height: number };
-	playerMove? : PlayerMove;
 }
 
 const initialState: GameState = {

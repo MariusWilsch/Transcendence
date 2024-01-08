@@ -29,7 +29,7 @@ module.exports = {
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/lines-between-class-members': 'off',
 		// Add other rules from the guide or adjust as per your project needs
-		indent: ['error', 'tab'], // Set indent rule to use tabs
+		indent: ['error', 'tab', { SwitchCase: 1 }], // Set indent rule to use tabs
 	},
 };
 
