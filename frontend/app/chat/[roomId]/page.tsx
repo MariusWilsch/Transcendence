@@ -152,7 +152,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         context.socket.on('privateChat',(message:any)=>{
           handlePrivateChat(message);
           trigger++;
-          console.log(trigger);
+          fetchDataAndSetupSocket();
+          toast.success("you had a message");
         });
     } 
     console.log("it renders n-times");
@@ -236,7 +237,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
           </div>
         </div>
       </div>
-      <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-750">
+      <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white">
         {desplayedMessages?.map((msg:any, index) => (
           (msg.sender == context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) || (msg.sender != context.userData?.intraId && <SingleMessageReceived key={index} message={msg.content} />)
         ))}

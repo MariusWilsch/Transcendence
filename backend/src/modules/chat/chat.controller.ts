@@ -48,7 +48,6 @@ export class ChatController {
   async getPublicChannels(@Res() res:any): Promise<Channel | undefined>{
     const data = await this.chatService.getAllTypeChannels("PUBLIC");
     const dataBeta = res.json(data);
-    console.log(data);
     return dataBeta;
   }
   @Get('channels/protected')
@@ -56,7 +55,13 @@ export class ChatController {
   async getProtectedChannels(@Res() res:any): Promise<Channel | undefined>{
     const data = await this.chatService.getAllTypeChannels("PROTECTED");
     const dataBeta = res.json(data);
-    console.log(data);
+    return dataBeta;
+  }
+  @Get('channels/availabelChannels')
+  @UseGuards(JwtAuthGuard)
+  async getAvailableChannels(@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllAvailableChannels();
+    const dataBeta = res.json(data);
     return dataBeta;
   }
   @Get('channels/:id/userChannels')
@@ -64,7 +69,6 @@ export class ChatController {
   async getUserChannels(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
     const data = await this.chatService.getUserChannels(id);
     const dataBeta = res.json(data);
-    console.log(data);
     return dataBeta;
   }
   // @Get(':id/message')

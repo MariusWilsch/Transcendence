@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'modules/auth/constants';
+import { channel } from 'diagnostics_channel';
+import { equals } from 'class-validator';
 
 enum ChannelType {
   Public = 1,
@@ -222,7 +224,7 @@ export class ChatService {
         memberId:this.generateRandomId(),
         intraId,
         channelId,
-        isOwner:true,
+        isOwner:isOwner,
       },
     });
   }
@@ -275,5 +277,63 @@ export class ChatService {
       },
     });
     return data;
+  }
+  async joinChannel(user:User, channelId:string, type:string, password:string)
+  {
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelId,
+      },
+    })
+    if (!channel){
+      throw ('no such channel sorry');
+    }
+    const member = await prisma.memberShip.findFirst({
+      where:{
+        intraId:user.intraId,
+        channelId,
+      }
+    })
+    if (member)
+    {
+      throw('already in channel');
+    }
+    if (channel.type === 'PROTECTED')
+    {
+        const reslt = await bcrypt.compare(password, channel.password);
+        if (!reslt)
+        {
+          throw("password incorrect");
+        }
+    }
+    await this.createMember(user.intraId, channelId, false);
+  }
+  async getAllChannelUsers(channelId:string){
+    return await prisma.memberShip.findMany({
+      where:{
+        channelId,
+      },
+    })
+  }
+  async createChannelMessage(channelId:string, message:string, senderId:string){
+    return await prisma.channelMessage.create({
+      data:{
+        channelId,
+        sender:senderId,
+        recipient:"",
+        content:message,
+      },
+    })
+  }
+  async getAllAvailableChannels(){
+    return await prisma.channel.findMany({
+      where:{
+        type:{
+          not:{
+            equals:'PRIVATE',
+          }
+        }
+      }
+    })
   }
 }

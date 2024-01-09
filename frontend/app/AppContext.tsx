@@ -40,6 +40,14 @@ export type User = {
   updated_at: Date;
   status: string;
 };
+export type Channel = {
+  id: number;
+  name: string;
+  type: string;
+  ownerId: string;
+  password: string;
+  description: string;
+}
 
 export type AppContextProps = {
   isDivVisible: boolean;

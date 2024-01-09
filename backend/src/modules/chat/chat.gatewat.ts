@@ -1,9 +1,11 @@
 // chat.gateway.ts
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'modules/prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
+import { channel } from 'diagnostics_channel';
+import { response } from 'express';
 
 
 @WebSocketGateway(3002,{
@@ -39,7 +41,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   
   handleDisconnect(client: any): void {
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Client disconnected: ${client.id}`);
     this.connectedClients.delete(client.id);
   }
 
@@ -111,7 +113,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
   @SubscribeMessage('JoinAChannel')
-  async joinChannel(client:any, payload:{}){
-
+  async joinChannel(client:Socket, payload:{channelId:string, type:string,password:string, user:User}){
+    try{
+      await this.chatService.joinChannel(payload.user, payload.channelId, payload.type, payload.password);
+      client.emit('JoinAChannel',{e:"Successufely join the channel"});
+    }
+    catch(e){
+        client.emit('JoinAChannel',{e});
+    }
+  }
+  @SubscribeMessage('channelChat')
+  async handleChannelChat(client:any, payload:{to:string,message:string, senderId:string}): Promise<void> {
+    try{
+      const members = await this.chatService.getAllChannelUsers(payload.to);
+      const message = await this.chatService.createChannelMessage(payload.to, payload.message, payload.senderId);
+      console.log('message broadcasted to channel');
+      members.map((member)=>{
+        const recipientSocket = this.getAllSocketsByUserId(member.intraId);
+        recipientSocket.map((socket:any) =>{
+          if (socket.id !== client.id){
+            socket.emit('privateChat',message)
+          }
+        }
+        );
+      })
+    }
+    catch(e){
+    }
   }
 }

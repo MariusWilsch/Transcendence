@@ -8,7 +8,7 @@ import { Room, useAppContext, User } from '../AppContext';
 import PrivateRoom from './[roomId]/page';
 import {Navbar}   from '../components/Navbar';
 import {Sidebar}   from '../components/Sidebar';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { ImBubbles2 } from "react-icons/im";
 import { MdGroups } from "react-icons/md";
 import { BsPersonLinesFill } from "react-icons/bs";
@@ -21,7 +21,7 @@ import Cookies from "universal-cookie";
 
 const CreateChannelForm = () => {
   const [channelName, setChannelName] = useState('');
-  const [channelType, setChannelType] = useState('');
+  const [channelType, setChannelType] = useState('PUBLIC');
   const [password, setPassword] = useState('');
   const context = useAppContext();
 
@@ -41,6 +41,9 @@ const CreateChannelForm = () => {
         console.log({owner:context.userData.intraId,name:channelName, typePass:{type:channelType, password:password}})
       });
       handleSubmit(e);
+    }
+    else{
+      toast.error('you should enter atleast the name of your channel');
     }
   }
   // useEffect(()=>{
@@ -187,7 +190,7 @@ export const ConversationCard = ({room}:any) => {
         <div><span className='hidden sm:block'>{user?.login}</span></div>
         {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
       </div>
-      <Image width={50} height={50} src={user.Avatar} alt="My profile" className="w-10 sm:w-10 h-10 sm:h-10 rounded-full" />
+      <Image width={50} height={50} src={user?.Avatar} alt="My profile" className="w-10 sm:w-10 h-10 sm:h-10 rounded-full" />
     </div>
     </Link>
   );
@@ -329,10 +332,15 @@ const Chat = () => {
       {
         console.log(data);
       })
-      context.socket?.on('privateChat', () => {
-        trigger++;
-        fetchDataAndSetupSocket();
-      })
+      if (context.socket)
+      {
+
+        context.socket?.on('privateChat', (message:any) => {
+          trigger++;
+          fetchDataAndSetupSocket();
+          toast.success("you had a message");
+        })
+      }
     } 
   }, [context.socket, trigger]);
   return (
