@@ -82,11 +82,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.getAllSocketsByUserId(payload.to);
+    const senderSocket = this.getAllSocketsByUserId(payload.senderId);
     // const recip = await this.chatService.getUserById(payload.to);
     // console.log(recip):
     if (recipientSocket) {
+
       const message = await this.chatService.createMessage(payload.senderId, payload.to, payload.message);
-          recipientSocket.map((client:any) =>client.emit('privateChat',message));
+          recipientSocket.map((socket:any) =>socket.emit('privateChat',message));
+          senderSocket.map((socket:any) =>{
+            if (client.id != socket.id)
+            {
+              socket.emit('privateChat',message);
+            }
+          })
         // Save the private message to the database
         console.log(`Private message from ${payload.senderId} to ${payload.to}: ${message.content}`);
       } else {

@@ -59,6 +59,14 @@ export class ChatController {
     console.log(data);
     return dataBeta;
   }
+  @Get('channels/:id/userChannels')
+  @UseGuards(JwtAuthGuard)
+  async getUserChannels(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getUserChannels(id);
+    const dataBeta = res.json(data);
+    console.log(data);
+    return dataBeta;
+  }
   // @Get(':id/message')
   // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
   //   const data = await this.chatService.getMessagesByUser(id);

@@ -268,4 +268,12 @@ export class ChatService {
     })
     return data;
   }
+  async getUserChannels(userId:string) {
+    const data = await prisma.memberShip.findMany({
+      where:{
+        intraId:userId,
+      },
+    });
+    return data;
+  }
 }
