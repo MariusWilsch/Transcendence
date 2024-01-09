@@ -1,10 +1,11 @@
 import { Socket } from 'socket.io';
+
 export interface Vector {
 	x: number;
 	y: number;
 }
 
-interface Size {
+export interface Size {
 	width: number;
 	height: number;
 }
@@ -17,7 +18,6 @@ export interface Paddle {
 export interface Ball {
 	position: Vector;
 	radius: number;
-	// velocity: Vector;
 }
 
 interface Score {

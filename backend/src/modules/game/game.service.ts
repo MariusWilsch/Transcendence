@@ -7,19 +7,21 @@ import {
 	Paddle,
 	Ball,
 	Vector,
+	Size,
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 
 // Helper functions
-const createVec2 = (x: number, y: number) => ({ x, y });
+const createVec2 = (x: number, y: number): Vector => ({ x, y });
 
-const createSize = (width: number, height: number) => ({ width, height });
+const createSize = (width: number, height: number): Size => ({ width, height });
 
 @Injectable()
 export class GameService {
 	private gameSessions: Map<string, GameSession> = new Map();
+	//! The two variables only work if they stay the same across all game sessions
 	private paddleSpeed: number;
-	private ballSpeed: { x: number; y: number };
+	private ballVelocity: { x: number; y: number };
 
 	private initGameState() {
 		const {
@@ -32,7 +34,7 @@ export class GameService {
 			canvasHeight,
 		} = GAME_CONFIG;
 		this.paddleSpeed = canvasHeight * paddleSpeedFactor;
-		this.ballSpeed = {
+		this.ballVelocity = {
 			x: canvasWidth * ballSpeedFactor,
 			y: canvasHeight * ballSpeedFactor,
 		};
@@ -51,10 +53,6 @@ export class GameService {
 			ball: {
 				position: createVec2(canvasWidth / 2, canvasHeight / 2),
 				radius: ballRadius,
-				// velocity: createVec2(
-				// 	canvasWidth * ballSpeedFactor,
-				// 	canvasHeight * ballSpeedFactor
-				// ),
 			},
 			score: {
 				player1: 0,
@@ -65,6 +63,19 @@ export class GameService {
 
 	//* Business logic
 
+	/**
+	 * The createGameSession function creates a new game session by joining two players to a room,
+	 * associating the room ID with each player, and storing the game session in a Map.
+	 * @param {string} roomID - The roomID is a string that represents the unique identifier for the game
+	 * session. It is used to associate the players and their game state with a specific room.
+	 * @param {Socket} player1 - The `player1` parameter is a Socket object representing the first player
+	 * in the game session. It is used to join the player to a Socket.io room and associate the room ID
+	 * with the player's data.
+	 * @param {Socket} player2 - The `player2` parameter is a Socket object representing the second player
+	 * in the game session. A Socket object is typically used in Socket.io to represent a client connection
+	 * to the server. In this case, it is used to represent the second player's connection to the game
+	 * server.
+	 */
 	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
 		// Join both Sockets to a Socket.io room
 		player1.join(roomID);
@@ -86,6 +97,17 @@ export class GameService {
 		});
 	}
 
+	/**
+	 * The function updates the game state by updating the ball's position, updating the paddles'
+	 * positions, and checking for collisions between the ball and the paddles.
+	 * @param {string} roomID - The `roomID` parameter is a string that represents the unique identifier of
+	 * the game room. It is used to retrieve the corresponding game session from the `gameSessions` map.
+	 * @param {number} deltaTime - The `deltaTime` parameter represents the time elapsed since the last
+	 * update of the game state. It is typically measured in milliseconds or seconds and is used to
+	 * calculate the changes in the game state based on the passage of time.
+	 * @returns There is no return statement in the provided code snippet. Therefore, nothing is being
+	 * returned.
+	 */
 	public updateGameState(roomID: string, deltaTime: number) {
 		const gameSession = this.gameSessions.get(roomID);
 
@@ -98,6 +120,13 @@ export class GameService {
 		);
 	}
 
+	/**
+	 * The function checks if the game is over based on the score of the players.
+	 * @param {GameState}  - The `isGameOver` function takes in a `GameState` object as a parameter. The
+	 * `GameState` object has a property called `score`, which is an object containing the scores of two
+	 * players (`player1` and `player2`).
+	 * @returns a boolean value. If the game is over, it will return true. Otherwise, it will return false.
+	 */
 	public isGameOver({ score }: GameState): boolean {
 		// Implement game over condition based on game state
 		if (
@@ -119,7 +148,7 @@ export class GameService {
 	 * frame update. It is typically used to ensure smooth and consistent movement regardless of the frame
 	 * rate. By multiplying the paddle speed with `deltaTime`, the paddle movement will be scaled based on
 	 * the time passed since the last update, resulting in
-	 * @returns If `didPaddleMove` is false, the function will return without performing any further
+	 * @description If `didPaddleMove` is false, the function will return without performing any further
 	 * actions.
 	 */
 	private updatePaddles({ gameState, input }: GameSession, deltaTime: number) {
@@ -176,15 +205,31 @@ export class GameService {
 	}
 
 	/**
+	 * The function checks if the ball collides with the top or bottom wall and updates its velocity and
+	 * position accordingly.
+	 * @param {Ball}  - - `position`: The current position of the ball, represented as an object with `x`
+	 * and `y` coordinates.
+	 */
+	private checkTopBottomWallCollision({ position, radius }: Ball) {
+		if (position.y - radius <= 0) {
+			this.ballVelocity.y *= -1;
+			position.y = radius;
+		} else if (position.y + radius >= GAME_CONFIG.canvasHeight) {
+			this.ballVelocity.y *= -1;
+			position.y = GAME_CONFIG.canvasHeight - radius;
+		}
+	}
+
+	/**
 	 * The function checks for a collision between a ball and a paddle in a game and changes the ball's
 	 * horizontal velocity if a collision is detected.
 	 * @param {GameState} gameState - The `gameState` parameter is an object that represents the current
 	 * state of the game. It contains information about the ball and the paddles.
-	 * @param {string} [playerID] - The `playerID` parameter is an optional parameter that represents the
+	 * @param {string} [playerID] - The `playerID` parameter is an parameter that represents the
 	 * ID of the player whose paddle collision is being checked. It is used to access the specific paddle
 	 * from the `gameState.paddles` object. If `playerID` is not provided, the function will not be able to
 	 * check
-	 */
+	 */ //! The ball still sticks to the paddle sometimes
 	private checkPaddleCollision(gameState: GameState, playerID: string) {
 		const ball = gameState.ball;
 		const paddle = gameState.paddles[playerID];
@@ -210,29 +255,17 @@ export class GameService {
 		) {
 			// Collision detected
 			// Reverse the ball's x velocity
-			this.ballSpeed.x *= -1;
+			this.ballVelocity.x *= -1;
 			// ball.velocity.x *= -1;
 		}
 	}
 
 	private updateBall({ ball, score }: GameState, deltaTime: number): void {
-		const { canvasHeight, canvasWidth } = GAME_CONFIG;
-		ball.position.x += this.ballSpeed.x * deltaTime;
-		ball.position.y += this.ballSpeed.y * deltaTime;
-
-		// If ball is not close to the edge, return
-		// if (ball.position.y > 100 && ball.position.y < canvas.height - 100) {
-		// 	return;
-		// } //! Is this working?
+		ball.position.x += this.ballVelocity.x * deltaTime;
+		ball.position.y += this.ballVelocity.y * deltaTime;
 
 		// If ball hits the top or bottom wall, reverse the y velocity
-		if (ball.position.y - ball.radius <= 0) {
-			this.ballSpeed.y *= -1;
-			ball.position.y = ball.radius;
-		} else if (ball.position.y + ball.radius >= canvasHeight) {
-			this.ballSpeed.y *= -1;
-			ball.position.y = canvasHeight - ball.radius;
-		}
+		this.checkTopBottomWallCollision(ball);
 
 		// If ball hits the left
 		if (ball.position.x - ball.radius <= 0) {
@@ -241,17 +274,14 @@ export class GameService {
 			return;
 		}
 		// If ball hits the right wall
-		if (ball.position.x + ball.radius >= canvasWidth) {
+		if (ball.position.x + ball.radius >= GAME_CONFIG.canvasWidth) {
 			score.player2++;
 			this.resetBall(ball);
 			return;
 		}
-
-		// console.log(
-		// 	`[After Update] Ball Position: x=${ball.position.x}, y=${ball.position.y}`
-		// );
 	}
 
+	//! This function is still subject to change
 	public deleteGameSession(clientID: string, roomID: string): void {
 		const gameSession = this.gameSessions.get(roomID);
 
@@ -265,10 +295,14 @@ export class GameService {
 			if (otherPlayer) {
 				otherPlayer.disconnect();
 			}
-			// this.clearGameSession(gameSession);
 		}
 	}
 
+	/**
+	 * The function checks if a game room exists based on the provided room ID.
+	 * @param {string} roomID - A string representing the ID of a game room.
+	 * @returns a boolean value.
+	 */
 	public isInGame(roomID: string): boolean {
 		console.log('Does the room exist?', this.gameSessions.has(roomID));
 		return this.gameSessions.has(roomID);
@@ -317,20 +351,6 @@ export class GameService {
 
 	//* Helpers
 
-	// private clearGameSession(gameSession: GameSession) {
-	// 	gameSession.players = [];
-	// 	gameSession.gameState = null;
-	// 	gameSession.intervalID = null;
-	// 	gameSession.input = null;
-	// }
-
-	private getPaddleCenter(paddle: Paddle): Vector {
-		return createVec2(
-			paddle.position.x + paddle.size.width / 2,
-			paddle.position.y + paddle.size.height / 2
-		);
-	}
-
 	private choosePaddle(ball: Ball): string {
 		return ball.position.x < GAME_CONFIG.canvasWidth / 2
 			? 'player1'
@@ -354,90 +374,13 @@ export class GameService {
 		return false;
 	}
 
+	/**
+	 * The function "resetBall" resets the position of a ball to the center of the canvas.
+	 * @param {Ball} ball - The parameter "ball" is of type "Ball". It represents an instance of the Ball
+	 * class, which has properties such as position and size.
+	 */
 	private resetBall(ball: Ball) {
 		ball.position.x = GAME_CONFIG.canvasWidth / 2;
 		ball.position.y = GAME_CONFIG.canvasHeight / 2;
 	}
 }
-
-// @Injectable()
-// export class GameService {
-// 	private gameState: GameState;
-
-// 	public initGameState(playerSocketID1: string, playerSocketID2: string) {
-// 		const {
-// 			paddleWidth,
-// 			paddleHeight,
-// 			paddleSpeedY,
-// 			ballRadius,
-// 			ballSpeedFactor,
-// 			canvasWidth,
-// 			canvasHeight,
-// 		} = GAME_CONFIG;
-// 		const paddleY = canvasHeight / 2 - paddleHeight / 2;
-// 		this.gameState = {
-// 			paddles: {
-// 				player1: {
-// 					position: createVec2(0, paddleY),
-// 					size: createSize(paddleWidth, paddleHeight),
-// 					yCordSpeed: paddleSpeedY,
-// 					socketID: playerSocketID1,
-// 				},
-// 				player2: {
-// 					position: createVec2(canvasWidth - paddleWidth, paddleY),
-// 					size: createSize(paddleWidth, paddleHeight),
-// 					yCordSpeed: paddleSpeedY,
-// 					socketID: playerSocketID2,
-// 				},
-// 			},
-// 			ball: {
-// 				position: createVec2(canvasWidth / 2, canvasHeight / 2),
-// 				radius: ballRadius,
-// 				velocity: createVec2(0, canvasHeight * ballSpeedFactor),
-// 			},
-// 			score: {
-// 				player1: 0,
-// 				player2: 0,
-// 			},
-// 			canvas: {
-// 				width: canvasWidth,
-// 				height: canvasHeight,
-// 			},
-// 		};
-// 	}
-
-// 	public getGameState() {
-// 		return this.gameState;
-// 	}
-
-// 	public updateGameState(deltaTime: number) {
-// 		this.updateBall(deltaTime);
-// 		// this.updatePaddles(deltaTime);
-// 	}
-
-// 	public isGameOver(): boolean {
-// 		// Implement game over condition based on game state
-// 		// Example: return true if score limit is reached
-
-// 		return false;
-// 	}
-
-// 	//* Private
-
-// 	private updateBall(deltaTime: number) {
-// 		const { ball, canvas } = this.gameState;
-// 		// console.log(ball.position.x, ball.position.y);
-// 		ball.position.x += ball.velocity.x * deltaTime;
-// 		ball.position.y += ball.velocity.y * deltaTime;
-
-// 		// Check for collisions with top and bottom walls
-// 		if (
-// 			ball.position.y + ball.radius >= canvas.height ||
-// 			ball.position.y - ball.radius <= 0
-// 		) {
-// 			ball.velocity.y *= -1;
-// 		}
-// 	} //! Improve collision detection
-
-// 	private updatePaddles(deltaTime: number) {}
-// }
