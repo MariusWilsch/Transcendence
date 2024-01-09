@@ -1,6 +1,7 @@
 'use Client'
 import { useEffect } from 'react';
 import { Socket, io } from 'socket.io-client';
+import { GameState } from './GlobalRedux/features';
 
 
 //* Refactor idea:
@@ -17,27 +18,18 @@ const useSocket = (initGame: Function, updateGame: Function, clearGame: Function
 				console.log('Connected to server');
 		});
 
-// socket.on('disconnect', function(this: any){	
-    
-// 	var self = this;
-//     var rooms = Object.keys(self.rooms);
-// 		console.log(rooms);
-// });
-			
 		socket.on('disconnect', () => {
 			console.log('Disconnected from server');
 			clearGame();
 		});
 			
-		socket.on('createGame', (gameState) => {
+		socket.on('createGame', (obj) => {
 			console.log('Creating game');
-			console.log(gameState);
-			
-			initGame(gameState);
+			initGame(obj.gameState, obj.canvasWidth, obj.canvasHeight);
 		})
 			
-		socket.on('gameState', (gameState) => {
-			console.log('Updating game');
+		socket.on('gameState', (gameState: GameState) => {
+			// console.log('Updating game');
 			updateGame(gameState);
 		});
 

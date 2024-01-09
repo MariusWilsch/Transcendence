@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { GameState } from '../GlobalRedux/features';
+import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 
 export class GameService {
 	private app: PIXI.Application;
@@ -7,7 +8,13 @@ export class GameService {
 	private leftPaddle = new PIXI.Graphics();
 	private rightPaddle = new PIXI.Graphics();
 	private container: HTMLDivElement;
-	// private isGameCleared = false;
+	private scores: {
+		player1: PIXI.Text;
+		player2: PIXI.Text;
+	};
+	private prevScores: GameState['score'];
+	private prevBallPosition: { x: number, y: number } = { x: 0, y: 0 };
+	private letAmpt = 0.1;
 
 	constructor(container: HTMLDivElement, width: number, height: number) {
 		this.container = container;
@@ -18,6 +25,33 @@ export class GameService {
 			antialias: true, // Enable antialiasing
 		});
 		container.appendChild(this.app.view as HTMLCanvasElement);
+		this.scores = {
+			player1: new PIXI.Text('0', {
+					fontFamily: 'Arial',
+					fontSize: 36,
+					fontStyle: 'italic',
+					fontWeight: 'bold',
+					fill: ['#ffffff'],
+					stroke: '#4a1850',
+					strokeThickness: 5,
+			}),
+			player2: new PIXI.Text('0', {
+					fontFamily: 'Arial',
+					fontSize: 36,
+					fontStyle: 'italic',
+					fontWeight: 'bold',
+					fill: ['#ffffff'],
+					stroke: '#4a1850',
+					strokeThickness: 5,
+			}),
+		};
+		this.scores.player1.position.set(width / 2 - 50, 20);
+		this.scores.player2.position.set(width / 2 + 50, 20);
+		this.app.stage.addChild(this.scores.player1, this.scores.player2);
+		this.prevScores = {
+			player1: 0,
+			player2: 0,
+		};
 	}
 
 	//* Private methods
@@ -27,6 +61,7 @@ export class GameService {
 		this.ball.beginFill(0xFF0000); // Change color to blue
 		this.ball.drawCircle(ballProps.position.x, ballProps.position.y, ballProps.radius);
 		this.ball.endFill();
+		
 	}
 	
 	private drawPaddle(paddleProps: GameState['paddles']['player1' | 'player2'], side: 'left' | 'right') {
@@ -37,14 +72,19 @@ export class GameService {
 		paddle.endFill();
 	}
 
-
+	private lerp(start: number, end: number, amt: number) {
+    return (1 - amt) * start + amt * end;
+}
 
 	//* Public methods
 
-	public initGameElements(ballProps: GameState['ball'], paddles: GameState['paddles']) {
+	public initGameElements(ball: GameState['ball'], paddles: GameState['paddles']) {
 		console.log('Initializing game elements');
 		// Draw ball
-		this.drawBall(ballProps);
+		this.drawBall(ball);
+		this.prevBallPosition = { ...ball.position };
+		//! Add motion blur to ball
+		// this.ball.filters = [new MotionBlurFilter([ball.velocity.x, ball.velocity.y], 2)];
 
 		// Draw paddles
 		this.drawPaddle(paddles.player1, 'left');
@@ -52,29 +92,41 @@ export class GameService {
 
 		// Add elements to stage
 		this.app.stage.addChild(this.ball, this.leftPaddle, this.rightPaddle);
-		// this.isGameCleared = false;
 	}
 
-	public updateGameElements(ballProps: GameState['ball'], paddles: GameState['paddles']) {
-		// if (!this.isGameCleared) return
+	public updateGameElements({ball, paddles, score} :GameState) {
 		// console.log('Updating game elements');
-		// Update ball
-		this.drawBall(ballProps);
+		// Calculate new position
+    // let newX = this.lerp(this.prevBallPosition.x, ball.position.x, this.lerpAmt);
+    // let newY = this.lerp(this.prevBallPosition.y, ball.position.y, this.lerpAmt);
+
+    // Update the ball's position for drawing
+    // this.prevBallPosition = { x: newX, y: newY };
+
+    // Draw the ball at the new interpolated position
+		// this.drawBall({ ...ball, position: { x: newX, y: newY } });
+		// Update Ball
+		this.drawBall(ball);
 
 		// Update paddles
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
+
+		// Update scores	
+		if (score.player1 !== this.prevScores.player1) {
+			this.scores.player1.text = score.player1.toString();
+		} else if (score.player2 !== this.prevScores.player2) {
+			this.scores.player2.text = score.player2.toString();
+		}
+		this.prevScores = score;
 	}
 
 	public clearGameElements() {
-		if (this.isGameCleared) return
 		console.log('Clearing game elements');
 		if (this.app) {
 			this.container.removeChild(this.app.view as HTMLCanvasElement);
-			this.app.destroy()
-			// this.isGameCleared = true;
+			this.app.destroy(true, true)
 		}
 	}
-
 }
 

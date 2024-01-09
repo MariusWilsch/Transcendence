@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@pixi/filter-motion-blur": "^5.1.1",
     "@reduxjs/toolkit": "^1.9.7",
     "next": "14.0.3",
     "pixi.js": "^7.3.2",

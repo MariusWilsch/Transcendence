@@ -9,6 +9,7 @@ import { Server, Socket as IO } from 'socket.io';
 import { GameState } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
+import { GAME_CONFIG } from './helpers/game.constants';
 
 @WebSocketGateway({
 	cors: {
@@ -33,7 +34,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
-		console.log('client rooms', client.data.roomID);
+		// If the client was in a running game clear the interval
+		const roomID = client.data.roomID;
+		if (this.gameService.isInGame(roomID)) {
+			console.log('Client was in a running game, clearing interval');
+			clearInterval(this.gameService.getIntervalID(roomID));
+			this.gameService.deleteGameSession(client.id, roomID);
+		}
 	}
 
 	checkForAvailablePlayers() {
@@ -52,10 +59,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.gameService.createGameSession(roomID, player1, player2);
 
 		//? Emit an event to both Sockets in the room
-		this.Server.to(roomID).emit(
-			'createGame',
-			this.gameService.getGameState(roomID)
-		);
+		this.Server.to(roomID).emit('createGame', {
+			gameState: this.gameService.getGameState(roomID),
+			canvasWidth: GAME_CONFIG.canvasWidth,
+			canvasHeight: GAME_CONFIG.canvasHeight,
+		});
 
 		// Start the game loop
 		this.beginGameLoop(roomID);
@@ -71,23 +79,32 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
 
+			// if (deltaTime > 0.02) {
+			// 	console.log(`High Delta Time Detected: ${deltaTime}`);
+			// }
+
+			// const startUpdateTime = performance.now();
 			this.gameService.updateGameState(roomID, deltaTime);
-			// If game is over, clear the interval
-			if (this.isGameOver(roomID)) {
+			// const endUpdateTime = performance.now();
+
+			// console.log(
+			// 	`Game state update took ${endUpdateTime - startUpdateTime} milliseconds`
+			// );
+
+			if (this.gameService.isGameOver(this.gameService.getGameState(roomID))) {
+				console.log('Game over, clearing interval');
 				clearInterval(intervalId);
 			}
+			// const startUpdateTime1 = performance.now();
 			this.sendGameState(roomID, this.gameService.getGameState(roomID));
+			// const endUpdateTime1 = performance.now();
+
+			// console.log(
+			// 	`Game state send took ${endUpdateTime1 - startUpdateTime1} milliseconds`
+			// );
 		}, 1000 / 60); // Run the loop at approximately 60 FPS
-	}
 
-	isGameOver(roomID: string): boolean {
-		//* Implement game over condition
-		if (this.lobby.length != 0) {
-			return true; // Return true if there are no players in the lobby
-		} //! Only works for 2 players for now
-
-		// Consult GameService for game-related conditions
-		return this.gameService.isGameOver(roomID);
+		this.gameService.setIntervalID(roomID, intervalId);
 	}
 
 	sendGameState(roomID: string, gameState: GameState) {
@@ -102,28 +119,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('onPaddleMove')
 	handlePaddleMove(client: IO, payload: any): void {
-		console.log('ROOM ID', client.data.roomID, 'by', client.id);
-
-		// payload could include details like the player ID and the new paddle position
-		// Update the game state based on this information
-		this.gameService.updatePaddleState(
-			client,
-			client.data.roomID,
-			payload.direction
-		);
-		// Further processing...
-	}
-	@SubscribeMessage('onScoreChange')
-	handleScoreChange(client: IO, payload: any): void {
-		console.log('ROOM ID', client.data.roomID, 'by', client.id);
-
-		// payload could include details like the player ID and the new paddle position
-		// Update the game state based on this information
-		// this.gameService.updateScore(client.data.roomID, payload);
+		// Notify game service of the paddle move
+		this.gameService.setInputBool(client.data.roomID, payload);
 		// Further processing...
 	}
 }
-
 // sendGameState(gameState: GameState) {
 // 	//! Optimization ideas
 // 	// Only send dimensions once (on game start)
@@ -286,4 +286,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 // 		// Consult GameService for game-related conditions
 // 		return this.gameService.isGameOver();
 // 	}
+// }
+
+// if (
+// 	ball.position.y + ball.radius >= canvas.height ||
+// 	ball.position.y - ball.radius <= 0
+// ) {
+// 	ball.velocity.y *= -1;
 // }

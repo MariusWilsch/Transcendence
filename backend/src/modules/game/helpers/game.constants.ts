@@ -2,9 +2,11 @@
 export const GAME_CONFIG = {
 	canvasWidth: 600,
 	canvasHeight: 400,
+	proximityThreshold: 50,
 	paddleWidth: 20,
 	paddleHeight: 100,
-	paddleSpeedY: 5,
+	paddleSpeedFactor: 1.25,
 	ballRadius: 20,
-	ballSpeedFactor: 0.75,
+	ballSpeedFactor: 0.8,
+	WinningScore: 7,
 };
