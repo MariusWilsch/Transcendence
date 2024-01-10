@@ -9,8 +9,6 @@ import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private readonly logger = new Logger(JwtAuthGuard.name);
-
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const cookie = request.cookies.jwt;
@@ -24,7 +22,6 @@ export class JwtAuthGuard implements CanActivate {
 
       return true;
     } catch (error: any) {
-      this.logger.error('Error verifying access token:', error.message);
       return false;
     }
   }

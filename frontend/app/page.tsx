@@ -45,13 +45,9 @@ export default function Home() {
           );
         }
       }
-    } catch (error: any) {
-      const msg = "Error during login" + error.message;
-      toast.error(msg);
-      console.error("Error during login:", error);
-    }
+    } catch (error: any) {}
   };
-  
+
   useEffect(() => {
     checkJwtCookie();
   }, []);

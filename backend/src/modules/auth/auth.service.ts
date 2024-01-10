@@ -210,6 +210,7 @@ export class AuthService {
         fullname: user.usual_full_name,
         login: user.username,
         email: user.email,
+        Avatar: 'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg',
         isRegistred: false,
         isTfaEnabled: false,
         status: 'ONLINE',

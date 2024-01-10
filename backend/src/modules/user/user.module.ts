@@ -9,8 +9,11 @@ import { diskStorage } from 'multer';
 @Module({
   imports: [
     MulterModule.register({
+      dest: './Avataruploads/',
       storage: diskStorage({
-        destination: 'AvatarUploads/',
+        destination: function (req, file, cb) {
+          cb(null, 'Avataruploads/')
+      },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now();
           const fileExtension = file.originalname.split('.').pop();

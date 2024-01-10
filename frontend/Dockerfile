@@ -5,8 +5,13 @@ RUN mkdir -p /usr/transcendence
 
 WORKDIR /usr/transcendence
 
+ENV PATH /usr/src/app/node_modules/.bin:$PATH
+
 COPY package*.json ./
 
+RUN npm install
+
+COPY . .
 
 RUN chmod 777 docker.sh
 

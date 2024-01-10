@@ -114,7 +114,7 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
                     width={30}
                     height={30}
                     sizes=""
-                    className="rounded-full mr-2"
+                    className="rounded-full mr-2 w-[30px] h-[30px]"
                   />
                   <div className="text-slate-400 font-sans">{user.login}</div>
                 </Link>

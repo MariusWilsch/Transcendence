@@ -30,6 +30,10 @@ export class UserService {
           intraId: id,
         },
       });
+
+      if (!User) {
+        return undefined;
+      }
       if (!User.Avatar) {
         await prisma.user.update({
           where: {
@@ -41,19 +45,8 @@ export class UserService {
         });
         return User;
       }
-      // if (!User.Avatar.includes('http://')) {
-      //   await prisma.user.update({
-      //     where: {
-      //       intraId: id,
-      //     },
-      //     data: {
-      //       Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
-      //     },
-      //   });
-      //   return User;
-      // }
+      
       const s = User.Avatar.split('/');
-
       if (s[s.length - 2]) {
         if ('http://' + s[s.length - 2] === `${URL}:3001`) {
           const path = './Avataruploads/' + s[s.length - 1];
@@ -127,18 +120,11 @@ export class UserService {
         },
         data: {
           Avatar: newAvatar,
-        },
-      });
-      await prisma.user.update({
-        where: {
-          intraId: userId,
-        },
-        data: {
           isRegistred: true,
         },
       });
     } catch (error) {
-      console.error('Error updating login:', error);
+      console.error('Error updating avatar:', error);
     }
   }
 

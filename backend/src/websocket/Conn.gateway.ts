@@ -58,7 +58,7 @@ export class handleClientsConnection
   }
   //===========================================================
 
-  private logger: Logger = new Logger('handle Clients Connection Gateway Log');
+  // private logger: Logger = new Logger('handle Clients Connection Gateway Log');
 
   afterInit(server: Server) {
     console.log('handleClientsConnection server initialized');
@@ -88,7 +88,7 @@ export class handleClientsConnection
         }
       }
     } catch (error) {
-      this.logger.error('Error in handleConnection:', error);
+      // this.logger.error('Error in handleConnection:', error);
     }
   }
 
@@ -104,7 +104,7 @@ export class handleClientsConnection
         }
       }
     } catch (error) {
-      this.logger.error('Error in handleDisconnect:', error);
+      // this.logger.error('Error in handleDisconnect:', error);
     }
   }
 }

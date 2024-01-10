@@ -32,14 +32,12 @@ export class UserController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async getAllUsers(@Res() res: any): Promise<User[] | undefined> {
     try {
       const data = await this.userService.getAllUsers();
       res.json(data);
       return data;
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error getAllUsers:', error);
       return undefined;
     }
@@ -55,8 +53,7 @@ export class UserController {
       const data = await this.userService.getUsersbyInput(name.searchTerm);
       res.json(data);
       return data;
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error getUser:', error);
       return undefined;
     }
@@ -72,13 +69,11 @@ export class UserController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
     try {
       const data = await this.userService.getUserbyId(id);
       return data;
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error getUserbyId:', error);
       return undefined;
     }
@@ -180,7 +175,8 @@ export class UserController {
   async editavatar(
     @Param('id') userId: string,
     @UploadedFile() avatar: Express.Multer.File,
-    @Res() res: any
+    @Res() res: any,
+    @Req() req: any
   ) {
     try {
       let user = await this.userService.getUserbyId(userId);
@@ -190,9 +186,21 @@ export class UserController {
       if (!avatar) {
         return res.json({ success: false });
       }
+      if (avatar.size > 1024 * 1024 * 10 || avatar.size < 100) {
+        return res.json({ success: false });
+      }
 
       const avatarFilename = avatar.filename;
-      const avatarUrl = `${URL}:3001/${avatarFilename}`;
+      const avatarpath = avatar.path;
+
+      // const avatarUrl = `${req.protocol}://${req.get('host')}/Avataruploads/${avatar.filename}`;
+      const avatarUrl = `${req.protocol}://${req.get('host')}/${
+        avatar.filename
+      }`;
+      console.log('avatarUrl', avatarUrl);
+
+      // const avatarUrl = `${URL}:3001/${avatarFilename}`;
+      // const avatarUrl = `${URL}:3001/${avatarFilename}`;
 
       await this.userService.updateAvatar(userId, avatarUrl);
       return res.json({ success: true });
@@ -309,10 +317,10 @@ export class UserController {
       );
 
       if (friendsDetails.length === 0) {
-        return res.json({ success: true, friendsDetails : null , empty : true});
+        return res.json({ success: true, friendsDetails: null, empty: true });
       }
 
-      return res.json({ success: true, friendsDetails , empty : false });
+      return res.json({ success: true, friendsDetails, empty: false });
     } catch (error: any) {
       console.error('Error getFriends:', error);
       return res.json({ success: false });
