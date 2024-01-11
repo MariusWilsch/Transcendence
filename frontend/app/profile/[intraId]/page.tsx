@@ -37,6 +37,7 @@ export default function Profile(params: any) {
     undefined
   );
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
 
   useEffect(() => {
     setisSidebarVisible(window.innerWidth > 768);
@@ -248,21 +249,17 @@ export default function Profile(params: any) {
     IntraPic = userFromRoutId?.Avatar || IntraPic;
   }
 
-  // const lottieRef = useRef<LottieRefCurrentProps>(null);
-  // useEffect(() => {
-  //   if (lottieRef.current) {
-  //     lottieRef.current.setSpeed(0.05);
-  //     lottieRef.current.playSegments([1, 100], true);
-  //}
-  // }, []);
-
   return (
     <div className=" min-h-screen w-screen bg-[#12141A] relative">
-      <div className="z-0 absolute w-auto h-auto inset-0 mt-80">
+      <div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80">
         <Lottie
           animationData={loading}
-          className="w-auto h-auto "
-          // lottieRef={lottieRef as any}
+          className="w-auto h-auto"
+          onDOMLoaded={(e) => {
+            console.log("onDOMLoaded");
+            lottieRef.current?.setSpeed(0.05);
+          }}
+          lottieRef={lottieRef as any}
         />
       </div>
 
