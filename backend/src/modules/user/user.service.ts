@@ -30,6 +30,10 @@ export class UserService {
           intraId: id,
         },
       });
+      if (!User)
+      {
+        return undefined
+      }
       if (!User.Avatar) {
         await prisma.user.update({
           where: {

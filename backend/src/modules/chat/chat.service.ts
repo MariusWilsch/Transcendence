@@ -28,7 +28,7 @@ export class ChatService {
     const senderUser:User = await prisma.user.findUnique({ where: { intraId: sender } });
     const recipientUser:User = await prisma.user.findUnique({ where: { intraId: recipient } });
     const privateRoomName = parseInt(senderUser.intraId) > parseInt(recipientUser.intraId) ? senderUser.intraId + recipientUser.intraId :recipientUser.intraId + senderUser.intraId;
-    const room = await prisma.privateRoom.findUnique({
+    let room = await prisma.privateRoom.findUnique({
       where:{
         name:privateRoomName,
       }
@@ -36,9 +36,24 @@ export class ChatService {
     if (!senderUser || !recipientUser) {
       throw new Error('Sender or recipient not found.');
     }
-    if (!room)
+    if (!room && (senderUser && recipientUser))
     {
-      throw('no such channel');
+      room =   await prisma.privateRoom.create({
+        data: {
+          name:privateRoomName,
+          participantsIds:[senderUser.intraId, recipientUser.intraId],
+          participants: {
+            connect: [
+              { intraId: senderUser.intraId },
+              { intraId: recipientUser.intraId },
+            ],
+          },
+        },
+      });
+    }
+    if(!room && (!senderUser || !recipientUser)){
+      
+      throw('error during the creation of the room');
     }
      const message = await prisma.message.create({
       data: {
@@ -96,16 +111,22 @@ export class ChatService {
     }
     const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
     const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
-    if (!member1 || !member2) {
-      // Handle the case where either sender or recipient does not exist
-      throw new Error('Sender or recipient not found.');
-    }
-    console.log(member1),
+    console.log(member1);
     console.log(member2);
+    if (!member1 || !member2) {
+      // Handle the case where either sender or recipient does not exis
+      throw ('Sender or recipient not found.');
+    }
     await prisma.privateRoom.create({
       data: {
         name:romeName,
         participantsIds:[member1.intraId, member2.intraId],
+        participants: {
+          connect: [
+            { intraId: member1.intraId },
+            { intraId: member2.intraId},
+          ],
+        },
       },
     });
   }
@@ -325,12 +346,17 @@ export class ChatService {
       },
     })
   }
-  async getAllAvailableChannels(){
+  async getAllAvailableChannels(intraId:string){
     return await prisma.channel.findMany({
       where:{
         type:{
           not:{
             equals:'PRIVATE',
+          }
+        },
+        members:{
+          none:{
+            intraId,
           }
         }
       }

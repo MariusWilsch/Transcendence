@@ -68,8 +68,9 @@ const ChannelsLobby = ()=>{
     const context = useAppContext();
       const [socket, setsocket] = useState<Socket | null>(null);
       const [availabelChannels, setAvailableChannels] = useState<Channel[] | []>([]);
-      const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages state
-    
+      const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages stat
+
+      let trigger =1;
       useEffect(() => {
         const checkJwtCookie = async () => {
           try {
@@ -113,10 +114,11 @@ const ChannelsLobby = ()=>{
             }
             else{
               toast.success(msg);
+              trigger++;
             }
           })
         }
-      }, [context.socket]);
+      }, [context.socket, trigger]);
     
       useEffect(() => {
         context.setisSidebarVisible(window.innerWidth > 768);
@@ -159,7 +161,7 @@ const ChannelsLobby = ()=>{
         }
         try {
           const response: any = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/availabelChannels`,
+            `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.userData.intraId}/availabelChannels`,
             {
               method: "GET",
               credentials: "include",
@@ -323,9 +325,7 @@ const ChannelsLobby = ()=>{
                     <div className="mt-4 flex  justify-center ">
                       <div className="mt-4 w-full flex flex-col items-center">
                         {availabelChannels && selectedFeild==="Explore" &&
-                          availabelChannels.filter((chan:Channel)=>{
-                            chan.name
-                          })?.map((channel:Channel) => (
+                          availabelChannels.map((channel:Channel) => (
                               <div
                                 key={channel.name}
                                 className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "

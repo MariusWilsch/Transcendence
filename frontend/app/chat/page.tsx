@@ -18,6 +18,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Modal} from '@mantine/core';
 import { IoMdAdd } from "react-icons/io";
 import Cookies from "universal-cookie";
+import { Loading } from "../components/Loading";
 
 const CreateChannelForm = () => {
   const [channelName, setChannelName] = useState('');
@@ -141,7 +142,7 @@ export async function getRooms(userId: string): Promise<Room[]> {
   
   });
   const room = await res.json();
-  console.log(room)
+  // console.log(room)
   return room;
 }
 
@@ -176,10 +177,35 @@ export const FriendsCard = () => {
   );
 }
 export const ConversationCard = ({room}:any) => {
+  const [user, setUser] = useState<User | undefined>();
+  const [loading, setLoading] = useState(true);
   const context = useAppContext();
   const roomName = room.name;
-  // console.log(room);
-  const user = context.friendsData.friends.find((user:User) => user.intraId === room.participantsIds[0]);
+  useEffect(()=>{
+    const fetchUser= async ()=>{
+      try{
+        const response3 = await fetch(`http://localhost:3001/users/${room.participantsIds[0]}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const recp:User | undefined = await response3.json();
+        setUser(recp);
+        setLoading(false);
+      }
+      catch(e)
+      {
+        console.log(e);
+      }
+    }
+    fetchUser();
+  },[])
+  if (loading ||  user===undefined)
+  {
+    return (
+      <Loading />
+    )
+  }
+  // const users = context.friendsData.friends.find((user:User) => user.intraId === room.participantsIds[0]);
   return (
     <Link
     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
@@ -222,13 +248,54 @@ export const PermissionDenied = () => {
 export const Conversations = () => {
   const context = useAppContext();
   const [selected, setSelected] = useState<string>('messages');
-  const activeRoom = Array.isArray(context.rooms)? context.rooms.map((room:Room) => {
-    room.participantsIds = room.participantsIds.filter((id:string) => id !== context.userData?.intraId);
-    return room;
-  }):[];
-  activeRoom.sort((a:Room, b:Room) => {
-    return a.updated_at > b.updated_at ? -1 : 1;});
+  const [aRooms, setARooms] = useState<Room[] | []>([]);
   const style = {borderBottom: "1px solid gray"};
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const rooms = await getRooms(context.userData.intraId);
+        context.setRooms(rooms);
+  
+        const activeRoom = Array.isArray(rooms)
+          ? rooms.map((room: Room) => {
+              room.participantsIds = room.participantsIds.filter(
+                (id: string) => id !== context.userData?.intraId
+              );
+              return room;
+            })
+          : [];
+  
+        const sortedRooms = activeRoom.sort((a: Room, b: Room) =>
+          a.updated_at > b.updated_at ? -1 : 1
+        );
+  
+        setARooms(sortedRooms);
+      } catch (error) {
+        console.error('Error fetching rooms:', error);
+      }
+    };
+  
+    const handlePrivateChatEvent = () => {
+      fetchRooms(); // Fetch rooms when a private chat event occurs
+    };
+  
+    if (context.socket && context.userData) {
+      fetchRooms(); // Initial fetch on component mount
+  
+      // Register the event listener
+      context.socket.on('privateChat', handlePrivateChatEvent);
+  
+      // Clean up the event listener when the component unmounts
+      return () => {
+        if (context.socket)
+        {
+          context.socket.off('privateChat', handlePrivateChatEvent);
+        }
+      };
+    }
+  }, [context.socket, context.userData, aRooms]); // Include aRooms as a dependency
+  
+  
   return (
     <div  className=" w-1/5 flex flex-col h-full p-4">
     {/* <SearchStart /> */}
@@ -257,7 +324,7 @@ export const Conversations = () => {
       {
         selected === 'messages' &&
         <div>
-        {activeRoom?.map((room:any, index:any) => (
+        {aRooms?.map((room:any, index:any) => (
           <ConversationCard key={index} room={room} />
           ))}
       </div>
@@ -304,8 +371,6 @@ const Chat = () => {
           credentials: "include",
         });
         const friends = await response2.json();
-        const rooms = await getRooms(userData.intraId);
-        context.setRooms(rooms);
         const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
         if (!context.socket) {
           const cookie = new Cookies();
@@ -336,13 +401,14 @@ const Chat = () => {
       {
 
         context.socket?.on('privateChat', (message:any) => {
+          const msg = message.content;
           trigger++;
-          fetchDataAndSetupSocket();
-          toast.success("you had a message");
+          console.log('this the message ', trigger);
+          toast.success(`you have a new message : ${msg}`);
         })
       }
     } 
-  }, [context.socket, trigger]);
+  }, [context.socket]);
   return (
     <div className=" min-h-screen w-screen  bg-[#12141A]">
     <Navbar isProfileOwner={false} />

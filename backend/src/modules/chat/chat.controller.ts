@@ -57,10 +57,10 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
-  @Get('channels/availabelChannels')
+  @Get('channels/:id/availabelChannels')
   @UseGuards(JwtAuthGuard)
-  async getAvailableChannels(@Res() res:any): Promise<Channel | undefined>{
-    const data = await this.chatService.getAllAvailableChannels();
+  async getAvailableChannels(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllAvailableChannels(id);
     const dataBeta = res.json(data);
     return dataBeta;
   }
