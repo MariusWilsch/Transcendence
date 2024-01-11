@@ -97,6 +97,7 @@ export const UserProfileImage = ({
           >
             {imagePreview && (
               <Image
+                unoptimized={true}
                 src={imagePreview}
                 alt="image Preview"
                 width={300}

@@ -193,14 +193,7 @@ export class UserController {
       const avatarFilename = avatar.filename;
       const avatarpath = avatar.path;
 
-      // const avatarUrl = `${req.protocol}://${req.get('host')}/Avataruploads/${avatar.filename}`;
-      const avatarUrl = `${req.protocol}://${req.get('host')}/${
-        avatar.filename
-      }`;
-      console.log('avatarUrl', avatarUrl);
-
-      // const avatarUrl = `${URL}:3001/${avatarFilename}`;
-      // const avatarUrl = `${URL}:3001/${avatarFilename}`;
+      const avatarUrl = `${URL}:3001/${avatarFilename}`;
 
       await this.userService.updateAvatar(userId, avatarUrl);
       return res.json({ success: true });

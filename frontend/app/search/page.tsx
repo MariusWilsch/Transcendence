@@ -45,6 +45,7 @@ export default function Search(params: any) {
       ) {
         return;
       }
+      console.log(searchTerm);
       try {
         const data = {
           searchTerm: searchTerm,

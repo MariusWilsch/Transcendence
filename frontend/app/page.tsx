@@ -26,7 +26,7 @@ export default function Home() {
       );
       var data: User = await response.json();
 
-      if (data !== null) {
+      if (data !== null && data !== undefined) {
         contex.setUser(data);
         if (data.intraId) {
           toast.success("Welcome back " + data.login + " !", {

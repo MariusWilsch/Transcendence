@@ -29,7 +29,6 @@ export class AuthController {
   ) {}
 
   @Get('user')
-  @UseGuards(JwtAuthGuard)
   async user(@Req() req: any, @Res() res: any) {
     try {
       const ccokie = req.cookies;

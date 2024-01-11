@@ -31,8 +31,8 @@ services:
       - ./backend/.env
     networks:
       - dev_network
-    volumes:
-      - ./backend/Avataruploads:/usr/transcendence/Avataruploads
+    # volumes:
+    #   - ./backend/Avataruploads:/usr/transcendence/Avataruploads
 
   frontend:
     image: frontend

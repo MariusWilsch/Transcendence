@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { useAppContext, AppProvider, User } from "../../AppContext";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
@@ -15,6 +15,8 @@ import { Sidebar } from "../../components/Sidebar";
 import { TwoFactorAuth } from "../../components/TwoFactorAuth";
 import { Friend } from "../../components/Friend";
 import { useParams, redirect, useRouter } from "next/navigation";
+import loading from "../../../public/loading.json";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 export default function Profile(params: any) {
   const {
@@ -246,10 +248,25 @@ export default function Profile(params: any) {
     IntraPic = userFromRoutId?.Avatar || IntraPic;
   }
 
-  return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
-      <Navbar isProfileOwner={isProfileOwner} />
+  // const lottieRef = useRef<LottieRefCurrentProps>(null);
+  // useEffect(() => {
+  //   if (lottieRef.current) {
+  //     lottieRef.current.setSpeed(0.05);
+  //     lottieRef.current.playSegments([1, 100], true);
+  //}
+  // }, []);
 
+  return (
+    <div className=" min-h-screen w-screen bg-[#12141A] relative">
+      <div className="z-0 absolute w-auto h-auto inset-0 mt-80">
+        <Lottie
+          animationData={loading}
+          className="w-auto h-auto "
+          // lottieRef={lottieRef as any}
+        />
+      </div>
+
+      <Navbar isProfileOwner={isProfileOwner} />
       <div className="flex ">
         {isSidebarVisible && (
           <div className="w-16 custom-height ">
@@ -263,7 +280,7 @@ export default function Profile(params: any) {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="z-10 relative flex-1 overflow-y-auto">
           <UserProfileImage
             status={userFromRoutId?.status}
             isProfileOwner={isProfileOwner}
