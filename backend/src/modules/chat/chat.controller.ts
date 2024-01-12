@@ -57,6 +57,19 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
+  @Get('channel/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    try{
+      const data = await this.chatService.getChannel(id);
+      const dataBeta = res.json(data);
+      return dataBeta;
+    }
+    catch(e)
+    {
+      return undefined;
+    }
+  }
   @Get('channels/:id/availabelChannels')
   @UseGuards(JwtAuthGuard)
   async getAvailableChannels(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
@@ -68,6 +81,13 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async getUserChannels(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
     const data = await this.chatService.getUserChannels(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  @Get('channels/messages/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannelMessages(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getChannelMessages(id);
     const dataBeta = res.json(data);
     return dataBeta;
   }

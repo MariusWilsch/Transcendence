@@ -4,8 +4,6 @@ import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'modules/prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
-import { channel } from 'diagnostics_channel';
-import { response } from 'express';
 
 
 @WebSocketGateway(3002,{
@@ -122,7 +120,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('JoinAChannel',{e});
     }
   }
-  @SubscribeMessage('channelChat')
+  @SubscribeMessage('channelBroadcast')
   async handleChannelChat(client:any, payload:{to:string,message:string, senderId:string}): Promise<void> {
     try{
       const members = await this.chatService.getAllChannelUsers(payload.to);
@@ -132,7 +130,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const recipientSocket = this.getAllSocketsByUserId(member.intraId);
         recipientSocket.map((socket:any) =>{
           if (socket.id !== client.id){
-            socket.emit('privateChat',message)
+            socket.emit('channelBroadcast',message)
           }
         }
         );

@@ -24,8 +24,16 @@ export interface Room {
   participantsIds: string[];
   participants: User[];
   messages: Message[];
-  createdAt:      Date
-  updated_at:    Date
+  createdAt: Date
+  updated_at: Date
+}
+export type ChannelMessage = {
+  id: number,
+  channelId: string,
+  sender: string,
+  recipient: string,
+  content: string,
+  createdAt: Date,
 }
 
 export type User = {

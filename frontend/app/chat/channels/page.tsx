@@ -8,7 +8,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { Socket, io } from "socket.io-client";
 import Cookies from "universal-cookie";
 import { motion } from "framer-motion";
-import { FaCircle } from "react-icons/fa";
 import { RiSearchLine } from "react-icons/ri";
 import { Popover, Button, TextInput } from '@mantine/core';
 import { GrGroup } from "react-icons/gr";
@@ -66,11 +65,9 @@ const JoinProtectedChannel=({selectedChannel}:any)=> {
 
 const ChannelsLobby = ()=>{
     const context = useAppContext();
-      const [socket, setsocket] = useState<Socket | null>(null);
       const [availabelChannels, setAvailableChannels] = useState<Channel[] | []>([]);
       const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages stat
 
-      let trigger =1;
       useEffect(() => {
         const checkJwtCookie = async () => {
           try {
@@ -114,15 +111,11 @@ const ChannelsLobby = ()=>{
             }
             else{
               toast.success(msg);
-              trigger++;
+              exploreChannels();
             }
           })
         }
-      }, [context.socket, trigger]);
-    
-      useEffect(() => {
-        context.setisSidebarVisible(window.innerWidth > 768);
-      }, []);
+      }, [context.socket,availabelChannels]);
     
       // const [users, setUsers] = useState<User[] | undefined>(undefined);
       const [inputValue, setInputValue] = useState("");
@@ -175,30 +168,12 @@ const ChannelsLobby = ()=>{
           }
           if (data) {
             setAvailableChannels(data);
-            console.log(data);
           }
         } catch (error: any) {
           const msg = "Error getting channels: " + error.message;
           toast.error(msg);
           console.error("Error getting channels:", error.message);
         }
-      };
-    
-      // useEffect(() => {
-      //   console.log( context.user);
-      //   userChannels();
-      // }, [context.user]);
-    
-      useEffect(() => {}, [inputValue]);
-      const createsocket = () => {
-        const handleClientsConnection = `${process.env.NEXT_PUBLIC_API_URL}:3002/handleClientsConnection`;
-    
-        const cookies = new Cookies();
-        const newSocket = io(handleClientsConnection, {
-          auth: { jwt: cookies.get("jwt") },
-        });
-    
-        setsocket(newSocket);
       };
     
       return (

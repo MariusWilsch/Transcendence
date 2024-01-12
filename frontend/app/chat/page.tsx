@@ -198,7 +198,7 @@ export const ConversationCard = ({room}:any) => {
       }
     }
     fetchUser();
-  },[])
+  },[room])
   if (loading ||  user===undefined)
   {
     return (
@@ -231,7 +231,7 @@ const SearchStart = () => {
 }
 export const ConversationNotSelected = () => {
   return (
-    <div className="flex  flex-1 flex-col items-center justify-center p-2 my-1  w-screen">
+    <div className="flex  flex-1 flex-col items-center justify-center p-3 my-1  w-screen ">
       <BiConversation className="h-40 w-40  " />
       <h1> no Conversation has been selected</h1>
     </div>
@@ -276,16 +276,14 @@ export const Conversations = () => {
     };
   
     const handlePrivateChatEvent = () => {
-      fetchRooms(); // Fetch rooms when a private chat event occurs
+      fetchRooms();
     };
   
     if (context.socket && context.userData) {
-      fetchRooms(); // Initial fetch on component mount
+      fetchRooms();
   
       // Register the event listener
       context.socket.on('privateChat', handlePrivateChatEvent);
-  
-      // Clean up the event listener when the component unmounts
       return () => {
         if (context.socket)
         {
@@ -340,14 +338,6 @@ export const Conversations = () => {
     </div>
   );
 };
-
-const ProfileInfo = () => {
-  return (
-    <div className="border w-1/5 xl:hidden">
-      <h1>Profile Info</h1>
-    </div>
-  );
-}
 const Chat = () => {
   const context = useAppContext();
   let trigger = 1;
@@ -410,7 +400,7 @@ const Chat = () => {
     } 
   }, [context.socket]);
   return (
-    <div className=" min-h-screen w-screen  bg-[#12141A]">
+    <div className=" min-h-screen w-screen  bg-[#12141A] ">
     <Navbar isProfileOwner={false} />
     <div className="flex ">
       {context.isSidebarVisible && (

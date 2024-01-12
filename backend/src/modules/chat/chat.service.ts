@@ -250,7 +250,7 @@ export class ChatService {
     });
   }
   async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}):Promise<void> {
-    const name = channelName + "#" + ownerId;
+    const name = channelName + ownerId;
     let password:string;
     const saltRounds = 10;
     const channel = await prisma.channel.findUnique({
@@ -333,6 +333,8 @@ export class ChatService {
     return await prisma.memberShip.findMany({
       where:{
         channelId,
+        isBanned:false,
+        isMuted:false,
       },
     })
   }
@@ -347,6 +349,7 @@ export class ChatService {
     })
   }
   async getAllAvailableChannels(intraId:string){
+    
     return await prisma.channel.findMany({
       where:{
         type:{
@@ -359,6 +362,35 @@ export class ChatService {
             intraId,
           }
         }
+      }
+    })
+  }
+  async getChannel(channelId:string):Promise<any>{
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelId,
+      },
+    });
+    if (!channel)
+    {
+      throw('no such channel');
+    }
+    return channel;
+  }
+  async getChannelMessages(channelId:string):Promise<any>
+  {
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelId,
+      },
+    });
+    if (!channel)
+    {
+      throw('no such channel');
+    }
+    return await prisma.channelMessage.findMany({
+      where:{
+        channelId,
       }
     })
   }

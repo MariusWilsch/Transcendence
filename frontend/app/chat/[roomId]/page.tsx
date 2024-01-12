@@ -9,6 +9,12 @@ import Cookies from 'universal-cookie';
 import { Navbar } from '@/app/components/Navbar';
 import { Sidebar } from '@/app/components/Sidebar';
 import { Loading } from '@/app/components/Loading';
+import { FaCircle } from 'react-icons/fa';
+import { PiGameControllerLight } from 'react-icons/pi';
+import { CiCirclePlus, CiSaveUp2 } from 'react-icons/ci';
+import { motion, AnimatePresence } from "framer-motion";
+import { FaBullseye } from 'react-icons/fa6';
+import { Friend } from '@/app/components/Friend';
 
 interface PageProps {
   params: {
@@ -16,6 +22,99 @@ interface PageProps {
   }
 }
 
+const Mytoast=(message:string)=> {
+  return (
+    toast.custom((t) => (
+      <div
+      className={`${
+        t.visible ? 'animate-enter' : 'animate-leave'
+      } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+    <div className="flex-1 w-0 p-4">
+      <div className="flex items-start">
+        <div className="flex-shrink-0 pt-0.5">
+          <img
+            className="h-10 w-10 rounded-full"
+            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixqx=6GHAjsWpt9&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
+            alt=""
+            />
+        </div>
+        <div className="ml-3 flex-1">
+          <p className="text-sm font-medium text-gray-900">
+            zaki essad
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            {message}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div className="flex border-l border-gray-200">
+      <button
+        onClick={() => toast.dismiss(t.id)}
+        className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+        Close
+      </button>
+    </div>
+  </div>
+))
+)
+}
+
+const UserProfileImage = ({
+  status,
+  isProfileOwner,
+  src,
+  intraId,
+}: {
+  status: string | undefined;
+  isProfileOwner: boolean;
+  src: string;
+  intraId: string | undefined;
+}) => {
+  return (
+        <div className="flex flex-col items-center justify-center p-6 "
+        >
+          <div
+            className=" flex justify-center items-center border-white border-y-4 border-x-4"
+            style={{ position: "relative", display: "inline-block" }}
+          >
+              <Image
+                src={src}
+                alt="image Preview"
+                width={120}
+                height={120}
+                className="rounded-full border-2 border-black "
+                onError={(e: any) => {
+                  e.target.onerror = null;
+                }}
+              />
+          </div>
+        </div>
+  );
+};
+
+const ProfileInfo = ({recipient}:any) => {
+  return (
+    <div className="border w-1/5 hidden xl:block overflow-hidden">
+      <UserProfileImage
+       status={"ONLINE"}
+       isProfileOwner={false}
+       src={recipient.Avatar}
+       intraId={recipient.intraId}
+      />
+      <div className=' flex justify-center items-center text-white  border'>
+        <h1 className='justify-center items-center' >{recipient.login}</h1>
+      </div>
+      <Friend
+       isProfileOwner={false}
+       userId={recipient?.intraId}
+       friendId={""}
+      />
+    </div>
+  );
+}
 // const SingleMessageReceived = ({ message }: any, recipient: User) => {
 //   console.log(recipient.Avatar);
 //   return (
@@ -27,18 +126,18 @@ interface PageProps {
 //     </div>
 //   );
 // }
-const SingleMessageReceived = (props: any) => {
+export const SingleMessageReceived = (props: any) => {
   const { message, recipient } = props;
   return (
     <div className="flex items-end p-2 my-1">
       <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
         <div><span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{message}</span></div>
       </div>
-      <Image width={24} height={24} src={recipient.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
+      <Image width={24} height={24} src={recipient?.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
     </div>
   );
 };
-const SingleMessageSent = ({ message }: any) => {
+export const SingleMessageSent = ({ message }: any) => {
   const context = useAppContext();
   return (
     <div className="flex items-end justify-end p-2 my-1">
@@ -61,6 +160,31 @@ async function getMessages(userId: string): Promise<any> {
 
   return room;
 }
+
+export async function getCurrentUser():Promise<any> {
+  const res = await fetch("http://localhost:3001/auth/user", {
+    method: "GET",
+    credentials: "include",
+  });
+  const user = res.json();
+  return user;
+}
+export async function getUser(intraId:string):Promise<any> {
+  const res = await fetch(`http://localhost:3001/users/${intraId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const user = res.json();
+  return user;
+}
+export async function getUserFriends(intraId:string):Promise<any> {
+  const res = await fetch(`http://localhost:3001/users/${intraId}/friends`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const friends = res.json();
+  return friends;
+}
 // async function getRecipientData(userId: string): Promise<any> {
 //   const res = await fetch(`http://localhost:3001/users/${userId}`);
 //   const user = await res.json();
@@ -76,11 +200,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   let trigger = 1;
   const fetchDataAndSetupSocket = async () => {
     try {
-      const response = await fetch("http://localhost:3001/auth/user", {
-        method: "GET",
-        credentials: "include",
-      });
-      const userData: User | undefined = await response.json();
+      const userData: User | undefined = await getCurrentUser();
       if (userData === undefined || !params.roomId.includes(userData.intraId)) {
         setPermission(false);
         setLoading(false);
@@ -88,11 +208,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       }
       context.setUserData(userData);
       const recp = params.roomId.replace(userData.intraId, '');
-      const response3 = await fetch(`http://localhost:3001/users/${recp}`, {
-        method: "GET",
-        credentials: "include",
-      });
-      const user: User | undefined = await response3.json();
+      const user: User | undefined = await getUser(recp);
       const roomid = user !== undefined ? parseInt(user.intraId) > parseInt(userData.intraId) ? user.intraId + userData.intraId : userData.intraId + user.intraId : 1;
       if (user === undefined || params.roomId !== roomid) {
         setPermission(false);
@@ -101,11 +217,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       }
       setRecipient(user);
       context.setRecipientLogin(recp);
-      const response2 = await fetch(`http://localhost:3001/users/${userData.intraId}/friends`, {
-        method: "GET",
-        credentials: "include",
-      });
-      const friends = await response2.json();
+      const friends = await getUserFriends(userData.intraId);
       context.setFriends(friends);
       const rooms = await getRooms(userData.intraId);
       context.setRooms(rooms);
@@ -131,11 +243,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     if (context.socket) {
       const fetchData = async () => {
         try {
-          const response3 = await fetch(`http://localhost:3001/users/${context.recipientUserId}`, {
-            method: "GET",
-            credentials: "include",
-          });
-          const user: User | undefined = await response3.json();
+          const user: User | undefined = await getUser(context.recipientUserId);
           const roomid = user !== undefined ? parseInt(user.intraId) > parseInt(context.userData.intraId) ? user.intraId + context.userData.intraId : context.userData.intraId + user.intraId : 1;
           if (user === undefined || params.roomId !== roomid) {
             setPermission(false);
@@ -167,7 +275,10 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         handlePrivateChat(message);
         fetchDataAndSetupSocket();
         trigger++;
-        toast.success("you had a message");
+        if ( message.senderId !== context.userData.intraId)
+        {
+          Mytoast(message.content);
+        }
       });
     }
     console.log("it renders n-times");
@@ -253,7 +364,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white">
+                <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                   {desplayedMessages?.map((msg: any, index) => (
                     (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                     (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
@@ -286,6 +397,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
               </div>
             }
             {!permission && <PermissionDenied />}
+            <ProfileInfo recipient={recipient} />
           </div>
         </div>
       </div>
@@ -295,3 +407,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
 }
 
 export default PrivateRoom;
+
+
+
+
+

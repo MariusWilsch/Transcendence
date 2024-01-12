@@ -52,3 +52,13 @@ export type User = {
     mutedTime: Date;
     joined_at: Date;
   }
+
+  export type ChannelMessage = {
+    id: number,
+    channelId: string,
+    sender: string,
+    recipient: string,
+    content: string,
+    createdAt: Date,
+  }
+  
