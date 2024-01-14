@@ -1,5 +1,5 @@
 // chat.controller.ts
-import { Controller, Post, Body, Get, Res,Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res,Param, UseGuards, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Room , User, Message, Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
@@ -8,6 +8,17 @@ import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  async searchUsers(@Query('q') query: string) {
+    return await this.chatService.searchUsers(query);
+  }
+  @Get('chan/:id/Search')
+  @UseGuards(JwtAuthGuard)
+  async searchMembers(@Param(':id') id:string,@Query('q') query: string) {
+    return await this.chatService.searchMembers(query, id);
+  }
+  
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAllRooms(@Res() res:any): Promise<Room | undefined>{
@@ -91,12 +102,14 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
-  // @Get(':id/message')
-  // async getMessages(@Param('id') id: string, @Res() res:any) : Promise<void>{
-  //   const data = await this.chatService.getMessagesByUser(id);
-  //   res.json(data) ??
-  //   return data;
-  //  }
+  @Get('chanAvatar/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChanAvatar(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getChanAvatar(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  
   @Post('private-message')
   @UseGuards(JwtAuthGuard)
   async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {

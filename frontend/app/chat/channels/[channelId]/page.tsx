@@ -1,6 +1,6 @@
 'use client'
 import { FC, useEffect, useState } from "react"
-import { Channel, ChannelMessage, User, useAppContext } from "@/app/AppContext"
+import { Channel, ChannelMessage, MemberShip, User, useAppContext } from "@/app/AppContext"
 import Cookies from "universal-cookie"
 import { io } from "socket.io-client"
 import { SingleMessageReceived, SingleMessageSent, getCurrentUser, getUser } from "../../[roomId]/page"
@@ -9,11 +9,113 @@ import toast, { Toaster } from "react-hot-toast"
 import { Navbar } from "@/app/components/Navbar"
 import { Sidebar } from "@/app/components/Sidebar"
 import { Conversations } from "../../page"
+import { IoMdArrowBack } from "react-icons/io"
+import { Avatar, AvatarGroup } from "@mantine/core"
+import { FaUserEdit } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
+import Image from "next/image"
+import { useDisclosure } from '@mantine/hooks';
+import { Modal, Button } from '@mantine/core';
+import { Select } from '@mantine/core';
+import Search from "@/app/notif/page"
 
 interface PageProps {
   params: {
     channelId: string
   }
+}
+
+async function searchMember(query:string, channelId:string) {
+  const response = await fetch(`http://localhost:3001/chat/chan/${channelId}/Search?q=${query}`,
+  {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  
+  });
+
+  const data = await response.json();
+  return data;
+}
+const EditMemberShip = ({ member }: any) => {
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const handleSubmit = () => {
+    console.log('data submited');
+  }
+
+
+  return (
+    <>
+      <Modal opened={opened} onClose={close} title="Authentication" centered>
+        <div>
+          <div className="member-avatar">
+
+          </div>
+          <div className="login">
+
+          </div>
+          <div className="change-privilege">
+            <Select
+              label="Priviliges"
+              placeholder="Change Member Privilige"
+              data={['Moderator', 'admin']}
+            />
+            <div className="banne"></div>
+          </div>
+          <div className="muted">
+            <Select
+              label="Mute User for"
+              placeholder="Pick value"
+              data={['1h', '6h', '12h', 'for ever']}
+            />
+          </div>
+          <Button onClick={()=>{
+            close();
+            handleSubmit();
+          }}> submit </Button>
+        </div>
+      </Modal>
+      <FaUserEdit className="text-white w-6 h-6 transform transition-transform hover:scale-150" onClick={open} />
+    </>
+  );
+}
+
+const MemberCard = ({ member }: any) => {
+  const context = useAppContext();
+  return (
+    <div className="flex flex-row overflow-x-auto justify-center items-center">
+      <div className="flex flex-row items-center text-xs p-3  my-1 hover:bg-gray-800 rounded ">
+          <Image
+            width={50}
+            height={50}
+            src={member?.Avatar}
+            alt="My profile"
+            className="w-10 sm:w-10 h-10 sm:h-10 rounded-full"
+          />
+          <span className="p-2 text-white">{member?.login}</span>
+
+        <div>
+        {(member.isOwner || member.isModerator)
+          ? <EditMemberShip member={member} />
+          : <CgProfile  className="text-white w-6 h-6 transform transition-transform hover:scale-150" />
+        }
+        </div>
+      </div>
+
+    </div>
+  );
+}
+async function getChannelFirstMembers(channelId: string): Promise<MemberShip[] | []> {
+  const res = await fetch(`http://localhost:3001/chat/chanAvatar/${channelId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const members = res.json();
+
+  return members;
 }
 async function getChannel(channelId: string): Promise<Channel | undefined> {
   const res = await fetch(`http://localhost:3001/chat/channel/${channelId}`, {
@@ -35,16 +137,105 @@ async function getChannelMessages(channelId: string): Promise<ChannelMessage[] |
 
   return messages;
 }
+
+const MemberCards = ({ members }: any) => {
+  return (
+    <div>
+      {
+        members?.map((member: any, index: number) => (
+          <MemberCard key={index} member={member} />
+        )
+        )
+      }
+    </div>
+  )
+}
+const ChannelAvatar = ({ firstMembers }: any) => {
+  return (
+    <AvatarGroup className="justify-center items-center ">
+      {firstMembers &&
+        firstMembers.map((member: MemberShip, index: number) => (
+          <Avatar key={index} src={member.Avatar} ></Avatar>
+        ))
+      }
+      <Avatar>+N</Avatar>
+    </AvatarGroup>
+  )
+}
+const ChannelDashBoard = ({ channelId }: any) => {
+  const [query, setQuery] = useState('');
+  const [firstMembers, setFirstMembers] = useState<MemberShip[] | []>();
+  const [members, setmembers] = useState<MemberShip[] | []>();
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      const members = await getChannelFirstMembers(channelId);
+      setFirstMembers(members);
+    }
+    fetchAvatar();
+  }, [])
+  useEffect(() => {
+    const search = async () => {
+      if (query){
+
+        const members = await searchMember(query, channelId);
+        setmembers(members);
+      } 
+    }
+    search();
+  }, [query])
+  const context = useAppContext();
+  return (
+    <div className="flex flex-col border w-full  lg:w-1/5 overflow-hidden ">
+      <IoMdArrowBack className="text-white w-8 h-8 hover:cursor-pointer hover:w-10 hover:h-10  justify-center items-center xl:hidden" onClick={() => context.setComponent("conversation")} />
+      <div className="p-4 mt-20">
+        {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}
+      </div>
+      <div className='justify-center items-center text-white  border p-4'>
+        <h1 className="text-center">{channelId}</h1>
+      </div>
+      <div className="info-card text-white p-4 m-5 border ">
+        <h1 className="text-start"> Members :</h1>
+      </div>
+      <div className="info-search members text-white border p-4 m-5 w-fit">
+        <label className=" flex flex-grow ">
+          <input
+            id="searchField"
+            name={`inputValue${Math.random()}`}
+            type="text"
+            value={query}
+            placeholder="Search ..."
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+            className="  bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
+          />
+        </label>
+      </div>
+      <div className="desplay-members">
+        {members && <MemberCards members={members} />}
+      </div>
+    </div>
+  );
+}
+
 const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [channel, setChannel] = useState<Channel | undefined>();
   const [messages, setMessages] = useState<ChannelMessage[] | []>([]); // Provide a type for the messages state
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const context = useAppContext();
+  const [firstMembers, setFirstMembers] = useState<MemberShip[] | []>();
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      const members = await getChannelFirstMembers(params.channelId);
+      setFirstMembers(members);
+    }
+    fetchAvatar();
+  }, [])
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (context.userData) {
+        if (!context.userData) {
           const userData: User | undefined = await getCurrentUser();
           if (userData === undefined) {
             throw ('you need to login first');
@@ -82,8 +273,8 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   }, [])
   const broadCastMessage = () => {
     if (context.socket && channel && messageText.trimStart().trimEnd()) {
-
-      context.socket.emit('channelBroadcast', { to: channel.name, message: messageText, senderId: context.userData });
+      console.log("salam 3alikom")
+      context.socket.emit('channelBroadcast', { to: channel.name, message: messageText, senderId: context.userData.intraId });
       setMessages((prevMessages: ChannelMessage[]) => {
         const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
 
@@ -138,19 +329,12 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
               <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
                 <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
                   <div className="relative flex items-center space-x-4">
-                    <div className="relative">
-                      {/* <span style={{ display: recipient?.status == "ONLINE" ? "" : "none" }} className="absolute text-green-500 right-0 bottom-0">
-              <svg width="20" height="20">
-                <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
-              </svg>
-            </span> */}
-                      {/* {recipient !== undefined && <Image width={144} height={144} src={recipient.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />} */}
-                    </div>
+                    <div className="relative p-4">
+                      {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}                    </div>
                     <div className="flex flex-col leading-tight">
                       <div className="text-2xl mt-1 flex items-center">
                         <span className="text-white mr-3">{channel?.name}</span>
                       </div>
-                      {/* <span style={{ display: recipient?.status == "ONLINE" ? "" : "none" }} className="text-lg text-white">Active</span> */}
                     </div>
                   </div>
                 </div>
@@ -185,6 +369,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                   </div>
                 </div>
               </div>
+              <ChannelDashBoard channelId={params.channelId} />
             </div>
           </div>
         </div>

@@ -74,17 +74,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.connectedClients.get(userId) || [];
   }
   @SubscribeMessage('createPrivateRoom')
-  async createPrivRoom(client :any, payload:{user1:string, user2:string}): Promise<void>{
-    console.log(`this is he first user ${payload.user1}`);
-    console.log(`this is he second user ${payload.user2}`);
-    await this.chatService.createPrivateRoom(payload.user1, payload.user2);
+  async createPrivRoom(client :any, payload:{user1:string, user2:string, clientRoomid:string}): Promise<void>{
+    try{
+
+      await this.chatService.createPrivateRoom(payload.user1, payload.user2, payload.clientRoomid);
+    }
+    catch(e){
+      client.emit('createPrivateRoom', {e})
+    }
   }
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
     const recipientSocket = this.getAllSocketsByUserId(payload.to);
     const senderSocket = this.getAllSocketsByUserId(payload.senderId);
-    // const recip = await this.chatService.getUserById(payload.to);
-    // console.log(recip):
     if (recipientSocket) {
 
       const message = await this.chatService.createMessage(payload.senderId, payload.to, payload.message);
@@ -127,16 +129,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const message = await this.chatService.createChannelMessage(payload.to, payload.message, payload.senderId);
       console.log('message broadcasted to channel');
       members.map((member)=>{
-        const recipientSocket = this.getAllSocketsByUserId(member.intraId);
-        recipientSocket.map((socket:any) =>{
-          if (socket.id !== client.id){
-            socket.emit('channelBroadcast',message)
+        if (!member.isBanned && !member.isMuted)
+        {
+          const recipientSocket = this.getAllSocketsByUserId(member.intraId);
+          recipientSocket.map((socket:any) =>{
+            if (socket.id !== client.id){
+              socket.emit('channelBroadcast',message)
+            }
           }
+          );
         }
-        );
-      })
+        })
     }
     catch(e){
+      console.log(e);
     }
   }
 }

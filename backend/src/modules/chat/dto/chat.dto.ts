@@ -41,16 +41,18 @@ export type User = {
       password: string;
       description: string;
   }
-  export type memberShip={
+  export type MemberShip={
     memberId: string;
-    intraId: string;
-    channelId: string;
-    isOwner: boolean;
-    isModerator: boolean;
-    isBanned: boolean;
-    isMuted: boolean;
-    mutedTime: Date;
-    joined_at: Date;
+      intraId: string;
+      channelId: string;
+      Avatar: string;
+      login: string;
+      isOwner: boolean;
+      isModerator: boolean;
+      isBanned: boolean;
+      isMuted: boolean;
+      mutedTime: Date;
+      joined_at: Date;
   }
 
   export type ChannelMessage = {

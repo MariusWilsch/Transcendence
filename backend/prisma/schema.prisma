@@ -46,6 +46,8 @@ model MemberShip {
   memberId        String        @unique @id
   intraId         String
   channelId       String
+  Avatar          String        @default("")
+  login           String        @default("")
   isOwner        Boolean @default(false)
   isModerator    Boolean @default(false)
   isBanned       Boolean @default(false)

@@ -2,13 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { Public } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'modules/auth/constants';
-import { channel } from 'diagnostics_channel';
-import { equals } from 'class-validator';
 
 enum ChannelType {
   Public = 1,
@@ -86,8 +83,6 @@ export class ChatService {
       });
 
       const user = payload.userWithoutDate;
-
-      // console.log('payload: ', payload);
       return user;
     } catch (error) {
       console.error('JWT Verification Error:', error);
@@ -95,10 +90,16 @@ export class ChatService {
     }
   }
 
-  async createPrivateRoom(user1: string, user2: string): Promise<void> {
-
+  async createPrivateRoom(user1: string, user2: string, clientRoomid:string): Promise<void> {
+    if (user1 === user2)
+    {
+      return;
+    }
     const romeName  = parseInt(user1) > parseInt(user2) ? user1 + user2 :user2 + user1;
-
+    if (romeName !== clientRoomid)
+    {
+      return ;
+    }
     const room = await prisma.privateRoom.findUnique({
       where:{
         name:romeName,
@@ -240,12 +241,24 @@ export class ChatService {
   }
   async createMember(intraId:string, channelId:string, isOwner:boolean):Promise<void> {
     const memberId = this.generateRandomId();
+    const user = await prisma.user.findUnique({
+      where:{
+        intraId,
+      }
+    })
+    if (!user)
+    {
+      throw ('no such user');
+    }
+
     await prisma.memberShip.create({
       data:{
         memberId:this.generateRandomId(),
         intraId,
         channelId,
         isOwner:isOwner,
+        Avatar:user.Avatar,
+        login:user.login,
       },
     });
   }
@@ -339,6 +352,7 @@ export class ChatService {
     })
   }
   async createChannelMessage(channelId:string, message:string, senderId:string){
+    console.log(channelId,message, senderId );
     return await prisma.channelMessage.create({
       data:{
         channelId,
@@ -346,6 +360,7 @@ export class ChatService {
         recipient:"",
         content:message,
       },
+
     })
   }
   async getAllAvailableChannels(intraId:string){
@@ -394,4 +409,34 @@ export class ChatService {
       }
     })
   }
+
+  async searchUsers(query: string) {
+    return await prisma.user.findMany({
+      where: {
+        login: {
+          contains: query,
+        },
+      },
+    });
+  }
+  async getChanAvatar(channelId:string){
+    return await prisma.memberShip.findMany({
+      take:3,
+      where:{
+        channelId,
+      }
+    })
+  }
+  async searchMembers(query: string, channelId:string) {
+    return await prisma.memberShip.findMany({
+      where: {
+        channelId,
+        isBanned:false,
+        login: {
+          contains: query,
+        },
+      },
+    });
+  }
+
 }

@@ -57,6 +57,20 @@ export type Channel = {
   description: string;
 }
 
+export type MemberShip={
+  memberId: string;
+    intraId: string;
+    channelId: string;
+    Avatar: string;
+    login: string;
+    isOwner: boolean;
+    isModerator: boolean;
+    isBanned: boolean;
+    isMuted: boolean;
+    mutedTime: Date;
+    joined_at: Date;
+}
+
 export type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
@@ -86,6 +100,10 @@ export type AppContextProps = {
   setNotifSocket: (notifSocket: Socket | null) => void;
   notif: boolean;
   setnotif: (notif: boolean) => void;
+  setComponent : (component:string)=>void;
+  component:string;
+  setResponsive : (responsive :boolean)=>void;
+  responsive : boolean;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -108,6 +126,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
   const [notifSocket, setNotifSocket] = useState<Socket | null>(null);
   const [notif, setnotif] = useState<boolean>(false);
+  const [component, setComponent] = useState('conversation');//for resposive purposes
+  const [responsive, setResponsive] = useState(true);
 
 
   const toggleDivVisibility = () => {
@@ -118,6 +138,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setisSidebarVisible((prev) => !prev);
   };
   const contextValue: AppContextProps = {
+    setComponent,
+    component,
+    setResponsive,
+    responsive,
     setUsersData,
     usersData,
     rooms,
