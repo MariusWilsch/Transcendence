@@ -1,10 +1,11 @@
 'use client';
-import GameCanvas from './game/GameCanvas';
+
+import Test from './test';
 
 export default function Home() {
 	return (
 		<main>
-			<GameCanvas />
+			<Test />
 		</main>
 	);
 }

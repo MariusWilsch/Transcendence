@@ -6,8 +6,22 @@ html,
 body {
 	margin: 0;
 	padding: 0;
-	overflow: hidden
-	@apply h-screen w-screen bg-black;
+	overflow: hidden @apply h-screen w-screen bg-black;
 	@apply text-white;
 	@apply text-center;
+}
+
+.boxTransform {
+	@apply transform hover:scale-105 hover:bg-base-200 transition-all duration-200 ease-in-out;
+}
+
+.join-item:last-child {
+	@apply border-0;
+}
+
+@layer {
+	:root {
+		font-size: 1vw;
+		/* font-family: Sand; */
+	}
 }

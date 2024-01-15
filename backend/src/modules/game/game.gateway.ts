@@ -70,6 +70,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	beginGameLoop(roomID: string) {
+		//! or https://www.thecodeship.com/web-development/alternative-to-javascript-evil-setinterval/
+		//! try out https://github.com/timetocode/node-game-loop
+		//! or https://www.npmjs.com/package/node-gameloop?activeTab=code or https://github.com/norlin/node-gameloop/tree/master/lib
 		let lastTime = performance.now();
 
 		console.log('Game loop started');
@@ -106,13 +109,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.gameService.setIntervalID(roomID, intervalId);
 	}
 
+	//! Optimization ideas
+	// Only send dimensions once (on game start)
+	// Only send score when it changes
+	// Don't send ball & paddle velocities
+	// console.log('Sending game state');
+	// console.log('Server-side:');
 	sendGameState(roomID: string, gameState: GameState) {
-		//! Optimization ideas
-		// Only send dimensions once (on game start)
-		// Only send score when it changes
-		// Don't send ball & paddle velocities
-		// console.log('Sending game state');
-
+		// console.log
 		this.Server.to(roomID).emit('gameState', gameState);
 	}
 

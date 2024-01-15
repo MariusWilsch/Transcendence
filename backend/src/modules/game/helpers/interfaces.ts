@@ -37,6 +37,7 @@ export interface GameState {
 
 // Structure to keep track of player associations within a game session
 export interface GameSession {
+	ballVelocity: Vector;
 	players: Socket[];
 	gameState: GameState;
 	intervalID: NodeJS.Timeout | null;

@@ -21,45 +21,8 @@ export class GameService {
 	private gameSessions: Map<string, GameSession> = new Map();
 	//! The two variables only work if they stay the same across all game sessions
 	private paddleSpeed: number;
-	private ballVelocity: { x: number; y: number };
-
-	private initGameState() {
-		const {
-			paddleWidth,
-			paddleHeight,
-			paddleSpeedFactor,
-			ballRadius,
-			ballSpeedFactor,
-			canvasWidth,
-			canvasHeight,
-		} = GAME_CONFIG;
-		this.paddleSpeed = canvasHeight * paddleSpeedFactor;
-		this.ballVelocity = {
-			x: canvasWidth * ballSpeedFactor,
-			y: canvasHeight * ballSpeedFactor,
-		};
-		const paddleY = canvasHeight / 2 - paddleHeight / 2;
-		return {
-			paddles: {
-				player1: {
-					position: createVec2(0, paddleY),
-					size: createSize(paddleWidth, paddleHeight),
-				},
-				player2: {
-					position: createVec2(canvasWidth - paddleWidth, paddleY),
-					size: createSize(paddleWidth, paddleHeight),
-				},
-			},
-			ball: {
-				position: createVec2(canvasWidth / 2, canvasHeight / 2),
-				radius: ballRadius,
-			},
-			score: {
-				player1: 0,
-				player2: 0,
-			},
-		};
-	}
+	private collisionOccurred = false;
+	private justScored = false;
 
 	//* Business logic
 
@@ -87,6 +50,15 @@ export class GameService {
 
 		// Create a new game session and store it in the Map
 		this.gameSessions.set(roomID, {
+			ballVelocity: createVec2(
+				GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor,
+				0
+				// GAME_CONFIG.canvasHeight * GAME_CONFIG.ballSpeedFactor
+			),
+			// ballVelocity: createVec2(
+			// 	GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor,
+			// 	GAME_CONFIG.canvasHeight * GAME_CONFIG.ballSpeedFactor
+			// ),
 			players: [player1, player2],
 			gameState: this.initGameState(),
 			intervalID: null,
@@ -111,11 +83,11 @@ export class GameService {
 	public updateGameState(roomID: string, deltaTime: number) {
 		const gameSession = this.gameSessions.get(roomID);
 
-		this.updateBall(gameSession.gameState, deltaTime);
+		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		this.updatePaddles(gameSession, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
 		this.checkPaddleCollision(
-			gameSession.gameState,
+			gameSession,
 			this.choosePaddle(gameSession.gameState.ball)
 		);
 	}
@@ -139,6 +111,39 @@ export class GameService {
 
 	//* Private
 
+	private initGameState() {
+		const {
+			paddleWidth,
+			paddleHeight,
+			paddleSpeedFactor,
+			ballRadius,
+			canvasWidth,
+			canvasHeight,
+		} = GAME_CONFIG;
+		this.paddleSpeed = canvasHeight * paddleSpeedFactor;
+		const paddleY = canvasHeight / 2 - paddleHeight / 2;
+		return {
+			paddles: {
+				player1: {
+					position: createVec2(0, paddleY),
+					size: createSize(paddleWidth, paddleHeight),
+				},
+				player2: {
+					position: createVec2(canvasWidth - paddleWidth, paddleY),
+					size: createSize(paddleWidth, paddleHeight),
+				},
+			},
+			ball: {
+				position: createVec2(canvasWidth / 2, canvasHeight / 2),
+				radius: ballRadius,
+			},
+			score: {
+				player1: 0,
+				player2: 0,
+			},
+		};
+	}
+
 	/**
 	 * The function updates the positions of the paddles based on player input and prevents them from
 	 * overlapping.
@@ -156,7 +161,6 @@ export class GameService {
 		let didPaddleMove = false;
 
 		if (input.player1.up) {
-			//* yCordSpeed can be taken from the game config and removed from the game state
 			paddles.player1.position.y -= this.paddleSpeed * deltaTime;
 			didPaddleMove = true;
 		}
@@ -210,12 +214,15 @@ export class GameService {
 	 * @param {Ball}  - - `position`: The current position of the ball, represented as an object with `x`
 	 * and `y` coordinates.
 	 */
-	private checkTopBottomWallCollision({ position, radius }: Ball) {
+	private checkTopBottomWallCollision(
+		{ position, radius }: Ball,
+		ballVelocity: Vector
+	) {
 		if (position.y - radius <= 0) {
-			this.ballVelocity.y *= -1;
+			ballVelocity.y *= -1;
 			position.y = radius;
 		} else if (position.y + radius >= GAME_CONFIG.canvasHeight) {
-			this.ballVelocity.y *= -1;
+			ballVelocity.y *= -1;
 			position.y = GAME_CONFIG.canvasHeight - radius;
 		}
 	}
@@ -230,7 +237,21 @@ export class GameService {
 	 * from the `gameState.paddles` object. If `playerID` is not provided, the function will not be able to
 	 * check
 	 */ //! The ball still sticks to the paddle sometimes
-	private checkPaddleCollision(gameState: GameState, playerID: string) {
+	private checkPaddleCollision(
+		{ gameState, ballVelocity }: GameSession,
+		playerID: string
+	) {
+		if (this.collisionOccurred) {
+			// Skip collision detection in this frame
+			this.collisionOccurred = false;
+			if (this.justScored) {
+				this.justScored = false;
+				ballVelocity.x = GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor;
+				return;
+			}
+			return;
+		}
+
 		const ball = gameState.ball;
 		const paddle = gameState.paddles[playerID];
 
@@ -253,30 +274,55 @@ export class GameService {
 			ballBottom > paddleTop &&
 			ballTop < paddleBottom
 		) {
-			// Collision detected
-			// Reverse the ball's x velocity
-			this.ballVelocity.x *= -1;
-			// ball.velocity.x *= -1;
+			console.log('Collision detected! at', ball.position.x);
+
+			const paddleCenterY = paddle.position.y + paddle.size.height / 2;
+			const collisionPoint =
+				(ball.position.y - paddleCenterY) / (paddle.size.height / 2);
+			const angle = collisionPoint * (Math.PI / 6);
+			const magnitude = Math.sqrt(
+				ballVelocity.x * ballVelocity.x + ballVelocity.y * ballVelocity.y
+			);
+			// Adjust the ball's Y-velocity based on the bounce angle
+			if (playerID === 'player1') {
+				ballVelocity.x = magnitude * Math.cos(angle);
+			} else {
+				ballVelocity.x = -magnitude * Math.cos(angle);
+			}
+			ballVelocity.y = magnitude * Math.sin(angle);
+			// Collision detected // Reverse the ball's x velocity
+			// Set the collisionOccurred flag to true
+			this.collisionOccurred = true;
 		}
 	}
 
-	private updateBall({ ball, score }: GameState, deltaTime: number): void {
-		ball.position.x += this.ballVelocity.x * deltaTime;
-		ball.position.y += this.ballVelocity.y * deltaTime;
+	private updateBall(
+		{ ball, score }: GameState,
+		ballVelocity: Vector,
+		deltaTime: number
+	): void {
+		// console.log('Ball state before sending', ball);
+		// console.log("Ball's velocity before sending", ballVelocity);
+
+		ball.position.x += ballVelocity.x * deltaTime;
+
+		ball.position.y += ballVelocity.y * deltaTime;
 
 		// If ball hits the top or bottom wall, reverse the y velocity
-		this.checkTopBottomWallCollision(ball);
+		this.checkTopBottomWallCollision(ball, ballVelocity);
 
 		// If ball hits the left
 		if (ball.position.x - ball.radius <= 0) {
+			this.justScored = true;
 			score.player1++;
-			this.resetBall(ball);
+			this.resetBall(ball, ballVelocity);
 			return;
 		}
 		// If ball hits the right wall
 		if (ball.position.x + ball.radius >= GAME_CONFIG.canvasWidth) {
+			this.justScored = true;
 			score.player2++;
-			this.resetBall(ball);
+			this.resetBall(ball, ballVelocity);
 			return;
 		}
 	}
@@ -369,9 +415,12 @@ export class GameService {
 	private isBallCloseToPaddle({ position }: Ball): boolean {
 		const { canvasWidth, proximityThreshold } = GAME_CONFIG;
 		// Return early if the ball is not close to the paddle
-		if (position.x < canvasWidth - proximityThreshold) return true;
-		if (position.x > proximityThreshold) return true;
-		return false;
+		if (
+			position.x < canvasWidth - proximityThreshold &&
+			position.x > proximityThreshold
+		)
+			return false;
+		return true;
 	}
 
 	/**
@@ -379,8 +428,12 @@ export class GameService {
 	 * @param {Ball} ball - The parameter "ball" is of type "Ball". It represents an instance of the Ball
 	 * class, which has properties such as position and size.
 	 */
-	private resetBall(ball: Ball) {
+	private resetBall(ball: Ball, ballVelocity: Vector) {
 		ball.position.x = GAME_CONFIG.canvasWidth / 2;
 		ball.position.y = GAME_CONFIG.canvasHeight / 2;
+
+		// Reverse the ball's x velocity
+		ballVelocity.x = GAME_CONFIG.canvasWidth * 0.6;
+		ballVelocity.y = 0;
 	}
 }
