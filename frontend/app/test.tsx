@@ -1,36 +1,5 @@
-import GameCanvas from './game/GameCanvas';
-import Cards from './components/Cards';
-import Steps from './components/Steps';
-import { Stats } from './game/GameCanvas';
-import { createContext, useState, useContext } from 'react';
-
-const ScoreContext = createContext({
-	//! Stopped here
-	player1Score: 0,
-	player2Score: 0,
-	setPlayer1Score: (score: number) => {},
-	setPlayer2Score: (score: number) => {},
-});
-
-export const useScore = () => useContext(ScoreContext);
-
-export const ScoreProvider = ({ children }: any) => {
-	const [player1Score, setPlayer1Score] = useState(0);
-	const [player2Score, setPlayer2Score] = useState(0);
-
-	return (
-		<ScoreContext.Provider
-			value={{
-				player1Score,
-				player2Score,
-				setPlayer1Score,
-				setPlayer2Score,
-			}}
-		>
-			{children}
-		</ScoreContext.Provider>
-	);
-};
+import Cards from './cards/Cards';
+import Steps from './steps/Steps';
 
 export const Sidebar = () => {
 	return (
@@ -51,42 +20,11 @@ const NavBar = () => {
 	return <div className="h-[8vh] bg-base-200 "></div>;
 };
 
-const GamePage = () => {
-	return (
-		<ScoreProvider>
-			<div className="flex flex-col items-center h-full">
-				<div className="flex flex-col w-3/5 h-full py-8">
-					<GameHeader />
-					<GameCanvasWrapper />
-				</div>
-			</div>
-		</ScoreProvider>
-	);
-};
-
-const GameCanvasWrapper = () => {
-	return (
-		<div className="h-3/4 flex items-center justify-center">
-			<GameCanvas />
-		</div>
-	);
-};
-
-const GameHeader = () => {
-	return (
-		<div className="h-1/4 flex items-center justify-evenly">
-			<Stats scorePos={'left'} />
-			<Stats scorePos={'right'} />
-		</div>
-	);
-};
-
 const Content = () => {
 	return (
 		<div className="flex flex-1 flex-col  justify-center -mt-1 -ml-1 rounded-tl-2xl bg-base-100 h-full">
 			<Cards />
 			{/* <Steps /> */}
-			{/* <Matchmaking /> //! Proberably not gonna used that */}
 			{/* <GamePage /> */}
 		</div>
 	);
@@ -97,7 +35,7 @@ const Test = () => {
 		<div className="flex flex-col h-screen w-screen">
 			<div className="flex flex-1">
 				<Sidebar />
-				<div className="flex flex-col w-full h-full">
+				<div className="flex flex-col">
 					<NavBar />
 					<Content />
 				</div>

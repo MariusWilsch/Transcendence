@@ -1,9 +1,9 @@
 'use client';
-import React, { useState } from 'react';
-import { GameService } from './GameService';
-import { GameState } from '../GlobalRedux/features';
 import useSocket from '../useSocket';
-import { useScore } from '../test'; //! TODO: Add into it's own file
+import { useState, useRef, useEffect } from 'react';
+import { GameService } from './GameService';
+import { useScore } from '../ScoreContext/ScoreContext';
+import { GameState } from '../../interfaces/GameState';
 
 export const Score = ({ score }: any) => {
 	return (
@@ -34,13 +34,13 @@ interface PlayerMove {
 	player: 'player1' | 'player2';
 }
 
-const GameCanvas = () => {
-	const canvasRef = React.useRef<HTMLDivElement>(null);
-	const serviceRef = React.useRef<GameService | null>(null);
+export const GameCanvas = () => {
+	const canvasRef = useRef<HTMLDivElement>(null);
+	const serviceRef = useRef<GameService | null>(null);
 	const [sendToServer, setSendToServer] = useState<(data: any) => void>();
 	const { setPlayer1Score, setPlayer2Score } = useScore();
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			let payload: PlayerMove | undefined = undefined;
 			switch (e.key) {
@@ -137,5 +137,3 @@ const GameCanvas = () => {
 		</div>
 	);
 };
-
-export default GameCanvas;
