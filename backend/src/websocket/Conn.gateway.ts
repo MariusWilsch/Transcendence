@@ -48,8 +48,8 @@ export class handleClientsConnection
     const jwt = client.handshake.auth.jwt as string;
     if (jwt && client.id) {
       if (!this.connectedClients.has(client.id)) {
-        // this.connectedClients.set(client.id, jwt);
-        this.connectedClients.set(jwt, client.id);
+        this.connectedClients.set(client.id, jwt);
+        // this.connectedClients.set(jwt, client.id);
       }
     }
   }
@@ -58,11 +58,8 @@ export class handleClientsConnection
   }
   //===========================================================
 
-  // private logger: Logger = new Logger('handle Clients Connection Gateway Log');
-
   afterInit(server: Server) {
     console.log('handleClientsConnection server initialized');
-    // this.logger.log('APP server Initialized!');
   }
 
   @SubscribeMessage('FriendShipRequest')
@@ -70,6 +67,18 @@ export class handleClientsConnection
     @ConnectedSocket() client: Socket,
     @MessageBody() data: any
   ) {
+    console.log('data : ', data);
+    // const jwt = client.handshake.auth.jwt as string;
+    // const userId = 10;
+    // const friendId = 10;
+
+    // for (const [key, value] of this.connectedClients.entries()) {
+    //   const user = this.authService.getUserFromJwt(value);
+    //   if (user.intraId === friendId || ) {
+    //     this.server.to(key).emit('FriendShipRequest');
+    //   }
+    // }
+
     // notify other clients about this new user
     this.server.emit('FriendShipRequest');
     // console.log('FriendShipRequest : ', data);
@@ -87,9 +96,7 @@ export class handleClientsConnection
           await this.UserService.updateUserState(user.intraId, 'ONLINE');
         }
       }
-    } catch (error) {
-      // this.logger.error('Error in handleConnection:', error);
-    }
+    } catch (error) {}
   }
 
   async handleDisconnect(client: Socket) {
@@ -103,8 +110,6 @@ export class handleClientsConnection
           await this.UserService.updateUserState(user.intraId, 'OFFLINE');
         }
       }
-    } catch (error) {
-      // this.logger.error('Error in handleDisconnect:', error);
-    }
+    } catch (error) {}
   }
 }

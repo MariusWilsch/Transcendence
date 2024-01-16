@@ -124,15 +124,15 @@ export default function Profile(params: any) {
     if (params.params.intraId === user?.intraId) {
       setIsProfileOwner(true);
     }
-    let timeoutId: any;
-    if (!user) {
-      timeoutId = setTimeout(() => {
-        toast.error("Please login first");
-      }, 5000);
-    }
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    // let timeoutId: any;
+    // if (!user) {
+    //   timeoutId = setTimeout(() => {
+    //     toast.error("Please login first");
+    //   }, 5000);
+    // }
+    // return () => {
+    //   clearTimeout(timeoutId);
+    // };
   }, [user]);
 
   useEffect(() => {
@@ -256,7 +256,6 @@ export default function Profile(params: any) {
           animationData={loading}
           className="w-auto h-auto"
           onDOMLoaded={(e) => {
-            console.log("onDOMLoaded");
             lottieRef.current?.setSpeed(0.05);
           }}
           lottieRef={lottieRef as any}
@@ -290,11 +289,13 @@ export default function Profile(params: any) {
             } p-10`}
           >
             <UserDetailsCard value={Login} intraId={intraId} />
-            <Friend
-              isProfileOwner={isProfileOwner}
-              userId={user?.intraId}
-              friendId={params.params.intraId}
-            />
+            {user?.intraId && (
+              <Friend
+                isProfileOwner={isProfileOwner}
+                userId={user.intraId}
+                friendId={params.params.intraId}
+              />
+            )}
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
           </div>
         </div>
