@@ -2,7 +2,7 @@
 import useSocket from '../useSocket';
 import { useState, useRef, useEffect } from 'react';
 import { GameService } from './GameService';
-import { useScore } from '../ScoreContext/GameContext';
+// import { useScore } from '../ScoreContext/GameContext';
 import { GameState } from '../../interfaces/GameState';
 
 export const Score = ({ score }: any) => {
@@ -15,7 +15,10 @@ export const Score = ({ score }: any) => {
 };
 
 export const Stats = ({ scorePos }: any) => {
-	const { player1Score, player2Score } = useScore();
+	// const { player1Score, player2Score } = useScore();
+	const player1Score = 0;
+	const player2Score = 0;
+
 	return (
 		<div className="flex items-center gap-x-8">
 			{scorePos === 'right' ? <Score score={player1Score} /> : null}
@@ -38,7 +41,7 @@ export const GameCanvas = () => {
 	const canvasRef = useRef<HTMLDivElement>(null);
 	const serviceRef = useRef<GameService | null>(null);
 	const [sendToServer, setSendToServer] = useState<(data: any) => void>();
-	const { setPlayer1Score, setPlayer2Score } = useScore();
+	// const { setPlayer1Score, setPlayer2Score } = useScore();
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,8 +105,8 @@ export const GameCanvas = () => {
 		// console.log('update game');
 		if (serviceRef.current == null) return;
 		serviceRef.current.updateGameElements(state);
-		setPlayer1Score(state.score.player1);
-		setPlayer2Score(state.score.player2);
+		// setPlayer1Score(state.score.player1);
+		// setPlayer2Score(state.score.player2);
 	};
 
 	const clearGame = () => {

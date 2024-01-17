@@ -31,7 +31,7 @@ const NavBar = () => {
 
 const Content = ({ children }: any) => {
 	return (
-		<div className="flex flex-1 flex-col justify-center -mt-1 -ml-1 rounded-tl-2xl bg-base-100 h-full">
+		<div className="flex mx-5 flex-1 flex-col justify-center -mt-1 -ml-1 rounded-tl-2xl bg-base-100 h-full">
 			{children}
 		</div>
 	);
