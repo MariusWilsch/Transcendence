@@ -12,7 +12,7 @@ const useSocket = (
 	clearGame: Function,
 	sendToServer: Function,
 ) => {
-	const { setTwoPlayersFound } = useGameContext();
+	// const { setTwoPlayersFound } = useGameContext();
 	useEffect(() => {
 		const socket = io('http://localhost:3001');
 
@@ -29,7 +29,6 @@ const useSocket = (
 
 		socket.on('createGame', (obj) => {
 			console.log('Creating game');
-			setTwoPlayersFound(true);
 			initGame(obj.gameState, obj.canvasWidth, obj.canvasHeight);
 		});
 
