@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stats, GameCanvas } from './GameCanvas';
-import { ScoreProvider } from '../ScoreContext/ScoreContext';
+import { GameProvider } from '../ScoreContext/GameContext';
 
 const GameHeader = () => {
 	return (
@@ -19,17 +19,17 @@ const GameCanvasWrapper = () => {
 	);
 };
 
-const Game = () => {
+export default function Game() {
 	return (
-		<ScoreProvider>
-			<div className="flex flex-col items-center h-full">
-				<div className="flex flex-col w-3/5 h-full py-8">
-					<GameHeader />
-					<GameCanvasWrapper />
+		<>
+			<GameProvider>
+				<div className="flex flex-col items-center h-full">
+					<div className="flex flex-col w-3/5 h-full py-8">
+						<GameHeader />
+						<GameCanvasWrapper />
+					</div>
 				</div>
-			</div>
-		</ScoreProvider>
+			</GameProvider>
+		</>
 	);
-};
-
-export default Game;
+}

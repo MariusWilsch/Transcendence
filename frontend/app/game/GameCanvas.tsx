@@ -2,7 +2,7 @@
 import useSocket from '../useSocket';
 import { useState, useRef, useEffect } from 'react';
 import { GameService } from './GameService';
-import { useScore } from '../ScoreContext/ScoreContext';
+import { useScore } from '../ScoreContext/GameContext';
 import { GameState } from '../../interfaces/GameState';
 
 export const Score = ({ score }: any) => {

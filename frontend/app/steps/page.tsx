@@ -1,12 +1,13 @@
 'use client';
-import '../globals.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Card1Picture from '../assets/images/card1.png';
 import Card2Picture from '../assets/images/card2.png';
 import Placeholder from '../assets/images/placeholder.png';
 import PlaceholderBlack from '../assets/images/placeholderBlack.png';
 import PlaceholderWhite from '../assets/images/placeholderWhite.png';
 import Image from 'next/image';
+import { useGameContext } from '../ScoreContext/GameContext';
 
 const Input = ({ ariaLabel }: { ariaLabel: string }) => {
 	return (
@@ -47,10 +48,13 @@ const Instructions = () => {
 	);
 };
 
-const CardOverlay = ({ title, desc, img, currentStep }: any) => {
+const CardOverlay = ({ title, desc, img, currentStep, handleClick }: any) => {
 	return (
 		<>
-			<div className="card shadow-xl image-full boxTransform w-[60%] h-[80%]">
+			<div
+				className="card shadow-xl image-full boxTransform w-[60%] h-[80%]"
+				onClick={handleClick}
+			>
 				<figure>
 					<Image src={img} alt="Pre-configured game" />
 				</figure>
@@ -67,7 +71,7 @@ const CardOverlay = ({ title, desc, img, currentStep }: any) => {
 	);
 };
 
-const Step1 = () => {
+const Step1 = ({ setStep }: any) => {
 	return (
 		<>
 			<div className="flex w-full items-center gap-x-4">
@@ -76,22 +80,22 @@ const Step1 = () => {
 					desc={'Sum hipster ipsum here'}
 					img={Card1Picture}
 					currentStep={1}
+					handleClick={() => setStep(2)}
 				/>
-
 				<div className="divider divider-horizontal">OR</div>
-
 				<CardOverlay
 					title={'Play against other players'}
 					desc={'Sum hipster ipsum here'}
 					img={Card2Picture}
 					currentStep={0}
+					handleClick={() => setStep(2)}
 				/>
 			</div>
 		</>
 	);
 };
 
-const Step2 = () => {
+const Step2 = ({ setStep }: any) => {
 	return (
 		<>
 			<div className="flex flex-col lg:flex-row gap-4">
@@ -100,6 +104,7 @@ const Step2 = () => {
 					desc={'Sum hipster ipsum here'}
 					img={Placeholder}
 					currentStep={0}
+					handleClick={() => setStep(3)}
 				/>
 				<div className="divider lg:divider-horizontal">OR</div>
 				<CardOverlay
@@ -107,6 +112,7 @@ const Step2 = () => {
 					desc={''}
 					img={Placeholder}
 					currentStep={2}
+					handleClick={() => setStep(3)}
 				/>
 			</div>
 		</>
@@ -114,28 +120,36 @@ const Step2 = () => {
 };
 
 const Step3 = () => {
+	const router = useRouter();
+
+	const { twoPlayersFound } = useGameContext();
+
+	useEffect(() => {
+		if (twoPlayersFound) {
+			router.push('/game');
+		}
+	}, [twoPlayersFound, router]);
+
 	return (
 		<>
 			<div className="diff aspect-[16/9] w-4/5 mx-auto rounded-xl">
 				<div className="diff-item-1">
-					<Image src={PlaceholderWhite} alt="Pre-configured game" />
+					<Image src={PlaceholderWhite} alt="Map Choice !" />
 				</div>
 				<div className="diff-item-2">
-					<Image src={PlaceholderBlack} alt="Pre-configured game" />
+					<Image src={PlaceholderBlack} alt="Map Choice 2" />
 				</div>
 				<div className="diff-resizer"></div>
 			</div>
 			<button
-				className="btn"
+				className="btn btn-accent mt-8"
 				onClick={() =>
-					(
-						document.getElementById('my_modal_1') as HTMLDialogElement
-					)?.showModal()
+					(document.getElementById('modal1') as HTMLDialogElement)?.showModal()
 				}
 			>
 				START A GAME
 			</button>
-			<dialog id="my_modal_1" className="modal">
+			<dialog id="modal1" className="modal">
 				<div className="modal-box text-left">
 					<h3 className="font-bold text-lg flex items-end">
 						Searching for a game{' '}
@@ -159,8 +173,8 @@ const Step3 = () => {
 	);
 };
 
-const Steps = () => {
-	const [currentStep, setCurrentStep] = useState(3);
+export const StepsList = () => {
+	const [currentStep, setCurrentStep] = useState(1);
 
 	return (
 		<div className="flex pt-4 flex-col items-center gap-x-12 h-full justify-between">
@@ -177,8 +191,8 @@ const Steps = () => {
 			</ul>
 			<div className="flex items-center justify-center flex-grow w-full">
 				<div className="w-4/5">
-					{currentStep === 1 && <Step1 />}
-					{currentStep === 2 && <Step2 />}
+					{currentStep === 1 && <Step1 setStep={setCurrentStep} />}
+					{currentStep === 2 && <Step2 setStep={setCurrentStep} />}
 					{currentStep === 3 && <Step3 />}
 				</div>
 			</div>
@@ -186,4 +200,10 @@ const Steps = () => {
 	);
 };
 
-export default Steps;
+export default function Steps() {
+	return (
+		<>
+			<StepsList />
+		</>
+	);
+}

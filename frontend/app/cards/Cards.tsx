@@ -1,8 +1,8 @@
 'use client';
 import Card1Picture from '../assets/images/card1.png';
 import Card2Picture from '../assets/images/card2.png';
-
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const Card = ({ img, btnText, title, desc }: any) => {
 	return (
@@ -14,7 +14,9 @@ export const Card = ({ img, btnText, title, desc }: any) => {
 				<h2 className="card-title">{title}</h2>
 				<p className="">{desc}</p>
 				<div className="card-actions justify-center">
-					<button className="btn btn-primary">{btnText}</button>
+					<Link href={'/steps'}>
+						<button className="btn btn-primary">{btnText}</button>
+					</Link>
 				</div>
 			</div>
 		</div>

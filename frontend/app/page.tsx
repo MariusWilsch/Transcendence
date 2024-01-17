@@ -1,11 +1,10 @@
 'use client';
-
-import Test from './test';
+import Cards from '../app/cards/Cards';
 
 export default function Home() {
 	return (
 		<main>
-			<Test />
+			<Cards />
 		</main>
 	);
 }
