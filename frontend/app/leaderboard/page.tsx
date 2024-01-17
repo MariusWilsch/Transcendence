@@ -42,6 +42,7 @@ export default function Search(params: any) {
     leaderboard();
   }, [page]);
 
+  
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
