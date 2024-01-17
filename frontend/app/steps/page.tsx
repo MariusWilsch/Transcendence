@@ -7,7 +7,8 @@ import Placeholder from '../assets/images/placeholder.png';
 import PlaceholderBlack from '../assets/images/placeholderBlack.png';
 import PlaceholderWhite from '../assets/images/placeholderWhite.png';
 import Image from 'next/image';
-import { useGameContext } from '../ScoreContext/GameContext';
+import { startConnection } from '@/GlobalRedux/features';
+import { useDispatch } from 'react-redux';
 
 const Input = ({ ariaLabel }: { ariaLabel: string }) => {
 	return (
@@ -121,14 +122,23 @@ const Step2 = ({ setStep }: any) => {
 
 const Step3 = () => {
 	const router = useRouter();
-
-	const { twoPlayersFound } = useGameContext();
+	const dispatch = useDispatch();
+	const [twoPlayersFound, setTwoPlayersFound] = useState(false); // Should be handled by redux but for testing purposes it's fine
 
 	useEffect(() => {
 		if (twoPlayersFound) {
 			router.push('/game');
 		}
 	}, [twoPlayersFound, router]);
+
+	const handleStartGame = () => {
+		const modal = document.getElementById('modal1') as HTMLDialogElement;
+		modal?.showModal();
+		dispatch(startConnection());
+		setTimeout(() => {
+			setTwoPlayersFound(true); // Update the state
+		}, 5000);
+	};
 
 	return (
 		<>
@@ -141,12 +151,7 @@ const Step3 = () => {
 				</div>
 				<div className="diff-resizer"></div>
 			</div>
-			<button
-				className="btn btn-accent mt-8"
-				onClick={() =>
-					(document.getElementById('modal1') as HTMLDialogElement)?.showModal()
-				}
-			>
+			<button className="btn btn-accent mt-8" onClick={handleStartGame}>
 				START A GAME
 			</button>
 			<dialog id="modal1" className="modal">
@@ -160,7 +165,6 @@ const Step3 = () => {
 					</p>
 					<div className="modal-action justify-center">
 						<form method="dialog">
-							{/* if there is a button in form, it will close the modal */}
 							<button className="btn">Cancel Matchmaking</button>
 						</form>
 					</div>

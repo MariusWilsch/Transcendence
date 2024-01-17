@@ -1,6 +1,6 @@
 export interface PlayerMove {
-	playerID: number;
-	direction: 'up' | 'down';
+	direction: 'up' | 'down' | 'stop';
+	player: 'player1' | 'player2';
 }
 
 export interface GameState {
@@ -21,4 +21,6 @@ export interface GameState {
 		velocity: { x: number; y: number };
 	};
 	score: { player1: number; player2: number };
+	canvasWidth: number;
+	canvasHeight: number;
 }

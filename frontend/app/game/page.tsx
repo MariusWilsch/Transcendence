@@ -1,15 +1,14 @@
 import React from 'react';
-import { Stats, GameCanvas } from './GameCanvas';
-import { GameProvider } from '../ScoreContext/GameContext';
+import { GameCanvas } from './GameCanvas';
 
-const GameHeader = () => {
-	return (
-		<div className="h-1/4 flex items-center justify-evenly">
-			<Stats scorePos={'left'} />
-			<Stats scorePos={'right'} />
-		</div>
-	);
-};
+// const GameHeader = () => {
+// 	return (
+// 		<div className="h-1/4 flex items-center justify-evenly">
+// 			<Stats scorePos={'left'} />
+// 			<Stats scorePos={'right'} />
+// 		</div>
+// 	);
+// };
 
 const GameCanvasWrapper = () => {
 	return (
@@ -22,14 +21,12 @@ const GameCanvasWrapper = () => {
 export default function Game() {
 	return (
 		<>
-			<GameProvider>
-				<div className="flex flex-col items-center h-full">
-					<div className="flex flex-col w-3/5 h-full py-8">
-						<GameHeader />
-						<GameCanvasWrapper />
-					</div>
+			<div className="flex flex-col items-center h-full">
+				<div className="flex flex-col w-3/5 h-full py-8">
+					{/* <GameHeader /> */}
+					<GameCanvasWrapper />
 				</div>
-			</GameProvider>
+			</div>
 		</>
 	);
 }
