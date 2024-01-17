@@ -21,7 +21,6 @@ import { AuthService } from 'modules/auth/auth.service';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET, URL } from '../auth/constants';
-import { empty } from '@prisma/client/runtime/library';
 
 @Controller('users')
 export class UserController {
@@ -40,6 +39,25 @@ export class UserController {
     } catch (error) {
       console.error('Error getAllUsers:', error);
       return undefined;
+    }
+  }
+
+  @Get('leaderboard')
+  @UseGuards(JwtAuthGuard)
+  async getLeaderboard(@Query('page') page: number, @Res() res: any) {
+    console.log(page);
+    try {
+      if (page !== undefined) {
+        const leaderboard = await this.userService.leaderboard(page);
+        if (leaderboard !== undefined) {
+          return res.json({ success: true, leaderboard });
+        }
+      } else {
+        return res.json({ success: false });
+      }
+    } catch (error: any) {
+      console.error('Error leaderboard:', error);
+      return res.json({ success: false });
     }
   }
 
@@ -391,5 +409,3 @@ export class UserController {
     }
   }
 }
-
-// todo : handel sending friend request to blocked user

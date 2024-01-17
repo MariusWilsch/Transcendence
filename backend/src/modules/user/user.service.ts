@@ -409,4 +409,24 @@ export class UserService {
       return;
     }
   }
+
+  async leaderboard(page : number): Promise<User[] | undefined> {
+    try {
+      const numberOfUserInOnePage = 10;
+
+      const leaderboard = await prisma.user.findMany({
+        orderBy: {
+          login: 'asc',
+        },
+      });
+      // get tonly the users that are in the page that we want
+      leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
+      leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
+      
+      return leaderboard;
+    } catch (error: any) {
+      console.error('Error leaderboard:', error);
+      return;
+    }
+  }
 }

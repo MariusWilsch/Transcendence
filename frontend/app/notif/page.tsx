@@ -229,7 +229,10 @@ export default function Search() {
                                   friend.intraId
                                 );
                                 if (context.notifSocket) {
-                                  context.notifSocket.emit("FriendShipRequest");
+                                  context.notifSocket.emit("FriendShipRequest", {
+                                    userId: `${friend.intraId}`,
+                                    friendId: `${context.user?.intraId}`,
+                                  });
                                 }
                               }}
                             >
@@ -248,7 +251,10 @@ export default function Search() {
                                   friend.intraId
                                 );
                                 if (context.notifSocket) {
-                                  context.notifSocket.emit("FriendShipRequest");
+                                  context.notifSocket.emit("FriendShipRequest", {
+                                    userId: `${friend.intraId}`,
+                                    friendId: `${context.user?.intraId}`,
+                                  });
                                 }
                               }}
                             >

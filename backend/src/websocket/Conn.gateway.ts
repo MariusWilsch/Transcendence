@@ -20,7 +20,7 @@ import { AuthService } from 'modules/auth/auth.service';
   },
 })
 export class handleClientsConnection
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private UserService: UserService,
@@ -56,32 +56,24 @@ export class handleClientsConnection
   removeClient(client: Socket) {
     this.connectedClients.delete(client.id);
   }
-  //===========================================================
-
-  afterInit(server: Server) {
-    console.log('handleClientsConnection server initialized');
-  }
 
   @SubscribeMessage('FriendShipRequest')
   handleFriendRequest(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: any
   ) {
-    console.log('data : ', data);
-    // const jwt = client.handshake.auth.jwt as string;
-    // const userId = 10;
-    // const friendId = 10;
+    // console.log('data : ', data);
+    const {userId, friendId} = data;
 
-    // for (const [key, value] of this.connectedClients.entries()) {
-    //   const user = this.authService.getUserFromJwt(value);
-    //   if (user.intraId === friendId || ) {
-    //     this.server.to(key).emit('FriendShipRequest');
-    //   }
-    // }
+    for (const [key, value] of this.connectedClients.entries()) {
+      const user = this.authService.getUserFromJwt(value);
+      if (user.intraId === friendId) {
+        // console.log('user : ', user.login);
+        this.server.to(key).emit('FriendShipRequest');
+      }
+    }
 
-    // notify other clients about this new user
-    this.server.emit('FriendShipRequest');
-    // console.log('FriendShipRequest : ', data);
+    // this.server.emit('FriendShipRequest');
   }
 
   async handleConnection(client: Socket) {

@@ -289,12 +289,14 @@ export default function Profile(params: any) {
             } p-10`}
           >
             <UserDetailsCard value={Login} intraId={intraId} />
-            {user?.intraId && (
+            {user !== null ? (
               <Friend
                 isProfileOwner={isProfileOwner}
-                userId={user.intraId}
+                userId={user?.intraId}
                 friendId={params.params.intraId}
               />
+            ) : (
+              <div className="flex items-center justify-center text-gray-400">Loading...</div>
             )}
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
           </div>
