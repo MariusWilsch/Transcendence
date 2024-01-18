@@ -3,15 +3,59 @@
 import Image from "next/image";
 import logo from "../public/42_Logo.svg";
 import Link from "next/link";
-import { AppProvider } from "./AppContext";
 import { CiLogin } from "react-icons/ci";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { useParams, redirect, useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { useAppContext, AppProvider, User } from "./AppContext";
 
 export default function Home() {
+  const router = useRouter();
+  const contex = useAppContext();
+
+  const checkJwtCookie = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      var data: User = await response.json();
+
+      if (data !== null) {
+        contex.setUser(data);
+        if (data.intraId) {
+          toast.success("Welcome back " + data.login + " !", {
+            style: {
+              border: "1px solid #006400",
+              padding: "16px",
+              color: "#006400",
+            },
+            iconTheme: {
+              primary: "#006400",
+              secondary: "#FFFFFF",
+            },
+          });
+          return router.push(
+            `${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${data.intraId}`
+          );
+        }
+      }
+    } catch (error: any) {
+      const msg = "Error during login" + error.message;
+      toast.error(msg);
+      console.error("Error during login:", error);
+    }
+  };
+  
+  useEffect(() => {
+    checkJwtCookie();
+  }, []);
+
   const [selectedId, setSelectedId] = useState<"LOGIN" | "SIGNEIN" | null>(
     null
   );
@@ -23,7 +67,6 @@ export default function Home() {
   const [username, setusername] = useState("");
   const [email, setemail] = useState("");
   const [passwordsigne, setpasswordsigne] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();

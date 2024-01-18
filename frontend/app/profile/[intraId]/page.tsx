@@ -5,48 +5,16 @@ import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider, User } from "../../AppContext";
-import { CiCirclePlus } from "react-icons/ci";
-import { CiSaveUp2 } from "react-icons/ci";
-import { CiEdit } from "react-icons/ci";
-import { IoIosCloseCircleOutline } from "react-icons/io";
-import { TbFriends } from "react-icons/tb";
-import { MdOutlineBlock } from "react-icons/md";
-import { CgUnblock } from "react-icons/cg";
-import { BiMessageRounded } from "react-icons/bi";
-import { IoGameControllerOutline } from "react-icons/io5";
-import { CiSearch } from "react-icons/ci";
-import { useParams, redirect, useRouter } from "next/navigation";
-import pong from "../../../public/pong.svg";
-import { IoMenuOutline } from "react-icons/io5";
-import { CiLogout } from "react-icons/ci";
-import { RiPingPongLine } from "react-icons/ri";
-import { IoChatbubblesOutline } from "react-icons/io5";
-import { GrGroup } from "react-icons/gr";
-import { FaUserFriends } from "react-icons/fa";
-import { GrAchievement } from "react-icons/gr";
-import { MdLeaderboard } from "react-icons/md";
-import { FiUserPlus } from "react-icons/fi";
-import { IoHome } from "react-icons/io5";
-import { IoMdNotificationsOutline } from "react-icons/io";
-import { CgProfile } from "react-icons/cg";
-import { usePathname } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
-import { FaCircle } from "react-icons/fa";
-import { PiGameControllerLight } from "react-icons/pi";
-import { TbUserOff } from "react-icons/tb";
-import { FaUserTimes } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaCircleDot } from "react-icons/fa6";
-import { Loading } from '../../components/Loading';
-import { Navbar } from '../../components/Navbar';
-import { UserDetailsCard } from '../../components/UserDetailsCard';
-import { UserProfileImage } from '../../components/UserProfileImage';
-import { Sidebar } from '../../components/Sidebar';
-import { TwoFactorAuth } from '../../components/TwoFactorAuth';
-import { Friend } from '../../components/Friend';
-
-
+import { Loading } from "../../components/Loading";
+import { Navbar } from "../../components/Navbar";
+import { UserDetailsCard } from "../../components/UserDetailsCard";
+import { UserProfileImage } from "../../components/UserProfileImage";
+import { Sidebar } from "../../components/Sidebar";
+import { TwoFactorAuth } from "../../components/TwoFactorAuth";
+import { Friend } from "../../components/Friend";
+import { useParams, redirect, useRouter } from "next/navigation";
 
 export default function Profile(params: any) {
   const {
@@ -58,9 +26,8 @@ export default function Profile(params: any) {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    // friendshipStatus,
-    // setStatus,
   } = useAppContext();
+  const router = useRouter();
 
   const [socket, setsocket] = useState<Socket | null>(null);
 

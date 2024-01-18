@@ -1,15 +1,11 @@
-import { NextResponse, NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from "next/server";
 
 export default async function middleware(req: NextRequest, res: NextResponse) {
-    const path = req.nextUrl.pathname;
+  const cookie = req.cookies.get("jwt");
 
-    const hasToken = req.cookies.has("jwt");
-
-    const cookie = req.cookies.get("jwt");
-
-    if (hasToken && cookie) {
-        //console.log("this user has a token .");
-      } else {
-        //console.log("this user does not a token .");
-    }
+  if (cookie) {
+    // console.log("this user has a token .");
+  } else {
+    // console.log("this user does not a token .");
+  }
 }
