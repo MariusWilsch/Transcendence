@@ -9,7 +9,6 @@ import PlaceholderWhite from '../assets/images/placeholderWhite.png';
 import Image from 'next/image';
 import { startConnection } from '@/app/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConnectionState } from '@/interfaces';
 import { RootState } from '../GlobalRedux/store';
 
 //* Helper components
@@ -106,7 +105,7 @@ const Modal = () => {
 const Step1 = ({ setStep }: any) => {
 	return (
 		<>
-			<div className="flex w-full items-center gap-x-4">
+			<div className="flex flex-col w-full lg:flex-row items-center gap-x-4">
 				<CardOverlay
 					title={'Play against AI'}
 					desc={'Sum hipster ipsum here'}
@@ -114,7 +113,7 @@ const Step1 = ({ setStep }: any) => {
 					currentStep={1}
 					handleClick={() => setStep(2)}
 				/>
-				<div className="divider divider-horizontal">OR</div>
+				<div className="divider lg:divider-horizontal">OR</div>
 				<CardOverlay
 					title={'Play against other players'}
 					desc={'Sum hipster ipsum here'}
@@ -130,7 +129,7 @@ const Step1 = ({ setStep }: any) => {
 const Step2 = ({ setStep }: any) => {
 	return (
 		<>
-			<div className="flex flex-col lg:flex-row gap-4">
+			<div className="flex flex-col w-full lg:flex-row items-center gap-4">
 				<CardOverlay
 					title={'Play using your mouse'}
 					desc={'Sum hipster ipsum here'}

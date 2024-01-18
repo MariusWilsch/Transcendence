@@ -26,7 +26,7 @@ const Sidebar = () => {
 };
 
 const NavBar = () => {
-	return <div className="h-[8vh] bg-base-200 "></div>;
+	return <div className="h-[6vh] bg-base-200 "></div>;
 };
 
 const Content = ({ children }: any) => {

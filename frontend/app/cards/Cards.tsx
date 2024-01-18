@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export const Card = ({ img, btnText, title, desc }: any) => {
 	return (
-		<div className="card bg-base-200 shadow-sm hover:shadow-accent rounded-xl boxTransform">
+		<div className="card bg-base-200 shadow-sm hover:shadow-accent rounded-xl boxTransform sm:w-3/4 md:w-3/5 lg:w-2/5 max-w-[80%] mb-4">
 			<figure>
 				<Image src={img} alt="Pre-configured game" />
 			</figure>
@@ -28,7 +28,7 @@ const Cards = () => {
 	//! The cards should wrap to the next line if the screen is too small
 	//! I don't know how to specify when the cards should wrap to the next line
 	return (
-		<div className="flex flex-wrap justify-center items-center gap-12">
+		<div className="flex flex-wrap justify-center items-center py-6 gap-x-4 md:gap-x-6 lg:gap-x-12">
 			<Card
 				img={Card1Picture}
 				btnText={'Play now!'}
