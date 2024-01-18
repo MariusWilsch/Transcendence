@@ -62,7 +62,7 @@ model ChannelMessage {
   id             Int       @id @default(autoincrement())
   channelId      String
   sender         String
-  recipient      String
+  Avatar         String?
   content        String
   createdAt      DateTime  @default(now())
   senderUser     Channel      @relation(fields: [channelId], references: [name])

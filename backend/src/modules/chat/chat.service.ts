@@ -33,6 +33,16 @@ export class ChatService {
     if (!senderUser || !recipientUser) {
       throw new Error('Sender or recipient not found.');
     }
+    const userStatue = prisma.friend.findFirst({
+      where:{
+        friendId:sender,
+      }
+    });
+
+    if (userStatue && (await userStatue)?.friendshipStatus === 'BLOCKED')
+    {
+      throw ('message can\'t be sent');
+    }
     if (!room && (senderUser && recipientUser))
     {
       room =   await prisma.privateRoom.create({
@@ -351,13 +361,26 @@ export class ChatService {
       },
     })
   }
-  async createChannelMessage(channelId:string, message:string, senderId:string){
-    console.log(channelId,message, senderId );
+  async createChannelMessage(channelId:string, message:string, sender:User){
+    const memberShip = await  prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId :sender.intraId
+      },
+    })
+    if (!memberShip)
+    {
+      throw ('no such member');
+    }
+    if (memberShip.isBanned || memberShip.isMuted)
+    {
+      throw ('you can t send message into that channel ');
+    }
     return await prisma.channelMessage.create({
       data:{
         channelId,
-        sender:senderId,
-        recipient:"",
+        sender:sender.intraId,
+        Avatar:sender.Avatar,
         content:message,
       },
 
@@ -438,5 +461,54 @@ export class ChatService {
       },
     });
   }
-
+  async updateChannelUser(moderatorId:string,memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}){
+    const memberShip = await prisma.memberShip.findUnique({
+      where:{
+        memberId,
+      }
+    });
+    const moderator = await prisma.memberShip.findFirst({
+      where:{
+        intraId:moderatorId,
+        channelId:memberShip.channelId,
+      }
+    });
+    // if (!moderator
+    //     || (!moderator.isModerator)
+    //     || (!moderator.isModerator && !moderator.isOwner)){
+    //       throw('lack of privilege');    
+    //    }
+    if (!memberShip){
+      throw('member doesn t exist')
+    }
+    if (memberShip.isOwner){
+      throw('you can t modify the owner privilege');
+    }
+    // console.log({
+    //   isBanned:info.banning !== memberShip.isBanned ? info.banning:memberShip.isBanned,
+    //   isModerator:info.userPrivilige!== memberShip.isModerator?info.userPrivilige:memberShip.isModerator,
+    //   isMuted:info.Muting.action !==memberShip.isMuted?info.Muting.action:memberShip.isMuted,
+    //   mutedTime:info.Muting.time,
+    // });
+    await prisma.memberShip.update({
+      where:{
+        memberId,
+      },
+      data:{
+        isBanned:info.banning !== memberShip.isBanned ? info.banning:memberShip.isBanned,
+        isModerator:info.userPrivilige!== memberShip.isModerator?info.userPrivilige:memberShip.isModerator,
+        isMuted:info.Muting.action !==memberShip.isMuted?info.Muting.action:memberShip.isMuted,
+        mutedTime:info.Muting.time,
+      }
+    })
+    return memberShip;
+  }
+  async getMember(channelId:string, intraId:string){
+    return await prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId,
+      }
+    })
+  }
 }

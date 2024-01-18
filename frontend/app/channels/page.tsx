@@ -25,7 +25,9 @@ const JoinProtectedChannel = ({ selectedChannel }: any) => {
   }
   const handleSubmit = (pass: string) => {
     if (context.socket && ((selectedChannel.type === "PROTECTED" && pass) || (selectedChannel.type !== "PROTECTED" && pass === "default"))) {
-      context.socket.emit('JoinAChannel', { channelId: selectedChannel.name, type: selectedChannel.type, password: pass, user: context.userData })
+      const cookie = new Cookies();
+      const jwt = cookie.get('jwt');
+      context.socket.emit('JoinAChannel', { channelId: selectedChannel.name, type: selectedChannel.type, password: pass, jwt})
     }
     else {
       toast.error('enter a password first');
@@ -82,7 +84,7 @@ const ChannelsLobby = () => {
         );
         var data: User = await response.json();
 
-        if (data !== null) {
+        if (data !== undefined) {
           context.setUserData(data);
         }
       } catch (error: any) {
@@ -342,7 +344,7 @@ const ChannelsLobby = () => {
                             transition={{ delay: 0.02 }}
                           >
                             <Link
-                              href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/channels/${channel.channelId}`}
+                              href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${channel.channelId}`}
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">

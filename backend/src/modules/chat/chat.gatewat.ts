@@ -1,9 +1,11 @@
 // chat.gateway.ts
-import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect,  } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'modules/prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
+import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
 
 
 @WebSocketGateway(3002,{
@@ -27,6 +29,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (user)
     {
       console.log(`Client connected: ${user.intraId}`);
+      client.user = user;
       if (this.connectedClients.has(user.intraId))
       {
         this.connectedClients.get(user.intraId).push(client);
@@ -73,60 +76,98 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   getAllSocketsByUserId(userId: string): any | [] {
     return this.connectedClients.get(userId) || [];
   }
-  @SubscribeMessage('createPrivateRoom')
-  async createPrivRoom(client :any, payload:{user1:string, user2:string, clientRoomid:string}): Promise<void>{
-    try{
 
-      await this.chatService.createPrivateRoom(payload.user1, payload.user2, payload.clientRoomid);
+
+  @SubscribeMessage('createPrivateRoom')
+  async createPrivRoom(client :any, payload:{jwt:string, user2:string, clientRoomid:string}): Promise<void>{
+    try{
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+        return;
+      }
+      await this.chatService.createPrivateRoom(client.user.intraId, payload.user2, payload.clientRoomid);
     }
     catch(e){
       client.emit('createPrivateRoom', {e})
     }
   }
-  @SubscribeMessage('privateChat')
-  async handlePrivateChat(client: any, payload: { to: string, message: string, senderId:string}): Promise<void> {
-    const recipientSocket = this.getAllSocketsByUserId(payload.to);
-    const senderSocket = this.getAllSocketsByUserId(payload.senderId);
-    if (recipientSocket) {
 
-      const message = await this.chatService.createMessage(payload.senderId, payload.to, payload.message);
-          recipientSocket.map((socket:any) =>socket.emit('privateChat',message));
-          senderSocket.map((socket:any) =>{
-            if (client.id != socket.id)
-            {
-              socket.emit('privateChat',message);
-            }
-          })
+  @SubscribeMessage('privateChat')
+  async handlePrivateChat(client: any, payload: { to: string, message: string, jwt:string}): Promise<void> {
+    try{
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+        return;
+      }
+      const recipientSocket = this.getAllSocketsByUserId(payload.to);
+      const senderSocket = this.getAllSocketsByUserId(client.user.intraId);
+      if (recipientSocket) {
+        
+        const message = await this.chatService.createMessage(client.user.intraId, payload.to, payload.message);
+        recipientSocket.map((socket:any) =>socket.emit('privateChat',message));
+        senderSocket.map((socket:any) =>{
+          if (client.id != socket.id)
+          {
+            socket.emit('privateChat',message);
+          }
+        })
         // Save the private message to the database
-        console.log(`Private message from ${payload.senderId} to ${payload.to}: ${message.content}`);
+        console.log(`Private message from ${client.user.intraId} to ${payload.to}: ${message.content}`);
       } else {
         client.emit('error', { message: 'Recipient not found or offline.' });
       }
+    }
+    catch(e){
+      console.log(e);
+    }
   }
+
   @SubscribeMessage('createChannel')
-  async createChannel(client :any, payload:{owner:string,name:string, typePass:{type:string, password:string}}){
+  async createChannel(client :any, payload:{jwt:string,name:string, typePass:{type:string, password:string}}){
     try{
-      await this.chatService.createChannel(payload.owner, payload.name, payload.typePass);
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+         
+        return;
+      }
+      await this.chatService.createChannel(client.user.intraId, payload.name, payload.typePass);
     }
     catch(e){
       client.emit(e);
     }
   }
+
   @SubscribeMessage('JoinAChannel')
-  async joinChannel(client:Socket, payload:{channelId:string, type:string,password:string, user:User}){
+  async joinChannel(client:any, payload:{channelId:string, type:string,password:string,jwt:string}){
     try{
-      await this.chatService.joinChannel(payload.user, payload.channelId, payload.type, payload.password);
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+         
+        return;
+      }
+      await this.chatService.joinChannel(client.user, payload.channelId, payload.type, payload.password);
       client.emit('JoinAChannel',{e:"Successufely join the channel"});
     }
     catch(e){
         client.emit('JoinAChannel',{e});
     }
   }
+
   @SubscribeMessage('channelBroadcast')
-  async handleChannelChat(client:any, payload:{to:string,message:string, senderId:string}): Promise<void> {
+  async handleChannelChat(client:any, payload:{to:string,message:string, jwt:string}): Promise<void> {
     try{
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+         
+        return;
+      }
       const members = await this.chatService.getAllChannelUsers(payload.to);
-      const message = await this.chatService.createChannelMessage(payload.to, payload.message, payload.senderId);
+      const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
       console.log('message broadcasted to channel');
       members.map((member)=>{
         if (!member.isBanned && !member.isMuted)
@@ -134,15 +175,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const recipientSocket = this.getAllSocketsByUserId(member.intraId);
           recipientSocket.map((socket:any) =>{
             if (socket.id !== client.id){
-              socket.emit('channelBroadcast',message)
+              socket.emit('channelBroadcast',message);
+              console.log('are we here');
             }
           }
           );
         }
-        })
+      })
+    }
+    catch(e){
+      client.emit('channelBroadcast', {e});
+    }
+  }
+
+  @SubscribeMessage('updateChannelUser')
+  async updateChannel(client:any, payload:{jwt:string, memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}}){
+    try{
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+        return;
+      }
+      const memberShip = await this.chatService.updateChannelUser(client.user.intraId, payload.memberId,payload.info);
+      client.emit('updateChannelUser',{e:"member Successufely updated"});
+      const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
+      socketRec.map((socket:any)=>{
+        socket.emit('updateChannelUser', {e:`your memberShip at the channel ${memberShip.channelId} has been updated`});
+      })
     }
     catch(e){
       console.log(e);
+        client.emit('updateChannelUser',{e});
     }
   }
 }

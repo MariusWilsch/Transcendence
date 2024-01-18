@@ -15,8 +15,13 @@ export class ChatController {
   }
   @Get('chan/:id/Search')
   @UseGuards(JwtAuthGuard)
-  async searchMembers(@Param(':id') id:string,@Query('q') query: string) {
+  async searchMembers(@Param('id') id:string,@Query('q') query: string) {
     return await this.chatService.searchMembers(query, id);
+  }
+  @Get('chanMember/:id/:intraId')
+  @UseGuards(JwtAuthGuard)
+  async getMember(@Param('id') id:string,@Param('intraId') intraId:string) {
+    return await this.chatService.getMember(id, intraId);
   }
   
   @Get()
@@ -31,9 +36,15 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async getPrivateRoomsByUser(@Param('id') id:string , @Res() res:any)
   {
-    const data = await this.chatService.getPrivateRoomsByUser(id);
-    res.json(data);
-    return data;
+    try{
+
+      const data = await this.chatService.getPrivateRoomsByUser(id);
+      res.json(data);
+      return data;
+    }
+    catch(e){
+      return undefined;
+    }
   }
   @Get(':id')
   @UseGuards(JwtAuthGuard)
