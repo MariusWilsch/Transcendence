@@ -233,6 +233,7 @@ export const Sidebar = () => {
                   </Link>
                 </li>
                 <li>
+                <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels`}>
                   <motion.div
                     whileTap={{ scale: 0.8 }}
                     initial={{ opacity: 0 }}
@@ -242,12 +243,13 @@ export const Sidebar = () => {
                     <GrGroup
                       size="30"
                       className={`${
-                        RouterName === "groups"
-                          ? "text-slate-50"
-                          : "text-slate-500"
+                        RouterName === "channels"
+                        ? "text-slate-50"
+                        : "text-slate-500"
                       } hover:text-slate-50 mx-auto m-8`}
-                    />
+                      />
                   </motion.div>
+                      </Link>
                 </li>
                 <li>
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>

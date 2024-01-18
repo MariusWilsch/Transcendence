@@ -195,7 +195,7 @@ export default function Search(params: any) {
                           >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
+                                <div className="flex items-center">
                                   <div className="flex-shrink-0 pt-0.5">
                                     <img
                                       className="h-10 w-10 rounded-full"

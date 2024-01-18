@@ -89,8 +89,19 @@ export const UserProfileImage = ({
         <div
           className={`${
             isSidebarVisible ? "backgroundDiv" : "backgroundDivNotVisible"
-          } backgroundDiv  md:h-80 h-48 flex justify-center`}
+          } backgroundDiv  md:h-80 h-48 flex justify-center relative`}
         >
+          {/* <div
+            className={`absolute md:h-80 h-48 w-full flex justify-center items-center`}
+          >
+            <div className="flex flex-row justify-between gap-5 bg-blue-950 bg-opacity-50 w-5/6 h-5/6">
+              <div className="w-1/3 bg-red-950 bg-opacity-30">hello</div>
+              <div className="w-1/3 h-1/2 bg-red-950 bg-opacity-30 ">number of online friends</div>
+              <div className="w-1/3 bg-red-950 bg-opacity-30">win percentage
+               + number of games played</div>
+            </div>
+          </div> */}
+
           <div
             className="w-48 h-48 md:w-72 md:h-72 md:mt-36 mt-16"
             style={{ position: "relative", display: "inline-block" }}

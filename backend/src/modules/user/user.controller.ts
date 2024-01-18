@@ -45,7 +45,6 @@ export class UserController {
   @Get('leaderboard')
   @UseGuards(JwtAuthGuard)
   async getLeaderboard(@Query('page') page: number, @Res() res: any) {
-    console.log(page);
     try {
       if (page !== undefined) {
         const leaderboard = await this.userService.leaderboard(page);

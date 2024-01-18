@@ -9,6 +9,7 @@ import { Navbar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
 import { RiSearchLine } from "react-icons/ri";
 import { motion, AnimatePresence } from "framer-motion";
+import { TbSquareRoundedNumber1 } from "react-icons/tb";
 
 export default function Search(params: any) {
   const context = useAppContext();
@@ -42,7 +43,6 @@ export default function Search(params: any) {
     leaderboard();
   }, [page]);
 
-  
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
@@ -69,11 +69,10 @@ export default function Search(params: any) {
               <div className="mt-4 flex  justify-center ">
                 <div className="mt-4 w-full flex flex-col items-center">
                   {users &&
-                    users?.map((user) => (
+                    users.map((user, index) => (
                       <Link
                         key={user.intraId}
                         href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
-                        className=""
                       >
                         <motion.div
                           whileHover={{ scale: 1.1 }}
@@ -84,29 +83,50 @@ export default function Search(params: any) {
                         >
                           <div
                             key={user.intraId}
-                            className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                            className="p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center"
                           >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
-                                  <div className="flex-shrink-0 pt-0.5">
+                                <div className="flex items-center">
+                                  <div className="relative flex-shrink-0 pt-0.5">
                                     <img
                                       className="h-10 w-10 rounded-full"
                                       src={user.Avatar}
                                       alt=""
                                     />
+                                    <div className="absolute -right-2 top-5 text-2xl">
+                                      {index + 1 === 1 && page === 1 && "🥇"}
+                                      {index + 1 === 2 && page === 1 && "🥈"}
+                                      {index + 1 === 3 && page === 1 && "🥉"}
+                                    </div>
                                   </div>
-                                  <div className="ml-3 f">
+                                  <div className="ml-3">
                                     <p className="text-md font-sans text-white">
-                                      {user.login}
+                                      {index + 1 === 1 && page === 1 && (
+                                        <div> Pong champ {user.login}</div>
+                                      )}
+                                      {index + 1 === 2 && page === 1 && (
+                                        <div> Ball wizard {user.login}</div>
+                                      )}
+                                      {index + 1 === 3 && page === 1 && (
+                                        <div> Pong king {user.login}</div>
+                                      )}
+                                      {(index + 1 > 3 || page !== 1) && (
+                                        <div> {user.login}</div>
+                                      )}
                                     </p>
                                   </div>
                                 </div>
                               </div>
 
-                              <div className="flex border-l border-gray-900">
+                              <div className="flex">
                                 <button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 ">
-                                  Profile
+                                  {index < 3 && page === 1 && (
+                                    <div className="text-lg font-bold text-white mr-2">
+                                      {index + 1 === 1 &&
+                                        "🥇 add win percentage here "}
+                                    </div>
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -141,7 +161,14 @@ export default function Search(params: any) {
                     leaderboard();
                     setPage((prev) => prev + 1);
                   } else {
-                    toast.error("No more users");
+                    toast("No more users", {
+                      icon: "🙅",
+                      style: {
+                        borderRadius: "10px",
+                        background: "#333",
+                        color: "#fff",
+                      },
+                    });
                   }
                 }}
               >

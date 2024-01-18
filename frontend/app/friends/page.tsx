@@ -359,7 +359,10 @@ export default function Friends() {
                   <div className="w-full flex items-center justify-center mb-6">
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
                       <div className="md:w-[50vw] w-full flex flex-row-reverse">
-                        <form className="min-w-[80vw] md:min-w-[50vw]" onSubmit={handleSubmit}>
+                        <form
+                          className="min-w-[80vw] md:min-w-[50vw]"
+                          onSubmit={handleSubmit}
+                        >
                           <label className=" flex flex-grow ">
                             <input
                               id="searchField"
@@ -415,7 +418,7 @@ export default function Friends() {
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">
-                                  <div className="flex items-start">
+                                  <div className="flex items-center">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <img
                                         className="h-10 w-10 rounded-full"
