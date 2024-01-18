@@ -30,9 +30,9 @@ export class UserService {
           intraId: id,
         },
       });
-      if (!User)
-      {
-        return undefined
+
+      if (!User) {
+        return undefined;
       }
       if (!User.Avatar) {
         await prisma.user.update({
@@ -45,19 +45,8 @@ export class UserService {
         });
         return User;
       }
-      // if (!User.Avatar.includes('http://')) {
-      //   await prisma.user.update({
-      //     where: {
-      //       intraId: id,
-      //     },
-      //     data: {
-      //       Avatar: `http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg`,
-      //     },
-      //   });
-      //   return User;
-      // }
+      
       const s = User.Avatar.split('/');
-
       if (s[s.length - 2]) {
         if ('http://' + s[s.length - 2] === `${URL}:3001`) {
           const path = './Avataruploads/' + s[s.length - 1];
@@ -131,18 +120,11 @@ export class UserService {
         },
         data: {
           Avatar: newAvatar,
-        },
-      });
-      await prisma.user.update({
-        where: {
-          intraId: userId,
-        },
-        data: {
           isRegistred: true,
         },
       });
     } catch (error) {
-      console.error('Error updating login:', error);
+      console.error('Error updating avatar:', error);
     }
   }
 
@@ -156,6 +138,9 @@ export class UserService {
   }
 
   async createFriend(userId: string, friendId: string) {
+    if (!userId || !friendId) {
+      return;
+    }
     const friend = await prisma.friend.create({
       data: {
         friendshipStatus: 'PENDING',
@@ -166,6 +151,9 @@ export class UserService {
   }
 
   async blockFriend(userId: string, friendId: string): Promise<string> {
+    if (!userId || !friendId) {
+      return;
+    }
     const ifTheFriendshipExists = await prisma.friend.findFirst({
       where: {
         OR: [
@@ -418,6 +406,25 @@ export class UserService {
       return FriendshipStatus;
     } catch (error: any) {
       console.error('Error FriendshipStatus:', error);
+      return;
+    }
+  }
+
+  async leaderboard(page : number): Promise<User[] | undefined> {
+    try {
+      const numberOfUserInOnePage = 10;
+
+      const leaderboard = await prisma.user.findMany({
+        orderBy: {
+          login: 'asc',
+        },
+      });
+      leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
+      leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
+      
+      return leaderboard;
+    } catch (error: any) {
+      console.error('Error leaderboard:', error);
       return;
     }
   }

@@ -17,7 +17,7 @@ import { handleClientsConnection } from 'websocket/Conn.gateway';
 
 @Module({
   imports: [ChatModule, GameModule, UserModule, AuthModule, PrismaModule, JwtModule, EmailModule , ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'AvatarUploads/'),
+    rootPath: join(__dirname, '..', 'Avataruploads/'),
   })],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, JwtService, Email2FAService, handleClientsConnection],

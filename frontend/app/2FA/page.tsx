@@ -58,7 +58,7 @@ const TwoFactorVerification = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: any) => {
     if (e.key === "Enter") {
       handleVerify();
     }

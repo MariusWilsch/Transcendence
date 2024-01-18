@@ -160,9 +160,9 @@ export const Friend = ({
         if (data.friend && data.friend.friendshipStatus) {
           if (
             data.friend.friendshipStatus === "PENDING" &&
-            data.friend.userId === userId
+            data.friend.userId === friendId
           ) {
-            setSender(true);
+            // setSender(true);
           }
         }
       } catch (error: any) {
@@ -212,7 +212,7 @@ export const Friend = ({
               {friendshipStatus === "PENDING" && (
                 <button
                   className={`${blocked ? "  pointer-events-none" : ""}
-                  ${!sender ? "  pointer-events-none" : ""}`}
+                  ${sender ? "  pointer-events-none" : ""}`}
                   onClick={() => {
                     removefrinship();
                     if (context.notifSocket) {

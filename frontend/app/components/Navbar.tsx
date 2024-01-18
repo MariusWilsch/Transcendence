@@ -49,6 +49,7 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
     <div className="bg-[#1F212A] flex flex-row  w-[100vw]">
       <div className="w-16 h-16 bg-[#292D39]">
         <Image
+        unoptimized={true}
           src={pong}
           alt="Description of the image"
           priority={true}
@@ -108,13 +109,14 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
                   className="flex flex-row"
                 >
                   <Image
+                  unoptimized={true}
                     src={user.Avatar}
                     alt="Description of the image"
                     priority={true}
                     width={30}
                     height={30}
                     sizes=""
-                    className="rounded-full mr-2"
+                    className="rounded-full mr-2 w-[30px] h-[30px]"
                   />
                   <div className="text-slate-400 font-sans">{user.login}</div>
                 </Link>

@@ -20,7 +20,7 @@ import { AuthService } from 'modules/auth/auth.service';
   },
 })
 export class handleClientsConnection
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private UserService: UserService,
@@ -48,21 +48,13 @@ export class handleClientsConnection
     const jwt = client.handshake.auth.jwt as string;
     if (jwt && client.id) {
       if (!this.connectedClients.has(client.id)) {
-        // this.connectedClients.set(client.id, jwt);
-        this.connectedClients.set(jwt, client.id);
+        this.connectedClients.set(client.id, jwt);
+        // this.connectedClients.set(jwt, client.id);
       }
     }
   }
   removeClient(client: Socket) {
     this.connectedClients.delete(client.id);
-  }
-  //===========================================================
-
-  private logger: Logger = new Logger('handle Clients Connection Gateway Log');
-
-  afterInit(server: Server) {
-    console.log('handleClientsConnection server initialized');
-    // this.logger.log('APP server Initialized!');
   }
 
   @SubscribeMessage('FriendShipRequest')
@@ -70,9 +62,18 @@ export class handleClientsConnection
     @ConnectedSocket() client: Socket,
     @MessageBody() data: any
   ) {
-    // notify other clients about this new user
-    this.server.emit('FriendShipRequest');
-    // console.log('FriendShipRequest : ', data);
+    // console.log('data : ', data);
+    const {userId, friendId} = data;
+
+    for (const [key, value] of this.connectedClients.entries()) {
+      const user = this.authService.getUserFromJwt(value);
+      if (user.intraId === friendId) {
+        // console.log('user : ', user.login);
+        this.server.to(key).emit('FriendShipRequest');
+      }
+    }
+
+    // this.server.emit('FriendShipRequest');
   }
 
   async handleConnection(client: Socket) {
@@ -87,9 +88,7 @@ export class handleClientsConnection
           await this.UserService.updateUserState(user.intraId, 'ONLINE');
         }
       }
-    } catch (error) {
-      this.logger.error('Error in handleConnection:', error);
-    }
+    } catch (error) {}
   }
 
   async handleDisconnect(client: Socket) {
@@ -103,8 +102,6 @@ export class handleClientsConnection
           await this.UserService.updateUserState(user.intraId, 'OFFLINE');
         }
       }
-    } catch (error) {
-      this.logger.error('Error in handleDisconnect:', error);
-    }
+    } catch (error) {}
   }
 }

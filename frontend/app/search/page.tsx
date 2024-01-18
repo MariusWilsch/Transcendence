@@ -4,10 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { useAppContext, AppProvider, User } from "../AppContext";
-import { CiCirclePlus } from "react-icons/ci";
-import { CiSaveUp2 } from "react-icons/ci";
-import { CiEdit } from "react-icons/ci";
-import { IoIosCloseCircleOutline } from "react-icons/io";
 import toast, { Toaster } from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
@@ -45,6 +41,7 @@ export default function Search(params: any) {
       ) {
         return;
       }
+      console.log(searchTerm);
       try {
         const data = {
           searchTerm: searchTerm,
@@ -198,7 +195,7 @@ export default function Search(params: any) {
                           >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
+                                <div className="flex items-center">
                                   <div className="flex-shrink-0 pt-0.5">
                                     <img
                                       className="h-10 w-10 rounded-full"

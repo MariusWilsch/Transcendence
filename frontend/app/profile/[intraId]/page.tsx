@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { useAppContext, AppProvider, User } from "../../AppContext";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
@@ -15,6 +15,8 @@ import { Sidebar } from "../../components/Sidebar";
 import { TwoFactorAuth } from "../../components/TwoFactorAuth";
 import { Friend } from "../../components/Friend";
 import { useParams, redirect, useRouter } from "next/navigation";
+import loading from "../../../public/loading.json";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 export default function Profile(params: any) {
   const {
@@ -35,6 +37,7 @@ export default function Profile(params: any) {
     undefined
   );
   const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
 
   useEffect(() => {
     setisSidebarVisible(window.innerWidth > 768);
@@ -121,15 +124,15 @@ export default function Profile(params: any) {
     if (params.params.intraId === user?.intraId) {
       setIsProfileOwner(true);
     }
-    let timeoutId: any;
-    if (!user) {
-      timeoutId = setTimeout(() => {
-        toast.error("Please login first");
-      }, 5000);
-    }
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    // let timeoutId: any;
+    // if (!user) {
+    //   timeoutId = setTimeout(() => {
+    //     toast.error("Please login first");
+    //   }, 5000);
+    // }
+    // return () => {
+    //   clearTimeout(timeoutId);
+    // };
   }, [user]);
 
   useEffect(() => {
@@ -247,9 +250,19 @@ export default function Profile(params: any) {
   }
 
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
-      <Navbar isProfileOwner={isProfileOwner} />
+    <div className=" min-h-screen w-screen bg-[#12141A] relative">
+      <div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80">
+        <Lottie
+          animationData={loading}
+          className="w-auto h-auto"
+          onDOMLoaded={(e) => {
+            lottieRef.current?.setSpeed(0.05);
+          }}
+          lottieRef={lottieRef as any}
+        />
+      </div>
 
+      <Navbar isProfileOwner={isProfileOwner} />
       <div className="flex ">
         {isSidebarVisible && (
           <div className="w-16 custom-height ">
@@ -263,7 +276,7 @@ export default function Profile(params: any) {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="z-10 relative flex-1 overflow-y-auto">
           <UserProfileImage
             status={userFromRoutId?.status}
             isProfileOwner={isProfileOwner}
@@ -276,11 +289,17 @@ export default function Profile(params: any) {
             } p-10`}
           >
             <UserDetailsCard value={Login} intraId={intraId} />
-            <Friend
-              isProfileOwner={isProfileOwner}
-              userId={user?.intraId}
-              friendId={params.params.intraId}
-            />
+            {user !== null ? (
+              <Friend
+                isProfileOwner={isProfileOwner}
+                userId={user?.intraId}
+                friendId={params.params.intraId}
+              />
+            ) : (
+              <div className="skeleton flex items-center justify-center text-gray-400">
+                Loading...
+              </div>
+            )}
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
           </div>
         </div>
