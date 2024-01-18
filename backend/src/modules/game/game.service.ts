@@ -55,10 +55,6 @@ export class GameService {
 				0
 				// GAME_CONFIG.canvasHeight * GAME_CONFIG.ballSpeedFactor
 			),
-			// ballVelocity: createVec2(
-			// 	GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor,
-			// 	GAME_CONFIG.canvasHeight * GAME_CONFIG.ballSpeedFactor
-			// ),
 			players: [player1, player2],
 			gameState: this.initGameState(),
 			intervalID: null,
@@ -80,9 +76,7 @@ export class GameService {
 	 * @returns There is no return statement in the provided code snippet. Therefore, nothing is being
 	 * returned.
 	 */
-	public updateGameState(roomID: string, deltaTime: number) {
-		const gameSession = this.gameSessions.get(roomID);
-
+	public updateGameState(gameSession: GameSession, deltaTime: number) {
 		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		this.updatePaddles(gameSession, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
@@ -274,8 +268,6 @@ export class GameService {
 			ballBottom > paddleTop &&
 			ballTop < paddleBottom
 		) {
-			console.log('Collision detected! at', ball.position.x);
-
 			const paddleCenterY = paddle.position.y + paddle.size.height / 2;
 			const collisionPoint =
 				(ball.position.y - paddleCenterY) / (paddle.size.height / 2);
@@ -350,8 +342,8 @@ export class GameService {
 	 * @returns a boolean value.
 	 */
 	public isInGame(roomID: string): boolean {
-		console.log('Does the room exist?', this.gameSessions.has(roomID));
-		return this.gameSessions.has(roomID);
+		if (this.gameSessions.size == 0) return false;
+		return this.gameSessions.get(roomID).intervalID !== null;
 	}
 
 	//* Getters
@@ -395,6 +387,13 @@ export class GameService {
 		}
 	}
 
+	public getWinner({ score }: GameState): boolean[] {
+		if (score.player1 === GAME_CONFIG.WinningScore) {
+			return [true, false];
+		} else {
+			return [false, true];
+		}
+	}
 	//* Helpers
 
 	private choosePaddle(ball: Ball): string {

@@ -7,8 +7,13 @@ import Placeholder from '../assets/images/placeholder.png';
 import PlaceholderBlack from '../assets/images/placeholderBlack.png';
 import PlaceholderWhite from '../assets/images/placeholderWhite.png';
 import Image from 'next/image';
-import { startConnection } from '@/GlobalRedux/features';
-import { useDispatch } from 'react-redux';
+import { startConnection } from '@/app/GlobalRedux/features';
+import { useDispatch, useSelector } from 'react-redux';
+import { ConnectionState } from '@/interfaces';
+import { RootState } from '../GlobalRedux/store';
+
+//* Helper components
+//! Add this to it's own file, maybe /components/*
 
 const Input = ({ ariaLabel }: { ariaLabel: string }) => {
 	return (
@@ -72,6 +77,32 @@ const CardOverlay = ({ title, desc, img, currentStep, handleClick }: any) => {
 	);
 };
 
+const Modal = () => {
+	return (
+		<dialog id="modal1" className="modal">
+			<div className="modal-box text-left">
+				<h3 className="font-bold text-lg flex items-end">
+					Searching for a game{' '}
+					<span className="ml-2 loading loading-dots loading-md"></span>
+				</h3>
+				<p className="py-4">
+					Press ESC key or click the button to cancel the matchmaking.
+				</p>
+				<div className="modal-action justify-center">
+					<form method="dialog">
+						<button className="btn">Cancel Matchmaking</button>
+					</form>
+				</div>
+			</div>
+			<form method="dialog" className="modal-backdrop">
+				<button>close</button>
+			</form>
+		</dialog>
+	);
+};
+
+//* Actual steps
+
 const Step1 = ({ setStep }: any) => {
 	return (
 		<>
@@ -123,22 +154,21 @@ const Step2 = ({ setStep }: any) => {
 const Step3 = () => {
 	const router = useRouter();
 	const dispatch = useDispatch();
-	const [twoPlayersFound, setTwoPlayersFound] = useState(false); // Should be handled by redux but for testing purposes it's fine
-
-	useEffect(() => {
-		if (twoPlayersFound) {
-			router.push('/game');
-		}
-	}, [twoPlayersFound, router]);
+	const push = useSelector(
+		(state: RootState) => state.connection.isGameStarted,
+	);
 
 	const handleStartGame = () => {
 		const modal = document.getElementById('modal1') as HTMLDialogElement;
 		modal?.showModal();
 		dispatch(startConnection());
-		setTimeout(() => {
-			setTwoPlayersFound(true); // Update the state
-		}, 5000);
 	};
+
+	useEffect(() => {
+		if (push) {
+			router.push('/game');
+		}
+	}, [push, router]);
 
 	return (
 		<>
@@ -154,30 +184,12 @@ const Step3 = () => {
 			<button className="btn btn-accent mt-8" onClick={handleStartGame}>
 				START A GAME
 			</button>
-			<dialog id="modal1" className="modal">
-				<div className="modal-box text-left">
-					<h3 className="font-bold text-lg flex items-end">
-						Searching for a game{' '}
-						<span className="ml-2 loading loading-dots loading-md"></span>
-					</h3>
-					<p className="py-4">
-						Press ESC key or click the button to cancel the matchmaking.
-					</p>
-					<div className="modal-action justify-center">
-						<form method="dialog">
-							<button className="btn">Cancel Matchmaking</button>
-						</form>
-					</div>
-				</div>
-				<form method="dialog" className="modal-backdrop">
-					<button>close</button>
-				</form>
-			</dialog>
+			<Modal />
 		</>
 	);
 };
 
-export const StepsList = () => {
+const StepsList = () => {
 	const [currentStep, setCurrentStep] = useState(1);
 
 	return (

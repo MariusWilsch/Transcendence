@@ -1,6 +1,13 @@
 import { MiddlewareAPI, Dispatch, AnyAction } from '@reduxjs/toolkit';
 import { io, Socket } from 'socket.io-client';
-import { initGame, setConnected, updateGame } from '../features';
+import {
+	initGame,
+	updateGame,
+	gameStarted,
+	gameFinished,
+	setPlayerOutcome,
+	GameOutcome,
+} from '../features';
 import { GameState } from '@/interfaces/GameState';
 
 // Types
@@ -21,20 +28,27 @@ let socket: Socket | null = null;
 const connect = (store: MiddlewareStore) => {
 	socket = io('http://localhost:3001');
 
-	socket.on('connect', () => {
-		console.log('Connected to server');
-		// dispatch(setConnected(true));
-	});
+	socket.on('connect', () => console.log('Connected to server'));
 
 	socket.on('disconnect', () => console.log('Disconnected from server'));
 
-	socket.on('createGame', (gameState: GameState) =>
-		store.dispatch(initGame(gameState)),
-	);
+	socket.on('createGame', (gameState: GameState) => {
+		console.log('Game created', socket?.id);
+		store.dispatch(initGame(gameState));
+		//! Will be set twice, once for each player
+		store.dispatch(gameStarted());
+	});
 
 	socket.on('gameState', (gameState: GameState) =>
 		store.dispatch(updateGame(gameState)),
 	);
+
+	socket.on('gameOver', (won: boolean) => {
+		//! Will be set twice, once for each player
+		store.dispatch(gameFinished());
+		const outcome = won ? GameOutcome.WON : GameOutcome.LOST;
+		store.dispatch(setPlayerOutcome(outcome));
+	});
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
@@ -43,6 +57,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 	switch (action.type) {
 		case 'game/movePaddle':
 			socket?.emit('onPaddleMove', action.payload);
+			break;
+		case 'connection/startLoop':
+			socket?.emit('startLoop');
 			break;
 		//* Can be expanded to handle more actions - Add below
 		default:

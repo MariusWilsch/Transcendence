@@ -35,15 +35,6 @@ export interface GameState {
 	score: Score;
 }
 
-// Structure to keep track of player associations within a game session
-export interface GameSession {
-	ballVelocity: Vector;
-	players: Socket[];
-	gameState: GameState;
-	intervalID: NodeJS.Timeout | null;
-	input: PaddleInput;
-}
-
 //* Not sure if this is needed
 export interface PaddleMove {
 	direction: 'up' | 'down' | 'stop';
@@ -53,4 +44,13 @@ export interface PaddleMove {
 export interface PaddleInput {
 	player1: { up: boolean; down: boolean };
 	player2: { up: boolean; down: boolean };
+}
+
+// Structure to keep track of player associations within a game session
+export interface GameSession {
+	ballVelocity: Vector;
+	players: Socket[];
+	gameState: GameState;
+	intervalID: NodeJS.Timeout | null;
+	input: PaddleInput;
 }

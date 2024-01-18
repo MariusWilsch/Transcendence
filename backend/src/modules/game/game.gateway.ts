@@ -6,7 +6,7 @@ import {
 	WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket as IO } from 'socket.io';
-import { GameState } from './helpers/interfaces';
+import { GameState, GameSession, PaddleMove } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
@@ -59,14 +59,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.gameService.createGameSession(roomID, player1, player2);
 
 		//? Emit an event to both Sockets in the room
+		const gameState = this.gameService.getGameState(roomID);
 		this.Server.to(roomID).emit('createGame', {
-			gameState: this.gameService.getGameState(roomID),
+			...gameState,
 			canvasWidth: GAME_CONFIG.canvasWidth,
 			canvasHeight: GAME_CONFIG.canvasHeight,
 		});
-
-		// Start the game loop
-		this.beginGameLoop(roomID);
 	}
 
 	beginGameLoop(roomID: string) {
@@ -80,25 +78,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const currentTime = performance.now();
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
+			const gameSession = this.gameService.getSession(roomID);
 
 			// if (deltaTime > 0.02) {
 			// 	console.log(`High Delta Time Detected: ${deltaTime}`);
 			// }
 
 			// const startUpdateTime = performance.now();
-			this.gameService.updateGameState(roomID, deltaTime);
+			this.gameService.updateGameState(gameSession, deltaTime);
 			// const endUpdateTime = performance.now();
 
 			// console.log(
 			// 	`Game state update took ${endUpdateTime - startUpdateTime} milliseconds`
 			// );
 
-			if (this.gameService.isGameOver(this.gameService.getGameState(roomID))) {
+			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
+				const gameResult = this.gameService.getWinner(gameSession.gameState);
+				console.log('Game result', gameResult);
+				gameSession.players[0].emit('gameOver', gameResult[0]);
+				gameSession.players[1].emit('gameOver', gameResult[1]);
 				clearInterval(intervalId);
 			}
 			// const startUpdateTime1 = performance.now();
-			this.sendGameState(roomID, this.gameService.getGameState(roomID));
+			this.sendGameState(roomID, gameSession.gameState);
 			// const endUpdateTime1 = performance.now();
 
 			// console.log(
@@ -113,16 +116,35 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// Only send dimensions once (on game start)
 	// Only send score when it changes
 	// Don't send ball & paddle velocities
-	// console.log('Sending game state');
-	// console.log('Server-side:');
+
 	sendGameState(roomID: string, gameState: GameState) {
-		// console.log
 		this.Server.to(roomID).emit('gameState', gameState);
 	}
 
 	@SubscribeMessage('onPaddleMove')
-	handlePaddleMove(client: IO, payload: any): void {
+	handlePaddleMove(client: IO, payload: PaddleMove): void {
+		const roomID = client.data.roomID;
+		const gameSession: GameSession = this.gameService.getSession(
+			client.data.roomID
+		);
+
+		if (
+			(payload.player === 'player1' &&
+				client.id !== gameSession.players[0].id) ||
+			(payload.player === 'player2' && client.id !== gameSession.players[1].id)
+		) {
+			return;
+		}
+
 		// Notify game service of the paddle move
-		this.gameService.setInputBool(client.data.roomID, payload);
+		console.log('onPaddleMove event received', payload);
+		this.gameService.setInputBool(roomID, payload);
+	}
+
+	@SubscribeMessage('startLoop')
+	handleStartLoop(client: IO): void {
+		console.log('startLoop event received');
+		if (!this.gameService.isInGame(client.data.roomID))
+			this.beginGameLoop(client.data.roomID);
 	}
 }

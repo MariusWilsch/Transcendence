@@ -155,14 +155,6 @@ export class GameService {
 		// Update paddles
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
-
-		// Update scores
-		// if (score.player1 !== this.prevScores.player1) {
-		// 	this.scores.player1.text = score.player1.toString();
-		// } else if (score.player2 !== this.prevScores.player2) {
-		// 	this.scores.player2.text = score.player2.toString();
-		// }
-		// this.prevScores = score;
 	}
 
 	public clearGameElements() {

@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export const Card = ({ img, btnText, title, desc }: any) => {
 	return (
-		<div className="card bg-base-200 shadow-sm hover:shadow-accent sm:w-[60vw] sm:max-h-[60vh] md:w-[45%] rounded-xl boxTransform">
+		<div className="card bg-base-200 shadow-sm hover:shadow-accent rounded-xl boxTransform">
 			<figure>
 				<Image src={img} alt="Pre-configured game" />
 			</figure>
@@ -24,7 +24,7 @@ export const Card = ({ img, btnText, title, desc }: any) => {
 };
 
 const Cards = () => {
-	//* I want these cards to be clickable and redirect to the game page
+	//* I want these cards to be clickable and redirect to the steps page
 	//! The cards should wrap to the next line if the screen is too small
 	//! I don't know how to specify when the cards should wrap to the next line
 	return (
