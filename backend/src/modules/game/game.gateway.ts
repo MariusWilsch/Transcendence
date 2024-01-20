@@ -31,6 +31,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.checkForAvailablePlayers();
 	}
 
+	//? Do I really want to disconnect the client if they quit the game or the game is over?
 	handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
@@ -146,5 +147,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log('startLoop event received');
 		if (!this.gameService.isInGame(client.data.roomID))
 			this.beginGameLoop(client.data.roomID);
+	}
+
+	@SubscribeMessage('cancelMatchmaking')
+	handleCancelMatchmaking(client: IO): void {
+		this.lobby = this.lobby.filter((player) => player.id !== client.id);
+		console.log(
+			`Client ${client.id} removed from matchmaking. New lobby size: ${this.lobby.length}`
+		);
+	}
+
+	@SubscribeMessage('addToLobby')
+	handleAddToLobby(client: IO): void {
+		this.lobby.push(client);
+		console.log(
+			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
+		);
 	}
 }

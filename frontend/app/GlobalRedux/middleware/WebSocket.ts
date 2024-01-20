@@ -7,6 +7,8 @@ import {
 	gameFinished,
 	setPlayerOutcome,
 	GameOutcome,
+	MatchmakingStatus,
+	setMatchmaking,
 } from '../features';
 import { GameState } from '@/interfaces/GameState';
 
@@ -30,13 +32,18 @@ const connect = (store: MiddlewareStore) => {
 
 	socket.on('connect', () => console.log('Connected to server'));
 
-	socket.on('disconnect', () => console.log('Disconnected from server'));
+	socket.on('disconnect', () => {
+		console.log('Disconnected from server');
+		store.dispatch(gameFinished());
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
+	});
 
 	socket.on('createGame', (gameState: GameState) => {
 		console.log('Game created', socket?.id);
 		store.dispatch(initGame(gameState));
 		//! Will be set twice, once for each player
 		store.dispatch(gameStarted());
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('gameState', (gameState: GameState) =>
@@ -60,6 +67,12 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			break;
 		case 'connection/startLoop':
 			socket?.emit('startLoop');
+			break;
+		case 'connection/cancelMatchmaking':
+			socket?.emit('cancelMatchmaking');
+			break;
+		case 'connection/addToLobby':
+			socket?.emit('addToLobby');
 			break;
 		//* Can be expanded to handle more actions - Add below
 		default:

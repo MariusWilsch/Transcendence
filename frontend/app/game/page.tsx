@@ -4,6 +4,7 @@ import { RootState } from '@/app/GlobalRedux/store';
 import { startLoop } from '@/app/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Link from 'next/link';
 
 const Score = ({ score }: any) => {
 	return (
@@ -68,7 +69,7 @@ function CountdownModal() {
 		<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
 			<div className="modal-box">
 				<div className="py-4">
-					Game starting in
+					Game starting in{' '}
 					<span className="countdown">
 						<span
 							ref={countdownRef}
@@ -134,11 +135,15 @@ function GameOutcomeModal({ outcome }: any) {
 			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
 				<div className="modal-box">
 					<div className="font-bold text-lg">You {outcome} </div>
-					<div className="modal-action">
-						<form method="dialog">
-							{/* if there is a button in form, it will close the modal */}
-							<button className="btn btn-wide">Play again</button>
-							<button className="btn btn-wide">Go Home</button>
+					<div className="modal-action flex justify-center items-center">
+						<form
+							method="dialog"
+							className="space-x-4 w-full flex justify-center"
+						>
+							<button className="btn">Play again</button>
+							<Link href="/">
+								<button className="btn">Go Home</button>
+							</Link>
 						</form>
 					</div>
 				</div>

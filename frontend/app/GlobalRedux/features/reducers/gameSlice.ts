@@ -43,6 +43,7 @@ const gameSlice = createSlice({
 
 //* Action creators
 export const movePaddle = createAction<PlayerMove>('game/movePaddle');
+//! I think this one should go to connectionSlice.ts
 export const startConnection = createAction('game/startConnection');
 
 //* Slice definitions

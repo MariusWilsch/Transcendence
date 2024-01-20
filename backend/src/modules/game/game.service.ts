@@ -321,6 +321,7 @@ export class GameService {
 
 	//! This function is still subject to change
 	public deleteGameSession(clientID: string, roomID: string): void {
+		if (this.gameSessions.size == 0) return;
 		const gameSession = this.gameSessions.get(roomID);
 
 		if (gameSession) {
@@ -389,9 +390,9 @@ export class GameService {
 
 	public getWinner({ score }: GameState): boolean[] {
 		if (score.player1 === GAME_CONFIG.WinningScore) {
-			return [true, false];
-		} else {
 			return [false, true];
+		} else {
+			return [true, false];
 		}
 	}
 	//* Helpers
