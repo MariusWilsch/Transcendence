@@ -68,8 +68,8 @@ function CountdownModal() {
 		<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
 			<div className="modal-box">
 				<div className="py-4">
+					Game starting in
 					<span className="countdown">
-						<span>Game starting in </span>
 						<span
 							ref={countdownRef}
 							style={{ '--value': 5 } as React.CSSProperties}
@@ -128,6 +128,7 @@ function GameOutcomeModal({ outcome }: any) {
 		}
 	}, [isGameStarted]);
 
+	//! The buttons are supposed to go next to each other, but they are stacked on top of each other
 	return (
 		<>
 			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
@@ -136,8 +137,8 @@ function GameOutcomeModal({ outcome }: any) {
 					<div className="modal-action">
 						<form method="dialog">
 							{/* if there is a button in form, it will close the modal */}
-							<button className="btn">Play again</button>
-							<button className="btn">Go Home</button>
+							<button className="btn btn-wide">Play again</button>
+							<button className="btn btn-wide">Go Home</button>
 						</form>
 					</div>
 				</div>

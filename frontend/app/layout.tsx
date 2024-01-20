@@ -1,9 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Quicksand } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/app/GlobalRedux/provider';
 
-const inter = Inter({ subsets: ['latin'] });
+const quicksand = Quicksand({
+	subsets: ['latin'],
+	weight: ['300', '400', '500', '600', '700'],
+	variable: '--font-quicksand',
+});
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -31,7 +35,7 @@ const NavBar = () => {
 
 const Content = ({ children }: any) => {
 	return (
-		<div className="flex flex-1 flex-col justify-center -mt-1 -ml-1 rounded-tl-2xl bg-base-100 h-full">
+		<div className="flex flex-1 flex-col justify-center -mt-1 -ml-1 rounded-tl-2xl bg-base-100 h-full  shadow-lg">
 			{children}
 		</div>
 	);
@@ -44,7 +48,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className={inter.className}>
+			<body className={quicksand.className}>
 				<div className="flex flex-col h-screen w-screen">
 					<div className="flex flex-1">
 						<Sidebar />
