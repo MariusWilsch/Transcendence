@@ -101,7 +101,7 @@ export default function Search(params: any) {
                                     </div>
                                   </div>
                                   <div className="ml-3">
-                                    <p className="text-md font-sans text-white">
+                                    <div className="text-md font-sans text-white">
                                       {index + 1 === 1 && page === 1 && (
                                         <div> Pong champ {user.login}</div>
                                       )}
@@ -114,7 +114,7 @@ export default function Search(params: any) {
                                       {(index + 1 > 3 || page !== 1) && (
                                         <div> {user.login}</div>
                                       )}
-                                    </p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -124,7 +124,7 @@ export default function Search(params: any) {
                                   {index < 3 && page === 1 && (
                                     <div className="text-lg font-bold text-white mr-2">
                                       {index + 1 === 1 &&
-                                        "🥇 add win percentage here "}
+                                        "win % "}
                                     </div>
                                   )}
                                 </button>

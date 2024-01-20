@@ -296,8 +296,10 @@ export default function Profile(params: any) {
                 friendId={params.params.intraId}
               />
             ) : (
-              <div className="skeleton flex items-center justify-center text-gray-400">
-                Loading...
+              <div className="flex items-center justify-center text-gray-400">
+                <div className="skeleton pr-10 pl-10 text-slate-400">
+                  Loading...
+                </div>
               </div>
             )}
             <TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />

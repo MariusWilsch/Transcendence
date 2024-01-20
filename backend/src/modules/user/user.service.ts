@@ -45,7 +45,7 @@ export class UserService {
         });
         return User;
       }
-      
+
       const s = User.Avatar.split('/');
       if (s[s.length - 2]) {
         if ('http://' + s[s.length - 2] === `${URL}:3001`) {
@@ -97,14 +97,8 @@ export class UserService {
         },
         data: {
           login: newLogin,
-        },
-      });
-      await prisma.user.update({
-        where: {
-          intraId: userId,
-        },
-        data: {
           isRegistred: true,
+          updated_at: new Date(),
         },
       });
     } catch (error) {
@@ -121,6 +115,7 @@ export class UserService {
         data: {
           Avatar: newAvatar,
           isRegistred: true,
+          updated_at: new Date(),
         },
       });
     } catch (error) {
@@ -385,6 +380,7 @@ export class UserService {
         },
         data: {
           status: status,
+          updated_at: new Date(),
         },
       });
     } catch (error: any) {
@@ -410,7 +406,7 @@ export class UserService {
     }
   }
 
-  async leaderboard(page : number): Promise<User[] | undefined> {
+  async leaderboard(page: number): Promise<User[] | undefined> {
     try {
       const numberOfUserInOnePage = 10;
 
@@ -421,7 +417,7 @@ export class UserService {
       });
       leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
       leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
-      
+
       return leaderboard;
     } catch (error: any) {
       console.error('Error leaderboard:', error);
