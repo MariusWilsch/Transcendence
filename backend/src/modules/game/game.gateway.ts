@@ -124,7 +124,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('onPaddleMove')
 	handlePaddleMove(client: IO, payload: PaddleMove): void {
-		const roomID = client.data.roomID;
 		const gameSession: GameSession = this.gameService.getSession(
 			client.data.roomID
 		);
@@ -139,14 +138,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		// Notify game service of the paddle move
 		console.log('onPaddleMove event received', payload);
-		this.gameService.setInputBool(roomID, payload);
+		this.gameService.setInputBool(gameSession, payload);
 	}
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
 		console.log('startLoop event received');
-		if (!this.gameService.isInGame(client.data.roomID))
-			this.beginGameLoop(client.data.roomID);
+		if (!this.gameService.isInGame(client.data.roomID)) {
+			// this.beginGameLoop(client.data.roomID);
+		}
 	}
 
 	@SubscribeMessage('cancelMatchmaking')

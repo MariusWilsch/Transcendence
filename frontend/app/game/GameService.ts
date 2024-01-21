@@ -27,6 +27,7 @@ export class GameService {
 	constructor(container: HTMLDivElement, width: number, height: number) {
 		this.container = container;
 		this.app = new PIXI.Application<HTMLCanvasElement>({
+			eventMode: 'passive', // More performant then auto
 			width: width,
 			height: height,
 			backgroundAlpha: 0, // Set background color to transparent
@@ -158,6 +159,7 @@ export class GameService {
 	}
 
 	public clearGameElements() {
+		//! What do I actually need to clear?
 		console.log('Clearing game elements');
 		if (this.app) {
 			this.container.removeChild(this.app.view as HTMLCanvasElement);

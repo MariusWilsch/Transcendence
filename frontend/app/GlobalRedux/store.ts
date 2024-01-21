@@ -11,6 +11,8 @@ import { GameConfigState } from './features/reducers/gameConfig';
 
 //* The Redux store for the application.
 
+//! Refactoring needed
+//TODO: The reducers have some reduant states and actions that can be improved
 export interface RootState {
 	game: GameState;
 	connection: ConnectionState;

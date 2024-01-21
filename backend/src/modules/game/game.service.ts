@@ -174,6 +174,40 @@ export class GameService {
 		this.preventPaddleOverlap(paddles.player1, paddles.player2);
 	}
 
+	// private updatePaddles({ gameState, input }: GameSession, deltaTime: number) {
+	// 	const paddles = gameState.paddles;
+	// 	let didPaddlesMove = false;
+
+	// 	didPaddlesMove = this.updatePaddle(
+	// 		paddles.player1,
+	// 		input.player1,
+	// 		deltaTime
+	// 	);
+	// 	didPaddlesMove = this.updatePaddle(
+	// 		paddles.player2,
+	// 		input.player2,
+	// 		deltaTime
+	// 	);
+	// 	if (!didPaddlesMove) return;
+	// 	this.preventPaddleOverlap(paddles.player1, paddles.player2);
+	// }
+
+	// private updatePaddle(
+	// 	paddle: Paddle,
+	// 	input: { up: false; down: false },
+	// 	deltaTime: number
+	// ) {
+	// 	let didMove = false;
+	// 	if (input.direction === 'up') {
+	// 		paddle.position.y -= this.paddleSpeed * deltaTime;
+	// 		didMove = true;
+	// 	} else if (input.direction === 'down') {
+	// 		paddle.position.y += this.paddleSpeed * deltaTime;
+	// 		didMove = true;
+	// 	}
+	// 	return didMove;
+	// }
+
 	/**
 	 * The preventPaddleOverlap function ensures that the paddles do not overlap with the top or bottom
 	 * boundaries of the game canvas.
@@ -369,9 +403,9 @@ export class GameService {
 		this.gameSessions.get(roomID).intervalID = intervalID;
 	}
 
-	public setInputBool(roomID: string, payload: PaddleMove) {
+	public setInputBool(gameSession: GameSession, payload: PaddleMove) {
 		//1. Get the input object
-		const input = this.gameSessions.get(roomID).input[payload.player];
+		const input = gameSession.input[payload.player];
 
 		// 2. Decide which input to set
 		switch (payload.direction) {

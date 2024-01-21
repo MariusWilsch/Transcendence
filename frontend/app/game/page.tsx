@@ -129,7 +129,6 @@ function GameOutcomeModal({ outcome }: any) {
 		}
 	}, [isGameStarted]);
 
-	//! The buttons are supposed to go next to each other, but they are stacked on top of each other
 	return (
 		<>
 			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
