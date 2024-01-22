@@ -1,6 +1,7 @@
 .git
 *.md
-!README*.md
 .DS_Store
 node_modules/
+app/node_modules
 dist/
+.next/

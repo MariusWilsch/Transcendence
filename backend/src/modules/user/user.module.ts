@@ -12,13 +12,14 @@ import { diskStorage } from 'multer';
       dest: './Avataruploads/',
       storage: diskStorage({
         destination: function (req, file, cb) {
-          cb(null, 'Avataruploads/')
-      },
+          cb(null, 'Avataruploads/');
+        },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now();
           const fileExtension = file.originalname.split('.').pop();
           cb(null, file.fieldname + '-' + uniqueSuffix + '.' + fileExtension);
         },
+        
       }),
     }),
   ],

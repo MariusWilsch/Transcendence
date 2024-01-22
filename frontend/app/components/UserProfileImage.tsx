@@ -134,22 +134,23 @@ export const UserProfileImage = ({
             credentials: "include",
           }
         );
+        if (!response.ok) {
+          toast.error("Failed to update the avatar");
+          setSelectedFile(null);
+          return;
+        }
         const data = await response.json();
         if (data.success === false) {
-          toast.error("Failed to update login avatar");
-          console.log("Failed to update login avatar");
+          toast.error("Failed to update the avatar");
         } else {
           toast.success("avatar updated successfully");
-          console.log("avatar updated successfully");
         }
       } catch (error) {
         toast.error("Failed to update avatar");
-        console.error("Error during POST request:", error);
       }
       setSelectedFile(null);
     } else {
       toast.error("Please select a file");
-      console.log("Please select a file");
     }
   };
   var readableDate: string = "";
@@ -166,7 +167,7 @@ export const UserProfileImage = ({
   }
 
   const percentage: any = {
-    "--value": 0.5,
+    "--value": 55,
     "--size": "160px",
     fontSize: "44px",
   };
@@ -192,7 +193,7 @@ export const UserProfileImage = ({
                       style={percentage}
                       role="progressbar"
                     >
-                      0.5%
+                      55%
                     </div>
                   </div>
                   <div className="text-gray-300 font-mono">
@@ -203,16 +204,21 @@ export const UserProfileImage = ({
               </div>
               <div className="w-1/3 h-2/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30 ">
                 <div className="m-4 overflow-hidden ">
-                  <div className="flex flex-row justify-between">
-                    <div className="text-white mb-1">Total friends :</div>
+                  <div className="flex flex-row justify-between ">
+                    <div className="text-white mb-1 ">Total friends :</div>
                     {isProfileOwner && (
                       <button
                         onClick={() => setrefreshFriends((prev) => prev + 1)}
                       >
-                        <RxUpdate
-                          size="20"
-                          className="text-gray-400 inline mr-1"
-                        />
+                        <div className="tooltip ">
+                          <RxUpdate
+                            size="20"
+                            className="text-gray-400 inline mr-1"
+                          />
+                          <div className="tooltiptext w-20 bg-gray-800 bg-opacity-80 top-0 right-4 text-white p-3 rounded-md hover:transition duration-300 ease-in">
+                            Refresh
+                          </div>
+                        </div>
                       </button>
                     )}
                   </div>
@@ -235,27 +241,47 @@ export const UserProfileImage = ({
               {user ? (
                 <div className="w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30 flex items-center overflow-hidden">
                   <div className="m-5 overflow-hidden ">
-                    <div className=" text-white mb-3">
-                      <TfiFaceSmile size="22" className="inline mr-[1px]" /> :{" "}
-                      <div className="inline text-green-400">
+                    <div className=" text-white mb-3 ">
+                      <div className="tooltip">
+                        <div className="tooltiptext w-32 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Full name
+                        </div>
+                        <TfiFaceSmile size="22" className="inline mr-[1px]" /> :{" "}
+                      </div>
+                      <div className="inline text-green-400 ">
                         {user?.fullname}
                       </div>
                     </div>
                     <div className=" text-white mb-3">
-                      <MdOutlineMailOutline size="21" className="inline" /> :{" "}
+                      <div className="tooltip">
+                        <div className="tooltiptext w-20 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Email
+                        </div>
+                        <MdOutlineMailOutline size="21" className="inline" /> :{" "}
+                      </div>
                       <div className="inline text-green-400 ">
                         {user?.email}
                       </div>
                     </div>
                     <div className=" text-white mb-3">
-                      <LiaWalkingSolid size="24" className="inline" />
+                      <div className="tooltip">
+                        <div className="tooltiptext w-36 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Joining date
+                        </div>
+                        <LiaWalkingSolid size="24" className="inline" />
+                      </div>
                       {"  "}:{" "}
                       <div className="inline text-green-400 ">
                         {readableDate}
                       </div>
                     </div>
                     <div className="font-sans text-white">
-                      <RxUpdate size="20" className="inline mr-1" /> :{" "}
+                      <div className="tooltip">
+                        <div className="tooltiptext w-40 bg-gray-800 bg-opacity-80 -top-5 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Last profile update
+                        </div>
+                        <RxUpdate size="20" className="inline mr-1" /> :{" "}
+                      </div>
                       <div className="inline text-blue-400 font-semibold">
                         {readableDate2} &nbsp;
                       </div>

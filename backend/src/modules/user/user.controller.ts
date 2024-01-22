@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -16,7 +18,10 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { AuthService } from 'modules/auth/auth.service';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
@@ -191,7 +196,13 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar'))
   async editavatar(
     @Param('id') userId: string,
-    @UploadedFile() avatar: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: 'image/*' }),
+        ],
+      }),
+    ) avatar: Express.Multer.File,
     @Res() res: any,
     @Req() req: any
   ) {

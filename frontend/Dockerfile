@@ -1,13 +1,13 @@
-FROM node:21-alpine
+FROM node:20-alpine
 
 
 RUN mkdir -p /usr/transcendence
 
 WORKDIR /usr/transcendence
 
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+# ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
-COPY package*.json ./
+COPY *.json ./
 
 RUN npm install
 

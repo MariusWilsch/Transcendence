@@ -94,7 +94,10 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
             </div>
             <div className="flex justify-end p-4 flex-grow">
               {!isDivVisible && isProfileOwner && (
-                <button onClick={toggleDivVisibility}>
+                <button onClick={toggleDivVisibility} className="tooltip">
+                  <div className="text-sm tooltiptext w-24 bg-gray-800 bg-opacity-80 top-0 right-8 text-white p-1 rounded-md hover:transition duration-300 ease-in">
+                    Edit profile
+                  </div>
                   <CiEdit className="text-white" size="25" />
                 </button>
               )}

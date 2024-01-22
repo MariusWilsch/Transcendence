@@ -147,7 +147,6 @@ export default function Search(params: any) {
                     leaderboard();
                     setPage((prev) => prev - 1);
                   } else {
-                    // toast.error("No more users");
                   }
                 }}
               >
