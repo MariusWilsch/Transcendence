@@ -345,6 +345,9 @@ const ChannelsLobby = () => {
                           >
                             <Link
                               href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${channel.channelId}`}
+                              onClick={()=>{
+                                context.setComponent('conversation');
+                              }}
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">

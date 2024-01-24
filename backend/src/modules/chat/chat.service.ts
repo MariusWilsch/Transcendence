@@ -38,8 +38,13 @@ export class ChatService {
         friendId:sender,
       }
     });
+    const userStatueReciepent = prisma.friend.findFirst({
+      where:{
+        userId:sender,
+      },
+    });
 
-    if (userStatue && (await userStatue)?.friendshipStatus === 'BLOCKED')
+    if (userStatue && ((await userStatue)?.friendshipStatus === 'BLOCKED' || (await userStatueReciepent)?.friendshipStatus === 'BLOCKED'))
     {
       throw ('message can\'t be sent');
     }
@@ -75,7 +80,7 @@ export class ChatService {
         name: privateRoomName,
       },
       data:{
-        updated_at:dateToIso,
+        updated_at:dateToIso
       },
     });
     console.log(message);
@@ -193,13 +198,15 @@ export class ChatService {
       },
     });
   }
-  async getRoomMessages(roomId:string) :Promise<any>{
+  async getRoomMessages(roomId:string, pageSize:number, skip:number) :Promise<any>{
     return await prisma.message.findMany({
+      take:pageSize,
+      skip,
       where:{
         PrivateRoomName:roomId,
       },
       orderBy:{
-        createdAt:'asc',
+        createdAt:'desc',
       }
     })
   }
@@ -232,13 +239,13 @@ export class ChatService {
     const data = await this.getRoomsByUser(userId);
     return data;
   }
-  async getPrivateRoomMessages(roomId: string){
+  async getPrivateRoomMessages(roomId: string, pageSize:number, skip:number){
     const room = await this.getPrivateRoom(roomId);
     if (!room)
     {
       throw ('no such room');
     }
-    const data = await this.getRoomMessages(roomId);
+    const data = await this.getRoomMessages(roomId, pageSize, skip);
     return data;
   }
   async getMessagesByUser(userId:string): Promise<any>{
@@ -318,6 +325,7 @@ export class ChatService {
     const data = await prisma.memberShip.findMany({
       where:{
         intraId:userId,
+        isBanned:false,
       },
     });
     return data;
@@ -368,19 +376,25 @@ export class ChatService {
         intraId :sender.intraId
       },
     })
+
     if (!memberShip)
     {
       throw ('no such member');
     }
-    if (memberShip.isBanned || memberShip.isMuted)
+    if (memberShip.isBanned || memberShip.isMuted) 
     {
       throw ('you can t send message into that channel ');
     }
+    const user =  await prisma.user.findUnique({
+      where:{
+        intraId:sender.intraId
+      }
+    })
     return await prisma.channelMessage.create({
       data:{
         channelId,
         sender:sender.intraId,
-        Avatar:sender.Avatar,
+        Avatar: user.Avatar,
         content:message,
       },
 
@@ -399,7 +413,7 @@ export class ChatService {
           none:{
             intraId,
           }
-        }
+        },
       }
     })
   }
@@ -508,6 +522,32 @@ export class ChatService {
       where:{
         channelId,
         intraId,
+      }
+    })
+  }
+  async updateChannelSettings(ownerId:string, channelId:string, info:{type:string,password:string}){
+    const saltRounds = 10;
+    let password = '';
+    const owner = prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId:ownerId,
+        isOwner:true,
+      }
+    });
+    if (!owner){
+      throw('luck of privilige ');
+    }
+    if(info.type ==="PROTECTED"){
+      const password = await bcrypt.hash(info.password, saltRounds);
+    }
+    await prisma.channel.update({
+      where:{
+        name:channelId,
+      },
+      data:{
+        type:info.type,
+        password:password,
       }
     })
   }

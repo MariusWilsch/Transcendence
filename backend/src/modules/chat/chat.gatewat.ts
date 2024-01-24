@@ -6,6 +6,7 @@ import { ChatService } from './chat.service';
 import { User } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { channel } from 'diagnostics_channel';
 
 
 @WebSocketGateway(3002,{
@@ -163,7 +164,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = this.chatService.getUserFromJwt(payload.jwt);
       if (!user)
       {
-         
         return;
       }
       const members = await this.chatService.getAllChannelUsers(payload.to);
@@ -176,7 +176,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           recipientSocket.map((socket:any) =>{
             if (socket.id !== client.id){
               socket.emit('channelBroadcast',message);
-              console.log('are we here');
             }
           }
           );
@@ -191,6 +190,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('updateChannelUser')
   async updateChannel(client:any, payload:{jwt:string, memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}}){
     try{
+      console.log(payload);
       const user = this.chatService.getUserFromJwt(payload.jwt);
       if (!user)
       {
@@ -206,6 +206,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     catch(e){
       console.log(e);
         client.emit('updateChannelUser',{e});
+    }
+  }
+  @SubscribeMessage('updateChannelSettings')
+  async updateChannelSettings(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){
+    try{
+      console.log(payload);
+      const user = this.chatService.getUserFromJwt(payload.jwt);
+      if (!user)
+      {
+        return;
+      }
+      await this.chatService.updateChannelSettings(client.user.intraId, payload.channelId,payload.info);
+      const memberShips = await this.chatService.getAllChannelUsers(payload.channelId);
+      client.emit('updateChannelSetting',{e:"channel settings Successufely updated"});
+      memberShips.map((memberShip)=>{
+        const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
+        socketRec.map((socket:any)=>{
+          socket.emit('updateChannelSetting',{e:"channel settings have been updated"});
+        })
+      })
+    }
+    catch(e){
+      console.log(e);
+        client.emit('updateChannelSettings',{e});
     }
   }
 }

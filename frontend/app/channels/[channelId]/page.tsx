@@ -8,16 +8,16 @@ import { Loading } from "@/app/components/Loading"
 import toast, { Toaster } from "react-hot-toast"
 import { Navbar } from "@/app/components/Navbar"
 import { Sidebar } from "@/app/components/Sidebar"
-import { Conversations } from "../../chat/page"
+import { Conversations, PermissionDenied } from "../../chat/page"
 import { IoMdArrowBack } from "react-icons/io"
-import { Avatar, AvatarGroup, ComboboxItem } from "@mantine/core"
+import { Avatar, AvatarGroup, ColorPicker, ComboboxItem } from "@mantine/core"
 import { FaUserEdit } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import Image from "next/image"
 import { useDisclosure } from '@mantine/hooks';
 import { Modal, Button } from '@mantine/core';
 import { Select,  } from '@mantine/core';
-import { PiFlagBannerFill } from "react-icons/pi";
+import { FcInvite } from "react-icons/fc";
 import { PiFlagBannerLight } from "react-icons/pi";
 import { CiLogout } from "react-icons/ci";
 import { CiSettings } from "react-icons/ci";
@@ -88,12 +88,9 @@ const EditMemberShip = (props: any) => {
     {
       if (context.socket)
       {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
         const cookie = new Cookies();
         const jwt = cookie.get('jwt')
-        console.log('are we here');
-        //schema
-        //{jwt,memberId, info:{userPrivilige:ModeValue==="moderator"?true:false,banning:member.isBanned,Muting:(member.isMuted && muteValue==='UnMute')?{action:false, time:new Date()}:muteValue?{action:true, time:addHoursToNow(muteValue)}:{action:member.isMuted,time:addHoursToNow(muteValue)}}}
-        //{moderatorId:string, memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}}
         context.socket.emit('updateChannelUser',{jwt,memberId, info:{userPrivilige:ModeValue==="moderator"?true:false,banning:member.isBanned,Muting:(member.isMuted && muteValue==='UnMute')?{action:false, time:new Date()}:muteValue?{action:true, time:addHoursToNow(muteValue)}:{action:member.isMuted,time:addHoursToNow(muteValue)}}})
       }
     }
@@ -113,7 +110,7 @@ const EditMemberShip = (props: any) => {
                   console.log(addHoursToNow(muteValue));
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Edit Member" centered>
+      <Modal opened={opened}  onClose={close} title="Edit Member" centered>
         <div>
           <div className="member-avatar">
 
@@ -150,15 +147,46 @@ const EditMemberShip = (props: any) => {
           }}> submit </Button>
         </div>
       </Modal>
-      <FaUserEdit className="text-white w-6 h-6 transform transition-transform hover:scale-150" onClick={open} />
+      <FaUserEdit className="text-white w-6 h-6 transform transition-transform hover:scale-110" onClick={open} />
     </>
   );
 }
 
 const MemberCard = (props: any) => {
+  const context = useAppContext();
   const {member, currentMember} = props;
+  const {memberId ,
+    intraId ,
+    channelId ,
+    Avatar ,
+    login,
+    isOwner,
+    isModerator,
+    isBanned ,
+    isMuted,
+    mutedTime,
+    joined_at,
+}= member;
+  const handleBanning=()=>{
+    if (context.socket){
+      const cookie = new Cookies();
+      const jwt = cookie.get('jwt')
+      context.socket.emit('updateChannelUser',{jwt,memberId, info:{userPrivilige:isModerator,banning:true,Muting:{action:isMuted,time:mutedTime}}});
+    }
+  }
+  const Ban =()=>( <div className=" flex flex-row space-x-5">
+  <PiFlagBannerLight
+    onClick={
+      ()=>{
+        handleBanning();
+      }
+    }
+    className="text-white w-6 h-6 transform transition-transform hover:scale-150"
+    />
+  <EditMemberShip member={member} currentMember={currentMember} />
+  </div>);
   return (
-      <div className="flex flex-row space-y-2  text-xs p-3 hover:bg-gray-800 rounded w-full bg-black">
+      <div className="flex flex-row justify-between space-y-2  text-xs p-3 hover:bg-gray-800 rounded w-full bg-black">
         <div className="flex flex-row  ml-0">
           <Image
             width={50}
@@ -172,12 +200,7 @@ const MemberCard = (props: any) => {
           </div>
         <div>
         {(currentMember?.isOwner || currentMember?.isModerator)
-          ? (<div className=" flex flex-row space-x-5  ">
-          <PiFlagBannerLight onClick={()=>console.log(`the member ${member.login} is banned`)}
-          className="text-white w-6 h-6 transform transition-transform hover:scale-150" />
-          <EditMemberShip member={member} currentMember={currentMember} />
-          </div>
-          )
+          ? ( <Ban /> )
           : (<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${member.intraId}`}>
             <CgProfile  className="text-white w-6 h-6 transform transition-transform hover:scale-150 " />
             </Link>
@@ -260,7 +283,7 @@ const ChannelAvatar = ({ firstMembers }: any) => {
           <Avatar key={index} src={member.Avatar} ></Avatar>
         ))
       }
-      <Avatar>+N</Avatar>
+      <Avatar>💬</Avatar>
     </AvatarGroup>
   )
 }
@@ -286,11 +309,12 @@ const ChannelDashBoard = (props: any) => {
     event.preventDefault(); // Fix the typo here
     setQuery(event.target.value);
   };
-  console.log('member');
+
   return (
     <div className="flex flex-col w-full  lg:w-1/5 overflow-hidden border border-[#292D39]">
-      <IoMdArrowBack className="text-white w-8 h-8 hover:cursor-pointer hover:w-10 hover:h-10  justify-center items-center xl:hidden" onClick={() => context.setComponent("conversation")} />
-      <div className="p-4 mt-20 flex flex-col justify-center items-center ">
+<div className='w-full '>
+      <IoMdArrowBack className=" text-white w-8 h-8 hover:cursor-pointer hover:scale-110  xl:hidden" onClick={() => context.setComponent("conversation")} />
+      </div>      <div className="p-4 mt-20 flex flex-col justify-center items-center ">
         {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}
         <div className="flex flex-row p-3 space-x-3">
       <CiLogout onClick={()=>{
@@ -300,6 +324,12 @@ const ChannelDashBoard = (props: any) => {
                   onClick={()=>{
                     console.log('change the channel Settings');
                   }}
+      />
+      <FcInvite 
+        className="text-white hover:scale-125" 
+        onClick={()=>{
+          console.log('Invite pep');
+        }}
       />
       </div>
       </div>
@@ -347,6 +377,24 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     }
     fetchAvatar();
   }, [])
+  const handleResize = () => {
+    if (window.innerWidth <= 1030) {
+      context.setisSidebarVisible(false);
+      context.setResponsive(false);
+    }
+    else {
+      context.setisSidebarVisible(true);
+      context.setResponsive(true);
+    }
+  }
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+    
+  }, [context.component])
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -393,7 +441,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
             ? toast.error("no such channel") : true;
       }
     }
-    if (!context.socket) {
+    if (!context.socket && !currentMember?.isBanned) {
       const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
       const cookie = new Cookies();
       const newSocket = io(chatNameSpace, {
@@ -402,7 +450,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
       context.setSocket(newSocket);
     }
     fetchData();
-    if (context.socket){
+    if (context.socket && !currentMember?.isBanned){
       context.socket.on('channelBroadcast', (message: any) => {
         if (message.channelId === params.channelId)
         {
@@ -473,7 +521,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
         <Navbar isProfileOwner={false} />
         <div className="flex ">
           {context.isSidebarVisible && (
-            <div className="w-16 custom-height ">
+            <div className="w-16 custom-height">
               <div
                 className={`transition-all duration-500 ease-in-out ${context.isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
                   }`}
@@ -482,13 +530,23 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
               </div>
             </div>
           )}
-          <div className="flex-1 overflow-y-auto">
+          {
+            !currentMember?.isBanned
+            ?
+            (<div className="flex-1 overflow-y-auto">
             <div className="flex custom-height">
-              <Conversations />
+            {context.responsive
+              ? <Conversations />
+              : context.component === "messages" && <Conversations />
+            }
+            {context.responsive
+            ?
               <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
                 <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
                   <div className="relative flex items-center space-x-4">
-                    <div className="relative p-4">
+                    <div
+                    onClick={()=>context.setComponent('profile')}
+                    className="relative p-4">
                       {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}                    </div>
                     <div className="flex flex-col leading-tight">
                       <div className="text-2xl mt-1 flex items-center">
@@ -503,7 +561,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                   {desplayedMessages?.map((msg: any, index: number) => (
                     (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                     (msg.sender !== context.userData?.intraId && channel ? <SingleMessageReceived key={index}  channelMessage={msg} /> : null)
-                  ))}
+                    ))}
                 </div>
                 <div className="p-4">
                   <div className="relative flex">
@@ -521,7 +579,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                         </svg>
                       </button>
                       <button type="button" style={{ display: messageText.length ? "" : "none" }} onClick={broadCastMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-                        {/* <span className="font-bold hidden sm:block">Send</span> */}
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
                           <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                         </svg>
@@ -530,9 +587,65 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                   </div>
                 </div>
               </div>
+              : context.component === 'conversation' &&
+              <div className="flex-1 p:2  lg:flex  justify-between flex flex-col custom-height">
+                <div className="flex sm:items-center justify-between p-1 bg-slate-900 ">
+                  <div className="relative flex items-center space-x-4">
+                <IoMdArrowBack className="text-white w-8 h-8 hover:cursor-pointer hover:scale-110 justify-center items-center xl:hidden" onClick={() => context.setComponent("messages")} />
+                    <div
+                    onClick={()=>context.setComponent('profile')}
+                    className="relative p-4">
+                      {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}                    </div>
+                    <div className="flex flex-col leading-tight">
+                      <div className="text-2xl mt-1 flex items-center">
+                        <span className="text-white mr-3">
+                          {channelName}
+                          </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {desplayedMessages?.map((msg: any, index: number) => (
+                    (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
+                    (msg.sender !== context.userData?.intraId && channel ? <SingleMessageReceived key={index}  channelMessage={msg} /> : null)
+                    ))}
+                </div>
+                <div className="p-4">
+                  <div className="relative flex">
+                    <input
+                      type="text"
+                      placeholder="Write your message!"
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      className="w-full focus:outline-none focus:placeholder-gray-400  placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
+                    <div className="absolute right-0 items-center inset-y-0">
+                      <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                      </button>
+                      <button type="button" style={{ display: messageText.length ? "" : "none" }} onClick={broadCastMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
+                          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+              {
+                context.responsive ?
+                <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
+              : context.component === 'profile' &&
               <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
+              }
             </div>
-          </div>
+          </div>)
+          : <PermissionDenied />
+        }
         </div>
         <Toaster />
       </div>

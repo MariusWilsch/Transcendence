@@ -55,9 +55,10 @@ export class ChatController {
   }
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
-  async getRoomMessages(@Param('id') id: string, @Res() res:any) :Promise<void>{
+  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number=1, @Query('pageSize') pageSize:number=20) :Promise<void>{
     try{
-      const data = await this.chatService.getPrivateRoomMessages(id);
+      const skip = (page - 1 ) * pageSize;
+      const data = await this.chatService.getPrivateRoomMessages(id, pageSize, skip);
       res.json(data);
       return data;
     }

@@ -17,6 +17,7 @@ import { Friend } from "../../components/Friend";
 import { useParams, redirect, useRouter } from "next/navigation";
 import loading from "../../../public/loading.json";
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import { AchievementCard } from "@/app/components/AchievementCard";
 
 export default function Profile(params: any) {
   const {

@@ -11,7 +11,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { CgDanger } from "react-icons/cg";
 import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
-import { Modal } from '@mantine/core';
+import { BackgroundImage, Modal } from '@mantine/core';
 import { IoMdAdd } from "react-icons/io";
 import Cookies from "universal-cookie";
 import { Loading } from "../components/Loading";
@@ -66,7 +66,7 @@ function FindAConversation() {
         href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomIdExtractor(context.userData?.intraId, item.intraId)}`}
       >
         <Spotlight.Action key={item.intraId} onClick={() => {
-          item.intraId != context.userData.intraId ? context.setRecipientLogin(item.intraId) : 1;
+          item.intraId != context.userData?.intraId ? context.setRecipientLogin(item.intraId) : 1;
           context.setComponent('conversation');
         }
         }
@@ -95,7 +95,7 @@ function FindAConversation() {
 
   return (
     <>
-      <div onClick={spotlight.open} className="relative text-sm">
+      <div onClick={spotlight.open} className="relative text-sm ">
         <input
           type="text"
           value={"search or start a new conversation"}
@@ -104,8 +104,8 @@ function FindAConversation() {
           readOnly
         />
       </div>
-      <div className="max-w-545 mx-auto">
-        <Spotlight.Root query={query} onQueryChange={setQuery}>
+      <div className="max-w-545 mx-auto bg-black">
+        <Spotlight.Root  query={query} overlayProps={{bga:'black'}} onQueryChange={setQuery}>
           <Spotlight.Search placeholder="Search by username..." leftSection={<CiSearch stroke={1.5} />} />
           <Spotlight.ActionsList>
             {data !== undefined && data.length > 0
@@ -231,7 +231,7 @@ const Demo = () => {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Create A Channel" centered>
+      <Modal  opened={opened} onClose={close} title="Create A Channel" centered>
         <CreateChannelForm />
       </Modal>
       <div className="flex flex-row justify-center space-x-3 text-white">
@@ -338,7 +338,7 @@ export const ConversationCard = ({ room }: any) => {
         context.setComponent('conversation');
       }
       } className="flex items-center p-3 text-xs h-max
-      my-1 hover:bg-gray-800 rounded-full ">
+      my-1 hover:bg-gray-800 rounded ">
         <div className="flex  flex-col space-y-2 text-white  max-w-xs mx-2 order-2 items-start">
           <div><span >{user?.login}</span></div>
           {/* <div className="sm:hidden" ><span>{lastMessage}</span></div> */}
@@ -359,7 +359,7 @@ export const ConversationNotSelected = () => {
 }
 export const PermissionDenied = () => {
   return (
-    <div className="flex  flex-1 flex-col items-center justify-center p-2 my-1  w-screen">
+    <div className="flex  flex-1 flex-col items-center justify-center p-2 my-1  w-screen text-slate-500">
       <CgDanger className="h-40 w-40  " />
       <h1> Permission Denied</h1>
     </div>
@@ -402,13 +402,9 @@ export const Conversations = () => {
       };
     }
   }, [context.socket, context.rooms]);
-
-
   return (
     <div className=" flex flex-col h-full p-4 w-full  lg:w-1/5 xl:1/5   text-white space-y-3 rounded  border border-[#292D39]">
       <FindAConversation />
-      {/* <h1 className='text-center text-lg text-white hidden sm:block'>Conversations</h1> */}
-      {/* <SearchStart /> */}
       <div className='flex justify-center py-3'>
         {selected === "channels" && <div
           onClick={() => setSelected("messages")}
@@ -436,10 +432,6 @@ export const Conversations = () => {
           )}
         </div>
       }
-      {/* {
-        selected === 'onlineFriends' &&
-        <FriendsCard />
-        } */}
       {
         selected == 'channels' &&
         <Demo />
@@ -449,48 +441,48 @@ export const Conversations = () => {
 };
 const Chat = () => {
   const context = useAppContext();
-  useEffect(() => {
-    const fetchDataAndSetupSocket = async () => {
-      try {
+  const fetchDataAndSetupSocket = async () => {
+    try {
 
-        const userData: User | undefined = await getCurrentUser();
-        if (userData === undefined) {
+      const userData: User | undefined = await getCurrentUser();
+      if (userData === undefined) {
+        return;
+      }
+      context.setUserData(userData);
+      const rooms = await getRooms(userData.intraId);
+        if (rooms === undefined) {
           return;
         }
-        context.setUserData(userData);
-        const rooms = await getRooms(userData.intraId);
-          if (rooms === undefined) {
-            return;
-          }
-          context.setRooms(rooms);
-        
-        const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-        if (!context.socket) {
-          const cookie = new Cookies();
-          const newSocket = io(chatNameSpace, {
-            query: { user: cookie.get('jwt') },
-          });
-          context.setSocket(newSocket);
-        }
-        if (context.recipientUserId && context.socket) {
-          context.socket?.emit('createPrivateRoom', { user1: context.userData?.intraId, user2: context.recipientUserId });
-        }
-        return () => {
-          context.socket?.disconnect();
-        };
-      } catch (error) {
-        console.error("Error during login:", error);
+        context.setRooms(rooms);
+      
+      const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+      if (!context.socket) {
+        const cookie = new Cookies();
+        const newSocket = io(chatNameSpace, {
+          query: { user: cookie.get('jwt') },
+        });
+        context.setSocket(newSocket);
       }
-    };
+      if (context.recipientUserId && context.socket) {
+        context.socket?.emit('createPrivateRoom', { user1: context.userData?.intraId, user2: context.recipientUserId });
+      }
+      return () => {
+        context.socket?.disconnect();
+      };
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+  };
+  useEffect(() => {
     fetchDataAndSetupSocket();
     if (context.socket) {
       context.socket.on("createChannel", (data: any) => {
         console.log(data);
       })
       if (context.socket) {
-
+        
         context.socket?.on('privateChat', (message: any) => {
-
+          fetchDataAndSetupSocket();
           const msg = message.content;
 
           toast.success(`you have a new message : ${msg}`);

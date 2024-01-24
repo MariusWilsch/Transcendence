@@ -28,7 +28,7 @@ model User {
   sentMessages   Message[]       @relation("SentMessages")
   receivedMessages Message[]     @relation("ReceivedMessages")
   privateRooms   PrivateRoom[]
-  membership       MemberShip[] 
+  membership       MemberShip[]
 }
 
 model Channel {
@@ -54,6 +54,7 @@ model MemberShip {
   isMuted        Boolean @default(false)
   mutedTime      DateTime? 
   joined_at      DateTime        @default(now())
+  onInviteState  Boolean @default(false)
   channel        Channel  @relation("channelMember",fields: [channelId], references  : [name])
   user           User     @relation(fields: [intraId], references: [intraId])
 }
@@ -106,12 +107,6 @@ enum FriendStatus {
   ACCEPTED
   BLOCKED
 }
-
-// enum ChannelType{
-//   PUBLIC
-//   PROTECTED
-//   PRIVATE
-// }
 
 model Friend {
   friendshipStatus FriendStatus
