@@ -65,6 +65,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'game/movePaddle':
 			socket?.emit('onPaddleMove', action.payload);
 			break;
+		case 'game/mouseMove':
+			socket?.emit('onMouseMove', action.payload);
+			break;
 		case 'connection/startLoop':
 			socket?.emit('startLoop');
 			break;

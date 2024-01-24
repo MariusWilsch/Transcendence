@@ -7,6 +7,7 @@ import { ConnectionStatus } from '@/app/GlobalRedux/features';
 
 // Step3.tsx
 export const Step3 = () => {
+	//! Instead of sending the setMapChoice everytime only send it once when the game starts
 	const { handleStartGame, handlePushToGame } = useStartGame();
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,

@@ -57,6 +57,7 @@ const Cards: React.FC = () => {
 		(state: RootState) => state.connection.isConnected,
 	);
 
+	//! Implement Dasiy UI's in text kbd for W and A keys in the description
 	return (
 		<>
 			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12">
@@ -66,7 +67,7 @@ const Cards: React.FC = () => {
 					btnText={'Play now!'}
 					title={'Play now!'}
 					desc={
-						'This game is pre-configured so all you have to do is press play!'
+						'Click here to play the game! You will use the W and A keys to move the paddle up and down and play against the computer!'
 					}
 					onClick={
 						isConnected === ConnectionStatus.CONNECTED
@@ -79,7 +80,9 @@ const Cards: React.FC = () => {
 					alt={'Customize the game'}
 					btnText={'Customize the game'}
 					title={'Customize the game'}
-					desc={'Here you can customize your game to your liking!'}
+					desc={
+						'Click here to customize the game! You can choose to play against a friend or the computer and much more!'
+					}
 					onClick={() => router.push('/steps')}
 				/>
 			</div>

@@ -1,6 +1,5 @@
 import { createAction, createSlice } from '@reduxjs/toolkit';
-import { GameState } from '@/interfaces/GameState';
-import { PlayerMove } from '@/interfaces/GameState';
+import { GameState, MouseMove, PlayerMove } from '@/interfaces';
 
 const initialState: GameState = {
 	paddles: {
@@ -43,6 +42,8 @@ const gameSlice = createSlice({
 
 //* Action creators
 export const movePaddle = createAction<PlayerMove>('game/movePaddle');
+export const mouseMove = createAction<MouseMove>('game/mouseMove');
+
 //! I think this one should go to connectionSlice.ts
 export const startConnection = createAction('game/startConnection');
 

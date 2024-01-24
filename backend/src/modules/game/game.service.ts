@@ -3,11 +3,14 @@ import { GAME_CONFIG } from './helpers/game.constants';
 import {
 	GameSession,
 	GameState,
-	PaddleMove,
 	Paddle,
 	Ball,
 	Vector,
 	Size,
+	PlayerInput,
+	Player,
+	PlayerMove,
+	Direction,
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 
@@ -23,6 +26,7 @@ export class GameService {
 	private paddleSpeed: number;
 	private collisionOccurred = false;
 	private justScored = false;
+	private mouseControlled = false; //! Dirty fix
 
 	//* Business logic
 
@@ -58,10 +62,10 @@ export class GameService {
 			players: [player1, player2],
 			gameState: this.initGameState(),
 			intervalID: null,
-			input: {
-				player1: { up: false, down: false },
-				player2: { up: false, down: false },
-			},
+			input: [
+				{ up: false, down: false },
+				{ up: false, down: false },
+			],
 		});
 	}
 
@@ -114,7 +118,7 @@ export class GameService {
 			canvasWidth,
 			canvasHeight,
 		} = GAME_CONFIG;
-		this.paddleSpeed = canvasHeight * paddleSpeedFactor;
+		this.paddleSpeed = canvasHeight / 1;
 		const paddleY = canvasHeight / 2 - paddleHeight / 2;
 		return {
 			paddles: {
@@ -150,63 +154,100 @@ export class GameService {
 	 * @description If `didPaddleMove` is false, the function will return without performing any further
 	 * actions.
 	 */
+
+	//! Needs testing
 	private updatePaddles({ gameState, input }: GameSession, deltaTime: number) {
 		const paddles = gameState.paddles;
 		let didPaddleMove = false;
 
-		if (input.player1.up) {
-			paddles.player1.position.y -= this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		}
-		if (input.player1.down) {
-			paddles.player1.position.y += this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		}
-		if (input.player2.up) {
-			paddles.player2.position.y -= this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		}
-		if (input.player2.down) {
-			paddles.player2.position.y += this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		}
+		// if (this.mouseControlled) return;ws
+
+		didPaddleMove = this.updatePaddle(
+			paddles.player1,
+			input[Player.P1],
+			deltaTime
+		);
+		// didPaddleMove = this.updatePaddle(
+		// 	paddles.player2,
+		// 	input[Player.P2],
+		// 	deltaTime
+		// );
+		// didPaddleMove = this.AIUpdatePaddle(
+		// 	paddles.player2,
+		// 	gameState.ball,
+		// 	deltaTime
+		// );
+
+		didPaddleMove = this.AIUpdatePaddle(
+			paddles.player2,
+			gameState.ball,
+			deltaTime
+		);
+
+		//! This paddle will always return false if mouse is used - Should I fix?
 		if (!didPaddleMove) return;
 		this.preventPaddleOverlap(paddles.player1, paddles.player2);
 	}
 
-	// private updatePaddles({ gameState, input }: GameSession, deltaTime: number) {
-	// 	const paddles = gameState.paddles;
-	// 	let didPaddlesMove = false;
+	private AIUpdatePaddle(paddle: Paddle, ball: Ball, deltaTime: number) {
+		const deltaY =
+			ball.position.y - (paddle.position.y + paddle.size.height / 2);
+		//! I think 0.012 for easy, 0.015 for medium and 0.017 for hard is good
+		const difficulty = 0.01; // Adjust this to make the AI harder or easier
 
-	// 	didPaddlesMove = this.updatePaddle(
-	// 		paddles.player1,
-	// 		input.player1,
-	// 		deltaTime
-	// 	);
-	// 	didPaddlesMove = this.updatePaddle(
-	// 		paddles.player2,
-	// 		input.player2,
-	// 		deltaTime
-	// 	);
-	// 	if (!didPaddlesMove) return;
-	// 	this.preventPaddleOverlap(paddles.player1, paddles.player2);
-	// }
+		// Move the paddle a fraction of the distance to the ball
+		paddle.position.y += difficulty * deltaY * deltaTime * this.paddleSpeed;
 
+		return true;
+	}
+
+	//! Is that at all doing something?
 	// private updatePaddle(
-	// 	paddle: Paddle,
-	// 	input: { up: false; down: false },
+	// 	{ position }: Paddle,
+	// 	input: PlayerInput,
 	// 	deltaTime: number
 	// ) {
-	// 	let didMove = false;
-	// 	if (input.direction === 'up') {
-	// 		paddle.position.y -= this.paddleSpeed * deltaTime;
-	// 		didMove = true;
-	// 	} else if (input.direction === 'down') {
-	// 		paddle.position.y += this.paddleSpeed * deltaTime;
-	// 		didMove = true;
+	// 	let didPaddleMove = false;
+	// 	if (input.up) {
+	// 		const x = 1 - Math.pow(0.25, deltaTime);
+	// 		const targetY = position.y - GAME_CONFIG.canvasHeight * 0.5;
+	// 		position.y = this.lerp(position.y, targetY, x);
+	// 		console.log(position.y);
+
+	// 		didPaddleMove = true;
+	// 	} else if (input.down) {
+	// 		const x = 1 - Math.pow(0.25, deltaTime);
+	// 		const targetY = position.y + GAME_CONFIG.canvasHeight * 0.5;
+	// 		position.y = this.lerp(position.y, targetY, x);
+	// 		didPaddleMove = true;
 	// 	}
-	// 	return didMove;
+	// 	return didPaddleMove;
 	// }
+
+	private updatePaddle(paddle: Paddle, input: PlayerInput, deltaTime: number) {
+		let didPaddleMove = false;
+		if (input.up) {
+			paddle.position.y -= this.paddleSpeed * deltaTime;
+			didPaddleMove = true;
+		} else if (input.down) {
+			paddle.position.y += this.paddleSpeed * deltaTime;
+			didPaddleMove = true;
+		}
+		return didPaddleMove;
+	}
+
+	//! Wrong place here
+
+	private lerp(a: number, b: number, x: number) {
+		return a + x * (b - a);
+	}
+
+	//! Wrong Place here
+	public updatePaddleMouse(paddle: Paddle, yPos: number) {
+		this.mouseControlled = true;
+		if (yPos + paddle.size.height > GAME_CONFIG.canvasHeight) return;
+		paddle.position.y = yPos;
+	}
 
 	/**
 	 * The preventPaddleOverlap function ensures that the paddles do not overlap with the top or bottom
@@ -217,6 +258,8 @@ export class GameService {
 	 * the second player's paddle in the game.
 	 */
 	private preventPaddleOverlap(player1: Paddle, player2: Paddle) {
+		console.log(player2.position);
+
 		if (player1.position.y < 0) {
 			player1.position.y = 0;
 		} else if (
@@ -378,7 +421,7 @@ export class GameService {
 	 */
 	public isInGame(roomID: string): boolean {
 		if (this.gameSessions.size == 0) return false;
-		return this.gameSessions.get(roomID).intervalID !== null;
+		return this.gameSessions.get(roomID)?.intervalID !== null;
 	}
 
 	//* Getters
@@ -403,19 +446,16 @@ export class GameService {
 		this.gameSessions.get(roomID).intervalID = intervalID;
 	}
 
-	public setInputBool(gameSession: GameSession, payload: PaddleMove) {
-		//1. Get the input object
-		const input = gameSession.input[payload.player];
-
-		// 2. Decide which input to set
-		switch (payload.direction) {
-			case 'up':
+	public setInputBool(input: PlayerInput, { direction }: PlayerMove) {
+		// 1. Decide which input to set
+		switch (direction) {
+			case Direction.UP:
 				input.up = true;
 				break;
-			case 'down':
+			case Direction.DOWN:
 				input.down = true;
 				break;
-			case 'stop':
+			case Direction.STOP:
 				input.up = false;
 				input.down = false;
 				break;

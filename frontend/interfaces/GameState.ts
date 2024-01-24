@@ -1,6 +1,15 @@
+export enum Direction {
+	UP = 0,
+	DOWN = 1,
+	STOPPED = 2,
+}
+
 export interface PlayerMove {
-	direction: 'up' | 'down' | 'stop';
-	player: 'player1' | 'player2';
+	direction: Direction;
+}
+
+export interface MouseMove {
+	yPos: number;
 }
 
 export interface GameState {

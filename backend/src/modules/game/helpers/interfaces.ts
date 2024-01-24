@@ -1,5 +1,21 @@
 import { Socket } from 'socket.io';
 
+export enum Player {
+	P1 = 0,
+	P2 = 1,
+}
+
+export enum Direction {
+	UP = 0,
+	DOWN = 1,
+	STOP = 2,
+}
+
+//* Not sure if this is needed
+export interface PlayerMove {
+	direction: Direction;
+}
+
 export interface Vector {
 	x: number;
 	y: number;
@@ -35,15 +51,9 @@ export interface GameState {
 	score: Score;
 }
 
-//* Not sure if this is needed
-export interface PaddleMove {
-	direction: 'up' | 'down' | 'stop';
-	player: 'player1' | 'player2';
-}
-
-export interface PaddleInput {
-	player1: { up: boolean; down: boolean };
-	player2: { up: boolean; down: boolean };
+export interface PlayerInput {
+	up: boolean;
+	down: boolean;
 }
 
 // Structure to keep track of player associations within a game session
@@ -52,5 +62,5 @@ export interface GameSession {
 	players: Socket[];
 	gameState: GameState;
 	intervalID: NodeJS.Timeout | null;
-	input: PaddleInput;
+	input: PlayerInput[];
 }

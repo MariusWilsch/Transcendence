@@ -4,7 +4,9 @@ import { RootState } from '@/app/GlobalRedux/store';
 import { startLoop } from '@/app/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useStartGame from '@/app/hooks/useStartGame';
 import Link from 'next/link';
+import { Modal } from '../components';
 
 const Score = ({ score }: any) => {
 	return (
@@ -103,10 +105,11 @@ export default function Game() {
 	const playerOutcome = useSelector(
 		(state: RootState) => state.connection.playerOutcome,
 	);
+
 	return (
 		<>
 			<CountdownModal />
-			<GameOutcomeModal outcome={playerOutcome} />
+			{/* <GameOutcomeModal outcome={playerOutcome} /> */}
 			<div className="flex flex-col items-center h-full">
 				<div className="flex flex-col w-3/5 h-full py-8">
 					<GameHeader />
@@ -122,6 +125,7 @@ function GameOutcomeModal({ outcome }: any) {
 	const isGameStarted = useSelector(
 		(state: RootState) => state.connection.isGameStarted,
 	);
+	const { handlePushToGame } = useStartGame();
 
 	useEffect(() => {
 		if (!isGameStarted) {
@@ -129,8 +133,10 @@ function GameOutcomeModal({ outcome }: any) {
 		}
 	}, [isGameStarted]);
 
+	//! Now starting game when 2 players are found
 	return (
 		<>
+			<Modal />
 			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
 				<div className="modal-box">
 					<div className="font-bold text-lg">You {outcome} </div>
@@ -139,7 +145,9 @@ function GameOutcomeModal({ outcome }: any) {
 							method="dialog"
 							className="space-x-4 w-full flex justify-center"
 						>
-							<button className="btn">Play again</button>
+							<button onClick={handlePushToGame} className="btn">
+								Play again
+							</button>
 							<Link href="/">
 								<button className="btn">Go Home</button>
 							</Link>

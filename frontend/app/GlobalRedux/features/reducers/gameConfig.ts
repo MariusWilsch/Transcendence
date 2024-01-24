@@ -8,9 +8,8 @@ export enum aiDifficulty {
 }
 
 export enum mouseOrKeyboard {
-	MOUSE = 0,
-	KEYBOARD = 1,
-	NONE = 2,
+	KEYBOARD = 0,
+	MOUSE = 1,
 }
 
 export enum mapChoice {
@@ -26,7 +25,7 @@ export interface GameConfigState {
 
 const initialState = {
 	aiDifficulty: aiDifficulty.NONE,
-	mouseOrKeyboard: mouseOrKeyboard.NONE,
+	mouseOrKeyboard: mouseOrKeyboard.KEYBOARD,
 	mapChoice: mapChoice.STANDARD,
 };
 

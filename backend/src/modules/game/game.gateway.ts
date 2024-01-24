@@ -6,7 +6,7 @@ import {
 	WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket as IO } from 'socket.io';
-import { GameState, GameSession, PaddleMove } from './helpers/interfaces';
+import { GameState, GameSession, PlayerMove } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
@@ -123,29 +123,51 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('onPaddleMove')
-	handlePaddleMove(client: IO, payload: PaddleMove): void {
+	handlePaddleMove(client: IO, payload: PlayerMove): void {
 		const gameSession: GameSession = this.gameService.getSession(
 			client.data.roomID
 		);
 
-		if (
-			(payload.player === 'player1' &&
-				client.id !== gameSession.players[0].id) ||
-			(payload.player === 'player2' && client.id !== gameSession.players[1].id)
-		) {
-			return;
-		}
+		// Determine which player is moving their paddle
+		const playerIDX = gameSession.players.findIndex(
+			(player) => player.id === client.id
+		);
+		// Player not found in game session
+		if (playerIDX === -1) return;
 
 		// Notify game service of the paddle move
+		this.gameService.setInputBool(gameSession.input[playerIDX], payload);
 		console.log('onPaddleMove event received', payload);
-		this.gameService.setInputBool(gameSession, payload);
+	}
+
+	@SubscribeMessage('onMouseMove')
+	handleMouseMove(client: IO, { yPos }: any): void {
+		console.log(yPos);
+
+		const gameSession: GameSession = this.gameService.getSession(
+			client.data.roomID
+		);
+
+		// Determine which player is moving their paddle
+		const playerIDX = gameSession.players.findIndex(
+			(player) => player.id === client.id
+		);
+		// Player not found in game session
+		if (playerIDX === -1) return;
+
+		const playerRole = playerIDX === 0 ? 'player1' : 'player2';
+		// Notify game service of the paddle move
+		this.gameService.updatePaddleMouse(
+			gameSession.gameState.paddles[playerRole],
+			yPos
+		);
 	}
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
 		console.log('startLoop event received');
 		if (!this.gameService.isInGame(client.data.roomID)) {
-			// this.beginGameLoop(client.data.roomID);
+			this.beginGameLoop(client.data.roomID);
 		}
 	}
 
