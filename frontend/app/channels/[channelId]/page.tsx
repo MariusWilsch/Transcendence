@@ -3,29 +3,29 @@ import { FC, useEffect, useState } from "react"
 import { Channel, ChannelMessage, MemberShip, User, useAppContext } from "@/app/AppContext"
 import Cookies from "universal-cookie"
 import { io } from "socket.io-client"
-import { SingleMessageSent, getCurrentUser, getUser } from "../../chat/[roomId]/page"
 import { Loading } from "@/app/components/Loading"
 import toast, { Toaster } from "react-hot-toast"
 import { Navbar } from "@/app/components/Navbar"
 import { Sidebar } from "@/app/components/Sidebar"
-import { Conversations, PermissionDenied } from "../../chat/page"
 import { IoMdArrowBack } from "react-icons/io"
-import { Avatar, AvatarGroup, ColorPicker, ComboboxItem } from "@mantine/core"
-import { FaUserEdit } from "react-icons/fa";
-import { CgProfile } from "react-icons/cg";
 import Image from "next/image"
-import { useDisclosure } from '@mantine/hooks';
-import { Modal, Button } from '@mantine/core';
 import { Select,  } from '@mantine/core';
 import { FcInvite } from "react-icons/fc";
 import { PiFlagBannerLight } from "react-icons/pi";
 import { CiLogout } from "react-icons/ci";
 import { CiSettings } from "react-icons/ci";
-
-
+import EditMemberShip from "@/app/chatComponents/EditMemberShip"
 import Search from "@/app/notif/page"
 import { time } from "console"
 import Link from "next/link"
+import ChannelAvatar from "@/app/chatComponents/ChannelAvatar"
+import ChannelDashBoard from "@/app/chatComponents/ChannelDashBoard"
+import { getChannel, getChannelFirstMembers, getChannelMessages, getCurrentMember, getCurrentUser, getRooms } from "@/app/utiles/utiles"
+import Conversations from "@/app/chatComponents/Converstions"
+import { SingleMessageSent } from "@/app/chatComponents/SingleMessageSent"
+import PermissionDenied from "@/app/chatComponents/PermissionDenied"
+
+
 
 interface PageProps {
   params: {
@@ -43,340 +43,153 @@ const SingleMessageReceived = ({channelMessage}: any) => {
     </div>
   );
 };
-function addHoursToNow(hours:string) {
-  const hoursToAdd = parseInt(hours, 10);
-  const currentDate = new Date();
-  currentDate.setHours(currentDate.getHours() + hoursToAdd);
-  return currentDate;
-}
-async function searchMember(query:string, channelId:string) {
-  const response = await fetch(`http://localhost:3001/chat/chan/${channelId}/Search?q=${query}`,
-  {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
+
+// async function searchMember(query:string, channelId:string) {
+//   const response = await fetch(`http://localhost:3001/chat/chan/${channelId}/Search?q=${query}`,
+//   {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     credentials: "include",
   
-  });
+//   });
 
-  const data = await response.json();
-  return data;
-}
-const EditMemberShip = (props: any) => {
-  const [opened, { open, close }] = useDisclosure(false);
-  const context = useAppContext();
-  const {member, currentMember} = props;
-  const {memberId ,
-      intraId ,
-      channelId ,
-      Avatar ,
-      login,
-      isOwner,
-      isModerator,
-      isBanned ,
-      isMuted,
-      mutedTime,
-      joined_at,
-  }= member;
+//   const data = await response.json();
+//   return data;
+// }
 
-  // const []
-  const [ModeValue, setModeValue] = useState('');
-  const [muteValue, setMuteValue] = useState('');
-  const handleSubmit = () => {
-    if (ModeValue || muteValue)
-    {
-      if (context.socket)
-      {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-        const cookie = new Cookies();
-        const jwt = cookie.get('jwt')
-        context.socket.emit('updateChannelUser',{jwt,memberId, info:{userPrivilige:ModeValue==="moderator"?true:false,banning:member.isBanned,Muting:(member.isMuted && muteValue==='UnMute')?{action:false, time:new Date()}:muteValue?{action:true, time:addHoursToNow(muteValue)}:{action:member.isMuted,time:addHoursToNow(muteValue)}}})
-      }
-    }
-  }
-  const dataMode= member.isModerator ? [{value:'remove Moderator', label:'remove moderator'}] : [{value:'moderator', label:'moderator'}];
-  const dataMute = member.isMuted
-                  ?[{value:'UnMute', label:'UnMute'}]
-                  :[
-                    {value:'1', label:'Mute for 1h'},
-                    {value:'2', label:'Mute for 2h'},
-                    {value:'6', label:'Mute for 6h'},
-                    {value:'12', label:'Mute for 12h'},
-                    {value:'131651616516165167', label:'until Unmute'},
-                     
-                  ];
-                  console.log(currentMember);
-                  console.log(addHoursToNow(muteValue));
-  return (
-    <>
-      <Modal opened={opened}  onClose={close} title="Edit Member" centered>
-        <div>
-          <div className="member-avatar">
+// async function getChannelFirstMembers(channelId: string): Promise<MemberShip[] | []> {
+//   const res = await fetch(`http://localhost:3001/chat/chanAvatar/${channelId}`, {
+//     method: "GET",
+//     credentials: "include",
+//   });
+//   if (!res.ok){
+//     return [];
+//   }
+//   const members = res.json();
 
-          </div>
-          <div className="login">
+//   return members;
+// }
+// async function getChannel(channelId: string): Promise<Channel | undefined> {
+//   const res = await fetch(`http://localhost:3001/chat/channel/${channelId}`, {
+//     method: "GET",
+//     credentials: "include",
+//   });
+//   if (!res.ok){
+//     return undefined;
+//   }
+//   const channel = res.json();
 
-          </div>
-          <div className="change-privilege">
-            <Select
-               data={dataMode}
-               label="change Member privilege"
-               value={ModeValue ? ModeValue : ''}
-               onChange={(_value:string | null) => {
-                _value ?setModeValue(_value):setMuteValue('');
-               }}
-            />
-            <div className="banne"></div>
-          </div>
-          <div className="muted">
-          <Select
-               data={dataMute}
-               label="Mute Member for "
-               value={muteValue? muteValue : ''}
-               onChange={(_value:string | null) => {
-                _value ?setMuteValue(_value):setMuteValue('');
-               }}
-            />
-          </div>
-          <Button onClick={()=>{
-            setModeValue('');
-            setMuteValue('');
-            close();
-            handleSubmit();
-          }}> submit </Button>
-        </div>
-      </Modal>
-      <FaUserEdit className="text-white w-6 h-6 transform transition-transform hover:scale-110" onClick={open} />
-    </>
-  );
-}
+//   return channel;
+// }
+// async function getCurrentMember(channelId: string, intraId:string): Promise<MemberShip | undefined> {
+//   const res = await fetch(`http://localhost:3001/chat/chanMember/${channelId}/${intraId}`, {
+//     method: "GET",
+//     credentials: "include",
+//   });
+//   if (!res.ok){
+//     return undefined;
+//   }
+//   const channel = res.json();
 
-const MemberCard = (props: any) => {
-  const context = useAppContext();
-  const {member, currentMember} = props;
-  const {memberId ,
-    intraId ,
-    channelId ,
-    Avatar ,
-    login,
-    isOwner,
-    isModerator,
-    isBanned ,
-    isMuted,
-    mutedTime,
-    joined_at,
-}= member;
-  const handleBanning=()=>{
-    if (context.socket){
-      const cookie = new Cookies();
-      const jwt = cookie.get('jwt')
-      context.socket.emit('updateChannelUser',{jwt,memberId, info:{userPrivilige:isModerator,banning:true,Muting:{action:isMuted,time:mutedTime}}});
-    }
-  }
-  const Ban =()=>( <div className=" flex flex-row space-x-5">
-  <PiFlagBannerLight
-    onClick={
-      ()=>{
-        handleBanning();
-      }
-    }
-    className="text-white w-6 h-6 transform transition-transform hover:scale-150"
-    />
-  <EditMemberShip member={member} currentMember={currentMember} />
-  </div>);
-  return (
-      <div className="flex flex-row justify-between space-y-2  text-xs p-3 hover:bg-gray-800 rounded w-full bg-black">
-        <div className="flex flex-row  ml-0">
-          <Image
-            width={50}
-            height={50}
-            src={member?.Avatar}
-            alt="My profile"
-            className="w-10 sm:w-10 h-10 sm:h-10 rounded-full"
-            />
-          <span className="p-2 text-white text-center">{member?.login}</span>
+//   return channel;
+// }
+// async function getChannelMessages(channelId: string): Promise<ChannelMessage[] | []> {
+//   const res = await fetch(`http://localhost:3001/chat/channels/messages/${channelId}`,
+//     {
+//       method: "GET",
+//       credentials: "include"
+//     },
+//   );
+//   if (!res.ok){
+//     return [];
+//   }
+//   const messages = res.json();
 
-          </div>
-        <div>
-        {(currentMember?.isOwner || currentMember?.isModerator)
-          ? ( <Ban /> )
-          : (<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${member.intraId}`}>
-            <CgProfile  className="text-white w-6 h-6 transform transition-transform hover:scale-150 " />
-            </Link>
-            )
-        }
-        </div>
-      </div>
-
-  );
-}
-async function getChannelFirstMembers(channelId: string): Promise<MemberShip[] | []> {
-  const res = await fetch(`http://localhost:3001/chat/chanAvatar/${channelId}`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok){
-    return [];
-  }
-  const members = res.json();
-
-  return members;
-}
-async function getChannel(channelId: string): Promise<Channel | undefined> {
-  const res = await fetch(`http://localhost:3001/chat/channel/${channelId}`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok){
-    return undefined;
-  }
-  const channel = res.json();
-
-  return channel;
-}
-async function getCurrentMember(channelId: string, intraId:string): Promise<MemberShip | undefined> {
-  const res = await fetch(`http://localhost:3001/chat/chanMember/${channelId}/${intraId}`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok){
-    return undefined;
-  }
-  const channel = res.json();
-
-  return channel;
-}
-async function getChannelMessages(channelId: string): Promise<ChannelMessage[] | []> {
-  const res = await fetch(`http://localhost:3001/chat/channels/messages/${channelId}`,
-    {
-      method: "GET",
-      credentials: "include"
-    },
-  );
-  if (!res.ok){
-    return [];
-  }
-  const messages = res.json();
-
-  return messages;
-}
-
-const MemberCards = (props: any) => {
-  const {members, currentMember} = props;
-  return (
-    <div className="space-y-2">
-      {
-        members?.filter((member:MemberShip)=>member.memberId !== currentMember?.memberId).map((member: any, index: number) => (
-          <MemberCard key={index} member={member} currentMember={currentMember} />
-        )
-        )
-      }
-    </div>
-  )
-}
-const ChannelAvatar = ({ firstMembers }: any) => {
-  return (
-    <AvatarGroup className="justify-center items-center ">
-      {firstMembers &&
-        firstMembers.map((member: MemberShip, index: number) => (
-          <Avatar key={index} src={member.Avatar} ></Avatar>
-        ))
-      }
-      <Avatar>💬</Avatar>
-    </AvatarGroup>
-  )
-}
-const ChannelDashBoard = (props: any) => {
-  const [query, setQuery] = useState('');
-  const [members, setmembers] = useState<MemberShip[] | []>();
-  const {firstMembers , channelId, currentMember} = props;
-  const context = useAppContext();
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      const members = await getChannelFirstMembers(channelId);
-    }
-    fetchAvatar();
-  }, [channelId])
-  useEffect(() => {
-    const search = async () => {
-        const members = await searchMember(query, channelId); 
-        setmembers(members);
-    }
-      query && search();
-  }, [query])
-  const handleQuery = (event: any) => {
-    event.preventDefault(); // Fix the typo here
-    setQuery(event.target.value);
-  };
-
-  return (
-    <div className="flex flex-col w-full  lg:w-1/5 overflow-hidden border border-[#292D39]">
-<div className='w-full '>
-      <IoMdArrowBack className=" text-white w-8 h-8 hover:cursor-pointer hover:scale-110  xl:hidden" onClick={() => context.setComponent("conversation")} />
-      </div>      <div className="p-4 mt-20 flex flex-col justify-center items-center ">
-        {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}
-        <div className="flex flex-row p-3 space-x-3">
-      <CiLogout onClick={()=>{
-        console.log('leave the channel');
-      }} className="text-red-900   hover:scale-125" />
-      <CiSettings className="text-white hover:scale-125" 
-                  onClick={()=>{
-                    console.log('change the channel Settings');
-                  }}
-      />
-      <FcInvite 
-        className="text-white hover:scale-125" 
-        onClick={()=>{
-          console.log('Invite pep');
-        }}
-      />
-      </div>
-      </div>
-      <div className='justify-center items-center text-white  border border-[#292D39] p-4'>
-        <h1 className="text-center">{channelId}</h1>
-      </div>
-      <div className="info-card text-white p-4 m-5border border-[#292D39] ">
-        <h1 className="text-start"> Members :</h1>
-      </div>
-      <div className=" text-white p-4 w-full">
-        <label className="">
-          <input
-            id="searchField"
-            name={`inputValue${Math.random()}`}
-            type="text"
-            value={query}
-            placeholder="Search for a member ..."
-            onChange={handleQuery}
-            className="  bg-[#1E2028] w-full items-center justify-center p-2 rounded-lg border border-[#292D39]   text-sm outline-none text-white"
-          />
-        </label>
-      </div>
-      <div className="p-3 h-2/5 overflow-hidden scroll-m-0">
-        {members && <MemberCards members={members} currentMember={currentMember} />}
-      </div>
-    </div>
-  );
-}
+//   return messages;
+// }
 
 const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [channel, setChannel] = useState<Channel | undefined>();
+  const [permission, setPermission] = useState(true);
   const [messages, setMessages] = useState<ChannelMessage[] | []>([]); // Provide a type for the messages state
   const [messageText, setMessageText] = useState('');
   const [currentMember, setCurrentMember] = useState<MemberShip | undefined>();
   const [loading, setLoading] = useState(false);
   const context = useAppContext();
   const [firstMembers, setFirstMembers] = useState<MemberShip[] | []>();
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      const members = await getChannelFirstMembers(params.channelId);
-      setFirstMembers(members);
-      if (!context.socket){
+ 
 
+  const fetchData = async () => {
+    try {
+      if (context.userData)
+      {
+        if (channel===undefined || !channel){
+          
+          const chan: Channel | undefined = await getChannel(params.channelId);
+          if (chan === undefined || !chan) {
+            throw ('no such channel')
+          }
+          setChannel(chan);
+          console.log('the channel is ', chan);
+        }
+        const userMemberShip = await getCurrentMember(params.channelId, context.userData.intraId );
+        if (userMemberShip === undefined || userMemberShip.isBanned)
+        {
+          throw('permission denied');
+        }
+        setCurrentMember(userMemberShip);
+        console.log('userMembership', userMemberShip);
+        if (!context.socket || context.socket === undefined)
+        {
+          const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+          const cookie = new Cookies();
+          const newSocket = io(chatNameSpace, {
+            query: { user: cookie.get('jwt') },
+          });
+          context.setSocket(newSocket);
+          console.log('socket ', context.socket);
+        }
+        const ChannelMessages = await getChannelMessages(params.channelId);
+        if (ChannelMessages) {
+          setMessages(ChannelMessages);
+          console.log(ChannelMessages);
+        }
+        const rooms = await getRooms(context.userData.intraId);
+        if (rooms !==undefined){
+            console.log('this is the rooms', rooms);
+            context.setRooms(rooms);
+          }
+        setLoading(false);
       }
     }
-    fetchAvatar();
-  }, [])
+    catch (e) {
+      e === "you need to login first"
+      ? toast.error("you need to login first")
+      : e === "no such channel"
+      ? toast.error("no such channel") : true;
+      setPermission(false);
+      setLoading(false);
+    }
+  }
+  const fetchAvatar = async () => {
+    const members = await getChannelFirstMembers(params.channelId);
+    setFirstMembers(members);
+  }
+  const fetchUserData=async()=>{
+    if (!context.userData)
+    {
+      const userData: User | undefined = await getCurrentUser();
+      if (userData === undefined) { 
+        throw ('you need to login first');
+      }
+      console.log(userData);
+      context.setUserData(userData);
+      console.log('this is the context', context.userData);
+    }
+    console.log('userData', context.userData);
+  }
   const handleResize = () => {
     if (window.innerWidth <= 1030) {
       context.setisSidebarVisible(false);
@@ -396,60 +209,9 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     
   }, [context.component])
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!context.userData) {
-          const userData: User | undefined = await getCurrentUser();
-          if (userData === undefined) {
-            throw ('you need to login first');
-          }
-          context.setUserData(userData);
-        }
-        if (channel===undefined || !channel){
-
-          const chan: Channel | undefined = await getChannel(params.channelId);
-          if (chan === undefined || !chan) {
-            throw ('no such channel')
-          }
-          setChannel(chan);
-        }
-        const userMemberShip = await getCurrentMember(params.channelId, context.userData.intraId );
-        if (userMemberShip === undefined)
-        {
-          return;
-        }
-        setCurrentMember(userMemberShip);
-        if (!context.socket || context.socket === undefined)
-        {
-          const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-          const cookie = new Cookies();
-          const newSocket = io(chatNameSpace, {
-            query: { user: cookie.get('jwt') },
-          });
-          context.setSocket(newSocket);
-        }
-        const ChannelMessages = await getChannelMessages(params.channelId);
-        if (ChannelMessages) {
-          setMessages(ChannelMessages);
-        }
-        loading? setLoading(false):true;
-      }
-      catch (e) {
-        e === "you need to login first"
-          ? toast.error("you need to login first")
-          : e === "no such channel"
-            ? toast.error("no such channel") : true;
-      }
-    }
-    if (!context.socket && !currentMember?.isBanned) {
-      const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-      const cookie = new Cookies();
-      const newSocket = io(chatNameSpace, {
-        query: { user: cookie.get('jwt') },
-      });
-      context.setSocket(newSocket);
-    }
+    fetchUserData();
     fetchData();
+    fetchAvatar();
     if (context.socket && !currentMember?.isBanned){
       context.socket.on('channelBroadcast', (message: any) => {
         if (message.channelId === params.channelId)
@@ -471,7 +233,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
         context.socket.off('channelBroadcast');
       }
     };
-  }, [context.socket])
+  }, [context.socket,context.userData])
   const broadCastMessage = () => {
     console.log("this is the socket",context.socket);
     console.log("this is the channel",channel);
@@ -531,7 +293,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
             </div>
           )}
           {
-            !currentMember?.isBanned
+            permission
             ?
             (<div className="flex-1 overflow-y-auto">
             <div className="flex custom-height">

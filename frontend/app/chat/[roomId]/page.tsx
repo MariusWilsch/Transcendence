@@ -2,7 +2,6 @@
 import { FC, use, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { User, useAppContext, Message, Room, AppContextProps } from '@/app/AppContext';
-import { Conversations, PermissionDenied, getRooms } from '../page';
 import toast, { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import Cookies from 'universal-cookie';
@@ -14,188 +13,18 @@ import { Friend } from '@/app/components/Friend';
 import { IoMdArrowBack } from "react-icons/io";
 import { Avatar, Indicator } from '@mantine/core';
 import { FaCircleArrowDown } from "react-icons/fa6";
+import UserProfileImage from '@/app/chatComponents/UderProfileImage';
+import { SingleMessageSent } from '@/app/chatComponents/SingleMessageSent';
+import { SingleMessageReceived } from '@/app/chatComponents/SingleMessageReceived';
+import ProfileInfo from '@/app/chatComponents/ProfileInfo';
+import { getCurrentUser, getMessages, getRooms, getUser } from '@/app/utiles/utiles';
+import Conversations from '@/app/chatComponents/Converstions';
+import PermissionDenied from '@/app/chatComponents/PermissionDenied';
 
 interface PageProps {
   params: {
     roomId: string
   }
-}
-
-const Mytoast = (props:any) => {
- 
-   let {message , user} = props;
-   message = message.length > 30 ? message.substring(0, 25) + '....':message;
-  return (
-    toast.custom((t) => (
-      <div
-        className={`${t.visible ? 'animate-enter' : 'animate-leave'
-          } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-      >
-        <div className="flex-1 w-0 p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0 pt-0.5">
-              <img
-                className="h-10 w-10 rounded-full"
-                src={user?.Avatar}
-                alt=""
-              />
-            </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-gray-900">
-                {user.login}
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                {message}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="flex border-l border-gray-200">
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    ))
-  )
-}
-
-const UserProfileImage = ({
-  status,
-  isProfileOwner,
-  src,
-  intraId,
-}: {
-  status: string | undefined;
-  isProfileOwner: boolean;
-  src: string;
-  intraId: string | undefined;
-}) => {
-  return (
-    <div className="flex flex-col items-center justify-center p-6 "
-    >
-      <div
-        className=" flex justify-center items-center border-white border-y-4 border-x-4 rounded-full"
-        style={{ position: "relative", display: "inline-block" }}
-      >
-        <Image
-          src={src}
-          alt="image Preview"
-          width={120}
-          height={120}
-          className="rounded-full border-2 border-black w-40 h-40  "
-          onError={(e: any) => {
-            e.target.onerror = null;
-          }}
-        />
-      </div>
-    </div>
-  );
-};
-
-const ProfileInfo = ({ recipient }: any) => {
-  const context = useAppContext();
-  return (
-    <div className="flex flex-col border border-[#292D39]  w-full h-full  lg:w-2/5 overflow-hidden  items-center p-4">
-      <div className='w-full '>
-      <IoMdArrowBack style={{'display':!context.responsive ? "":"none"}} className=" text-white w-8 h-8 hover:cursor-pointer hover:scale-110 " onClick={() => context.setComponent("conversation")} />
-      </div>
-      <div className=''>
-      <UserProfileImage
-        status={"ONLINE"}
-        isProfileOwner={false}
-        src={recipient?.Avatar}
-        intraId={recipient?.intraId}
-        />
-      <Friend
-        isProfileOwner={false}
-        friendId={recipient?.intraId}
-        userId={context.userData?.intraId}
-        />
-        </div>
-      <div className='flex flex-col  justify-center mt-4 items-center  px-1 w-3/4 h-fit bg-[#1a1d24] rounded border border-[#292D39] p-2'>
-        <div  className='flex flex-col   w-11/12 '>
-          <h1 className='text-white p-2 text-base'>Login </h1>
-          <p className=' text-white px-2 pb-1'>{recipient?.login}</p>
-        </div>
-        <div className='flex flex-col border-t border-[#292D39] w-11/12'>
-          <h1 className=' text-white p-2 text-base '>Full name </h1>
-          <p className='text-white px-2 pb-1'>{recipient?.fullname}</p>
-        </div>
-        <div className='flex flex-col border-t border-[#292D39]   w-11/12'>
-          <h1 className='text-white p-2 text-base '>Member since </h1>
-          <p className='text-white px-2 pb-2'>{extractDate(recipient?.created_at)}</p>
-        </div>
-      </div>
-
-    </div>
-  );
-}
-export const SingleMessageReceived = (props: any) => {
-  const { message, recipient } = props;
-  return (
-    <div className="flex items-end p-2 my-1">
-      <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-        <div><span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{message}</span></div>
-      </div>
-      <Image width={24} height={24} src={recipient?.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
-    </div>
-  );
-};
-export const SingleMessageSent = ({ message }: any) => {
-  const context = useAppContext();
-  return (
-    <div className="flex items-end justify-end p-2 my-1">
-      <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
-        <div><span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">{message}</span></div>
-      </div>
-      <Image width={24} height={24} src={context.userData?.Avatar} alt="My profile" className="w-6 h-6 rounded-full order-1" />
-    </div>
-  );
-}
-
-async function getMessages(userId: string, page:number): Promise<any> {
-  const res = await fetch(`http://localhost:3001/chat/${userId}/messages?page=${page}`,
-    {
-      method: "GET",
-      credentials: "include"
-    },
-  );
-  const room = res.json();
-
-  return room;
-}
-
-export async function getCurrentUser(): Promise<any> {
-  const res = await fetch("http://localhost:3001/auth/user", {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok)
-  {
-    return undefined;
-  }
-  const user = res.json();
-  return user;
-}
-export async function getUser(intraId: string): Promise<any> {
-  const res = await fetch(`http://localhost:3001/users/${intraId}`, {
-    method: "GET",
-    credentials: "include",
-  });
-  const user = res.json();
-  return user;
-}
-export async function getUserFriends(intraId: string): Promise<any> {
-  const res = await fetch(`http://localhost:3001/users/${intraId}/friends`, {
-    method: "GET",
-    credentials: "include",
-  });
-  const friends = res.json();
-  return friends;
 }
 
 const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
@@ -206,7 +35,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [messageLoading, setMessageLoading] = useState<boolean>(true);
   const [noMoreData, setNoMoreData] = useState(true);
-  const [lastScrollPosition, setLastScrollPosition] = useState(0);
+  const [lastScrollPosition, setLastScrollPosition] = useState(0.5);
   const [page, setPage] = useState(2);
   const context = useAppContext();
   const fetchDataAndSetupSocket = async () => {
@@ -377,7 +206,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
               PrivateRoomName: params.roomId,
             };
 
-            return[singleMsg,...newMessages];
+            return [singleMsg,...newMessages];
           }
           );
           setMessageText('');
@@ -436,22 +265,38 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   /* this is the start*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // const handleScroll = (e:any) => {
+  //     const { scrollTop, scrollHeight, clientHeight } = e.target;
+  //     console.log('the scrollTop', scrollTop);
+  //     console.log('the scrollHeight', scrollHeight);
+  //     console.log('the client height', clientHeight);
+  //     console.log('result', scrollHeight - clientHeight);
+  //     if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !loading && noMoreData) {
+  //       setLastScrollPosition(scrollTop);
+  //       console.log('i m right here')
+  //       fetchNewMessages(scrollTop);
+  //       e.target.scrollTop = lastScrollPosition;
+  //     }
+  //   };
   const handleScroll = () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
       console.log('the scrollTop', scrollTop);
-      console.log('the scrollHeight', scrollHeight);
-      console.log('the client height', clientHeight);
-      console.log('result', scrollHeight - clientHeight);
-      if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !messageLoading && noMoreData) {
-        setLastScrollPosition(scrollTop);
-        console.log('i m right here')
-        fetchNewMessages(scrollTop);
+          console.log('the scrollHeight', scrollHeight);
+          console.log('the client height', clientHeight);
+          console.log('result', scrollHeight - clientHeight);
+
+      // You can adjust the threshold based on your needs
+      if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !loading && noMoreData) {
+        setLastScrollPosition(-(scrollHeight - clientHeight));
+        console.log('this is the last position', lastScrollPosition);
+        fetchNewMessages();
+         // Restore scroll position
       }
     }
   };
 
-  const fetchNewMessages = async (scrollTop:number) => {
+  const fetchNewMessages = async () => {
     try {
       setLoading(true);
       const data = await getMessages(params.roomId, page);
@@ -463,6 +308,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         }
         
         );
+        
         setPage((prevPage) => prevPage + 1);
       }
     } catch (error) {
@@ -472,22 +318,22 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     }
   };
 
-  useEffect(() => {
-    // Attach scroll event listener to the chat container
-    console.log('referevce for good');
-    console.log(chatContainerRef.current);
-    if (chatContainerRef.current) {
-      chatContainerRef.current.addEventListener('scroll', handleScroll);
-    }
+  // useEffect(() => {
+  //   // Attach scroll event listener to the chat container
+  //   console.log('referevce for good');
+  //   console.log(chatContainerRef.current);
+  //   if (chatContainerRef.current) {
+  //     chatContainerRef.current.addEventListener('scroll', handleScroll);
+  //   }
 
-    // Cleanup: remove the event listener when the component unmounts
-    return () => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop = lastScrollPosition;
-        chatContainerRef.current.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [chatContainerRef.current]);
+  //   // Cleanup: remove the event listener when the component unmounts
+  //   return () => {
+  //     if (chatContainerRef.current) {
+  //       chatContainerRef.current.scrollTop = lastScrollPosition;
+  //       chatContainerRef.current.removeEventListener('scroll', handleScroll);
+  //     }
+  //   };
+  // }, [loading]);
   /* this is the end*/
   const desplayedMessages: Message[] = messages.length ? messages : [];
   if (loading) {
@@ -548,16 +394,27 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         </div>
                       </div>
                     </div>
-                    <div ref={chatContainerRef} className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    <div
+                      ref={chatContainerRef}
+                      onScroll={()=>{
+                        handleScroll();
+                      }
+                    }
+                    className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      {loading && <div>loading...</div>}
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
                     </div>
-                    { page > 3 &&
-                      <div className=' flex justify-center items-center w-full border'>
-                       <FaCircleArrowDown size={"30"} className='text-white hover:scale-90' />
-                    </div>
+                    {chatContainerRef.current?.scrollHeight  &&
+                       <FaCircleArrowDown
+                       onClick={()=>{
+                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+                        setPage(2);
+                      }}
+                       size={"30"}
+                       className=' relative bottom-1 self-center text-white hover:scale-90 z-30 ' />
                     }
                     <div className="p-4">
                       <div className="relative flex">
@@ -613,12 +470,26 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         </div>
                       </div>
                     </div>
-                    <div  ref={chatContainerRef}  className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    <div
+                      ref={chatContainerRef}
+                      onScroll={()=>{
+                        handleScroll();
+                      }
+                    }
+                    className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
-                    <FaCircleArrowDown size={"100"} className='text-white' />
+                    {chatContainerRef.current?.scrollHeight  &&
+                       <FaCircleArrowDown
+                       onClick={()=>{
+                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+                        setPage(2);
+                      }}
+                       size={"30"}
+                       className='  text-white hover:scale-90 z-30 ' />
+                    }
                     </div>
                     <div className="p-4">
                       <div className="relative flex">
@@ -663,25 +534,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   );
 }
 
-
-function extractDate(isoDateString: string): string | null {
-  if (!isoDateString)
-  {
-    return null;
-  }
-  const date = new Date(isoDateString);
-
-  if (isNaN(date.getTime())) {
-    console.error("Invalid date format");
-    return null;
-  }
-
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
-  const day = date.getDate().toString().padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
 export default PrivateRoom;
 
 

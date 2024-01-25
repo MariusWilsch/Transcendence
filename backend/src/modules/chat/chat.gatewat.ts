@@ -232,4 +232,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('updateChannelSettings',{e});
     }
   }
+  // @SubscribeMessage('LeaveChannel')
+  // async handleLeaving(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){
+  //   try{
+  //     console.log(payload);
+  //     const user = this.chatService.getUserFromJwt(payload.jwt);
+  //     if (!user)
+  //     {
+  //       return;
+  //     }
+  //     await this.chatService.updateChannelSettings(client.user.intraId, payload.channelId,payload.info);
+  //     const memberShips = await this.chatService.getAllChannelUsers(payload.channelId);
+  //     client.emit('updateChannelSetting',{e:"channel settings Successufely updated"});
+  //     memberShips.map((memberShip)=>{
+  //       const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
+  //       socketRec.map((socket:any)=>{
+  //         socket.emit('updateChannelSetting',{e:"channel settings have been updated"});
+  //       })
+  //     })
+  //   }
+  //   catch(e){
+  //     console.log(e);
+  //       client.emit('updateChannelSettings',{e});
+  //   }
+  // }
 }
