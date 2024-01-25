@@ -84,7 +84,7 @@ export class UserController {
   @Get('search')
   @UseGuards(JwtAuthGuard)
   async search(@Res() res, @Query('searchTerm') searchTerm: string) {
-    const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(
+    const targetURL = `${URL}:3000/search?query=${encodeURIComponent(
       searchTerm
     )}`;
     return res.redirect(targetURL);
@@ -115,7 +115,9 @@ export class UserController {
       }
 
       const uniqueLogin = await this.userService.uniqueLogin(body.newLogin);
-      if (body.newLogin.trim() === '' || uniqueLogin === false) {
+      if (body.newLogin.trim() === '' || uniqueLogin === false
+      || body.newLogin.length > 20 || body.newLogin.length < 3 ||
+      !/^[a-zA-Z0-9_\-+]+$/.test(body.newLogin)) {
         return res.json({ success: false });
       }
       await this.userService.updateLogin(userId, body.newLogin);
@@ -133,6 +135,9 @@ export class UserController {
     @Res() res: any
   ) {
     try {
+      if (body.otp.trim() === '' || body.otp.length !== 6 ) {
+        return res.json({ success: false });
+      }
       const isVerified = await this.authService.verifyOtp(userId, body.otp);
 
       if (isVerified) {

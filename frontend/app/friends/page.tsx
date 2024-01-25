@@ -254,7 +254,7 @@ export default function Friends() {
   }, [socket]);
 
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
+    <div className=" min-h-screen w-screen bg-[#12141A] overflow-x-hidden">
       <Navbar isProfileOwner={false} />
 
       <div className="flex ">
@@ -353,7 +353,7 @@ export default function Friends() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.02 }}
                 >
-                  <div className="flex w-full justify-center mb-6 ">
+                  <div className="flex w-full justify-center mb-6 overflow-x-hidden">
                     <div className="md:w-[50vw] w-[80vw] flex justify-center">
                       <div className="md:w-[50vw] w-[80vw] flex justify-center">
                         <form
@@ -388,7 +388,7 @@ export default function Friends() {
                 transition={{ delay: 0.02 }}
               >
                 <div className="mt-4 flex  justify-center ">
-                  <div className="mt-4 w-full flex flex-col items-center">
+                  <div className="mt-4 w-full flex flex-col items-center overflow-x-hidden">
                     {users &&
                       users?.map((user) => (
                         <Link

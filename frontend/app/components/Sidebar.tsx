@@ -109,7 +109,12 @@ export const Sidebar = () => {
                 <li className="">
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
-                    className=""
+                    className={`${
+                      user === null
+                        ? "pointer-events-none"
+                        : "pointer-events-auto"
+                    }
+                    `}
                   >
                     <motion.div
                       whileTap={{ scale: 0.8 }}

@@ -31,13 +31,15 @@ export default function Search(params: any) {
 
   useEffect(() => {
     const searchTerm = params.searchParams.query;
+    console.log('searchTerm ',searchTerm);
+    console.log('params ',params.searchParams);
 
     const handleSearchQuery = async (searchTerm: string) => {
       if (
         searchTerm === "" ||
         searchTerm === undefined ||
         searchTerm === null ||
-        searchTerm === " "
+        searchTerm.trim().length === 0
       ) {
         return;
       }

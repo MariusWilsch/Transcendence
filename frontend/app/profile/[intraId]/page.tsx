@@ -250,7 +250,7 @@ export default function Profile(params: any) {
   }
 
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A] relative">
+    <div className=" min-h-screen w-screen bg-[#12141A] relative overflow-x-hidden">
       <div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80">
         <Lottie
           animationData={loading}
@@ -297,7 +297,7 @@ export default function Profile(params: any) {
               />
             ) : (
               <div className="flex items-center justify-center text-gray-400">
-                <div className="skeleton pr-10 pl-10 text-slate-400">
+                <div className="skeleton bg-[#12141A] bg-opacity-40 pr-10 pl-10 text-slate-400">
                   Loading...
                 </div>
               </div>

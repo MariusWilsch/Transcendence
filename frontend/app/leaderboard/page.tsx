@@ -60,14 +60,14 @@ export default function Search(params: any) {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="p-10">
             <div className="">
               <div className="mb-5 text-white font-sans">Leaderboard </div>
               <div className="border-b border-gray-500 my-4 mb-10"></div>
 
               <div className="mt-4 flex  justify-center ">
-                <div className="mt-4 w-full flex flex-col items-center">
+                <div className="mt-4 w-full flex flex-col items-center overflow-x-hidden">
                   {users &&
                     users.map((user, index) => (
                       <Link
