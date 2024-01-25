@@ -30,15 +30,20 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
       inputValue.trim().length === 0
     ) {
       return;
     }
-    if (inputValue.trim().length > 10) {
+    if (inputValue.trim().length < 3) {
+      return toast.error("Write at least 3 characters");
+    }
+    if (inputValue.trim().length > 20) {
       return toast.error("TOO LONG");
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
     return router.push(
       `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?searchTerm=${inputValue}`

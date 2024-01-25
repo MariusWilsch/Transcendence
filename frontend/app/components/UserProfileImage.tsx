@@ -60,6 +60,7 @@ export const UserProfileImage = ({
           credentials: "include",
         }
       );
+
       const data = await response.json();
       if (response.success === false) {
         const msg = "Error getting friends";
@@ -134,7 +135,7 @@ export const UserProfileImage = ({
             credentials: "include",
           }
         );
-        if (!response.ok) {
+        if (!response.ok) {     
           toast.error("Failed to update the avatar");
           setSelectedFile(null);
           return;
@@ -153,6 +154,7 @@ export const UserProfileImage = ({
       toast.error("Please select a file");
     }
   };
+
   var readableDate: string = "";
   var readableDate1: string = "";
   var readableDate2: string = "";

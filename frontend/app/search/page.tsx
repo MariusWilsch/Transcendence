@@ -31,12 +31,9 @@ export default function Search(params: any) {
 
   useEffect(() => {
     const searchTerm = params.searchParams.query;
-    console.log('searchTerm ',searchTerm);
-    console.log('params ',params.searchParams);
 
     const handleSearchQuery = async (searchTerm: string) => {
       if (
-        searchTerm === "" ||
         searchTerm === undefined ||
         searchTerm === null ||
         searchTerm.trim().length === 0
@@ -61,13 +58,11 @@ export default function Search(params: any) {
           }
         );
         if (!response.ok) {
-          toast.error("User not found");
           return;
         }
         const users: User[] = await response.json();
         setUsers(users);
       } catch (error) {
-        console.error("Error:", error);
       }
     };
     handleSearchQuery(searchTerm);
@@ -76,12 +71,15 @@ export default function Search(params: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue.trim().length === 0
+      inputValue.trim().length === 0 ||
+      inputValue.trim().length > 20
     ) {
       return;
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
 
     try {
@@ -113,14 +111,6 @@ export default function Search(params: any) {
   };
 
   useEffect(() => {}, [inputValue]);
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const toggleselectedId = (prev: any) => {
-    // if (prev === null) {
-    //   return null;
-    // }
-    return null;
-  };
 
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">

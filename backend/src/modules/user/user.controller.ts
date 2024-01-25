@@ -72,6 +72,13 @@ export class UserController {
     @Body() name: { searchTerm: string }
   ): Promise<User[] | undefined> {
     try {
+      if (
+        name.searchTerm.trim().length === 0 ||
+        name.searchTerm.length > 20 ||
+        !/^[a-zA-Z0-9_\-+]+$/.test(name.searchTerm)
+      ) {
+        return undefined;
+      }
       const data = await this.userService.getUsersbyInput(name.searchTerm);
       res.json(data);
       return data;
@@ -113,11 +120,22 @@ export class UserController {
       if (!user) {
         return res.json({ success: false });
       }
+      if (
+        body.newLogin.trim().length > 20 ||
+        body.newLogin.trim().length < 3 ||
+        !/^[a-zA-Z0-9_\-+]+$/.test(body.newLogin)
+      ) {
+        return res.json({ success: false });
+      }
 
       const uniqueLogin = await this.userService.uniqueLogin(body.newLogin);
-      if (body.newLogin.trim() === '' || uniqueLogin === false
-      || body.newLogin.length > 20 || body.newLogin.length < 3 ||
-      !/^[a-zA-Z0-9_\-+]+$/.test(body.newLogin)) {
+      if (
+        body.newLogin.trim() === '' ||
+        uniqueLogin === false ||
+        body.newLogin.length > 20 ||
+        body.newLogin.length < 3 ||
+        !/^[a-zA-Z0-9_\-+]+$/.test(body.newLogin)
+      ) {
         return res.json({ success: false });
       }
       await this.userService.updateLogin(userId, body.newLogin);
@@ -135,7 +153,11 @@ export class UserController {
     @Res() res: any
   ) {
     try {
-      if (body.otp.trim() === '' || body.otp.length !== 6 ) {
+      if (
+        body.otp.trim() === '' ||
+        body.otp.length !== 6 ||
+        !/^[0-9]+$/.test(body.otp)
+      ) {
         return res.json({ success: false });
       }
       const isVerified = await this.authService.verifyOtp(userId, body.otp);
@@ -204,10 +226,12 @@ export class UserController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new FileTypeValidator({ fileType: 'image/*' }),
+          // new FileTypeValidator({ fileType: 'image/*' }),
+          new FileTypeValidator({ fileType: '.(gif|png|jpeg|jpg)' }),
         ],
-      }),
-    ) avatar: Express.Multer.File,
+      })
+    )
+    avatar: Express.Multer.File,
     @Res() res: any,
     @Req() req: any
   ) {

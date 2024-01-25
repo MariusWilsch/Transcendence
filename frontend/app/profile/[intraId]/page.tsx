@@ -124,15 +124,6 @@ export default function Profile(params: any) {
     if (params.params.intraId === user?.intraId) {
       setIsProfileOwner(true);
     }
-    // let timeoutId: any;
-    // if (!user) {
-    //   timeoutId = setTimeout(() => {
-    //     toast.error("Please login first");
-    //   }, 5000);
-    // }
-    // return () => {
-    //   clearTimeout(timeoutId);
-    // };
   }, [user]);
 
   useEffect(() => {
@@ -158,16 +149,6 @@ export default function Profile(params: any) {
       createsocket();
     }
   }, []);
-
-  // const listenForFriendships = () => {
-  //   if (socket !== null) {
-  //     socket.on("FriendShipRequest", () => {
-  //       console.log("FriendShipRequest");
-  //       toast.success("New friend request");
-  //       // getUserFromRoutId();
-  //     });
-  //   }
-  // };
 
   useEffect(() => {
     const listenForEvents = () => {

@@ -121,12 +121,15 @@ export default function Friends() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue.trim().length === 0
+      inputValue.trim().length === 0 ||
+      inputValue.trim().length > 20
     ) {
       return;
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
 
     try {
