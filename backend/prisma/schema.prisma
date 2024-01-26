@@ -10,16 +10,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id             String   @id @default(uuid())
-  intraId        String   @unique
-  name           String?  @unique
-  email          String   @unique
+  intraId        String    @unique
+  fullname       String    @unique
+  login          String    @unique
+  email          String    @unique
   Avatar         String?
-  isAuth         Boolean  @default(true)
-  TwoFASecret    String?
-  isTwoFAEnabled Boolean  @default(false)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  password       String?
+  isRegistred    Boolean   @default(false)
+  isTfaEnabled   Boolean   @default(false)
+  status         Status    @default(ONLINE)
+  tfa            Tfa?
+  friends        Friend[]  @relation("userFriends")
+  user           Friend[]  @relation("friendsUser") 
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+}
+
+model Tfa {
+  user           User      @relation(fields: [intraId], references: [intraId])
+  intraId        String    @unique
+  otp            String    @unique
+  created_at     DateTime  @default(now())
+}
+
+enum Status {
+  ONLINE
+  OFFLINE
+  INGAME
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+model Friend {
+  friendshipStatus FriendStatus
+  user             User         @relation("userFriends", fields: [userId], references: [intraId])
+  userId           String
+  friend           User         @relation("friendsUser", fields: [friendId], references: [intraId])
+  friendId         String
+  created_at       DateTime     @default(now())
+  @@unique([userId, friendId], name: "unique_user_friend")
 }

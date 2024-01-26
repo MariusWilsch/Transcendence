@@ -2,13 +2,66 @@
 @tailwind utilities;
 @tailwind components;
 
-html,
+/* html,
 body {
 	margin: 0;
 	padding: 0;
 	overflow: hidden @apply h-screen w-screen bg-black;
 	@apply text-white;
-	@apply text-center;
+	@apply text-center; */
+
+/* body {
+	background-color: white;
+} */
+
+@keyframes moveLeftAndRight {
+	50% {
+		transform: translateX(0);
+	}
+	0%,
+	100% {
+		transform: translateX(3px);
+	}
+}
+
+.animate-moveLeftAndRight {
+	animation: moveLeftAndRight 0.5s infinite;
+}
+
+.custom-height {
+	height: calc(100vh - 64px);
+}
+
+.custom-width {
+	width: calc(100vh - 64px);
+}
+
+.backgroundDiv {
+	background-image: url('../public/one.jpg');
+	background-size: cover;
+	background-position: center;
+	width: calc(100vw - 64px);
+}
+
+.backgroundDivNotVisible {
+	background-image: url('../public/one.jpg');
+	background-size: cover;
+	background-position: center;
+	width: 100vw;
+}
+
+.twofabackround {
+	background-image: url('../public/abstract-cubes-dark-shapes.jpeg');
+	background-size: cover;
+	background-position: center;
+	width: calc(100vw);
+}
+
+.homebackround {
+	background-image: url('../public/DALLEpong.png');
+	background-size: cover;
+	background-position: center;
+	width: 100vw;
 }
 
 .boxTransform {
@@ -24,4 +77,3 @@ body {
 		font-size: 1vw;
 	}
 }
-
