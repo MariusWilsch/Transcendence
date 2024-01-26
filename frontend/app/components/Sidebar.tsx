@@ -26,6 +26,19 @@ export const Sidebar = () => {
 
   const context = useAppContext();
 
+
+
+  
+  
+  // console.log("isSidebarVisible", context.isSidebarVisible);
+  //   useEffect(() => {
+  //     context.setisSidebarVisible(window.innerWidth > 768);
+  //   }, []);
+
+
+
+
+
   const getFriends = async () => {
     try {
       if (user?.intraId) {
@@ -99,7 +112,39 @@ export const Sidebar = () => {
     checkJwtCookie();
   }, []);
 
+
+
+  // {context.isSidebarVisible && (
+  //   <div className="w-16 custom-height ">
+  //     <div
+  //       className={`transition-all duration-500 ease-in-out ${
+  //         context.isSidebarVisible
+  //           ? 'w-16 opacity-100'
+  //           : 'w-0 opacity-0'
+  //       }`}
+  //     >
+  //       <Sidebar />
+  //     </div>
+  //   </div>
+  // )}
+
+
   return (
+  <div>
+  
+
+    {context.isSidebarVisible && (
+    <div className="w-16 custom-height ">
+      <div
+        className={`transition-all duration-500 ease-in-out ${
+          context.isSidebarVisible
+            ? 'w-16 opacity-100'
+            : 'w-0 opacity-0'
+        }`}
+      >
+
+
+
     <div className="relative custom-height bg-[#292D39] ">
       <div className="absolute buttom-0 left-0 bg-[#292D39]">
         <div className=" custom-height fixed text-black bg-[#292D39]">
@@ -287,5 +332,11 @@ export const Sidebar = () => {
         </div>
       </div>
     </div>
+
+
+      </div>
+    </div>
+     )}
+     </div>
   );
 };
