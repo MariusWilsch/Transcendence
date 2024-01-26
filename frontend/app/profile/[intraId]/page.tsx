@@ -214,7 +214,7 @@ export default function Profile(params: any) {
 
 	return (
 		<div className="">
-			<div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80">
+			<div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
 				<Lottie
 					animationData={loading}
 					className="w-auto h-auto"
