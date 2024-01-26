@@ -34,10 +34,9 @@ export default function Search(params: any) {
 
     const handleSearchQuery = async (searchTerm: string) => {
       if (
-        searchTerm === "" ||
         searchTerm === undefined ||
         searchTerm === null ||
-        searchTerm === " "
+        searchTerm.trim().length === 0
       ) {
         return;
       }
@@ -59,13 +58,11 @@ export default function Search(params: any) {
           }
         );
         if (!response.ok) {
-          toast.error("User not found");
           return;
         }
         const users: User[] = await response.json();
         setUsers(users);
       } catch (error) {
-        console.error("Error:", error);
       }
     };
     handleSearchQuery(searchTerm);
@@ -74,12 +71,15 @@ export default function Search(params: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue.trim().length === 0
+      inputValue.trim().length === 0 ||
+      inputValue.trim().length > 20
     ) {
       return;
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
 
     try {
@@ -111,14 +111,6 @@ export default function Search(params: any) {
   };
 
   useEffect(() => {}, [inputValue]);
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const toggleselectedId = (prev: any) => {
-    // if (prev === null) {
-    //   return null;
-    // }
-    return null;
-  };
 
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
@@ -195,7 +187,7 @@ export default function Search(params: any) {
                           >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
+                                <div className="flex items-center">
                                   <div className="flex-shrink-0 pt-0.5">
                                     <img
                                       className="h-10 w-10 rounded-full"

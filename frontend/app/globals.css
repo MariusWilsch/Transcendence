@@ -58,11 +58,28 @@ body {
 }
 
 .homebackround {
-	background-image: url('../public/DALLEpong.png');
+	background-image: url("../public/DALLEpong.png");
 	background-size: cover;
 	background-position: center;
 	width: 100vw;
-}
+  }
+  
+  .tooltip {
+	position: relative;
+	display: inline;
+  }
+  
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+	visibility: hidden;
+	position: absolute;
+	z-index: 1;
+  }
+  
+  /* Show the tooltip text when you mouse over the tooltip container */
+  .tooltip:hover .tooltiptext {
+	visibility: visible;
+  }
 
 .boxTransform {
 	@apply transform hover:scale-105 hover:bg-base-200 transition-all duration-200 ease-in-out;
@@ -72,8 +89,10 @@ body {
 	@apply border-0;
 }
 
+
+/* 
 @layer {
 	:root {
 		font-size: 1vw;
 	}
-}
+} */

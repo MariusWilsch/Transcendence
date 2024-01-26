@@ -106,26 +106,15 @@ export const Sidebar = () => {
           <ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
             <div className="flex flex-col justify-between custom-height bg-[#292D39]">
               <div className="">
-                <li>
-                  <motion.div
-                    whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.01 }}
-                  >
-                    <IoHome
-                      size="30"
-                      className={`${
-                        RouterName === "home"
-                          ? "text-slate-50"
-                          : "text-slate-500"
-                      } hover:text-slate-50 mx-auto m-8`}
-                    />
-                  </motion.div>
-                </li>
-                <li>
+                <li className="">
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user?.intraId}`}
+                    className={`${
+                      user === null
+                        ? "pointer-events-none"
+                        : "pointer-events-auto"
+                    }
+                    `}
                   >
                     <motion.div
                       whileTap={{ scale: 0.8 }}
@@ -139,7 +128,8 @@ export const Sidebar = () => {
                           RouterName === "profile"
                             ? "text-slate-50"
                             : "text-slate-500"
-                        } hover:text-slate-50 mx-auto m-8`}
+                        } hover:text-slate-50 mx-auto m-8
+                        `}
                       />
                     </motion.div>
                   </Link>
@@ -195,23 +185,6 @@ export const Sidebar = () => {
                   </motion.div>
                 </li>
                 <li>
-                  <motion.div
-                    whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.01 }}
-                  >
-                    <GrAchievement
-                      size="30"
-                      className={`${
-                        RouterName === "acheivements"
-                          ? "text-slate-50"
-                          : "text-slate-500"
-                      } hover:text-slate-50 mx-auto m-8`}
-                    />
-                  </motion.div>
-                </li>
-                <li>
                   <Link
                     href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}
                   >
@@ -233,21 +206,25 @@ export const Sidebar = () => {
                   </Link>
                 </li>
                 <li>
-                  <motion.div
-                    whileTap={{ scale: 0.8 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.01 }}
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels`}
                   >
-                    <GrGroup
-                      size="30"
-                      className={`${
-                        RouterName === "groups"
-                          ? "text-slate-50"
-                          : "text-slate-500"
-                      } hover:text-slate-50 mx-auto m-8`}
-                    />
-                  </motion.div>
+                    <motion.div
+                      whileTap={{ scale: 0.8 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.01 }}
+                    >
+                      <GrGroup
+                        size="30"
+                        className={`${
+                          RouterName === "channels"
+                            ? "text-slate-50"
+                            : "text-slate-500"
+                        } hover:text-slate-50 mx-auto m-8`}
+                      />
+                    </motion.div>
+                  </Link>
                 </li>
                 <li>
                   <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>

@@ -7,7 +7,6 @@ import { useAppContext, User } from "../AppContext";
 import toast, { Toaster } from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
-import { RiSearchLine } from "react-icons/ri";
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
 import { motion } from "framer-motion";
@@ -23,8 +22,6 @@ export default function Friends() {
     isSidebarVisible,
     setisSidebarVisible,
     toggleSidebarVisibleVisibility,
-    // socket,
-    // setsocket,
   } = useAppContext();
   const [socket, setsocket] = useState<Socket | null>(null);
 
@@ -124,12 +121,15 @@ export default function Friends() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue.trim().length === 0
+      inputValue.trim().length === 0 ||
+      inputValue.trim().length > 20
     ) {
       return;
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
 
     try {
@@ -257,7 +257,7 @@ export default function Friends() {
   }, [socket]);
 
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
+    <div className=" min-h-screen w-screen bg-[#12141A] overflow-x-hidden">
       <Navbar isProfileOwner={false} />
 
       <div className="flex ">
@@ -356,10 +356,13 @@ export default function Friends() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.02 }}
                 >
-                  <div className="w-full flex items-center justify-center mb-6">
-                    <div className="md:w-[50vw] w-full flex items-center justify-center">
-                      <div className="md:w-[50vw] w-full flex flex-row-reverse">
-                        <form className="min-w-[80vw] md:min-w-[50vw]" onSubmit={handleSubmit}>
+                  <div className="flex w-full justify-center mb-6 overflow-x-hidden">
+                    <div className="md:w-[50vw] w-[80vw] flex justify-center">
+                      <div className="md:w-[50vw] w-[80vw] flex justify-center">
+                        <form
+                          className="min-w-[80vw] md:min-w-[50vw]"
+                          onSubmit={handleSubmit}
+                        >
                           <label className=" flex flex-grow ">
                             <input
                               id="searchField"
@@ -374,13 +377,6 @@ export default function Friends() {
                               className="min-w-[80vw] md:min-w-[50vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
                             />
                             <div className="md:hidden">&nbsp; &nbsp;</div>
-                            <button
-                              onClick={handleSubmit}
-                              className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
-                              type="submit"
-                            >
-                              <RiSearchLine size="30" className="" />
-                            </button>
                           </label>
                         </form>
                       </div>
@@ -395,7 +391,7 @@ export default function Friends() {
                 transition={{ delay: 0.02 }}
               >
                 <div className="mt-4 flex  justify-center ">
-                  <div className="mt-4 w-full flex flex-col items-center">
+                  <div className="mt-4 w-full flex flex-col items-center overflow-x-hidden">
                     {users &&
                       users?.map((user) => (
                         <Link
@@ -415,7 +411,7 @@ export default function Friends() {
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">
-                                  <div className="flex items-start">
+                                  <div className="flex items-center">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <img
                                         className="h-10 w-10 rounded-full"

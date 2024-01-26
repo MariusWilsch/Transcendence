@@ -30,15 +30,20 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
       inputValue.trim().length === 0
     ) {
       return;
     }
-    if (inputValue.trim().length > 10) {
+    if (inputValue.trim().length < 3) {
+      return toast.error("Write at least 3 characters");
+    }
+    if (inputValue.trim().length > 20) {
       return toast.error("TOO LONG");
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
     return router.push(
       `${process.env.NEXT_PUBLIC_API_URL}:3001/users/search?searchTerm=${inputValue}`
@@ -46,10 +51,10 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
   };
 
   return (
-    <div className="bg-[#1F212A] flex flex-row  w-[100vw]">
+    <div className="bg-[#1F212A] flex flex-row  w-[100vw] overflow-hidden">
       <div className="w-16 h-16 bg-[#292D39]">
         <Image
-        unoptimized={true}
+          unoptimized={true}
           src={pong}
           alt="Description of the image"
           priority={true}
@@ -94,7 +99,10 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
             </div>
             <div className="flex justify-end p-4 flex-grow">
               {!isDivVisible && isProfileOwner && (
-                <button onClick={toggleDivVisibility}>
+                <button onClick={toggleDivVisibility} className="tooltip">
+                  <div className="text-sm tooltiptext w-24 bg-gray-800 bg-opacity-80 top-0 right-8 text-white p-1 rounded-md hover:transition duration-300 ease-in">
+                    Edit profile
+                  </div>
                   <CiEdit className="text-white" size="25" />
                 </button>
               )}
@@ -109,7 +117,7 @@ export const Navbar = ({ isProfileOwner }: { isProfileOwner: boolean }) => {
                   className="flex flex-row"
                 >
                   <Image
-                  unoptimized={true}
+                    unoptimized={true}
                     src={user.Avatar}
                     alt="Description of the image"
                     priority={true}

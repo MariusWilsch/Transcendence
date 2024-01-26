@@ -10,6 +10,11 @@ import { CiSaveUp2 } from "react-icons/ci";
 import { FaCircle } from "react-icons/fa";
 import { PiGameControllerLight } from "react-icons/pi";
 import { motion, AnimatePresence } from "framer-motion";
+import { MdOutlineMailOutline } from "react-icons/md";
+import { HiUserGroup } from "react-icons/hi2";
+import { TfiFaceSmile } from "react-icons/tfi";
+import { LiaWalkingSolid } from "react-icons/lia";
+import { RxUpdate } from "react-icons/rx";
 
 export const UserProfileImage = ({
   status,
@@ -35,9 +40,75 @@ export const UserProfileImage = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [friends, setfriends] = useState<number>(0);
+  const [Onlinefriends, setOnlinefriends] = useState<number>(0);
+  const [refreshFriends, setrefreshFriends] = useState<number>(0);
+
   useEffect(() => {
     setImagePreview(src);
   }, []);
+
+  const getFriends = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/friends`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+      if (response.success === false) {
+        const msg = "Error getting friends";
+        toast.error(msg);
+        console.log(msg);
+      }
+      if (data.friends) {
+        setfriends(data.friends.length);
+      }
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
+
+  const onlineFriends = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/onlinefriends`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.success === false) {
+        const msg = "Error getting friends";
+        toast.error(msg);
+        console.log(msg);
+      }
+      if (data.onlinefriends) {
+        setOnlinefriends(data.onlinefriends.length);
+      }
+    } catch (error: any) {
+      const msg = "Error getting friends: " + error.message;
+      toast.error(msg);
+      console.error("Error getting friends:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    onlineFriends();
+    getFriends();
+  }, [user, refreshFriends]);
 
   const handleFileChange = (event: any) => {
     const files = event.target.files;
@@ -64,23 +135,43 @@ export const UserProfileImage = ({
             credentials: "include",
           }
         );
+        if (!response.ok) {     
+          toast.error("Failed to update the avatar");
+          setSelectedFile(null);
+          return;
+        }
         const data = await response.json();
         if (data.success === false) {
-          toast.error("Failed to update login avatar");
-          console.log("Failed to update login avatar");
+          toast.error("Failed to update the avatar");
         } else {
           toast.success("avatar updated successfully");
-          console.log("avatar updated successfully");
         }
       } catch (error) {
         toast.error("Failed to update avatar");
-        console.error("Error during POST request:", error);
       }
       setSelectedFile(null);
     } else {
       toast.error("Please select a file");
-      console.log("Please select a file");
     }
+  };
+
+  var readableDate: string = "";
+  var readableDate1: string = "";
+  var readableDate2: string = "";
+
+  if (user) {
+    readableDate = new Date(user?.created_at).toISOString().split("T")[0];
+    readableDate1 = new Date(user?.updated_at).toISOString().split("T")[0];
+    readableDate2 = new Date(user?.updated_at)
+      .toISOString()
+      .split("T")[1]
+      .substring(0, 5);
+  }
+
+  const percentage: any = {
+    "--value": 55,
+    "--size": "160px",
+    fontSize: "44px",
   };
 
   return (
@@ -89,8 +180,125 @@ export const UserProfileImage = ({
         <div
           className={`${
             isSidebarVisible ? "backgroundDiv" : "backgroundDivNotVisible"
-          } backgroundDiv  md:h-80 h-48 flex justify-center`}
+          } backgroundDiv  md:h-80 h-48 flex justify-center relative`}
         >
+          <div
+            className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}
+          >
+            <div className="flex flex-row justify-between gap-[4%] w-[90%] h-5/6">
+              <div className="w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30">
+                <div className="m-3">
+                  <div className="text-white "> Win percentage : </div>
+                  <div className="w-full h-40 flex flex-row justify-center mt-4 mb-4">
+                    <div
+                      className="radial-progress text-green-400 font-extrabold  w-40 h-40 "
+                      style={percentage}
+                      role="progressbar"
+                    >
+                      55%
+                    </div>
+                  </div>
+                  <div className="text-gray-300 font-mono">
+                    <div className="inline text-blue-400">956&nbsp;</div>
+                    games played
+                  </div>
+                </div>
+              </div>
+              <div className="w-1/3 h-2/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30 ">
+                <div className="m-4 overflow-hidden ">
+                  <div className="flex flex-row justify-between ">
+                    <div className="text-white mb-1 ">Total friends :</div>
+                    {isProfileOwner && (
+                      <button
+                        onClick={() => setrefreshFriends((prev) => prev + 1)}
+                      >
+                        <div className="tooltip ">
+                          <RxUpdate
+                            size="20"
+                            className="text-gray-400 inline mr-1"
+                          />
+                          <div className="tooltiptext w-20 bg-gray-800 bg-opacity-80 top-0 right-4 text-white p-3 rounded-md hover:transition duration-300 ease-in">
+                            Refresh
+                          </div>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                  <div className="mb-1 font-extrabold text-5xl text-blue-600 flex flex-row justify-between ml-2 mr-2">
+                    <div>{friends}</div>
+                    <div>
+                      <HiUserGroup />
+                    </div>
+                  </div>
+                  {isProfileOwner && (
+                    <div className="text-gray-300 text-sm font-mono">
+                      <div className="inline text-green-400 font-mono">
+                        {Onlinefriends}&nbsp;
+                      </div>
+                      of theme are online
+                    </div>
+                  )}
+                </div>
+              </div>
+              {user ? (
+                <div className="w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30 flex items-center overflow-hidden">
+                  <div className="m-5 overflow-hidden ">
+                    <div className=" text-white mb-3 ">
+                      <div className="tooltip">
+                        <div className="tooltiptext w-32 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Full name
+                        </div>
+                        <TfiFaceSmile size="22" className="inline mr-[1px]" /> :{" "}
+                      </div>
+                      <div className="inline text-green-400 ">
+                        {user?.fullname}
+                      </div>
+                    </div>
+                    <div className=" text-white mb-3">
+                      <div className="tooltip">
+                        <div className="tooltiptext w-20 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Email
+                        </div>
+                        <MdOutlineMailOutline size="21" className="inline" /> :{" "}
+                      </div>
+                      <div className="inline text-green-400 ">
+                        {user?.email}
+                      </div>
+                    </div>
+                    <div className=" text-white mb-3">
+                      <div className="tooltip">
+                        <div className="tooltiptext w-36 bg-gray-800 bg-opacity-80 top-0 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Joining date
+                        </div>
+                        <LiaWalkingSolid size="24" className="inline" />
+                      </div>
+                      {"  "}:{" "}
+                      <div className="inline text-green-400 ">
+                        {readableDate}
+                      </div>
+                    </div>
+                    <div className="font-sans text-white">
+                      <div className="tooltip">
+                        <div className="tooltiptext w-40 bg-gray-800 bg-opacity-80 -top-5 left-4 text-white p-2 rounded-md hover:transition duration-300 ease-in">
+                          Last profile update
+                        </div>
+                        <RxUpdate size="20" className="inline mr-1" /> :{" "}
+                      </div>
+                      <div className="inline text-blue-400 font-semibold">
+                        {readableDate2} &nbsp;
+                      </div>
+                      <div className="inline text-green-400 ">
+                        {readableDate1}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="skeleton w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30"></div>
+              )}
+            </div>
+          </div>
+
           <div
             className="w-48 h-48 md:w-72 md:h-72 md:mt-36 mt-16"
             style={{ position: "relative", display: "inline-block" }}
