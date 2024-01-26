@@ -1,4 +1,5 @@
 import { createAction, createSlice } from '@reduxjs/toolkit';
+import { userAgent } from 'next/server';
 
 export enum GameOutcome {
 	WON = 'WON',
@@ -23,6 +24,10 @@ export interface ConnectionState {
 	isGameStarted: boolean; // True if the game has started, false if finished
 	isGamePaused: boolean; // True if the game is paused, false if resumed
 	playerOutcome: GameOutcome; // The outcome of the game for the player
+	gameData: {
+		username: string;
+		avatar: string;
+	};
 }
 
 const initialState = {
@@ -31,7 +36,11 @@ const initialState = {
 	playerOutcome: GameOutcome.NONE,
 	isGameStarted: false,
 	isGamePaused: false,
-};
+	gameData: {
+		username: '',
+		avatar: '',
+	},
+} as ConnectionState;
 
 const connectionSlice = createSlice({
 	name: 'connection',
@@ -62,6 +71,9 @@ const connectionSlice = createSlice({
 		setPlayerOutcome: (state, action) => {
 			state.playerOutcome = action.payload;
 		},
+		setGameData: (state, action) => {
+			state.gameData = action.payload;
+		},
 	},
 });
 
@@ -79,5 +91,6 @@ export const {
 	setPlayerOutcome,
 	setConnectionStatus,
 	setMatchmaking,
+	setGameData,
 } = connectionSlice.actions;
 export const connectionReducer = connectionSlice.reducer;

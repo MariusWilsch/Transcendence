@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { InputType, mapType } from '@/app/GlobalRedux/features';
+import { InputType, mapType } from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameService } from './GameService';
-import { RootState } from '@/app/GlobalRedux/store';
+import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { Direction } from '@/interfaces';
 import { handleKeyDown, handleKeyUp, handleMouseMove } from './interaction';
 

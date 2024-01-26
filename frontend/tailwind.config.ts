@@ -7,9 +7,8 @@ const config: Config = {
 		'./components/**/*.{js,ts,jsx,tsx,mdx}',
 		'./app/**/*.{js,ts,jsx,tsx,mdx}',
 	],
-	theme: {
-	},
-	plugins: [require('daisyui'), require('tailwindcss-animate')],
+	theme: {},
+	plugins: [require('daisyui')],
 	// daisyui: {
 	//   themes: ["forest", "", ""],
 	// },
@@ -17,10 +16,10 @@ const config: Config = {
 		themes: [
 			{
 				mytheme: {
-					"primary": '#181c26',
-					"secondary": '#232630',
-					"accent": '#6941b0',
-					'info': '#2094f3',
+					primary: '#181c26',
+					secondary: '#232630',
+					accent: '#6941b0',
+					info: '#2094f3',
 					'base-100': '#181c26',
 					'base-200': '#232630',
 				},

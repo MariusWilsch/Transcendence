@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
-import { GameState } from '../../interfaces/GameState';
-import { mapType } from '@/app/GlobalRedux/features';
+import { GameState } from '../../../interfaces/GameState';
+import { mapType } from '@/app/gamelobby/GlobalRedux/features';
 //* Decide later if I want to use this
 // import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 

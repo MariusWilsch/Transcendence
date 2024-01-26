@@ -1,9 +1,16 @@
 'use client';
-import { Carousel, CarouselNavigation, Modal } from '@/app/components';
-import useStartGame from '@/app/hooks/useStartGame';
+import {
+	Carousel,
+	CarouselNavigation,
+	Modal,
+} from '@/app/gamelobby/components';
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/app/GlobalRedux/store';
-import { ConnectionStatus, setupAIMatch } from '@/app/GlobalRedux/features';
+import { RootState } from '@/app/gamelobby/GlobalRedux/store';
+import {
+	ConnectionStatus,
+	setupAIMatch,
+} from '@/app/gamelobby/GlobalRedux/features';
 
 // Step3.tsx
 export const Step3 = () => {

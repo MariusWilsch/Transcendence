@@ -1,5 +1,5 @@
 import { Direction } from '@/interfaces';
-import { mouseMove, movePaddle } from '@/app/GlobalRedux/features';
+import { mouseMove, movePaddle } from '@/app/gamelobby/GlobalRedux/features';
 import { MutableRefObject } from 'react';
 import { Dispatch, AnyAction } from 'redux';
 

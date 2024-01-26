@@ -1,35 +1,52 @@
 'use client';
 import { GameCanvas } from './GameCanvas';
-import { RootState } from '@/app/GlobalRedux/store';
-import { setupInteraction, startLoop } from '@/app/GlobalRedux/features';
+import { RootState } from '@/app/gamelobby/GlobalRedux/store';
+import {
+	setupInteraction,
+	startLoop,
+} from '@/app/gamelobby/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import useStartGame from '@/app/hooks/useStartGame';
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import Link from 'next/link';
 import { Modal } from '../components';
 
-const Score = ({ score }: any) => {
+interface ScoreProps {
+	score: number;
+	username: string;
+}
+
+const Score: React.FC<ScoreProps> = ({ score, username }) => {
 	return (
 		<div className="flex flex-col">
-			<div className="text-2xl font-bold">Username</div>
+			<div className="text-2xl font-bold"> {username} </div>
 			<div className="text-xl">{score}</div>
 		</div>
 	);
 };
 
-const Stats = ({ scorePos }: any) => {
+interface StatsProps {
+	scorePos: 'left' | 'right';
+	gameData: {
+		username: string;
+		avatar: string;
+	};
+}
+
+const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
 	return (
 		<div className="flex items-center gap-x-8">
-			{scorePos === 'right' ? <Score score={score.player1} /> : null}
+			{scorePos === 'right' ? (
+				<Score score={score.player1} username={gameData.username} />
+			) : null}
 			<div className="avatar">
-				<div className="w-24 rounded-full">
-					{/* Fixing this later */}
-					<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-				</div>
+				<div className="w-24 rounded-full">{gameData.avatar}</div>
 			</div>
-			{scorePos === 'left' ? <Score score={score.player2} /> : null}
+			{scorePos === 'left' ? (
+				<Score score={score.player2} username={gameData.username} />
+			) : null}
 		</div>
 	);
 };
@@ -87,10 +104,12 @@ function CountdownModal() {
 }
 
 const GameHeader = () => {
+	const gameData = useSelector((state: RootState) => state.connection.gameData);
+	//! this is not gonna show the right avatar gameData will be the same for both
 	return (
 		<div className="h-1/4 flex items-center justify-evenly">
-			<Stats scorePos={'left'} />
-			<Stats scorePos={'right'} />
+			<Stats scorePos={'left'} gameData={gameData} />
+			<Stats scorePos={'right'} gameData={gameData} />
 		</div>
 	);
 };

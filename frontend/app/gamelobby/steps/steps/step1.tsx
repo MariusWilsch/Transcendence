@@ -1,8 +1,8 @@
 import playAgainstAI2 from '@/public/static/images/playAgainstAI2.png';
 import playAgainstHuman from '@/public/static/images/playAgainstHuman.png';
-import { CardOverlay } from '@/app/components';
-import { RootState } from '@/app/GlobalRedux/store';
-import { aiDifficulty } from '@/app/GlobalRedux/features';
+import { CardOverlay } from '@/app/gamelobby/components';
+import { RootState } from '@/app/gamelobby/GlobalRedux/store';
+import { aiDifficulty } from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 
 export const Step1: React.FC = ({ setStep }: any) => {

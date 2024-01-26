@@ -1,8 +1,8 @@
 import useMouse from '@/public/static/images/useMouse.png';
 import useKeyboard from '@/public/static/images/useKeyboard.png';
-import { CardOverlay } from '@/app/components';
+import { CardOverlay } from '@/app/gamelobby/components';
 import { useDispatch } from 'react-redux';
-import { setInputType, InputType } from '@/app/GlobalRedux/features';
+import { setInputType, InputType } from '@/app/gamelobby/GlobalRedux/features';
 
 export const Step2 = ({ setStep }: any) => {
 	const dispatch = useDispatch();

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Step1, Step2, Step3 } from './index';
 
 const StepsList: React.FC = () => {
-	const [currentStep, setCurrentStep] = useState(3);
+	const [currentStep, setCurrentStep] = useState(1);
 
 	return (
 		<div className="flex pt-4 flex-col items-center gap-x-12 h-full justify-between">
