@@ -6,7 +6,6 @@ import { aiDifficulty } from '@/app/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 
 export const Step1: React.FC = ({ setStep }: any) => {
-	//! How can I make the buttons a required field when selecting AI
 	const difficulty = useSelector(
 		(state: RootState) => state.gameConfig.aiDifficulty,
 	);

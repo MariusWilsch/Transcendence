@@ -50,9 +50,6 @@ export const handleKeyUp = (
 	}
 };
 
-//! Why is the paddle movement so smooth if I'm updating using the y postion of the mouse?
-//! and not like with the keyboatd controls?
-//! can the same be achieved with keybaoards and ball movement?
 export const handleMouseMove = (
 	dispatch: Dispatch<AnyAction>,
 	e: MouseEvent,

@@ -42,7 +42,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket.on('createGame', (gameState: GameState) => {
 		console.log('Game created');
 		store.dispatch(initGame(gameState));
-		//! Will be set twice, once for each player
+		//* Will be set twice, once for each player
 		store.dispatch(gameStarted());
 		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
@@ -52,7 +52,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	);
 
 	socket.on('gameOver', (won: boolean) => {
-		//! Will be set twice, once for each player
+		//* Will be set twice, once for each player
 		store.dispatch(gameFinished());
 		const outcome = won ? GameOutcome.WON : GameOutcome.LOST;
 		store.dispatch(setPlayerOutcome(outcome));

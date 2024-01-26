@@ -113,16 +113,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			// console.log(
 			// 	`Game state send took ${endUpdateTime1 - startUpdateTime1} milliseconds`
 			// );
-		}, 1000 / 60); // Run the loop at approximately 60 FPS
+		}, 1000 / 60); //! Run the loop at approximately 60 FPS or try 25/30 FPS like ALII suggested
 
 		this.gameService.setIntervalID(roomID, intervalId);
 	}
 
 	//! Optimization ideas
-	// Only send dimensions once (on game start)
-	// Only send score when it changes
-	// Don't send ball & paddle velocities
-
 	sendGameState(roomID: string, gameState: GameState) {
 		this.Server.to(roomID).emit('gameState', gameState);
 	}
@@ -186,7 +182,4 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		);
 		this.checkForAvailablePlayers();
 	}
-
-	@SubscribeMessage('setupAIMatch')
-	handleAIMatch(client: IO): void {}
 }

@@ -2,8 +2,6 @@ import { cancelMatchmaking } from '../GlobalRedux/features';
 import { useDispatch } from 'react-redux';
 
 export const Modal = () => {
-	//? How do I center "Cancel Matchmaking" button
-	//! I need to remove the user from the lobby if the cancels matchmaking
 	const dispatch = useDispatch();
 
 	return (

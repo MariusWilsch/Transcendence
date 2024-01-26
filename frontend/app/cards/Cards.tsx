@@ -49,15 +49,12 @@ export const Card: React.FC<CardProps> = ({
 };
 
 const Cards: React.FC = () => {
-	//! There is to little space between the cards and the cards navbar and bottom
-	//! How can we reduce the height of the cards relative to the text box? Somewhat like 70/30 maybe or 60/40
 	const { initSocketPushGame, pushToGame } = useStartGame();
 	const router = useRouter();
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,
 	);
 
-	//! Implement Dasiy UI's in text kbd for W and A keys in the description
 	return (
 		<>
 			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12">

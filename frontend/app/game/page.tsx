@@ -135,7 +135,6 @@ function GameOutcomeModal({ outcome }: any) {
 		}
 	}, [isGameStarted]);
 
-	//! Now starting game when 2 players are found
 	return (
 		<>
 			<Modal />

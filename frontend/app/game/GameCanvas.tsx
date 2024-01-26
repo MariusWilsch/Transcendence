@@ -47,7 +47,6 @@ export const GameCanvas: React.FC = () => {
 
 	useEffect(() => {
 		//* Create the game service if it doesn't exist
-		//! I think I need to check If the user is actually in a game session ot
 		if (!serviceRef.current) {
 			console.log('Creating game service with', gameState);
 
