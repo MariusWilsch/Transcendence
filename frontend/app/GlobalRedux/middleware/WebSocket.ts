@@ -24,10 +24,11 @@ interface Middleware {
 	) => (action: MiddlewareAction) => any;
 }
 
-let socket: Socket | null = null;
+let ClientSocket: Socket | null = null;
+let AISocket: Socket | null = null;
 
 //* Helper functions for WebSocket middleware
-const connect = (store: MiddlewareStore) => {
+const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket = io('http://localhost:3001');
 
 	socket.on('connect', () => console.log('Connected to server'));
@@ -39,7 +40,7 @@ const connect = (store: MiddlewareStore) => {
 	});
 
 	socket.on('createGame', (gameState: GameState) => {
-		console.log('Game created', socket?.id);
+		console.log('Game created');
 		store.dispatch(initGame(gameState));
 		//! Will be set twice, once for each player
 		store.dispatch(gameStarted());
@@ -56,27 +57,38 @@ const connect = (store: MiddlewareStore) => {
 		const outcome = won ? GameOutcome.WON : GameOutcome.LOST;
 		store.dispatch(setPlayerOutcome(outcome));
 	});
+	return socket;
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
-	if (action.type === 'game/startConnection' && !socket) connect(store);
+	if (action.type === 'game/startConnection' && !ClientSocket)
+		ClientSocket = connect(store, ClientSocket);
 
 	switch (action.type) {
 		case 'game/movePaddle':
-			socket?.emit('onPaddleMove', action.payload);
+			ClientSocket?.emit('onPaddleMove', action.payload);
 			break;
 		case 'game/mouseMove':
-			socket?.emit('onMouseMove', action.payload);
+			ClientSocket?.emit('onMouseMove', action.payload);
 			break;
 		case 'connection/startLoop':
-			socket?.emit('startLoop');
+			console.log('startLoop');
+
+			ClientSocket?.emit('startLoop', action.payload);
 			break;
 		case 'connection/cancelMatchmaking':
-			socket?.emit('cancelMatchmaking');
+			ClientSocket?.emit('cancelMatchmaking');
 			break;
 		case 'connection/addToLobby':
-			socket?.emit('addToLobby');
+			ClientSocket?.emit('addToLobby');
 			break;
+		case 'gameConfig/setupInteraction':
+			console.log('setupInteraction');
+			ClientSocket?.emit('setupInteraction', action.payload);
+			break;
+		case 'gameConfig/setupAIMatch':
+			AISocket = connect(store, AISocket);
+			AISocket?.emit('setupAIMatch', action.payload);
 		//* Can be expanded to handle more actions - Add below
 		default:
 			break;

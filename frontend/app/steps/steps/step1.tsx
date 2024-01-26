@@ -3,7 +3,7 @@ import playAgainstHuman from '@/public/static/images/playAgainstHuman.png';
 import { CardOverlay } from '@/app/components';
 import { RootState } from '@/app/GlobalRedux/store';
 import { aiDifficulty } from '@/app/GlobalRedux/features';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const Step1: React.FC = ({ setStep }: any) => {
 	//! How can I make the buttons a required field when selecting AI

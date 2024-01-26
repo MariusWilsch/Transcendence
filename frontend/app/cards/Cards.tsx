@@ -51,7 +51,7 @@ export const Card: React.FC<CardProps> = ({
 const Cards: React.FC = () => {
 	//! There is to little space between the cards and the cards navbar and bottom
 	//! How can we reduce the height of the cards relative to the text box? Somewhat like 70/30 maybe or 60/40
-	const { handleStartGame, handlePushToGame } = useStartGame();
+	const { initSocketPushGame, pushToGame } = useStartGame();
 	const router = useRouter();
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,
@@ -67,12 +67,12 @@ const Cards: React.FC = () => {
 					btnText={'Play now!'}
 					title={'Play now!'}
 					desc={
-						'Click here to play the game! You will use the W and A keys to move the paddle up and down and play against the computer!'
+						'Click here to play the game! You will use your Mouse to move the paddle and play against another player!'
 					}
 					onClick={
 						isConnected === ConnectionStatus.CONNECTED
-							? handlePushToGame
-							: handleStartGame
+							? pushToGame
+							: initSocketPushGame
 					}
 				/>
 				<Card

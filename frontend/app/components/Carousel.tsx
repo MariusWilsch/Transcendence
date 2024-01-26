@@ -2,7 +2,7 @@ import standardMap from '@/public/static/images/standardMap3.png';
 import pongOld from '@/public/static/images/pongOld2.png';
 import Image, { StaticImageData } from 'next/image';
 import { useDispatch } from 'react-redux';
-import { mapChoice, setMapChoice } from '../GlobalRedux/features';
+import { mapType, setMapChoice } from '../GlobalRedux/features';
 
 // CarouselItem.tsx
 const CarouselItem = ({
@@ -38,14 +38,14 @@ export const CarouselNavigation = () => {
 		<div className="flex justify-center w-full py-2 gap-2">
 			<a
 				href="#item1"
-				onClick={() => dispatch(setMapChoice(mapChoice.STANDARD))}
+				onClick={() => dispatch(setMapChoice(mapType.STANDARD))}
 				className="btn btn-xs"
 			>
 				1
 			</a>
 			<a
 				href="#item2"
-				onClick={() => dispatch(setMapChoice(mapChoice.CLASSIC))}
+				onClick={() => dispatch(setMapChoice(mapType.CLASSIC))}
 				className="btn btn-xs"
 			>
 				2

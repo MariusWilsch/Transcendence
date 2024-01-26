@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAction } from '@reduxjs/toolkit';
 
 export enum aiDifficulty {
 	EASY = 0,
@@ -7,26 +7,33 @@ export enum aiDifficulty {
 	NONE = 3,
 }
 
-export enum mouseOrKeyboard {
+export enum InputType {
 	KEYBOARD = 0,
 	MOUSE = 1,
+	AI = 2,
 }
 
-export enum mapChoice {
+export enum mapType {
 	CLASSIC = 0,
 	STANDARD = 1,
 }
 
+export enum playerType {
+	PLAYER = 0,
+	AI = 1,
+}
+
 export interface GameConfigState {
 	aiDifficulty: aiDifficulty;
-	mouseOrKeyboard: mouseOrKeyboard;
-	mapChoice: mapChoice;
+	inputType: InputType;
+	mapChoice: mapType;
+	// playerType: playerType;
 }
 
 const initialState = {
 	aiDifficulty: aiDifficulty.NONE,
-	mouseOrKeyboard: mouseOrKeyboard.KEYBOARD,
-	mapChoice: mapChoice.STANDARD,
+	inputType: InputType.MOUSE,
+	mapChoice: mapType.STANDARD,
 };
 
 const gameConfigSlice = createSlice({
@@ -36,8 +43,8 @@ const gameConfigSlice = createSlice({
 		setAiDifficulty: (state, action) => {
 			state.aiDifficulty = action.payload;
 		},
-		setMouseOrKeyboard: (state, action) => {
-			state.mouseOrKeyboard = action.payload;
+		setInputType: (state, action) => {
+			state.inputType = action.payload;
 		},
 		setMapChoice: (state, action) => {
 			state.mapChoice = action.payload;
@@ -46,6 +53,14 @@ const gameConfigSlice = createSlice({
 });
 
 //* Action creators
-export const { setAiDifficulty, setMouseOrKeyboard, setMapChoice } =
+export const setupInteraction = createAction<GameConfigState>(
+	'gameConfig/setupInteraction',
+);
+
+export const setupAIMatch = createAction<GameConfigState>(
+	'gameConfig/setupAIMatch',
+);
+
+export const { setAiDifficulty, setInputType, setMapChoice } =
 	gameConfigSlice.actions;
 export const gameConfigReducer = gameConfigSlice.reducer;

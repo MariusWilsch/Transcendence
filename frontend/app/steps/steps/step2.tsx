@@ -2,16 +2,13 @@ import useMouse from '@/public/static/images/useMouse.png';
 import useKeyboard from '@/public/static/images/useKeyboard.png';
 import { CardOverlay } from '@/app/components';
 import { useDispatch } from 'react-redux';
-import {
-	setMouseOrKeyboard,
-	mouseOrKeyboard,
-} from '@/app/GlobalRedux/features';
+import { setInputType, InputType } from '@/app/GlobalRedux/features';
 
 export const Step2 = ({ setStep }: any) => {
 	const dispatch = useDispatch();
 
-	const handleClick = (inputType: mouseOrKeyboard) => {
-		dispatch(setMouseOrKeyboard(inputType));
+	const handleClick = (inputType: InputType) => {
+		dispatch(setInputType(inputType));
 		setStep(3);
 	};
 
@@ -23,7 +20,7 @@ export const Step2 = ({ setStep }: any) => {
 					desc={'Sum hipster ipsum here'}
 					img={useMouse}
 					currentStep={0}
-					handleClick={() => handleClick(mouseOrKeyboard.MOUSE)}
+					handleClick={() => handleClick(InputType.MOUSE)}
 				/>
 				<div className="lg:divider lg:divider-horizontal hidden">OR</div>
 				<CardOverlay
@@ -31,7 +28,7 @@ export const Step2 = ({ setStep }: any) => {
 					desc={''}
 					img={useKeyboard}
 					currentStep={2}
-					handleClick={() => handleClick(mouseOrKeyboard.KEYBOARD)}
+					handleClick={() => handleClick(InputType.KEYBOARD)}
 				/>
 			</div>
 		</>

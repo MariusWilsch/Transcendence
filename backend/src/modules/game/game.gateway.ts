@@ -6,7 +6,12 @@ import {
 	WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket as IO } from 'socket.io';
-import { GameState, GameSession, PlayerMove } from './helpers/interfaces';
+import {
+	GameState,
+	GameSession,
+	PlayerMove,
+	GameConfigState,
+} from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
@@ -59,7 +64,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Create a new game session and store it in the Map
 		this.gameService.createGameSession(roomID, player1, player2);
 
-		//? Emit an event to both Sockets in the room
+		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
 		this.Server.to(roomID).emit('createGame', {
 			...gameState,
@@ -128,44 +133,38 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			client.data.roomID
 		);
 
-		// Determine which player is moving their paddle
-		const playerIDX = gameSession.players.findIndex(
-			(player) => player.id === client.id
-		);
-		// Player not found in game session
-		if (playerIDX === -1) return;
-
 		// Notify game service of the paddle move
-		this.gameService.setInputBool(gameSession.input[playerIDX], payload);
+		this.gameService.setKeyboardInput(
+			gameSession.input[client.data.playerID],
+			payload
+		);
 		console.log('onPaddleMove event received', payload);
 	}
 
 	@SubscribeMessage('onMouseMove')
-	handleMouseMove(client: IO, { yPos }: any): void {
-		console.log(yPos);
-
+	handleMouseMove(client: IO, payload: any): void {
 		const gameSession: GameSession = this.gameService.getSession(
 			client.data.roomID
 		);
-
-		// Determine which player is moving their paddle
-		const playerIDX = gameSession.players.findIndex(
-			(player) => player.id === client.id
-		);
-		// Player not found in game session
-		if (playerIDX === -1) return;
-
-		const playerRole = playerIDX === 0 ? 'player1' : 'player2';
 		// Notify game service of the paddle move
-		this.gameService.updatePaddleMouse(
-			gameSession.gameState.paddles[playerRole],
-			yPos
+		this.gameService.setMouseInput(
+			gameSession.input[client.data.playerID],
+			payload
+		);
+	}
+
+	@SubscribeMessage('setupInteraction')
+	handleSetupInteraction(client: IO, payload: GameConfigState): void {
+		console.log('setup interaction called', payload, client.data);
+		this.gameService.setCommand(
+			payload,
+			this.gameService.getSession(client.data.roomID),
+			client.data.playerID
 		);
 	}
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		console.log('startLoop event received');
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
@@ -185,5 +184,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(
 			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
 		);
+		this.checkForAvailablePlayers();
 	}
+
+	@SubscribeMessage('setupAIMatch')
+	handleAIMatch(client: IO): void {}
 }

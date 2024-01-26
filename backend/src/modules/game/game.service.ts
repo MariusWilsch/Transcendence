@@ -11,8 +11,12 @@ import {
 	Player,
 	PlayerMove,
 	Direction,
+	GameConfigState,
+	AiDifficulty,
+	InputType,
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
+import { createCommand } from './helpers/inputCommand';
 
 // Helper functions
 const createVec2 = (x: number, y: number): Vector => ({ x, y });
@@ -26,7 +30,6 @@ export class GameService {
 	private paddleSpeed: number;
 	private collisionOccurred = false;
 	private justScored = false;
-	private mouseControlled = false; //! Dirty fix
 
 	//* Business logic
 
@@ -48,76 +51,38 @@ export class GameService {
 		player1.join(roomID);
 		player2.join(roomID);
 
-		// Associate the room ID with each Socket
-		player1.data = { roomID };
-		player2.data = { roomID };
+		// Associate the room ID and PlayerID with each Socket
+		player1.data = { roomID, playerID: Player.P1 };
+		player2.data = { roomID, playerID: Player.P2 };
 
 		// Create a new game session and store it in the Map
 		this.gameSessions.set(roomID, {
 			ballVelocity: createVec2(
 				GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor,
 				0
-				// GAME_CONFIG.canvasHeight * GAME_CONFIG.ballSpeedFactor
 			),
 			players: [player1, player2],
 			gameState: this.initGameState(),
-			intervalID: null,
+			intervalID: undefined,
 			input: [
-				{ up: false, down: false },
-				{ up: false, down: false },
+				{
+					up: false,
+					down: false,
+					yPos: GAME_CONFIG.canvasHeight / 2 - GAME_CONFIG.paddleHeight / 2,
+				},
+				{
+					up: false,
+					down: false,
+					yPos: GAME_CONFIG.canvasHeight / 2 - GAME_CONFIG.paddleHeight / 2,
+				},
 			],
+			command: [],
 		});
 	}
 
-	/**
-	 * The function updates the game state by updating the ball's position, updating the paddles'
-	 * positions, and checking for collisions between the ball and the paddles.
-	 * @param {string} roomID - The `roomID` parameter is a string that represents the unique identifier of
-	 * the game room. It is used to retrieve the corresponding game session from the `gameSessions` map.
-	 * @param {number} deltaTime - The `deltaTime` parameter represents the time elapsed since the last
-	 * update of the game state. It is typically measured in milliseconds or seconds and is used to
-	 * calculate the changes in the game state based on the passage of time.
-	 * @returns There is no return statement in the provided code snippet. Therefore, nothing is being
-	 * returned.
-	 */
-	public updateGameState(gameSession: GameSession, deltaTime: number) {
-		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
-		this.updatePaddles(gameSession, deltaTime);
-		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
-		this.checkPaddleCollision(
-			gameSession,
-			this.choosePaddle(gameSession.gameState.ball)
-		);
-	}
-
-	/**
-	 * The function checks if the game is over based on the score of the players.
-	 * @param {GameState}  - The `isGameOver` function takes in a `GameState` object as a parameter. The
-	 * `GameState` object has a property called `score`, which is an object containing the scores of two
-	 * players (`player1` and `player2`).
-	 * @returns a boolean value. If the game is over, it will return true. Otherwise, it will return false.
-	 */
-	public isGameOver({ score }: GameState): boolean {
-		// Implement game over condition based on game state
-		if (
-			score.player1 < GAME_CONFIG.WinningScore &&
-			score.player2 < GAME_CONFIG.WinningScore
-		)
-			return false;
-		return true;
-	}
-
-	//* Private
-
 	private initGameState() {
-		const {
-			paddleWidth,
-			paddleHeight,
-			paddleSpeedFactor,
-			ballRadius,
-			canvasWidth,
-			canvasHeight,
-		} = GAME_CONFIG;
+		const { paddleWidth, paddleHeight, ballRadius, canvasWidth, canvasHeight } =
+			GAME_CONFIG;
 		this.paddleSpeed = canvasHeight / 1;
 		const paddleY = canvasHeight / 2 - paddleHeight / 2;
 		return {
@@ -143,6 +108,60 @@ export class GameService {
 	}
 
 	/**
+	 * The function updates the game state by updating the ball's position, updating the paddles'
+	 * positions, and checking for collisions between the ball and the paddles.
+	 * @param {string} roomID - The `roomID` parameter is a string that represents the unique identifier of
+	 * the game room. It is used to retrieve the corresponding game session from the `gameSessions` map.
+	 * @param {number} deltaTime - The `deltaTime` parameter represents the time elapsed since the last
+	 * update of the game state. It is typically measured in milliseconds or seconds and is used to
+	 * calculate the changes in the game state based on the passage of time.
+	 * @returns There is no return statement in the provided code snippet. Therefore, nothing is being
+	 * returned.
+	 */
+	public updateGameState(gameSession: GameSession, deltaTime: number) {
+		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
+		this.updatePaddles(gameSession, deltaTime);
+		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
+		this.checkPaddleCollision(
+			gameSession,
+			this.choosePaddle(gameSession.gameState.ball)
+		);
+	}
+
+	//* Private
+
+	private updateBall(
+		{ ball, score }: GameState,
+		ballVelocity: Vector,
+		deltaTime: number
+	): void {
+		// console.log('Ball state before sending', ball);
+		// console.log("Ball's velocity before sending", ballVelocity);
+
+		ball.position.x += ballVelocity.x * deltaTime;
+
+		ball.position.y += ballVelocity.y * deltaTime;
+
+		// If ball hits the top or bottom wall, reverse the y velocity
+		this.checkTopBottomWallCollision(ball, ballVelocity);
+
+		// If ball hits the left
+		if (ball.position.x - ball.radius <= 0) {
+			this.justScored = true;
+			score.player1++;
+			this.resetBall(ball, ballVelocity);
+			return;
+		}
+		// If ball hits the right wall
+		if (ball.position.x + ball.radius >= GAME_CONFIG.canvasWidth) {
+			this.justScored = true;
+			score.player2++;
+			this.resetBall(ball, ballVelocity);
+			return;
+		}
+	}
+
+	/**
 	 * The function updates the positions of the paddles based on player input and prevents them from
 	 * overlapping.
 	 * @param {GameSession}  - `gameState`: The current state of the game, which includes information
@@ -154,100 +173,28 @@ export class GameService {
 	 * @description If `didPaddleMove` is false, the function will return without performing any further
 	 * actions.
 	 */
-
 	//! Needs testing
-	private updatePaddles({ gameState, input }: GameSession, deltaTime: number) {
-		const paddles = gameState.paddles;
+	private updatePaddles(
+		{ gameState, command, input }: GameSession,
+		deltaTime: number
+	) {
 		let didPaddleMove = false;
 
-		// if (this.mouseControlled) return;ws
+		//* Update player 1's paddle
+		console.log(command[Player.P1], input[Player.P1]);
 
-		didPaddleMove = this.updatePaddle(
-			paddles.player1,
-			input[Player.P1],
-			deltaTime
-		);
-		// didPaddleMove = this.updatePaddle(
-		// 	paddles.player2,
-		// 	input[Player.P2],
-		// 	deltaTime
-		// );
-		// didPaddleMove = this.AIUpdatePaddle(
-		// 	paddles.player2,
-		// 	gameState.ball,
-		// 	deltaTime
-		// );
-
-		didPaddleMove = this.AIUpdatePaddle(
-			paddles.player2,
-			gameState.ball,
-			deltaTime
-		);
-
-		//! This paddle will always return false if mouse is used - Should I fix?
+		didPaddleMove = command[Player.P1].execute(deltaTime, input[Player.P1]);
+		//* Update player 2's paddle
+		didPaddleMove = command[Player.P2].execute(deltaTime, input[Player.P2]);
+		//* Early return if the paddle did not move to prevent unnecessary calculations
 		if (!didPaddleMove) return;
-		this.preventPaddleOverlap(paddles.player1, paddles.player2);
-	}
-
-	private AIUpdatePaddle(paddle: Paddle, ball: Ball, deltaTime: number) {
-		const deltaY =
-			ball.position.y - (paddle.position.y + paddle.size.height / 2);
-		//! I think 0.012 for easy, 0.015 for medium and 0.017 for hard is good
-		const difficulty = 0.01; // Adjust this to make the AI harder or easier
-
-		// Move the paddle a fraction of the distance to the ball
-		paddle.position.y += difficulty * deltaY * deltaTime * this.paddleSpeed;
-
-		return true;
+		this.preventPaddleOverlap(
+			gameState.paddles.player1,
+			gameState.paddles.player2
+		);
 	}
 
 	//! Is that at all doing something?
-	// private updatePaddle(
-	// 	{ position }: Paddle,
-	// 	input: PlayerInput,
-	// 	deltaTime: number
-	// ) {
-	// 	let didPaddleMove = false;
-	// 	if (input.up) {
-	// 		const x = 1 - Math.pow(0.25, deltaTime);
-	// 		const targetY = position.y - GAME_CONFIG.canvasHeight * 0.5;
-	// 		position.y = this.lerp(position.y, targetY, x);
-	// 		console.log(position.y);
-
-	// 		didPaddleMove = true;
-	// 	} else if (input.down) {
-	// 		const x = 1 - Math.pow(0.25, deltaTime);
-	// 		const targetY = position.y + GAME_CONFIG.canvasHeight * 0.5;
-	// 		position.y = this.lerp(position.y, targetY, x);
-	// 		didPaddleMove = true;
-	// 	}
-	// 	return didPaddleMove;
-	// }
-
-	private updatePaddle(paddle: Paddle, input: PlayerInput, deltaTime: number) {
-		let didPaddleMove = false;
-		if (input.up) {
-			paddle.position.y -= this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		} else if (input.down) {
-			paddle.position.y += this.paddleSpeed * deltaTime;
-			didPaddleMove = true;
-		}
-		return didPaddleMove;
-	}
-
-	//! Wrong place here
-
-	private lerp(a: number, b: number, x: number) {
-		return a + x * (b - a);
-	}
-
-	//! Wrong Place here
-	public updatePaddleMouse(paddle: Paddle, yPos: number) {
-		this.mouseControlled = true;
-		if (yPos + paddle.size.height > GAME_CONFIG.canvasHeight) return;
-		paddle.position.y = yPos;
-	}
 
 	/**
 	 * The preventPaddleOverlap function ensures that the paddles do not overlap with the top or bottom
@@ -258,8 +205,6 @@ export class GameService {
 	 * the second player's paddle in the game.
 	 */
 	private preventPaddleOverlap(player1: Paddle, player2: Paddle) {
-		console.log(player2.position);
-
 		if (player1.position.y < 0) {
 			player1.position.y = 0;
 		} else if (
@@ -365,37 +310,6 @@ export class GameService {
 		}
 	}
 
-	private updateBall(
-		{ ball, score }: GameState,
-		ballVelocity: Vector,
-		deltaTime: number
-	): void {
-		// console.log('Ball state before sending', ball);
-		// console.log("Ball's velocity before sending", ballVelocity);
-
-		ball.position.x += ballVelocity.x * deltaTime;
-
-		ball.position.y += ballVelocity.y * deltaTime;
-
-		// If ball hits the top or bottom wall, reverse the y velocity
-		this.checkTopBottomWallCollision(ball, ballVelocity);
-
-		// If ball hits the left
-		if (ball.position.x - ball.radius <= 0) {
-			this.justScored = true;
-			score.player1++;
-			this.resetBall(ball, ballVelocity);
-			return;
-		}
-		// If ball hits the right wall
-		if (ball.position.x + ball.radius >= GAME_CONFIG.canvasWidth) {
-			this.justScored = true;
-			score.player2++;
-			this.resetBall(ball, ballVelocity);
-			return;
-		}
-	}
-
 	//! This function is still subject to change
 	public deleteGameSession(clientID: string, roomID: string): void {
 		if (this.gameSessions.size == 0) return;
@@ -414,16 +328,6 @@ export class GameService {
 		}
 	}
 
-	/**
-	 * The function checks if a game room exists based on the provided room ID.
-	 * @param {string} roomID - A string representing the ID of a game room.
-	 * @returns a boolean value.
-	 */
-	public isInGame(roomID: string): boolean {
-		if (this.gameSessions.size == 0) return false;
-		return this.gameSessions.get(roomID)?.intervalID !== null;
-	}
-
 	//* Getters
 
 	public getGameState(roomID: string): GameState {
@@ -440,14 +344,49 @@ export class GameService {
 		return this.gameSessions.get(roomID);
 	}
 
+	public getWinner({ score }: GameState): boolean[] {
+		return score.player1 === GAME_CONFIG.WinningScore
+			? [false, true]
+			: [true, false];
+	}
+
 	//* Setters
+
+	//! I need to decide if allow to players who have different input types to play together
+	//! If yes then the way the function is build is okay.
+	//! If not I can just return both commands in a object and return them into the game session
+	public setCommand(
+		{ inputType, aiDifficulty }: GameConfigState,
+		{ gameState, command }: GameSession,
+		playerRole: Player
+	) {
+		const { paddles, ball } = gameState;
+
+		//! Very dirty fix but I can't be botherd to refactor the whole thing
+		if (
+			command[0] !== undefined &&
+			command[1] === undefined &&
+			playerRole === Player.P1 &&
+			aiDifficulty !== AiDifficulty.NONE
+		) {
+			playerRole = Player.P2;
+			inputType = InputType.AI;
+		}
+		const test = createCommand(inputType, {
+			paddle: playerRole === Player.P1 ? paddles.player1 : paddles.player2,
+			speed: this.paddleSpeed,
+			ball,
+			difficulty: aiDifficulty,
+		});
+		command[playerRole] = test;
+		console.log(command[playerRole]);
+	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {
 		this.gameSessions.get(roomID).intervalID = intervalID;
 	}
 
-	public setInputBool(input: PlayerInput, { direction }: PlayerMove) {
-		// 1. Decide which input to set
+	public setKeyboardInput(input: PlayerInput, { direction }: PlayerMove) {
 		switch (direction) {
 			case Direction.UP:
 				input.up = true;
@@ -462,19 +401,26 @@ export class GameService {
 		}
 	}
 
-	public getWinner({ score }: GameState): boolean[] {
-		if (score.player1 === GAME_CONFIG.WinningScore) {
-			return [false, true];
-		} else {
-			return [true, false];
-		}
+	public setMouseInput(input: PlayerInput, { yPos }: PlayerMove) {
+		if (yPos) input.yPos = yPos;
 	}
+
 	//* Helpers
 
 	private choosePaddle(ball: Ball): string {
 		return ball.position.x < GAME_CONFIG.canvasWidth / 2
 			? 'player1'
 			: 'player2';
+	}
+
+	/**
+	 * The function checks if a game room exists based on the provided room ID.
+	 * @param {string} roomID - A string representing the ID of a game room.
+	 * @returns a boolean value.
+	 */
+	public isInGame(roomID: string): boolean {
+		if (this.gameSessions.size == 0) return false;
+		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
 	/**
@@ -509,5 +455,22 @@ export class GameService {
 		// Reverse the ball's x velocity
 		ballVelocity.x = GAME_CONFIG.canvasWidth * 0.6;
 		ballVelocity.y = 0;
+	}
+
+	/**
+	 * The function checks if the game is over based on the score of the players.
+	 * @param {GameState}  - The `isGameOver` function takes in a `GameState` object as a parameter. The
+	 * `GameState` object has a property called `score`, which is an object containing the scores of two
+	 * players (`player1` and `player2`).
+	 * @returns a boolean value. If the game is over, it will return true. Otherwise, it will return false.
+	 */
+	public isGameOver({ score }: GameState): boolean {
+		// Implement game over condition based on game state
+		if (
+			score.player1 < GAME_CONFIG.WinningScore &&
+			score.player2 < GAME_CONFIG.WinningScore
+		)
+			return false;
+		return true;
 	}
 }

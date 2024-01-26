@@ -1,5 +1,9 @@
 import { useDispatch } from 'react-redux';
-import { setAiDifficulty, aiDifficulty } from '@/app/GlobalRedux/features';
+import {
+	setAiDifficulty,
+	aiDifficulty,
+	setInputType,
+} from '@/app/GlobalRedux/features';
 // Button.tsx
 
 type ButtonProps = {

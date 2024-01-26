@@ -13,7 +13,8 @@ export enum Direction {
 
 //* Not sure if this is needed
 export interface PlayerMove {
-	direction: Direction;
+	direction?: Direction;
+	yPos?: number;
 }
 
 export interface Vector {
@@ -54,6 +55,11 @@ export interface GameState {
 export interface PlayerInput {
 	up: boolean;
 	down: boolean;
+	yPos: number | null;
+}
+
+export interface PaddleControlCommand {
+	execute(deltaTime: number, input: PlayerInput): boolean;
 }
 
 // Structure to keep track of player associations within a game session
@@ -61,6 +67,33 @@ export interface GameSession {
 	ballVelocity: Vector;
 	players: Socket[];
 	gameState: GameState;
-	intervalID: NodeJS.Timeout | null;
+	intervalID: NodeJS.Timeout | undefined;
 	input: PlayerInput[];
+	command: PaddleControlCommand[];
+}
+
+//* Client side interfaces
+
+export enum AiDifficulty {
+	EASY = 0,
+	MEDIUM = 1,
+	HARD = 2,
+	NONE = 3,
+}
+
+export enum InputType {
+	KEYBOARD = 0,
+	MOUSE = 1,
+	AI = 2,
+}
+
+export enum MapChoice {
+	CLASSIC = 0,
+	STANDARD = 1,
+}
+
+export interface GameConfigState {
+	aiDifficulty: AiDifficulty;
+	inputType: InputType;
+	mapChoice: MapChoice;
 }

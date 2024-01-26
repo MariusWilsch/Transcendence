@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { GameState } from '../../interfaces/GameState';
+import { mapType } from '@/app/GlobalRedux/features';
 //* Decide later if I want to use this
 // import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 
@@ -24,20 +25,28 @@ export class GameService {
 	//* Vars for IDK
 	private paddleWidthReductionInPx = 5;
 
-	constructor(container: HTMLDivElement, width: number, height: number) {
+	constructor(
+		container: HTMLDivElement,
+		width: number,
+		height: number,
+		mapChoice: number,
+	) {
 		this.container = container;
+		console.log('Map choice: ', mapChoice);
+		const options =
+			mapChoice === mapType.STANDARD
+				? { backgroundAlpha: 0 }
+				: { background: 0x000000 };
 		this.app = new PIXI.Application<HTMLCanvasElement>({
-			eventMode: 'passive', // More performant then auto
 			width: width,
 			height: height,
-			backgroundAlpha: 0, // Set background color to transparent
 			antialias: true, // Enable antialiasing
-			resolution: 1, // Should I use this/,
-
+			resolution: 1, //? Should I use this
+			...options,
 			// autoDensity: true, // Should I use this/,
 		});
 		container.appendChild(this.app.view as HTMLCanvasElement);
-		this.drawCanvasSnickSnack();
+		mapChoice === mapType.STANDARD ? this.drawMap1() : this.drawMap2(height);
 		this.prevBallPosition = { x: 0, y: 0 };
 		this.lastUpdateTime = performance.now(); // Get current time
 		// this.nextUpdateTime = this.lastUpdateTime + 1000 / 60; // 60 FPS
@@ -45,7 +54,7 @@ export class GameService {
 
 	//* Private methods
 
-	private drawCanvasSnickSnack() {
+	private drawMap1() {
 		const graphics = new PIXI.Graphics();
 
 		// Set the line style (width, color)
@@ -70,6 +79,23 @@ export class GameService {
 		this.app.stage.addChild(graphics);
 	}
 
+	private drawMap2(length: number) {
+		console.log('Drawing map 2');
+
+		const graphics = new PIXI.Graphics();
+
+		graphics.lineStyle(2, 0xffffff, 1);
+		const dashFrequency = 10 + 5;
+		const dashCount = Math.floor(length / dashFrequency);
+		const midX = this.app.view.width / 2;
+		for (let i = 0; i <= dashCount; i++) {
+			let lineStart = dashFrequency * i;
+			graphics.moveTo(midX, lineStart);
+			graphics.lineTo(midX, lineStart + 10);
+		}
+		this.app.stage.addChild(graphics);
+	}
+
 	private lerp(start: number, end: number, t: number) {
 		return start * (1 - t) + end * t;
 	}
@@ -90,6 +116,7 @@ export class GameService {
 		side: 'left' | 'right',
 	) {
 		const paddle = side === 'left' ? this.leftPaddle : this.rightPaddle;
+
 		paddle.clear();
 		paddle.beginFill(0xffffff); // Change color to blue
 		paddle.drawRoundedRect(
@@ -132,7 +159,7 @@ export class GameService {
 		this.app.stage.addChild(this.ball, this.leftPaddle, this.rightPaddle);
 	}
 
-	public updateGameElements({ ball, paddles, score }: GameState) {
+	public updateGameElements({ ball, paddles }: GameState) {
 		//* Update ball with dynamic time lerp
 		const now = performance.now();
 		this.deltaTime = now - this.lastUpdateTime;

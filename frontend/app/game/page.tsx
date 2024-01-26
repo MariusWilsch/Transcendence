@@ -1,7 +1,7 @@
 'use client';
 import { GameCanvas } from './GameCanvas';
 import { RootState } from '@/app/GlobalRedux/store';
-import { startLoop } from '@/app/GlobalRedux/features';
+import { setupInteraction, startLoop } from '@/app/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useStartGame from '@/app/hooks/useStartGame';
@@ -40,6 +40,7 @@ function CountdownModal() {
 	const isGameStarted = useSelector(
 		(state: RootState) => state.connection.isGameStarted,
 	);
+	const gameConfig = useSelector((state: RootState) => state.gameConfig);
 	const dispatch = useDispatch();
 
 	useEffect(() => {
@@ -53,6 +54,7 @@ function CountdownModal() {
 		const countdown = countdownRef.current;
 		let remainingTime = 5;
 
+		dispatch(setupInteraction(gameConfig));
 		if (modal && countdown) {
 			modal.showModal();
 			const interval = setInterval(() => {
@@ -109,7 +111,7 @@ export default function Game() {
 	return (
 		<>
 			<CountdownModal />
-			{/* <GameOutcomeModal outcome={playerOutcome} /> */}
+			<GameOutcomeModal outcome={playerOutcome} />
 			<div className="flex flex-col items-center h-full">
 				<div className="flex flex-col w-3/5 h-full py-8">
 					<GameHeader />
@@ -125,7 +127,7 @@ function GameOutcomeModal({ outcome }: any) {
 	const isGameStarted = useSelector(
 		(state: RootState) => state.connection.isGameStarted,
 	);
-	const { handlePushToGame } = useStartGame();
+	const { pushToGame } = useStartGame();
 
 	useEffect(() => {
 		if (!isGameStarted) {
@@ -145,7 +147,7 @@ function GameOutcomeModal({ outcome }: any) {
 							method="dialog"
 							className="space-x-4 w-full flex justify-center"
 						>
-							<button onClick={handlePushToGame} className="btn">
+							<button onClick={pushToGame} className="btn">
 								Play again
 							</button>
 							<Link href="/">
