@@ -70,7 +70,7 @@ export const GameCanvas: React.FC = () => {
 
 	return (
 		<div
-			className={`border white rounded-lg ${
+			className={`z-10 border white rounded-lg ${
 				mapChoice === mapType.STANDARD ? 'px-8' : ''
 			}`}
 		>

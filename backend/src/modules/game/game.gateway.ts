@@ -15,6 +15,7 @@ import {
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
+import { AuthService } from 'modules/auth/auth.service';
 
 @WebSocketGateway({
 	cors: {
@@ -22,7 +23,10 @@ import { GAME_CONFIG } from './helpers/game.constants';
 	},
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private gameService: GameService) {}
+	constructor(
+		private gameService: GameService,
+		private authService: AuthService
+	) {}
 
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
@@ -31,7 +35,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected via ${client.id}`);
 		//! How do I get the user ID from the client that joined the lobby?
 
-		console.log('payload', payload);
+		if (!client.handshake.auth.token) {
+			console.log('Client does not have a valid token');
+			//! Some alert that he needs to login again
+			client.disconnect();
+			return;
+		}
 
 		this.lobby.push(client);
 		console.log('lobby size', this.lobby.length);
@@ -64,9 +73,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(roomID, player1, player2);
+		console.log(player1.handshake.auth.token);
+		console.log(player2.handshake.auth.token);
 
+		const user1 = this.authService.getUserFromJwt(player1.handshake.auth.token);
+		const user2 = this.authService.getUserFromJwt(player2.handshake.auth.token);
+
+		// Create a new game session and store it in the Map
+		this.gameService.createGameSession(
+			roomID,
+			player1,
+			player2,
+			user1.intraId,
+			user2.intraId
+		);
 		//! Can I get the user ID aswell? That would make uncessary to store the id's seperately
 
 		// Get the username and avatar from the clients that are joining the game
@@ -80,12 +100,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			canvasHeight: GAME_CONFIG.canvasHeight,
 			userData: [
 				{
-					avatar: 'avatar String here',
-					username: 'username String here',
+					avatar: user1.Avatar,
+					username: user1.login,
 				},
 				{
-					avatar: 'avatar String here',
-					username: 'username String here',
+					avatar: user2.Avatar,
+					username: user2.login,
 				},
 			],
 		});
@@ -118,7 +138,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
-				const gameResult = this.gameService.getWinner(gameSession.gameState);
+				const gameResult = this.gameService.getWinner(
+					gameSession.players,
+					gameSession.gameState
+				);
 				console.log('Game result', gameResult);
 				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
 				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);

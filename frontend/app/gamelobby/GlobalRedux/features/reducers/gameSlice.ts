@@ -20,6 +20,16 @@ const initialState: GameState = {
 	score: { player1: 0, player2: 0 },
 	canvasWidth: 0,
 	canvasHeight: 0,
+	userData: [
+		{
+			avatar: '',
+			username: '',
+		},
+		{
+			avatar: '',
+			username: '',
+		},
+	],
 };
 
 const gameSlice = createSlice({
@@ -31,6 +41,7 @@ const gameSlice = createSlice({
 			state.ball = action.payload.ball;
 			state.canvasHeight = action.payload.canvasHeight;
 			state.canvasWidth = action.payload.canvasWidth;
+			state.userData = action.payload.userData;
 		},
 		updateGame: (state, action) => {
 			state.paddles = action.payload.paddles;

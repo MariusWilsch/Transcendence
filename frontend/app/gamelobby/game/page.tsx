@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import Link from 'next/link';
 import { Modal } from '../components';
+import Image from 'next/image';
 
 interface ScoreProps {
 	score: number;
@@ -36,13 +37,20 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
+	console.log(gameData);
+
 	return (
 		<div className="flex items-center gap-x-8">
 			{scorePos === 'right' ? (
 				<Score score={score.player1} username={gameData.username} />
 			) : null}
 			<div className="avatar">
-				<div className="w-24 rounded-full">{gameData.avatar}</div>
+				<Image
+					src={gameData.avatar}
+					alt={'Some text here'}
+					width={100}
+					height={100}
+				/>
 			</div>
 			{scorePos === 'left' ? (
 				<Score score={score.player2} username={gameData.username} />
@@ -104,12 +112,15 @@ function CountdownModal() {
 }
 
 const GameHeader = () => {
-	const gameData = useSelector((state: RootState) => state.connection.gameData);
+	const userData = useSelector((state: RootState) => state.game.userData);
 	//! this is not gonna show the right avatar gameData will be the same for both
+
+	console.log(userData);
+
 	return (
 		<div className="h-1/4 flex items-center justify-evenly">
-			<Stats scorePos={'left'} gameData={gameData} />
-			<Stats scorePos={'right'} gameData={gameData} />
+			<Stats scorePos={'left'} gameData={userData[0]} />
+			<Stats scorePos={'right'} gameData={userData[1]} />
 		</div>
 	);
 };

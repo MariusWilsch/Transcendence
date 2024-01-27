@@ -12,6 +12,7 @@ import {
 } from '../features';
 import { GameState } from '@/interfaces/GameState';
 import Cookies from 'universal-cookie';
+import { MdToken } from 'react-icons/md';
 
 // Types
 type MiddlewareStore = MiddlewareAPI<Dispatch<AnyAction>>;
@@ -31,17 +32,13 @@ const cookies = new Cookies();
 
 //* Helper functions for WebSocket middleware
 const connect = (store: MiddlewareStore, socket: Socket | null) => {
-	socket = io('http://localhost:3001');
-
-	socket.on('connect', () => {
-		console.log('Connected to server');
-		{
-			auth: {
-				jwt: cookies.get('jwt');
-			}
-		}
-		console.log('cookies', cookies.get('jwt'));
+	socket = io('http://localhost:3001', {
+		auth: {
+			token: cookies.get('jwt'),
+		},
 	});
+
+	socket.on('connect', () => console.log('Connected to server'));
 
 	socket.on('disconnect', () => {
 		console.log('Disconnected from server');
@@ -51,6 +48,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 
 	socket.on('createGame', (gameState: GameState) => {
 		console.log('Game created');
+		console.log('gameState', gameState.userData);
 		store.dispatch(initGame(gameState));
 		//* Will be set twice, once for each player
 		store.dispatch(gameStarted());

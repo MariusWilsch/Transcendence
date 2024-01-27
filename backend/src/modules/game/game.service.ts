@@ -17,10 +17,11 @@ import {
 	GameResult,
 	Score,
 	MatchOutcome,
+	Players,
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 import { createCommand } from './helpers/inputCommand';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 //! What is the right way to import this?
 
 const prisma = new PrismaClient();
@@ -53,7 +54,13 @@ export class GameService {
 	 * to the server. In this case, it is used to represent the second player's connection to the game
 	 * server.
 	 */
-	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
+	public createGameSession(
+		roomID: string,
+		player1: Socket,
+		player2: Socket,
+		userID1: string,
+		userID2: string
+	) {
 		// Join both Sockets to a Socket.io room
 		player1.join(roomID);
 		player2.join(roomID);
@@ -70,8 +77,8 @@ export class GameService {
 			),
 			//! Strings need to be changed to the actual ID's but how do I get them?
 			players: [
-				{ playerIDs: 'userID1', playerSockets: player1 },
-				{ playerIDs: 'userID2', playerSockets: player2 },
+				{ playerIDs: userID1, playerSockets: player1 },
+				{ playerIDs: userID2, playerSockets: player2 },
 			],
 			gameState: this.initGameState(),
 			intervalID: undefined,
@@ -359,19 +366,19 @@ export class GameService {
 		return this.gameSessions.get(roomID);
 	}
 
-	public getWinner({ score }: GameState): GameResult {
+	public getWinner(players: Players[], { score }: GameState): GameResult {
 		if (score.player1 === GAME_CONFIG.WinningScore) {
 			return {
-				winnerId: 'userID1',
-				loserId: 'userID2',
+				winnerId: players[0].playerIDs,
+				loserId: players[1].playerIDs,
 				score,
 				result: [true, false],
 				outcome: MatchOutcome.FINISHED,
 			};
 		} else {
 			return {
-				winnerId: 'userID2',
-				loserId: 'userID1',
+				winnerId: players[1].playerIDs,
+				loserId: players[0].playerIDs,
 				score,
 				result: [false, true],
 				outcome: MatchOutcome.FINISHED,

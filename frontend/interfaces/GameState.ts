@@ -32,4 +32,14 @@ export interface GameState {
 	score: { player1: number; player2: number };
 	canvasWidth: number;
 	canvasHeight: number;
+	userData: [
+		{
+			avatar: string;
+			username: string;
+		},
+		{
+			avatar: string;
+			username: string;
+		},
+	];
 }
