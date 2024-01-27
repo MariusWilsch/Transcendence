@@ -80,7 +80,9 @@ const Cards: React.FC = () => {
 					desc={
 						'Click here to customize the game! You can choose to play against a friend or the computer and much more!'
 					}
-					onClick={() => router.push('/steps')}
+					onClick={() =>
+						router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`)
+					}
 				/>
 			</div>
 			<Modal />

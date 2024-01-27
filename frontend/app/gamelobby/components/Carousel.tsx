@@ -37,14 +37,14 @@ export const CarouselNavigation = () => {
 	return (
 		<div className="flex justify-center w-full py-2 gap-2">
 			<a
-				href="#item1"
+				href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps/#item1`}
 				onClick={() => dispatch(setMapChoice(mapType.STANDARD))}
 				className="btn btn-xs"
 			>
 				1
 			</a>
 			<a
-				href="#item2"
+				href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps/#item2`}
 				onClick={() => dispatch(setMapChoice(mapType.CLASSIC))}
 				className="btn btn-xs"
 			>

@@ -168,7 +168,7 @@ function GameOutcomeModal({ outcome }: any) {
 							<button onClick={pushToGame} className="btn">
 								Play again
 							</button>
-							<Link href="/">
+							<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}>
 								<button className="btn">Go Home</button>
 							</Link>
 						</form>
