@@ -11,6 +11,7 @@ import {
 	GameSession,
 	PlayerMove,
 	GameConfigState,
+	MatchType,
 } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,7 +32,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
 
-	handleConnection(client: IO, payload: any) {
+	handleConnection(client: IO) {
 		console.log(`Client connected via ${client.id}`);
 		//! How do I get the user ID from the client that joined the lobby?
 
@@ -41,11 +42,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			client.disconnect();
 			return;
 		}
-
-		this.lobby.push(client);
-		console.log('lobby size', this.lobby.length);
-
-		this.checkForAvailablePlayers();
 	}
 
 	//? Do I really want to disconnect the client if they quit the game or the game is over?
@@ -230,7 +226,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO): void {
+	handleAddToLobby(client: IO, payload: any): void {
+		if (this.lobby.includes(client)) return;
+
+		console.log('addToLobby event received', payload);
+
+		// if (payload.matchType === MatchType.PRIVATE) {
+		// 	console.log('Private match requested');
+		// }
+
 		this.lobby.push(client);
 		console.log(
 			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`

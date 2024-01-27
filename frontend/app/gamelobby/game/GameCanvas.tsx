@@ -1,6 +1,10 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { InputType, mapType } from '@/app/gamelobby/GlobalRedux/features';
+import {
+	ConnectionStatus,
+	InputType,
+	mapType,
+} from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameService } from './GameService';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
@@ -16,6 +20,9 @@ export const GameCanvas: React.FC = () => {
 	const gameState = useSelector((state: RootState) => state.game);
 	const { inputType, mapChoice } = useSelector(
 		(state: RootState) => state.gameConfig,
+	);
+	const { isGameStarted, isConnected } = useSelector(
+		(state: RootState) => state.connection,
 	);
 	const dispatch = useDispatch();
 
@@ -65,7 +72,6 @@ export const GameCanvas: React.FC = () => {
 		}
 
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
-		// if (isGameFinished == true) serviceRef.current.clearGameElements()
 	}, [gameState, mapChoice]);
 
 	return (

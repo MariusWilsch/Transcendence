@@ -115,3 +115,8 @@ export enum MatchOutcome {
 	FINISHED,
 	UNDEFINED,
 }
+
+export enum MatchType {
+	PRIVATE,
+	PUBLIC,
+}

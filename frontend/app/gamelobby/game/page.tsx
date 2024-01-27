@@ -7,9 +7,7 @@ import {
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import useStartGame from '@/app/gamelobby/hooks/useStartGame';
-import Link from 'next/link';
-import { Modal } from '../components';
+import { GameOutcomeModal } from '@/app/gamelobby/components';
 import Image from 'next/image';
 
 interface ScoreProps {
@@ -96,7 +94,7 @@ function CountdownModal() {
 
 	return (
 		<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-			<div className="modal-box">
+			<div className="modal-box flex justify-center">
 				<div className="py-4">
 					Game starting in{' '}
 					<span className="countdown">
@@ -148,44 +146,6 @@ export default function Game() {
 					<GameCanvasWrapper />
 				</div>
 			</div>
-		</>
-	);
-}
-
-function GameOutcomeModal({ outcome }: any) {
-	const modalRef = useRef<HTMLDialogElement>(null);
-	const isGameStarted = useSelector(
-		(state: RootState) => state.connection.isGameStarted,
-	);
-	const { pushToGame } = useStartGame();
-
-	useEffect(() => {
-		if (!isGameStarted) {
-			modalRef.current?.showModal();
-		}
-	}, [isGameStarted]);
-
-	return (
-		<>
-			<Modal />
-			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-				<div className="modal-box">
-					<div className="font-bold text-lg">You {outcome} </div>
-					<div className="modal-action flex justify-center items-center">
-						<form
-							method="dialog"
-							className="space-x-4 w-full flex justify-center"
-						>
-							<button onClick={pushToGame} className="btn">
-								Play again
-							</button>
-							<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}>
-								<button className="btn">Go Home</button>
-							</Link>
-						</form>
-					</div>
-				</div>
-			</dialog>
 		</>
 	);
 }

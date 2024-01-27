@@ -9,6 +9,7 @@ import { Modal } from '../components';
 import { useSelector } from 'react-redux';
 import { RootState } from '../GlobalRedux/store';
 import { ConnectionStatus } from '../GlobalRedux/features';
+import { MatchType } from '@/interfaces';
 
 type CardProps = {
 	img: StaticImageData;
@@ -68,8 +69,8 @@ const Cards: React.FC = () => {
 					}
 					onClick={
 						isConnected === ConnectionStatus.CONNECTED
-							? pushToGame
-							: initSocketPushGame
+							? () => pushToGame(MatchType.PUBLIC)
+							: () => initSocketPushGame(MatchType.PUBLIC)
 					}
 				/>
 				<Card

@@ -4,6 +4,11 @@ export enum Direction {
 	STOPPED = 2,
 }
 
+export enum MatchType {
+	PRIVATE,
+	PUBLIC,
+}
+
 export interface PlayerMove {
 	direction: Direction;
 }

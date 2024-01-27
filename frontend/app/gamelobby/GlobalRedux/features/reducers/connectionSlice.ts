@@ -1,3 +1,4 @@
+import { MatchType } from '@/interfaces';
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import { userAgent } from 'next/server';
 
@@ -16,6 +17,11 @@ export enum ConnectionStatus {
 export enum MatchmakingStatus {
 	SEARCHING = 'SEARCHING',
 	NOT_SEARCHING = 'NOT_SEARCHING',
+}
+
+export interface LobbyProps {
+	matchType: MatchType;
+	inviteeID?: string;
 }
 
 export interface ConnectionState {
@@ -80,7 +86,7 @@ const connectionSlice = createSlice({
 //* Action creators
 export const startLoop = createAction('connection/startLoop');
 export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
-export const addToLobby = createAction('connection/addToLobby');
+export const addToLobby = createAction<LobbyProps>('connection/addToLobby');
 
 //* Slice definitions
 export const {

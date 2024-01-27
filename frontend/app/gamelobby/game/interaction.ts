@@ -1,7 +1,8 @@
+'use cleint';
 import { Direction } from '@/interfaces';
 import { mouseMove, movePaddle } from '@/app/gamelobby/GlobalRedux/features';
 import { MutableRefObject } from 'react';
-import { Dispatch, AnyAction } from 'redux';
+import { Dispatch } from 'redux';
 
 const updateDirection = (
 	newDirection: Direction,
@@ -64,45 +65,3 @@ export const handleMouseMove = (
 		dispatch(mouseMove({ yPos: relativeYPos }));
 	}
 };
-
-// export const handleMouseMove = (
-// 	dispatch: Dispatch<AnyAction>,
-// 	currentDirection: MutableRefObject<Direction>,
-// 	e: MouseEvent,
-// 	lastPos: MutableRefObject<number | null>,
-// 	lastTime: MutableRefObject<number>,
-// ) => {
-// 	const currentPos = e.clientY;
-
-// 	if (lastPos.current === null) {
-// 		lastPos.current = currentPos;
-// 		lastTime.current = Date.now();
-// 		return;
-// 	}
-
-// 	const currentTime = Date.now();
-// 	const timeDiff = currentTime - lastTime.current;
-// 	const distanceDiff = currentPos - lastPos.current;
-
-// 	// Calculate the velocity (distance moved / by time taken)
-// 	// If no time has passed, set velocity to 0 to avoid division by zero
-// 	const velocity = timeDiff !== 0 ? distanceDiff / timeDiff : 0;
-
-// 	console.log('velocity: ', velocity);
-
-// 	let newDirection: Direction = Direction.STOPPED;
-// 	// If the mouse is moving up, move the paddle up
-// 	if (velocity < -0.01) newDirection = Direction.UP;
-// 	// If the mouse is moving down, move the paddle down
-// 	else if (velocity > 0.01) newDirection = Direction.DOWN;
-// 	// If the mouse is stopped, stop the paddle
-// 	else newDirection = Direction.STOPPED;
-
-// 	console.log('newDirection: ', newDirection);
-
-// 	lastTime.current = currentTime;
-// 	lastPos.current = currentPos;
-
-// 	// Call updateDirection with individual arguments
-// 	updateDirection(newDirection, dispatch, currentDirection);
-// };

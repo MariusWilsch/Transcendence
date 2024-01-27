@@ -338,14 +338,11 @@ export class GameService {
 			// Remove the game session
 			this.gameSessions.delete(roomID);
 			// Disconnect the other player
-			// const otherPlayer = gameSession.players.find(
-			// 	(player) => player.id !== clientID
-			// );
 			const otherPlayer = gameSession.players.find(
 				(player) => player.playerIDs !== clientID
 			);
 			if (otherPlayer) {
-				otherPlayer.playerSockets.disconnect();
+				otherPlayer.playerSockets.emit('opponentDisconnected');
 			}
 		}
 	}
@@ -415,7 +412,6 @@ export class GameService {
 			difficulty: aiDifficulty,
 		});
 		command[playerRole] = test;
-		console.log(command[playerRole]);
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {

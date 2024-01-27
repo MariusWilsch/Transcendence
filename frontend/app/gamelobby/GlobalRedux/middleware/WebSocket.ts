@@ -12,7 +12,6 @@ import {
 } from '../features';
 import { GameState } from '@/interfaces/GameState';
 import Cookies from 'universal-cookie';
-import { MdToken } from 'react-icons/md';
 
 // Types
 type MiddlewareStore = MiddlewareAPI<Dispatch<AnyAction>>;
@@ -58,6 +57,11 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket.on('gameState', (gameState: GameState) =>
 		store.dispatch(updateGame(gameState)),
 	);
+
+	socket.on('opponentDisconnected', () => {
+		store.dispatch(gameFinished());
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
+	});
 
 	socket.on('gameOver', (won: boolean) => {
 		//* Will be set twice, once for each player

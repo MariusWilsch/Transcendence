@@ -1,5 +1,14 @@
-import { cancelMatchmaking } from '../GlobalRedux/features';
-import { useDispatch } from 'react-redux';
+import {
+	ConnectionStatus,
+	GameOutcome,
+	cancelMatchmaking,
+} from '../GlobalRedux/features';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useRef } from 'react';
+import useStartGame from '../hooks/useStartGame';
+import Link from 'next/link';
+import { MatchType } from '@/interfaces';
+import { RootState } from '../GlobalRedux/store';
 
 export const Modal = () => {
 	const dispatch = useDispatch();
@@ -31,3 +40,50 @@ export const Modal = () => {
 		</dialog>
 	);
 };
+
+export function GameOutcomeModal({ outcome }: any) {
+	const modalRef = useRef<HTMLDialogElement>(null);
+	const isGameStarted = useSelector(
+		(state: RootState) => state.connection.isGameStarted,
+	);
+	const { pushToGame } = useStartGame();
+
+	useEffect(() => {
+		if (!isGameStarted) {
+			modalRef.current?.showModal();
+		}
+	}, [isGameStarted]);
+
+	return (
+		<>
+			<Modal />
+			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
+				<div className="modal-box flex flex-col justify-center items-center ">
+					{outcome === GameOutcome.NONE ? (
+						<div className="font-bold text-lg">Something went Wrong!</div>
+					) : (
+						<div className="font-bold text-lg">You {outcome}</div>
+					)}
+					<div className="modal-action flex justify-center items-center">
+						<form
+							method="dialog"
+							className="space-x-4 w-full flex justify-center"
+						>
+							{outcome !== GameOutcome.NONE && (
+								<button
+									onClick={() => pushToGame(MatchType.PUBLIC)}
+									className="btn"
+								>
+									Play again
+								</button>
+							)}
+							<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}>
+								<button className="btn">Go Home</button>
+							</Link>
+						</form>
+					</div>
+				</div>
+			</dialog>
+		</>
+	);
+}

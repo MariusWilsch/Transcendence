@@ -8,6 +8,7 @@ import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { ConnectionStatus } from '@/app/gamelobby/GlobalRedux/features';
+import { MatchType } from '@/interfaces';
 
 // Step3.tsx
 export const Step3 = () => {
@@ -23,7 +24,15 @@ export const Step3 = () => {
 			<CarouselNavigation />
 			<button
 				className="btn btn-accent mt-8"
-				onClick={() => console.log('Start Game')}
+				onClick={
+					isConnected === ConnectionStatus.CONNECTED
+						? () => {
+								initSocketPushGame(MatchType.PUBLIC);
+						  }
+						: () => {
+								pushToGame(MatchType.PRIVATE);
+						  }
+				}
 			>
 				START A GAME
 			</button>

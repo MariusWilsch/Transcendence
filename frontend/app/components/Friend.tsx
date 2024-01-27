@@ -13,6 +13,8 @@ import { FiUserPlus } from 'react-icons/fi';
 import { TbUserOff } from 'react-icons/tb';
 import { FaUserTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
+import { MatchType } from '@/interfaces';
 
 export const Friend = ({
 	isProfileOwner,
@@ -24,6 +26,7 @@ export const Friend = ({
 	friendId: string;
 }) => {
 	const context = useAppContext();
+	const { initSocketPushGame } = useStartGame();
 
 	const [friendshipStatus, setStatus] = useState<
 		'NOTFRIENDS' | 'PENDING' | 'ACCEPTED' | 'BLOCKED'
@@ -313,6 +316,8 @@ export const Friend = ({
 						{/* Here comes the private match logic */}
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+							//! Friend ID here
+							onClick={() => initSocketPushGame(MatchType.PRIVATE, 'friendId')}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}

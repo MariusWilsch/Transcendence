@@ -5,16 +5,15 @@ import { RootState } from '../GlobalRedux/store';
 import { useEffect } from 'react';
 import {
 	ConnectionStatus,
-	InputType,
 	MatchmakingStatus,
 	addToLobby,
 	aiDifficulty,
 	setConnectionStatus,
-	setInputType,
 	setMatchmaking,
 	setupAIMatch,
 	startConnection,
 } from '../GlobalRedux/features';
+import { MatchType } from '@/interfaces';
 
 const useStartGame = () => {
 	const router = useRouter();
@@ -24,20 +23,21 @@ const useStartGame = () => {
 	//! Modal shouldn't be fetched by using getElementById
 
 	//* Connect user to socket server and start matchmaking
-	const initSocketPushGame = () => {
+	const initSocketPushGame = (matchType: MatchType, inviteeID?: string) => {
+		console.log('initSocketPushGame called');
 		dispatch(startConnection());
 		dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: showModal();
+			: dispatch(addToLobby({ matchType, inviteeID })) && showModal();
 	};
 
 	//* User is connected to socket server and start matchmaking
-	const pushToGame = () => {
+	const pushToGame = (matchType: MatchType) => {
 		showModal();
 		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
 		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-		dispatch(addToLobby());
+		dispatch(addToLobby(matchType));
 	};
 
 	const showModal = () => {
