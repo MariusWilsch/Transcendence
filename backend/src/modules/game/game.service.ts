@@ -14,9 +14,16 @@ import {
 	GameConfigState,
 	AiDifficulty,
 	InputType,
+	GameResult,
+	Score,
+	MatchOutcome,
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 import { createCommand } from './helpers/inputCommand';
+import { PrismaClient } from '@prisma/client';
+//! What is the right way to import this?
+
+const prisma = new PrismaClient();
 
 // Helper functions
 const createVec2 = (x: number, y: number): Vector => ({ x, y });
@@ -61,7 +68,11 @@ export class GameService {
 				GAME_CONFIG.canvasWidth * GAME_CONFIG.ballSpeedFactor,
 				0
 			),
-			players: [player1, player2],
+			//! Strings need to be changed to the actual ID's but how do I get them?
+			players: [
+				{ playerIDs: 'userID1', playerSockets: player1 },
+				{ playerIDs: 'userID2', playerSockets: player2 },
+			],
 			gameState: this.initGameState(),
 			intervalID: undefined,
 			input: [
@@ -77,6 +88,7 @@ export class GameService {
 				},
 			],
 			command: [],
+			//! How do I get the ID's?
 		});
 	}
 
@@ -319,11 +331,14 @@ export class GameService {
 			// Remove the game session
 			this.gameSessions.delete(roomID);
 			// Disconnect the other player
+			// const otherPlayer = gameSession.players.find(
+			// 	(player) => player.id !== clientID
+			// );
 			const otherPlayer = gameSession.players.find(
-				(player) => player.id !== clientID
+				(player) => player.playerIDs !== clientID
 			);
 			if (otherPlayer) {
-				otherPlayer.disconnect();
+				otherPlayer.playerSockets.disconnect();
 			}
 		}
 	}
@@ -344,10 +359,24 @@ export class GameService {
 		return this.gameSessions.get(roomID);
 	}
 
-	public getWinner({ score }: GameState): boolean[] {
-		return score.player1 === GAME_CONFIG.WinningScore
-			? [false, true]
-			: [true, false];
+	public getWinner({ score }: GameState): GameResult {
+		if (score.player1 === GAME_CONFIG.WinningScore) {
+			return {
+				winnerId: 'userID1',
+				loserId: 'userID2',
+				score,
+				result: [true, false],
+				outcome: MatchOutcome.FINISHED,
+			};
+		} else {
+			return {
+				winnerId: 'userID2',
+				loserId: 'userID1',
+				score,
+				result: [false, true],
+				outcome: MatchOutcome.FINISHED,
+			};
+		}
 	}
 
 	//* Setters
@@ -472,5 +501,21 @@ export class GameService {
 		)
 			return false;
 		return true;
+	}
+
+	async saveMatchResult(
+		winnerId: string,
+		loserId: string,
+		score: Score,
+		outcome: any
+	) {
+		return prisma.matchHistory.create({
+			data: {
+				winnerId,
+				loserId,
+				score: JSON.stringify(score),
+				outcome,
+			},
+		});
 	}
 }

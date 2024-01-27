@@ -11,8 +11,6 @@ import { CiSearch } from 'react-icons/ci';
 import { useParams, redirect, useRouter, usePathname } from 'next/navigation';
 import pong from '../../public/pong.svg';
 import { IoMenuOutline } from 'react-icons/io5';
-import { setGameData } from '../gamelobby/GlobalRedux/features';
-import { useDispatch } from 'react-redux';
 
 export const Navbar = () => {
 	const {
@@ -29,7 +27,6 @@ export const Navbar = () => {
 	const [inputValue, setInputValue] = useState('');
 	const router = useRouter();
 	const pathname = usePathname();
-	const dispatch = useDispatch();
 
 	const handleSubmit = (event: any) => {
 		event.preventDefault();
@@ -69,8 +66,6 @@ export const Navbar = () => {
 
 				if (data !== null) {
 					setUser(data);
-					//! Am I sending the right properites?
-					dispatch(setGameData({ username: data.login, avatar: data.Avatar }));
 				}
 			} catch (error: any) {}
 		};

@@ -25,28 +25,22 @@ model User {
   user         Friend[]       @relation("friendsUser")
   created_at   DateTime       @default(now())
   updated_at   DateTime       @updatedAt
-  // wonMatches   MatchHistory[] @relation("userWins")
-  // lostMatches  MatchHistory[] @relation("userLosses")
+  wonMatches   MatchHistory[] @relation("userWins")
+  lostMatches  MatchHistory[] @relation("userLosses")
 }
 
-enum MatchOutcome {
-  WIN
-  LOSS
-  UNDEFINED
+model MatchHistory {
+  id        Int      @id @default(autoincrement())
+  winner    User?    @relation(name: "userWins", fields: [winnerId], references: [intraId])
+  winnerId  String? // Made nullable
+  loser     User?    @relation(name: "userLosses", fields: [loserId], references: [intraId])
+  loserId   String? // Made nullable
+  score     Json
+  outcome   Int
+  matchDate DateTime @default(now())
+
+  @@unique([winnerId, loserId, matchDate], name: "unique_match")
 }
-
-// model MatchHistory {
-//   id        Int          @id @default(autoincrement())
-//   winner    User?        @relation(name: "userWins", fields: [winnerId], references: [intraId])
-//   winnerId  String? // Made nullable
-//   loser     User?        @relation(name: "userLosses", fields: [loserId], references: [intraId])
-//   loserId   String? // Made nullable
-//   score     String // Format can be "3-1", "2-0", etc.
-//   outcome   MatchOutcome
-//   matchDate DateTime     @default(now())
-
-//   @@unique([winnerId, loserId, matchDate], name: "unique_match")
-// }
 
 model Tfa {
   user       User     @relation(fields: [intraId], references: [intraId])

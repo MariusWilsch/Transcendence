@@ -260,21 +260,25 @@ export const Sidebar = () => {
 													</Link>
 												</li>
 												<li>
-													<motion.div
-														whileTap={{ scale: 0.8 }}
-														initial={{ opacity: 0 }}
-														animate={{ opacity: 1, y: 0 }}
-														transition={{ delay: 0.01 }}
+													<Link
+														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}
 													>
-														<RiPingPongLine
-															size="30"
-															className={`${
-																RouterName === 'play'
-																	? 'text-slate-50'
-																	: 'text-slate-500'
-															} hover:text-slate-50 mx-auto m-8`}
-														/>
-													</motion.div>
+														<motion.div
+															whileTap={{ scale: 0.8 }}
+															initial={{ opacity: 0 }}
+															animate={{ opacity: 1, y: 0 }}
+															transition={{ delay: 0.01 }}
+														>
+															<RiPingPongLine
+																size="30"
+																className={`${
+																	RouterName === 'play'
+																		? 'text-slate-50'
+																		: 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
+															/>
+														</motion.div>
+													</Link>
 												</li>
 											</div>
 											<div>

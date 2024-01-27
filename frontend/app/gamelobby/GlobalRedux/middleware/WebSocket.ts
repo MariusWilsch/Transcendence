@@ -11,6 +11,7 @@ import {
 	setMatchmaking,
 } from '../features';
 import { GameState } from '@/interfaces/GameState';
+import Cookies from 'universal-cookie';
 
 // Types
 type MiddlewareStore = MiddlewareAPI<Dispatch<AnyAction>>;
@@ -26,12 +27,21 @@ interface Middleware {
 
 let ClientSocket: Socket | null = null;
 let AISocket: Socket | null = null;
+const cookies = new Cookies();
 
 //* Helper functions for WebSocket middleware
 const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket = io('http://localhost:3001');
 
-	socket.on('connect', () => console.log('Connected to server'));
+	socket.on('connect', () => {
+		console.log('Connected to server');
+		{
+			auth: {
+				jwt: cookies.get('jwt');
+			}
+		}
+		console.log('cookies', cookies.get('jwt'));
+	});
 
 	socket.on('disconnect', () => {
 		console.log('Disconnected from server');

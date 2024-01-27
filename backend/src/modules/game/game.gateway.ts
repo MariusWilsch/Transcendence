@@ -27,8 +27,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
 
-	handleConnection(client: IO) {
+	handleConnection(client: IO, payload: any) {
 		console.log(`Client connected via ${client.id}`);
+		//! How do I get the user ID from the client that joined the lobby?
+
+		console.log('payload', payload);
 
 		this.lobby.push(client);
 		console.log('lobby size', this.lobby.length);
@@ -64,12 +67,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Create a new game session and store it in the Map
 		this.gameService.createGameSession(roomID, player1, player2);
 
+		//! Can I get the user ID aswell? That would make uncessary to store the id's seperately
+
+		// Get the username and avatar from the clients that are joining the game
+		//! How do I this?
+
 		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
 		this.Server.to(roomID).emit('createGame', {
 			...gameState,
 			canvasWidth: GAME_CONFIG.canvasWidth,
 			canvasHeight: GAME_CONFIG.canvasHeight,
+			userData: [
+				{
+					avatar: 'avatar String here',
+					username: 'username String here',
+				},
+				{
+					avatar: 'avatar String here',
+					username: 'username String here',
+				},
+			],
 		});
 	}
 
@@ -102,8 +120,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log('Game over, clearing interval');
 				const gameResult = this.gameService.getWinner(gameSession.gameState);
 				console.log('Game result', gameResult);
-				gameSession.players[0].emit('gameOver', gameResult[0]);
-				gameSession.players[1].emit('gameOver', gameResult[1]);
+				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
+				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);
+				//! Save match result here!
+				this.gameService
+					.saveMatchResult(
+						gameResult.winnerId,
+						gameResult.loserId,
+						gameResult.score,
+						gameResult.outcome
+					)
+					.catch((error) => {
+						console.error('Error saving match result:', error);
+					});
+
+				// The game loop continues without waiting for the save operation to complete
+
 				clearInterval(intervalId);
 			}
 			// const startUpdateTime1 = performance.now();

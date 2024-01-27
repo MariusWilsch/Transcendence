@@ -37,7 +37,7 @@ export interface Ball {
 	radius: number;
 }
 
-interface Score {
+export interface Score {
 	player1: number;
 	player2: number;
 }
@@ -62,10 +62,23 @@ export interface PaddleControlCommand {
 	execute(deltaTime: number, input: PlayerInput): boolean;
 }
 
+export interface Players {
+	playerSockets: Socket;
+	playerIDs: string;
+}
+
+export interface GameResult {
+	winnerId: string;
+	loserId: string;
+	score: Score;
+	result: boolean[];
+	outcome: MatchOutcome;
+}
+
 // Structure to keep track of player associations within a game session
 export interface GameSession {
 	ballVelocity: Vector;
-	players: Socket[];
+	players: Players[];
 	gameState: GameState;
 	intervalID: NodeJS.Timeout | undefined;
 	input: PlayerInput[];
@@ -96,4 +109,9 @@ export interface GameConfigState {
 	aiDifficulty: AiDifficulty;
 	inputType: InputType;
 	mapChoice: MapChoice;
+}
+
+export enum MatchOutcome {
+	FINISHED,
+	UNDEFINED,
 }
