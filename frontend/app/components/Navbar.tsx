@@ -83,7 +83,7 @@ export const Navbar = () => {
 	}, [user, pathname]);
 
 	return (
-		<div className="bg-[#1F212A] flex flex-row  w-[100vw] overflow-hidden">
+		<div className="bg-[#1F212A] flex flex-row  w-full overflow-hidden">
 			<div className="w-16 h-16 bg-[#292D39]">
 				<Image
 					unoptimized={true}
