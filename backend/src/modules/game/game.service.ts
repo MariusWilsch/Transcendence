@@ -503,7 +503,6 @@ export class GameService {
 	 */
 	public isGameOver({ score }: GameState): boolean {
 		// Implement game over condition based on game state
-		if (this.gameSessions.size == 0) return false;
 		if (
 			score.player1 < GAME_CONFIG.WinningScore &&
 			score.player2 < GAME_CONFIG.WinningScore

@@ -1,12 +1,11 @@
-'use cleint';
 import { Direction } from '@/interfaces';
 import { mouseMove, movePaddle } from '@/app/gamelobby/GlobalRedux/features';
 import { MutableRefObject } from 'react';
-import { Dispatch } from 'redux';
+import { Dispatch, UnknownAction } from 'redux';
 
 const updateDirection = (
 	newDirection: Direction,
-	dispatch: Dispatch<AnyAction>,
+	dispatch: Dispatch<UnknownAction>,
 	currentDirection: MutableRefObject<Direction>,
 ) => {
 	if (newDirection !== currentDirection.current) {
@@ -16,7 +15,7 @@ const updateDirection = (
 };
 
 export const handleKeyDown = (
-	dispatch: Dispatch<AnyAction>,
+	dispatch: Dispatch<UnknownAction>,
 	currentDirection: MutableRefObject<Direction>,
 	e: KeyboardEvent,
 ) => {
@@ -38,7 +37,7 @@ export const handleKeyDown = (
 };
 
 export const handleKeyUp = (
-	dispatch: Dispatch<AnyAction>,
+	dispatch: Dispatch<UnknownAction>,
 	currentDirection: MutableRefObject<Direction>,
 	e: KeyboardEvent,
 ) => {
@@ -52,7 +51,7 @@ export const handleKeyUp = (
 };
 
 export const handleMouseMove = (
-	dispatch: Dispatch<AnyAction>,
+	dispatch: Dispatch<UnknownAction>,
 	e: MouseEvent,
 	canvasRef: React.RefObject<HTMLDivElement>,
 ) => {

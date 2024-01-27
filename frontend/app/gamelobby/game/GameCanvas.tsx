@@ -72,7 +72,7 @@ export const GameCanvas: React.FC = () => {
 		}
 
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
-	}, [gameState, mapChoice]);
+	}, [gameState, mapChoice, isConnected]);
 
 	return (
 		<div

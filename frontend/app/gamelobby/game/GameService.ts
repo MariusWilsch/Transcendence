@@ -1,4 +1,4 @@
-'use Client';
+'use client';
 import * as PIXI from 'pixi.js';
 import { GameState } from '../../../interfaces/GameState';
 import { mapType } from '@/app/gamelobby/GlobalRedux/features';
@@ -185,4 +185,13 @@ export class GameService {
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
 	}
+
+	// public clearGameElements() {
+	// 	//! What do I actually need to clear?
+	// 	console.log('Clearing game elements');
+	// 	if (this.app) {
+	// 		this.container.removeChild(this.app.view as HTMLCanvasElement);
+	// 		this.app.destroy(true, true);
+	// 	}
+	// }
 }
