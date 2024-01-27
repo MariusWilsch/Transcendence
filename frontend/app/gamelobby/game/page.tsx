@@ -113,8 +113,6 @@ const GameHeader = () => {
 	const userData = useSelector((state: RootState) => state.game.userData);
 	//! this is not gonna show the right avatar gameData will be the same for both
 
-	console.log(userData);
-
 	return (
 		<div className="h-1/4 flex items-center justify-evenly">
 			<Stats scorePos={'left'} gameData={userData[0]} />

@@ -50,10 +50,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
 		const roomID = client.data.roomID;
+		this.gameService.deleteGameSession(client.id, roomID);
 		if (this.gameService.isInGame(roomID)) {
-			console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
-			this.gameService.deleteGameSession(client.id, roomID);
+			console.log('Client was in a running game, clearing interval');
 		}
 	}
 
@@ -138,6 +138,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.players,
 					gameSession.gameState
 				);
+				if (gameResult === undefined) return;
 				console.log('Game result', gameResult);
 				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
 				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);

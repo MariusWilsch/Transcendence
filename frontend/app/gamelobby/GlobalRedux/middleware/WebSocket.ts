@@ -59,6 +59,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	);
 
 	socket.on('opponentDisconnected', () => {
+		console.log('Opponent disconnected');
 		store.dispatch(gameFinished());
 		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});

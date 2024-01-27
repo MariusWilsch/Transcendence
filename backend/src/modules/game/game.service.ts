@@ -138,6 +138,7 @@ export class GameService {
 	 * returned.
 	 */
 	public updateGameState(gameSession: GameSession, deltaTime: number) {
+		if (this.gameSessions.size == 0) return;
 		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		this.updatePaddles(gameSession, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
@@ -200,8 +201,6 @@ export class GameService {
 		let didPaddleMove = false;
 
 		//* Update player 1's paddle
-		console.log(command[Player.P1], input[Player.P1]);
-
 		didPaddleMove = command[Player.P1].execute(deltaTime, input[Player.P1]);
 		//* Update player 2's paddle
 		didPaddleMove = command[Player.P2].execute(deltaTime, input[Player.P2]);
@@ -364,6 +363,11 @@ export class GameService {
 	}
 
 	public getWinner(players: Players[], { score }: GameState): GameResult {
+		if (
+			score.player1 < GAME_CONFIG.WinningScore &&
+			score.player2 < GAME_CONFIG.WinningScore
+		)
+			return undefined;
 		if (score.player1 === GAME_CONFIG.WinningScore) {
 			return {
 				winnerId: players[0].playerIDs,
@@ -415,6 +419,7 @@ export class GameService {
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {
+		if (this.gameSessions.size == 0) return;
 		this.gameSessions.get(roomID).intervalID = intervalID;
 	}
 
@@ -451,7 +456,7 @@ export class GameService {
 	 * @returns a boolean value.
 	 */
 	public isInGame(roomID: string): boolean {
-		if (this.gameSessions.size == 0) return false;
+		if (this.gameSessions.size == 0) return true;
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
@@ -498,6 +503,7 @@ export class GameService {
 	 */
 	public isGameOver({ score }: GameState): boolean {
 		// Implement game over condition based on game state
+		if (this.gameSessions.size == 0) return false;
 		if (
 			score.player1 < GAME_CONFIG.WinningScore &&
 			score.player2 < GAME_CONFIG.WinningScore
