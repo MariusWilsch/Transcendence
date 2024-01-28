@@ -19,8 +19,12 @@ export const UserDetailsCard = ({
   const [newLoginInput, setNewLoginInput] = useState("");
 
   const updateLogin = async () => {
-    if (newLoginInput.trim().length > 20 || newLoginInput.trim().length < 3) {
-      toast.error("Login must be between 3 and 20 characters");
+    if (
+      newLoginInput.trim().length > 20 ||
+      newLoginInput.trim().length < 3 ||
+      !/^[a-zA-Z0-9_\-+]+$/.test(newLoginInput)
+    ) {
+      toast.error("Choose another login");
       return;
     }
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
@@ -43,10 +47,8 @@ export const UserDetailsCard = ({
         if (data.success === false) {
           const msg = "Failed to update login : " + newLoginInput;
           toast.error(msg);
-          console.log(newLoginInput, ": -maybe- not unique");
         } else {
           toast.success("Login updated successfully");
-          console.log(newLoginInput, ": updated successfully");
         }
       } catch (error: any) {
         const msg = "Error updating login: " + newLoginInput;
@@ -56,7 +58,6 @@ export const UserDetailsCard = ({
       setNewLoginInput("");
     } else {
       toast.error("Please enter a valid login");
-      console.log("Please enter a valid login");
     }
   };
 
@@ -68,7 +69,7 @@ export const UserDetailsCard = ({
   };
 
   return (
-    <div className="flex items-center justify-center ">
+    <div className="flex items-center justify-center overflow-x-hidden">
       <div
         className="flex items-center justify-center p-4
           rounded-md "

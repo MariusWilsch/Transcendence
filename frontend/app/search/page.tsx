@@ -34,10 +34,9 @@ export default function Search(params: any) {
 
     const handleSearchQuery = async (searchTerm: string) => {
       if (
-        searchTerm === "" ||
         searchTerm === undefined ||
         searchTerm === null ||
-        searchTerm === " "
+        searchTerm.trim().length === 0
       ) {
         return;
       }
@@ -59,13 +58,11 @@ export default function Search(params: any) {
           }
         );
         if (!response.ok) {
-          toast.error("User not found");
           return;
         }
         const users: User[] = await response.json();
         setUsers(users);
       } catch (error) {
-        console.error("Error:", error);
       }
     };
     handleSearchQuery(searchTerm);
@@ -74,12 +71,15 @@ export default function Search(params: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
-      inputValue === "" ||
       inputValue === undefined ||
       inputValue === null ||
-      inputValue.trim().length === 0
+      inputValue.trim().length === 0 ||
+      inputValue.trim().length > 20
     ) {
       return;
+    }
+    if (!/^[a-zA-Z0-9_\-+]+$/.test(inputValue)) {
+      return toast.error("Invalid characters");
     }
 
     try {
@@ -112,30 +112,8 @@ export default function Search(params: any) {
 
   useEffect(() => {}, [inputValue]);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const toggleselectedId = (prev: any) => {
-    // if (prev === null) {
-    //   return null;
-    // }
-    return null;
-  };
-
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
-      <Navbar isProfileOwner={false} />
 
-      <div className="flex ">
-        {isSidebarVisible && (
-          <div className="w-16 custom-height ">
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
-              }`}
-            >
-              <Sidebar />
-            </div>
-          </div>
-        )}
 
         <div className="flex-1 overflow-y-auto">
           <div className="p-10">
@@ -225,9 +203,7 @@ export default function Search(params: any) {
               </div>
             </div>
           </div>
-        </div>
-      </div>
       <Toaster />
-    </div>
+        </div>
   );
 }

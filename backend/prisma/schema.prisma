@@ -29,6 +29,20 @@ model User {
   receivedMessages Message[]     @relation("ReceivedMessages")
   privateRooms   PrivateRoom[]
   membership       MemberShip[]
+  wonMatches   MatchHistory[] @relation("userWins")
+  lostMatches  MatchHistory[] @relation("userLosses")
+}
+
+model MatchHistory {
+  id        Int      @id @default(autoincrement())
+  winner    User?    @relation(name: "userWins", fields: [winnerId], references: [intraId])
+  winnerId  String? // Made nullable
+  loser     User?    @relation(name: "userLosses", fields: [loserId], references: [intraId])
+  loserId   String? // Made nullable
+  score     Json
+  outcome   Int
+  matchDate DateTime @default(now())
+  @@unique([winnerId, loserId, matchDate], name: "unique_match")
 }
 
 model Channel {
@@ -90,10 +104,10 @@ model PrivateRoom{
   updated_at    DateTime  @updatedAt
 }
 model Tfa {
-  user           User      @relation(fields: [intraId], references: [intraId])
-  intraId        String    @unique
-  otp            String    @unique
-  created_at     DateTime  @default(now())
+  user       User     @relation(fields: [intraId], references: [intraId])
+  intraId    String   @unique
+  otp        String   @unique
+  created_at DateTime @default(now())
 }
 
 enum Status {
@@ -115,5 +129,6 @@ model Friend {
   friend           User         @relation("friendsUser", fields: [friendId], references: [intraId])
   friendId         String
   created_at       DateTime     @default(now())
+
   @@unique([userId, friendId], name: "unique_user_friend")
 }

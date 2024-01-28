@@ -158,53 +158,20 @@ export default function Home() {
   // bg-[#12141A]
 
   return (
-    <div className="w-[100vw] relative">
+    <div className="w-[100vw] relative overflow-x-hidden ">
       <AppProvider>
         <div className="w-[100vw] hero min-h-screen  ">
           <div className="h-[50vh] absolute top-0 left-0 hero homebackround overflow-hidden"></div>
-
-          <div className="w-2/3 hero-content text-center text-neutral-content z-10">
-            <div className="w-full flex justify-center items-center flex-col bg-white p-8 rounded-lg shadow-2xl">
-              <h1 className="mb-5 md:text-5xl text-3xl font-bold text-[#12141A] font-sans">
-                Transcendence
-              </h1>
-              <p className="text-[#12141A] text-sm font-sans">
-                The ultimate pong hub :
-              </p>
-              <p className="mb-5 text-[#12141A] text-sm font-sans">
-                classic gameplay, private chat...
-              </p>
-
-              <div className="m-2  w-52  justify-center items-center">
-                <div className="w-52 flex flex-row justify-center items-cente">
-                  <motion.div
-                    layoutId={"LOGIN"}
-                    onClick={() => setSelectedId("LOGIN")}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <div className=" w-52 text-center flex justify-center flex-row bg-[#292D39] font-sans hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-3xl">
-                      <div className="flex justify-between items-center text-white font-mono">
-                        Login &nbsp;
-                        <CiLogin size="25" />
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-          </div>
           <div className="absolute top-1/2 left-0 flex flex-col w-[100vw] items-center justify-center h-[50vh] bg-white overflow-hidden">
             <div className="absolute flex flex-col items-center justify-center w-2/3">
-              <p className="z-10 mb-2 md:text-md text-sm mt-24 text-[#12141A] font-mono w-2/3 md:mt-10">
+              <p className="mb-2 md:text-md text-sm mt-24 text-[#12141A] font-mono w-2/3 md:mt-10">
                 Explore the ultimate Pong gaming hub on our website!
               </p>
-              <p className=" z-10 mb-2 md:text-md text-sm text-[#12141A] font-mono w-2/3">
+              <p className=" mb-2 md:text-md text-sm text-[#12141A] font-mono w-2/3">
                 Enjoy classic gameplay with modern features, including
                 one-on-one matches and multiplayer modes with integrated chat.
               </p>
-              <p className="z-10 mb-2 md:text-md text-sm text-[#12141A] font-mono w-2/3">
+              <p className="mb-2 md:text-md text-sm text-[#12141A] font-mono w-2/3">
                 All skill levels are welcome in our vibrant community for
                 exciting matches and social connections!
               </p>
@@ -218,10 +185,43 @@ export default function Home() {
               lottieRef={lottieRef as any}
             />
           </div>
-          <div className="hidden md:inline-block absolute top-[100vh] w-full bg-[#292D39] overflow-hidden">
-            <div className="footer w-[100vw] p-10 text-white overflow-hidden">
-              <div className="m-0">
-                <div className="w-16 h-16">
+          <div className="w-2/3 hero-content text-center text-neutral-content z-10">
+            <div className="w-full flex justify-center items-center flex-col bg-white p-8 rounded-lg shadow-2xl">
+              <h1 className="  mb-5 md:text-5xl text-3xl font-bold text-[#12141A] font-sans">
+                Transcendence
+              </h1>
+              <p className="text-[#12141A] text-sm font-sans">
+                The ultimate pong hub :
+              </p>
+              <p className="mb-5 text-[#12141A] text-sm font-sans">
+                classic gameplay, private chat...
+              </p>
+
+              <div className="z-20 m-2  w-52  justify-center items-center">
+                <div className=" w-52 flex flex-row justify-center items-cente">
+                  <motion.div
+                    layoutId={"LOGIN"}
+                    onClick={() => setSelectedId("LOGIN")}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className=" z-50 w-52 text-center flex justify-center flex-row bg-[#292D39] font-sans hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-3xl">
+                      <div className="flex justify-between items-center text-white font-mono">
+                        Login &nbsp;
+                        <CiLogin size="25" />
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="inline-block absolute left-0 top-[100vh] w-full bg-[#292D39] overflow-hidden">
+            <div className="footer w-[100vw] p-10 text-white overflow-hidden md:justify-normal justify-center">
+              <div className="md:w-auto w-[50vw] m-0 flex flex-col justify-center items-center ">
+                <div className=" w-16 h-16 flex-row justify-center items-center ">
                   <Image
                     unoptimized={true}
                     src={pong}
@@ -230,29 +230,32 @@ export default function Home() {
                     width={100}
                     height={100}
                     sizes=""
+                    className=""
                     style={{ filter: "invert(100%)" }}
                   />
                 </div>
-                <div>
-                  <div className="font-serif text-base">Transcendence</div>
+                <div className="text-center flex-col justify-center ">
+                  <div className="font-serif text-base text-center">
+                    Transcendence
+                  </div>
                   The ultimate pong hub
                 </div>
               </div>
-              <div>
-                <div className="footer-title">Services</div>
+              <div className=" md:w-auto w-[50vw] flex flex-col justify-center items-center">
+                <div className="footer-title ">Services</div>
                 <div className="link link-hover">Live pong games</div>
                 <div className="link link-hover">games with IA</div>
                 <div className="link link-hover">Private chat</div>
                 <div className="link link-hover">Group chat</div>
               </div>
-              <div>
+              <div className="md:w-auto w-[50vw] flex flex-col justify-center items-center">
                 <div className="footer-title">IT team</div>
                 <div className="link link-hover">Mimouni Imad</div>
                 <div className="link link-hover">Zakariae Essadqui</div>
                 <div className="link link-hover">Marius Wilsch</div>
               </div>
-              <div className="">
-                <div className="footer-title">Social</div>
+              <div className="md:w-auto w-[50vw]  flex flex-col justify-center items-center">
+                <div className="footer-title ">Social</div>
                 <div className="imad flex flex-row ">
                   <Link href={"https://github.com/imadmi"} target="_blank">
                     <FaGithub size="20" className=" text-white mr-3" />
@@ -319,7 +322,7 @@ export default function Home() {
                                   User name
                                 </label>
                                 <input
-                                  className=" border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800 appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:border-green-500 focus:shadow-outline"
+                                  className=" border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800 appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:border-2 focus:border-green-400 focus:shadow-outline"
                                   id="login"
                                   type="text"
                                   placeholder="Login"
@@ -337,7 +340,7 @@ export default function Home() {
                                   Password
                                 </label>
                                 <input
-                                  className="border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black mb-3 leading-tight focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black mb-3 leading-tight focus:border-2 focus:border-green-400  focus:outline-none focus:shadow-outline"
                                   id="password"
                                   type="password"
                                   placeholder="Password"
@@ -348,7 +351,7 @@ export default function Home() {
                               </div>
                               <div className="flex items-center justify-center  ">
                                 <button
-                                  className="bg-blue-500 rounded-3xl w-full hover:bg-blue-700 text-white font-bold py-2 px-4 focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="bg-blue-500 rounded-3xl w-full hover:bg-blue-700 text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
                                   type="submit"
                                 >
                                   Log in
@@ -430,7 +433,7 @@ export default function Home() {
                                   Full Name
                                 </label>
                                 <input
-                                  className="border-gray-900 shadow bg-slate-100  appearance-none border  placeholder-gray-800  rounded w-full py-2 px-3 bg-opacity-10  text-black leading-tight focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="border-gray-900 shadow bg-slate-100  appearance-none border  placeholder-gray-800  rounded w-full py-2 px-3 bg-opacity-10  text-black leading-tight focus:border-2 focus:border-green-400  focus:outline-none focus:shadow-outline"
                                   id="username"
                                   type="text"
                                   placeholder="Full name"
@@ -449,7 +452,7 @@ export default function Home() {
                                   User name
                                 </label>
                                 <input
-                                  className=" border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800 appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className=" border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800 appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:border-2 focus:border-green-400  focus:outline-none focus:shadow-outline"
                                   id="login"
                                   type="text"
                                   placeholder="User name"
@@ -466,7 +469,7 @@ export default function Home() {
                                   Email
                                 </label>
                                 <input
-                                  className="border-gray-900 shadow bg-slate-100  bg-opacity-10  placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="border-gray-900 shadow bg-slate-100  bg-opacity-10  placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:border-2 focus:border-green-400  focus:outline-none focus:shadow-outline"
                                   id="email"
                                   type="email"
                                   placeholder="Email"
@@ -483,7 +486,7 @@ export default function Home() {
                                   Password
                                 </label>
                                 <input
-                                  className="border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black mb-3 leading-tight focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="border-gray-900 shadow bg-slate-100 bg-opacity-10 placeholder-gray-800  appearance-none border rounded w-full py-2 px-3 text-black mb-3 leading-tight focus:border-2 focus:border-green-400  focus:outline-none focus:shadow-outline"
                                   id="password"
                                   type="password"
                                   placeholder="Password"
@@ -496,7 +499,7 @@ export default function Home() {
                               </div>
                               <div className="flex items-center justify-center  ">
                                 <button
-                                  className="bg-blue-500 rounded-3xl w-full hover:bg-blue-700 text-white font-bold py-2 px-4 focus:border-green-500  focus:outline-none focus:shadow-outline"
+                                  className="bg-blue-500 rounded-3xl w-full hover:bg-blue-700 text-white font-bold py-2 px-4  focus:outline-none focus:shadow-outline"
                                   type="submit"
                                 >
                                   Sign Up

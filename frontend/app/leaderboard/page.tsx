@@ -44,30 +44,15 @@ export default function Search(params: any) {
   }, [page]);
 
   return (
-    <div className=" min-h-screen w-screen bg-[#12141A]">
-      <Navbar isProfileOwner={false} />
 
-      <div className="flex ">
-        {context.isSidebarVisible && (
-          <div className="w-16 custom-height ">
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                context.isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
-              }`}
-            >
-              <Sidebar />
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="p-10">
             <div className="">
               <div className="mb-5 text-white font-sans">Leaderboard </div>
               <div className="border-b border-gray-500 my-4 mb-10"></div>
 
               <div className="mt-4 flex  justify-center ">
-                <div className="mt-4 w-full flex flex-col items-center">
+                <div className="mt-4 w-full flex flex-col items-center overflow-x-hidden">
                   {users &&
                     users.map((user, index) => (
                       <Link
@@ -101,7 +86,7 @@ export default function Search(params: any) {
                                     </div>
                                   </div>
                                   <div className="ml-3">
-                                    <p className="text-md font-sans text-white">
+                                    <div className="text-md font-sans text-white">
                                       {index + 1 === 1 && page === 1 && (
                                         <div> Pong champ {user.login}</div>
                                       )}
@@ -114,7 +99,7 @@ export default function Search(params: any) {
                                       {(index + 1 > 3 || page !== 1) && (
                                         <div> {user.login}</div>
                                       )}
-                                    </p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -124,7 +109,7 @@ export default function Search(params: any) {
                                   {index < 3 && page === 1 && (
                                     <div className="text-lg font-bold text-white mr-2">
                                       {index + 1 === 1 &&
-                                        "🥇 add win percentage here "}
+                                        "win % "}
                                     </div>
                                   )}
                                 </button>
@@ -147,7 +132,6 @@ export default function Search(params: any) {
                     leaderboard();
                     setPage((prev) => prev - 1);
                   } else {
-                    // toast.error("No more users");
                   }
                 }}
               >
@@ -176,10 +160,8 @@ export default function Search(params: any) {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
       <Toaster />
-    </div>
+        </div>
+
   );
 }
