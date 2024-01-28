@@ -159,7 +159,7 @@ export const UserProfileImage = ({
 	const [numberofgames, setnumberofgames] = useState(0);
 	const [gameswon, setgameswon] = useState(0);
 	const [gamesloss, setgamesloss] = useState(0);
-	const [winpercentage, setwinpercentage] = useState("");
+	const [winpercentage, setwinpercentage] = useState('');
 
 	useEffect(() => {
 		const Gamehistory = async () => {
@@ -194,8 +194,9 @@ export const UserProfileImage = ({
 				setgameswon(gameswon);
 				setgamesloss(gamesloss);
 				const totalGames = gameswon + gamesloss;
-				const winPercentage = totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
-				
+				const winPercentage =
+					totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
+
 				setwinpercentage(winPercentage);
 
 				console.log(gameswon);
@@ -232,9 +233,7 @@ export const UserProfileImage = ({
 		<div>
 			<div className="flex flex-col items-center justify-center">
 				<div
-					className={`${
-						isSidebarVisible ? 'backgroundDiv' : 'backgroundDivNotVisible'
-					} backgroundDiv  md:h-80 h-48 flex justify-center relative`}
+					className={`backgroundDiv  md:h-80 h-48 flex justify-center relative backgroundDivNotVisible`}
 				>
 					<div
 						className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}

@@ -69,7 +69,7 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 											<div className="">
 												<img
 													src={game.user1Avatar}
-													className="w-10 h-10 rounded-full"
+													className="hidden md:w-10 md:h-10 rounded-full"
 												></img>
 											</div>
 											<div className="text-gray-300 text-sm m-2">{game.user1Login}</div>
@@ -95,7 +95,7 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 											<div className="">
 												<img
 													src={game.user2Avatar}
-													className="w-10 h-10 rounded-full"
+													className="hidden md:w-10 md:h-10 rounded-full"
 												></img>
 											</div>
 										</div>

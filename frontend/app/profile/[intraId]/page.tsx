@@ -211,7 +211,7 @@ export default function Profile(params: any) {
 	}
 
 	return (
-		<div className="relative">
+		<div className="relative w-[100vw]">
 			<div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
 				<Lottie
 					animationData={loading}
@@ -231,9 +231,7 @@ export default function Profile(params: any) {
 					intraId={intraId}
 				/>
 				<div
-					className={`${
-						isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'
-					} p-10`}
+					className={`${isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'} p-10 `}
 				>
 					<UserDetailsCard value={Login} intraId={intraId} />
 					{user !== null ? (
@@ -250,8 +248,7 @@ export default function Profile(params: any) {
 						</div>
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
-					<Gamehistory intraId={intraId}/>
-
+					<Gamehistory intraId={intraId} />
 				</div>
 			</div>
 			<Toaster />
