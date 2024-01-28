@@ -15,6 +15,7 @@ import { HiUserGroup } from 'react-icons/hi2';
 import { TfiFaceSmile } from 'react-icons/tfi';
 import { LiaWalkingSolid } from 'react-icons/lia';
 import { RxUpdate } from 'react-icons/rx';
+import { log } from 'console';
 
 export const UserProfileImage = ({
 	status,
@@ -155,6 +156,59 @@ export const UserProfileImage = ({
 		}
 	};
 
+	const [numberofgames, setnumberofgames] = useState(0);
+	const [gameswon, setgameswon] = useState(0);
+	const [gamesloss, setgamesloss] = useState(0);
+	const [winpercentage, setwinpercentage] = useState("");
+
+	useEffect(() => {
+		const Gamehistory = async () => {
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}:3001/users/Gamehistory/${intraId}`,
+					{
+						credentials: 'include',
+					},
+				);
+				const data = await response.json();
+				if (!response.ok) {
+					return;
+				}
+
+				if (data.success === false) {
+					return;
+				}
+				setnumberofgames(data.Gamehistory.length);
+				console.log(data.Gamehistory);
+
+				// number of games won
+				let gameswon = 0;
+				let gamesloss = 0;
+				data.Gamehistory.forEach((game: any) => {
+					if (game.winnerId !== intraId) {
+						gameswon++;
+					} else {
+						gamesloss++;
+					}
+				});
+				setgameswon(gameswon);
+				setgamesloss(gamesloss);
+				const totalGames = gameswon + gamesloss;
+				const winPercentage = totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
+				
+				setwinpercentage(winPercentage);
+
+				console.log(gameswon);
+				console.log(gamesloss);
+				console.log(totalGames);
+				console.log(winPercentage);
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		Gamehistory();
+	}, [intraId]);
+
 	var readableDate: string = '';
 	var readableDate1: string = '';
 	var readableDate2: string = '';
@@ -169,7 +223,7 @@ export const UserProfileImage = ({
 	}
 
 	const percentage: any = {
-		'--value': 55,
+		'--value': winpercentage,
 		'--size': '160px',
 		fontSize: '44px',
 	};
@@ -195,11 +249,11 @@ export const UserProfileImage = ({
 											style={percentage}
 											role="progressbar"
 										>
-											55%
+											{winpercentage}%
 										</div>
 									</div>
 									<div className="text-gray-300 font-mono">
-										<div className="inline text-blue-400">956&nbsp;</div>
+										<div className="inline text-blue-400">{numberofgames}&nbsp;</div>
 										games played
 									</div>
 								</div>
@@ -209,14 +263,9 @@ export const UserProfileImage = ({
 									<div className="flex flex-row justify-between ">
 										<div className="text-white mb-1 ">Total friends :</div>
 										{isProfileOwner && (
-											<button
-												onClick={() => setrefreshFriends((prev) => prev + 1)}
-											>
+											<button onClick={() => setrefreshFriends((prev) => prev + 1)}>
 												<div className="tooltip ">
-													<RxUpdate
-														size="20"
-														className="text-gray-400 inline mr-1"
-													/>
+													<RxUpdate size="20" className="text-gray-400 inline mr-1" />
 													<div className="tooltiptext w-20 bg-gray-800 bg-opacity-80 top-0 right-4 text-white p-3 rounded-md hover:transition duration-300 ease-in">
 														Refresh
 													</div>
@@ -250,9 +299,7 @@ export const UserProfileImage = ({
 												</div>
 												<TfiFaceSmile size="22" className="inline mr-[1px]" /> :{' '}
 											</div>
-											<div className="inline text-green-400 ">
-												{user?.fullname}
-											</div>
+											<div className="inline text-green-400 ">{user?.fullname}</div>
 										</div>
 										<div className=" text-white mb-3">
 											<div className="tooltip">
@@ -261,9 +308,7 @@ export const UserProfileImage = ({
 												</div>
 												<MdOutlineMailOutline size="21" className="inline" /> :{' '}
 											</div>
-											<div className="inline text-green-400 ">
-												{user?.email}
-											</div>
+											<div className="inline text-green-400 ">{user?.email}</div>
 										</div>
 										<div className=" text-white mb-3">
 											<div className="tooltip">
@@ -272,10 +317,7 @@ export const UserProfileImage = ({
 												</div>
 												<LiaWalkingSolid size="24" className="inline" />
 											</div>
-											{'  '}:{' '}
-											<div className="inline text-green-400 ">
-												{readableDate}
-											</div>
+											{'  '}: <div className="inline text-green-400 ">{readableDate}</div>
 										</div>
 										<div className="font-sans text-white">
 											<div className="tooltip">
@@ -287,9 +329,7 @@ export const UserProfileImage = ({
 											<div className="inline text-blue-400 font-semibold">
 												{readableDate2} &nbsp;
 											</div>
-											<div className="inline text-green-400 ">
-												{readableDate1}
-											</div>
+											<div className="inline text-green-400 ">{readableDate1}</div>
 										</div>
 									</div>
 								</div>
@@ -321,10 +361,7 @@ export const UserProfileImage = ({
 												</div>
 												<LiaWalkingSolid size="24" className="inline" />
 											</div>
-											{'  '}:{' '}
-											<div className="inline text-green-400 ">
-												{readableDate}
-											</div>
+											{'  '}: <div className="inline text-green-400 ">{readableDate}</div>
 										</div>
 										<div className="font-sans text-white">
 											<div className="tooltip">
@@ -336,9 +373,7 @@ export const UserProfileImage = ({
 											<div className="inline text-blue-400 font-semibold">
 												{readableDate2} &nbsp;
 											</div>
-											<div className="inline text-green-400 ">
-												{readableDate1}
-											</div>
+											<div className="inline text-green-400 ">{readableDate1}</div>
 										</div>
 									</div>
 								</div>
@@ -380,9 +415,7 @@ export const UserProfileImage = ({
 											status === 'OFFLINE'
 												? 'text-red-600 border-slate-950 border rounded-full'
 												: ''
-										} ${
-											status != 'ONLINE' && status != 'OFFLINE' ? 'hidden' : ''
-										}`}
+										} ${status != 'ONLINE' && status != 'OFFLINE' ? 'hidden' : ''}`}
 										size="20"
 									/>
 									<div
@@ -432,10 +465,7 @@ export const UserProfileImage = ({
 											}}
 										>
 											save &nbsp;
-											<CiSaveUp2
-												className="text-white inline-block"
-												size="22"
-											/>
+											<CiSaveUp2 className="text-white inline-block" size="22" />
 										</div>
 									</div>
 								</button>

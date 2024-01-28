@@ -257,7 +257,7 @@ export default function Friends() {
 	}, [socket]);
 
 	return (
-		<div className="flex-1 overflow-y-auto">
+		<div className="z-20 flex-1 overflow-y-auto">
 			<div className="p-10">
 				<div className="">
 					<div className="mb-5 text-white font-sans">Friends </div>
@@ -405,8 +405,7 @@ export default function Friends() {
 																			e.target.onerror = null;
 																		}}
 																	/>
-																	{(selectedFeild === 'Online' ||
-																		selectedFeild === 'All') && (
+																	{(selectedFeild === 'Online' || selectedFeild === 'All') && (
 																		<div className="absolute right-0 bottom-0">
 																			<div className="">
 																				<FaCircle
@@ -419,8 +418,7 @@ export default function Friends() {
 																							? 'text-red-600 border-slate-950 border rounded-full'
 																							: ''
 																					} ${
-																						user.status != 'ONLINE' &&
-																						user.status != 'OFFLINE'
+																						user.status != 'ONLINE' && user.status != 'OFFLINE'
 																							? 'hidden'
 																							: ''
 																					}`}
@@ -432,9 +430,7 @@ export default function Friends() {
 																</div>
 
 																<div className="ml-3 f">
-																	<p className="text-md font-sans text-white">
-																		{user.login}
-																	</p>
+																	<p className="text-md font-sans text-white">{user.login}</p>
 																</div>
 															</div>
 														</div>

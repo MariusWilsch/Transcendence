@@ -9,6 +9,7 @@ import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { Loading } from '../../components/Loading';
 import { Navbar } from '../../components/Navbar';
+import { Gamehistory } from '../../components/Gamehistory';
 import { UserDetailsCard } from '../../components/UserDetailsCard';
 import { UserProfileImage } from '../../components/UserProfileImage';
 import { Sidebar } from '../../components/Sidebar';
@@ -161,11 +162,8 @@ export default function Profile(params: any) {
 
 		if (socket) {
 			listenForEvents();
-
-			// listenForFriendships();
 			return () => {
 				socket.off('update');
-				// socket.off("FriendShipRequest");
 			};
 		}
 	}, [socket]);
@@ -213,11 +211,11 @@ export default function Profile(params: any) {
 	}
 
 	return (
-		<div className="">
+		<div className="relative">
 			<div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
 				<Lottie
 					animationData={loading}
-					className="w-auto h-auto"
+					className="w-full h-auto"
 					onDOMLoaded={(e) => {
 						lottieRef.current?.setSpeed(0.05);
 					}}
@@ -252,6 +250,8 @@ export default function Profile(params: any) {
 						</div>
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+					<Gamehistory intraId={intraId}/>
+
 				</div>
 			</div>
 			<Toaster />
