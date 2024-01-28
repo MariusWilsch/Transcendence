@@ -4,6 +4,7 @@ import { useState } from "react";
 import Cookies from "universal-cookie";
 import { Button, Modal, Select } from "@mantine/core";
 import { FaUserEdit } from "react-icons/fa";
+import Image from "next/image";
 
 function addHoursToNow(hours:string) {
     const hoursToAdd = parseInt(hours, 10);
@@ -59,41 +60,46 @@ const EditMemberShip = (props: any) => {
                     console.log(addHoursToNow(muteValue));
     return (
       <>
-        <Modal opened={opened}  onClose={close} title="Edit Member" centered>
-          <div>
-            <div className="member-avatar">
-  
+        <Modal opened={opened} withCloseButton={false}  onClose={()=>{
+          setModeValue('');
+          setMuteValue('');
+          close();
+        }} centered>
+          <div className="p-2">
+            <div className="flex flex-col justify-center items-center">
+            <Image width={144} height={144} src={Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full border" />
+            <h1>{login}</h1>
             </div>
-            <div className="login">
-  
-            </div>
-            <div className="change-privilege">
+            <div className="change-privilege p-2">
               <Select
                  data={dataMode}
-                 label="change Member privilege"
+                 placeholder="change the user privilige "
                  value={ModeValue ? ModeValue : ''}
                  onChange={(_value:string | null) => {
                   _value ?setModeValue(_value):setMuteValue('');
                  }}
               />
-              <div className="banne"></div>
             </div>
-            <div className="muted">
+            <div className="muted p-2">
             <Select
                  data={dataMute}
-                 label="Mute Member for "
+                 placeholder="Mute or unmute the user"
                  value={muteValue? muteValue : ''}
                  onChange={(_value:string | null) => {
                   _value ?setMuteValue(_value):setMuteValue('');
                  }}
               />
             </div>
-            <Button onClick={()=>{
+            <div className="flex flex-col justify-center items-center ">
+            <Button 
+            color="gray"
+            onClick={()=>{
               setModeValue('');
               setMuteValue('');
               close();
               handleSubmit();
             }}> submit </Button>
+            </div>
           </div>
         </Modal>
         <FaUserEdit className="text-white w-6 h-6 transform transition-transform hover:scale-110" onClick={open} />

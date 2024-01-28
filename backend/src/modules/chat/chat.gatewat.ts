@@ -168,14 +168,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       const members = await this.chatService.getAllChannelUsers(payload.to);
       const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
-      console.log('message broadcasted to channel');
       members.map((member)=>{
-        if (!member.isBanned && !member.isMuted)
+        if (!member.isBanned)
         {
           const recipientSocket = this.getAllSocketsByUserId(member.intraId);
           recipientSocket.map((socket:any) =>{
             if (socket.id !== client.id){
               socket.emit('channelBroadcast',message);
+              console.log('message broadcasted to channel');
             }
           }
           );
@@ -208,32 +208,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('updateChannelUser',{e});
     }
   }
-  @SubscribeMessage('updateChannelSettings')
-  async updateChannelSettings(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){
-    try{
-      console.log(payload);
-      const user = this.chatService.getUserFromJwt(payload.jwt);
-      if (!user)
-      {
-        return;
-      }
-      await this.chatService.updateChannelSettings(client.user.intraId, payload.channelId,payload.info);
-      const memberShips = await this.chatService.getAllChannelUsers(payload.channelId);
-      client.emit('updateChannelSetting',{e:"channel settings Successufely updated"});
-      memberShips.map((memberShip)=>{
-        const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
-        socketRec.map((socket:any)=>{
-          socket.emit('updateChannelSetting',{e:"channel settings have been updated"});
-        })
-      })
-    }
-    catch(e){
-      console.log(e);
-        client.emit('updateChannelSettings',{e});
-    }
+  @SubscribeMessage('privateMatch')
+  async privateMatch(client:any, payload:{hostPlayer:User, invitedPlayer:string}){
+    console.log(payload.invitedPlayer);
   }
-  // @SubscribeMessage('LeaveChannel')
-  // async handleLeaving(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){
+  // @SubscribeMessage('updateChannelSettings')
+  // async updateChannelSettings(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){
   //   try{
   //     console.log(payload);
   //     const user = this.chatService.getUserFromJwt(payload.jwt);
@@ -244,6 +224,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //     await this.chatService.updateChannelSettings(client.user.intraId, payload.channelId,payload.info);
   //     const memberShips = await this.chatService.getAllChannelUsers(payload.channelId);
   //     client.emit('updateChannelSetting',{e:"channel settings Successufely updated"});
+  //     memberShips.map((memberShip)=>{
+  //       const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
+  //       socketRec.map((socket:any)=>{
+  //         socket.emit('updateChannelSetting',{e:"channel settings have been updated"});
+  //       })
+  //     })
+  //   }
+  //   catch(e){
+  //     console.log(e);
+  //       client.emit('updateChannelSettings',{e});
+  //   }
+  // }
+  // @SubscribeMessage('LeaveChannel')
+  // async handleLeaving(client:any, payload:{jwt:string}){
+  //   try{
+  //     console.log(payload);
+  //     const user = this.chatService.getUserFromJwt(payload.jwt);
+  //     if (!user)
+  //     {
+  //       return;
+  //     }
+  //     await this.chatService.removeuser(client.user.intraId);
   //     memberShips.map((memberShip)=>{
   //       const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
   //       socketRec.map((socket:any)=>{

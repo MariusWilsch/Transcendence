@@ -132,6 +132,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
             throw ('no such channel')
           }
           setChannel(chan);
+          context.setChannel(chan);
           console.log('the channel is ', chan);
         }
         const userMemberShip = await getCurrentMember(params.channelId, context.userData.intraId );
@@ -402,7 +403,10 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                 context.responsive ?
                 <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
               : context.component === 'profile' &&
-              <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
+              <ChannelDashBoard
+              currentMember={currentMember}
+              firstMembers={firstMembers}
+              />
               }
             </div>
           </div>)

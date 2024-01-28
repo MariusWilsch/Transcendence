@@ -5,18 +5,21 @@ import { Sidebar } from "@/app/components/Sidebar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Socket, io } from "socket.io-client";
+import { io } from "socket.io-client";
 import Cookies from "universal-cookie";
 import { motion } from "framer-motion";
 import { RiSearchLine } from "react-icons/ri";
-import { Popover, Button, TextInput } from '@mantine/core';
 import { GrGroup } from "react-icons/gr";
-import { FaRegMessage } from "react-icons/fa6";
 import JoinProtectedChannel from "../chatComponents/JoinProtectedChannel";
+import Demo from "../chatComponents/Demo";
+import { FiCheckCircle } from "react-icons/fi";
 
+
+async function handleChannelInvitation(){}
 const ChannelsLobby = () => {
   const context = useAppContext();
   const [availabelChannels, setAvailableChannels] = useState<Channel[] | []>([]);
+  const [invitationChannels, setInvitationChannels] = useState<Channel[] | []>([]);
   const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages stat
 
   useEffect(() => {
@@ -125,6 +128,34 @@ const ChannelsLobby = () => {
     }
   };
 
+  const inviteChannels=async()=>{
+    if (!context.userData) {
+      return;
+    }
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channelInvitation/${context.userData.intraId}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (!data) {
+        const msg = "Error getting channels";
+        toast.error(msg);
+        console.log(msg);
+      }
+      if (data) {
+        setInvitationChannels(data);
+      }
+    } catch (error: any) {
+      const msg = "Error getting channels: " + error.message;
+      toast.error(msg);
+      console.error("Error getting channels:", error.message);
+    }
+  }
+
   return (
     <div className=" min-h-screen w-screen bg-[#12141A]">
       <Navbar isProfileOwner={false} />
@@ -183,7 +214,7 @@ const ChannelsLobby = () => {
                   <button
                     className="w-full"
                     onClick={() => {
-                      // PendingInvite();
+                      inviteChannels();
                       setselectedFeild("Invitations");
                     }}
                   >
@@ -243,7 +274,8 @@ const ChannelsLobby = () => {
                 transition={{ delay: 0.02 }}
               >
                 <div className="mt-4 flex  justify-center ">
-                  <div className="mt-4 w-full flex flex-col items-center">
+                  <div className=" w-full flex flex-col items-center">
+                {selectedFeild === "my channels" &&  <div><Demo /> </div>}
                     {availabelChannels && selectedFeild === "Explore" &&
                       availabelChannels.map((channel: Channel) => (
                         <div
@@ -262,7 +294,7 @@ const ChannelsLobby = () => {
                                 <div className="flex items-start">
                                   <div className="relative flex-shrink-0 pt-0.5">
                                     <GrGroup
-                                      className="h-10 w-10 rounded-full"
+                                      className="h-10 w-10"
                                     />
                                   </div>
 
@@ -304,7 +336,7 @@ const ChannelsLobby = () => {
                                   <div className="flex items-start">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <GrGroup
-                                        className="h-10 w-10 rounded-full"
+                                        className="h-10 w-10"
                                       />
                                     </div>
 
@@ -315,12 +347,56 @@ const ChannelsLobby = () => {
                                     </div>
                                   </div>
                                 </div>
-                                {/* link to the channelRoom */}
-                                <div className="flex justify-center items-center border-l border-gray-900"  >
-                                  <FaRegMessage className="h-10 w-10" />
-                                </div>
                               </div>
                             </Link>
+                          </motion.div>
+                        </div>
+                      ))}
+                    {invitationChannels && selectedFeild === "Invitations" &&
+                      invitationChannels?.map((channel: any) => (
+                        <div
+                          key={channel.channelId}
+                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                        >
+                          <motion.div
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.1 }}
+                            initial={{ opacity: 0, y: -100 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.02 }}
+                          >
+                            <div
+                            >
+                              <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
+                                <div className="flex-1 w-0 p-4">
+                                  <div className="flex items-start">
+                                    <div className="relative flex-shrink-0 pt-0.5">
+                                      <GrGroup
+                                        className="h-10 w-10"
+                                      />
+                                    </div>
+
+                                    <div className="ml-3 f">
+                                      <p className="text-md font-sans text-white">
+                                        {channel.channelId}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex ">
+                            <button
+                              className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+                              onClick={() => {
+                              }}
+                            >
+                              <FiCheckCircle
+                                size="30"
+                                className="text-green-300"
+                              />
+                            </button>
+                          </div>
+                            </div>
                           </motion.div>
                         </div>
                       ))}

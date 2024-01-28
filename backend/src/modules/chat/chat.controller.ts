@@ -100,6 +100,19 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
+  @Get('invitesChannels/:id')
+  @UseGuards(JwtAuthGuard)
+  async getIviteChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    try{
+      const data = await this.chatService.getInviteChannel(id);
+      const dataBeta = res.json(data);
+      return dataBeta;
+    }
+    catch(e)
+    {
+      return undefined;
+    }
+  }
   @Get('channels/:id/userChannels')
   @UseGuards(JwtAuthGuard)
   async getUserChannels(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
@@ -114,6 +127,7 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
+
   @Get('chanAvatar/:id')
   @UseGuards(JwtAuthGuard)
   async getChanAvatar(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
@@ -121,7 +135,97 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
-  
+
+  @Get('channelInvitation/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannelInvitation(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getInviteChannel(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+
+  @Post('createChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async createChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{type:string, password:string},
+  @Res() res:any){
+    try{
+      await this.chatService.createChannel(intraId, channelName, payload);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({e});
+    }
+  }
+  @Post('leaveChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async leaveChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Res() res:any){
+    try{
+      await this.chatService.leaveChannel(intraId, channelName);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false, e});
+    }
+  }
+  // async joinChannel(payload:{channelId:string, type:string,password:string}){
+  //   try{
+  //     await this.chatService.joinChannel(payload.channelId, payload.type, payload.password);
+  //   }
+  //   catch(e){
+  //   }
+  // }
+  @Post('joinChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async joinChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{channelId:string, type:string,password:string} ,
+  @Res() res:any){
+    try{
+      await this.chatService.joinChannel(intraId, payload.channelId, payload.type, payload.password);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.status(500).json({ success: false, error: e });
+    }
+  }
+  @Post('inviteToChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async inviteChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{invitedId:string} ,
+  @Res() res:any){
+    try{
+      await this.chatService.inviteChannel(intraId,payload.invitedId, channelName);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.status(500).json({ success: false, error: e });
+    }
+  }
+  @Post('updateChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async updateChannelSettings( @Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{newName:string, type:string, password:string},
+  @Res() res:any){
+    try{
+      await this.chatService.updateChannelSettings(intraId, channelName,payload);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false,e});
+    }
+  }
+
   @Post('private-message')
   @UseGuards(JwtAuthGuard)
   async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {

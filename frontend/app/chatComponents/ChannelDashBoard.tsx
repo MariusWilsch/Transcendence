@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MemberShip, useAppContext } from "../AppContext";
+import { MemberShip, User, useAppContext } from "../AppContext";
 import { IoMdArrowBack } from "react-icons/io";
 import { CiLogout, CiSettings } from "react-icons/ci";
 import { FcInvite } from "react-icons/fc";
@@ -7,23 +7,60 @@ import MemberCards from "./MemberCards";
 import ChannelAvatar from "./ChannelAvatar";
 import { getChannelFirstMembers, searchMember } from "../utiles/utiles";
 import Cookies from "universal-cookie";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import UpdateChannelSetting from "./UpdateChannelSetting";
 
+async function leaveChannel(Channelname: string, user: User) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/leaveChannel/${user.intraId}/${Channelname}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+        }),
+      }
+    );
+    if (response.ok) {
+      toast.success('you leaved the channel')
+    }
+    else {
+      const msg = 'Error: ' + response;
+      toast.error(msg);
+    }
+  }
+  catch (e) {
+    const msg = 'Error' + e;
+    toast.error(msg);
+  }
+}
 
 const ChannelDashBoard = (props: any) => {
     const [query, setQuery] = useState('');
     const [members, setmembers] = useState<MemberShip[] | []>();
-    const {firstMembers , channelId, currentMember} = props;
+    const {firstMembers , currentMember} = props;
     const context = useAppContext();
+
     useEffect(() => {
       const fetchAvatar = async () => {
-        const members = await getChannelFirstMembers(channelId);
+        if (context.channel){
+          const members = await getChannelFirstMembers(context.channel.name);
+          console.log('channel', context.channel);
+        }
       }
       fetchAvatar();
-    }, [channelId])
+    }, [context.channel])
     useEffect(() => {
       const search = async () => {
-          const members = await searchMember(query, channelId); 
+        if (context.channel){
+
+          const members = await searchMember(query, context.channel.name); 
           setmembers(members);
+        }
       }
         query && search();
     }, [query])
@@ -32,10 +69,8 @@ const ChannelDashBoard = (props: any) => {
       setQuery(event.target.value);
     };
     const handleLeavingChannel=()=>{
-        if (context.socket){
-            const cookie = new Cookies();
-            const jwt = cookie.get('jwt')
-            context.socket.emit('LeaveTheChannel',{jwt});
+        if (context.channel && context.userData){
+          leaveChannel(context.channel.name, context.userData);
           }
     }
     return (
@@ -45,22 +80,25 @@ const ChannelDashBoard = (props: any) => {
         </div>      <div className="p-4 mt-20 flex flex-col justify-center items-center ">
           {firstMembers && <ChannelAvatar firstMembers={firstMembers} />}
           <div className="flex flex-row p-3 space-x-3">
-        <CiLogout onClick={handleLeavingChannel}  className="text-red-900   hover:scale-125" />
-        <CiSettings className="text-white hover:scale-125" 
-                    onClick={()=>{
-                      console.log('change the channel Settings');
-                    }}
-        />
+        <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/`}><CiLogout onClick={handleLeavingChannel}  className="text-red-900   hover:scale-125" /></Link>
+        {
+          currentMember?.isOwner && 
+         (
+          <>
+         <UpdateChannelSetting firstMembers={firstMembers} member={currentMember} />
         <FcInvite 
-          className="text-white hover:scale-125" 
-          onClick={()=>{
-            console.log('Invite pep');
-          }}
+        className="text-white hover:scale-125" 
+        onClick={()=>{
+          console.log('Invite pep');
+        }}
         />
+        </>
+        ) 
+      }
         </div>
         </div>
         <div className='justify-center items-center text-white  border border-[#292D39] p-4'>
-          <h1 className="text-center">{channelId}</h1>
+          <h1 className="text-center">{context.channel?.name.replace(context.channel.ownerId, '')}</h1>
         </div>
         <div className="info-card text-white p-4 m-5border border-[#292D39] ">
           <h1 className="text-start"> Members :</h1>

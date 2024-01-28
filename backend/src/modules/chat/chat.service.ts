@@ -256,7 +256,7 @@ export class ChatService {
     const randomId = crypto.randomBytes(8).toString('hex');
     return randomId;
   }
-  async createMember(intraId:string, channelId:string, isOwner:boolean):Promise<void> {
+  async createMember(intraId:string, channelId:string, isOwner:boolean, onInviteState:boolean):Promise<void> {
     const memberId = this.generateRandomId();
     const user = await prisma.user.findUnique({
       where:{
@@ -274,13 +274,15 @@ export class ChatService {
         intraId,
         channelId,
         isOwner:isOwner,
+        isModerator:isOwner,
         Avatar:user.Avatar,
         login:user.login,
+        onInviteState,
       },
     });
   }
   async createChannel(ownerId:string,channelName:string,typePass:{type:string, password:string}):Promise<void> {
-    const name = channelName + ownerId;
+    const name = channelName;
     let password:string;
     const saltRounds = 10;
     const channel = await prisma.channel.findUnique({
@@ -306,7 +308,7 @@ export class ChatService {
     });
     try{
 
-      await this.createMember(ownerId, name, true);
+      await this.createMember(ownerId, name, true, false);
     }
     catch(e)
     {
@@ -326,11 +328,12 @@ export class ChatService {
       where:{
         intraId:userId,
         isBanned:false,
+        onInviteState:false,
       },
     });
     return data;
   }
-  async joinChannel(user:User, channelId:string, type:string, password:string)
+  async joinChannel(userId:string, channelId:string, type:string, password:string)
   {
     const channel = await prisma.channel.findUnique({
       where:{
@@ -339,6 +342,14 @@ export class ChatService {
     })
     if (!channel){
       throw ('no such channel sorry');
+    }
+    const user = await prisma.user.findUnique({
+      where:{
+        intraId:userId,
+      }
+    })
+    if (!user){
+      throw('no such user');
     }
     const member = await prisma.memberShip.findFirst({
       where:{
@@ -358,7 +369,7 @@ export class ChatService {
           throw("password incorrect");
         }
     }
-    await this.createMember(user.intraId, channelId, false);
+    await this.createMember(user.intraId, channelId, false, false);
   }
   async getAllChannelUsers(channelId:string){
     return await prisma.memberShip.findMany({
@@ -525,9 +536,17 @@ export class ChatService {
       }
     })
   }
-  async updateChannelSettings(ownerId:string, channelId:string, info:{type:string,password:string}){
+  async updateChannelSettings(ownerId:string, channelId:string, info:{newName:string, type:string,password:string}){
     const saltRounds = 10;
     let password = '';
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelId,
+      }
+    });
+    if (!channel){
+      throw('no such channel');
+    }
     const owner = prisma.memberShip.findFirst({
       where:{
         channelId,
@@ -538,16 +557,124 @@ export class ChatService {
     if (!owner){
       throw('luck of privilige ');
     }
+    if (info.newName){
+      const newChannelCheck = await prisma.channel.findUnique({
+        where:{
+          name:info.newName,
+        }
+      })
+      if (newChannelCheck){
+        throw('channel name already exist');
+      }
+    }
     if(info.type ==="PROTECTED"){
-      const password = await bcrypt.hash(info.password, saltRounds);
+      password = await bcrypt.hash(info.password, saltRounds);
     }
     await prisma.channel.update({
       where:{
         name:channelId,
       },
       data:{
-        type:info.type,
-        password:password,
+        name:info.newName?info.newName:channel.name,
+        type:info.type?info.type:channel.type,
+        password:info.password?password:channel.password,
+      }
+    })
+  }
+
+  async leaveChannel(intraId:string, channelName:string){
+    
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelName,
+      }
+    });
+    if (!channel){
+      throw('no such channel');
+    }
+    const membership = await prisma.memberShip.findFirst({
+      where:{
+        intraId,
+        channelId:channelName,
+      }
+    });
+    if (!membership){
+      throw('no such member');
+    }
+    if (membership.isOwner){
+      let newOwner = await prisma.memberShip.findFirst({
+        where:{
+          intraId:{
+            not:intraId,
+          },
+          isModerator:true,
+        }
+      })
+      if (!newOwner){
+        newOwner = await prisma.memberShip.findFirst({
+          where:{
+            intraId:{
+              not:intraId,
+            },
+            isBanned:false,
+          }
+        })
+      }
+
+      await prisma.memberShip.update({
+        where:{
+          memberId:newOwner.memberId,
+        },
+        data:{
+          isOwner:true,
+          isModerator:true,
+        }
+      })
+    }
+    await prisma.memberShip.deleteMany({
+      where:{
+        intraId,
+        channelId:channelName,
+      }
+    })
+  }
+
+  async inviteChannel(ownerId:string, invitedId:string,channelId:string){
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name :channelId,
+      }
+    })
+    if (!channel){
+      throw('no such channel');
+    }
+    const owner = await prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId:ownerId,
+        isOwner:true,
+      }
+    });
+    if (!owner){
+      throw('lack of previlige');
+    }
+    const member = await prisma.memberShip.findFirst({
+      where:{
+        intraId:invitedId,
+        channelId,
+      }
+    })
+    if (member){
+      throw('already on channel');
+    }
+    await this.createMember(invitedId, channelId, false, true);
+  }
+
+  async getInviteChannel(intraId:string){
+    return   await prisma.memberShip.findMany({
+      where:{
+        intraId,
+        onInviteState:true,
       }
     })
   }

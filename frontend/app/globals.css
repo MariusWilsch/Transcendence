@@ -5,9 +5,18 @@
 
 
 body {
-  background-color: white;
+  background-color: black;
 }
 
+.mantine-Modal-body{
+  background-color: rgb(75 85 99 );
+}
+.m-b5489c3c{
+  background-color:  rgb(75 85 99 );
+}
+#mantine-styled-comp{
+  background-color:  rgb(75 85 99 );
+}
 @keyframes moveLeftAndRight {
   50% {
     transform: translateX(0);
@@ -56,4 +65,8 @@ body {
   background-size: cover;
   background-position: center;
   width: 100vw;
+}
+
+.m-b5489c3c .m-d0e2b9cd .mantine-Modal-header{
+  background-color: black;
 }

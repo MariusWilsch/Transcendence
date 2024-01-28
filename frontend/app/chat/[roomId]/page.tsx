@@ -407,7 +407,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
                     </div>
-                    {chatContainerRef.current?.scrollHeight  &&
+                    {/* {chatContainerRef.current?.scrollHeight  &&
                        <FaCircleArrowDown
                        onClick={()=>{
                         chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
@@ -415,7 +415,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                       }}
                        size={"30"}
                        className=' relative bottom-1 self-center text-white hover:scale-90 z-30 ' />
-                    }
+                    } */}
                     <div className="p-4">
                       <div className="relative flex">
                         <input
@@ -481,7 +481,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
-                    {chatContainerRef.current?.scrollHeight  &&
+                    {/* {chatContainerRef.current?.scrollHeight  &&
                        <FaCircleArrowDown
                        onClick={()=>{
                         chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
@@ -489,7 +489,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                       }}
                        size={"30"}
                        className='  text-white hover:scale-90 z-30 ' />
-                    }
+                    } */}
                     </div>
                     <div className="p-4">
                       <div className="relative flex">

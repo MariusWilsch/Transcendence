@@ -321,7 +321,8 @@ export const Friend = ({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.02 }}
                 >
-                  <IoGameControllerOutline size="25" />
+                  <IoGameControllerOutline size="25"
+                  />
                 </motion.div>
               </button>
             </div>

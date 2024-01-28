@@ -55,7 +55,7 @@ function FindAConversation() {
           }
           }
           >
-            <Group wrap="nowrap" w="100%">
+            <Group  wrap="nowrap" w="100%">
               {item.Avatar && (
                 <Center>
                   <Image src={item.Avatar} alt={item.login} width={50} height={50} className="w-16 h-16 rounded-full p-2" />
@@ -84,13 +84,13 @@ function FindAConversation() {
             type="text"
             value={"search or start a new conversation"}
   
-            className="w-full px-2 py-2 border rounded-md focus:outline-none focus:border-blue-500 bg-slate-800"
+            className="w-full px-2 py-2 border rounded-md focus:outline-none focus:border-slate-600 bg-slate-800"
             readOnly
           />
         </div>
         <div className="max-w-545 mx-auto bg-black">
-          <Spotlight.Root  query={query} overlayProps={{bga:'black'}} onQueryChange={setQuery}>
-            <Spotlight.Search placeholder="Search by username..." leftSection={<CiSearch stroke={1.5} />} />
+          <Spotlight.Root   query={query} onQueryChange={setQuery}>
+            <Spotlight.Search placeholder="Search by username..."  leftSection={<CiSearch stroke={1.5} />} />
             <Spotlight.ActionsList>
               {data !== undefined && data.length > 0
                 ? (

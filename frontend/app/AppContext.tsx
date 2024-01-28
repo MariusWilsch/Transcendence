@@ -96,6 +96,8 @@ export type AppContextProps = {
   setSocket: (socket: Socket | null) => void;
   rooms: Room[];
   setRooms: (rooms: Room[]) => void;
+  channel: Channel | undefined;
+  setChannel: (channel: Channel) => void;
   notifSocket: Socket | null;
   setNotifSocket: (notifSocket: Socket | null) => void;
   notif: boolean;
@@ -128,6 +130,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [notif, setnotif] = useState<boolean>(false);
   const [component, setComponent] = useState('conversation');//for resposive purposes
   const [responsive, setResponsive] = useState(true);
+  const [channel, setChannel] = useState<Channel | undefined>();
 
 
   const toggleDivVisibility = () => {
@@ -138,6 +141,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setisSidebarVisible((prev) => !prev);
   };
   const contextValue: AppContextProps = {
+    setChannel,
+    channel,
     setComponent,
     component,
     setResponsive,

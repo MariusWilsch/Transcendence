@@ -74,7 +74,7 @@ const Conversations = () => {
         }
         {
           selected == 'channels' &&
-          <Demo />
+<h1>channels</h1>
         }
       </div>
     );

@@ -5,12 +5,15 @@ import { useEffect, useState } from "react";
 import { User, useAppContext } from "../AppContext";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { CiSettings } from "react-icons/ci";
+import ChannelAvatar from "./ChannelAvatar";
+import { FaRegEdit } from "react-icons/fa";
 
 
-async function creatChannel(Channelname: string, type: string, password: string, owner: User) {
+async function updateChannel(Channelname: string,newName:string, type: string, password: string, owner: User) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/createChannel/${owner.intraId}/${Channelname}`,
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/updateChannel/${owner.intraId}/${Channelname}`,
       {
         method: "POST",
         headers: {
@@ -18,17 +21,18 @@ async function creatChannel(Channelname: string, type: string, password: string,
         },
         credentials: "include",
         body: JSON.stringify({
+          newName:`${newName}`,
           type: `${type}`,
           password: `${password}`,
         }),
       }
     );
     if (response.ok) {
-      toast.success('channel created successfuly')
+      toast.success('channel updated successfuly')
     }
     else {
-      const msg = 'Error: ' + response;
-      toast.error(msg);
+      const res = response.json();
+
     }
   }
   catch (e) {
@@ -36,7 +40,9 @@ async function creatChannel(Channelname: string, type: string, password: string,
     toast.error(msg);
   }
 }
-const Demo = () => {
+const UpdateChannelSetting = (props:any) => {
+
+  const {member, firstMembers} = props; 
   const [opened, { open, close }] = useDisclosure(false);
   const [channelName, setChannelName] = useState('');
   const [channelType, setChannelType] = useState('PUBLIC');
@@ -52,15 +58,18 @@ const Demo = () => {
   const handleSelectChange = (e: any) => {
     setChannelType(e.target.value);
   }
-  const createAChannel = (e: any) => {
+  const updateAChannel = (e: any) => {
     e.preventDefault();
-    if (channelName && context.userData) {
+    if (context.userData && context.channel) {
       if (channelType === "PROTECTED" && password.length < 3)
       {
         toast.error("error : password require more than 3 characters ");
         return;
       }
-      creatChannel(channelName, channelType, password, context.userData);
+      if (context.channel)
+      updateChannel(context.channel.name,channelName===context.channel.name? '':channelName
+                , !channelType ? context.channel.type:channelType, password
+                , context.userData);
       handleSubmit(e);
     }
     else {
@@ -68,6 +77,9 @@ const Demo = () => {
     }
   }
   useEffect(() => {
+    if (context.channel){
+        setChannelName(context.channel.name);
+    }
 
   }, [context.userData]);
   return (
@@ -77,9 +89,13 @@ const Demo = () => {
       withCloseButton={false}
       onClose={close}  centered>
       <div className="pt-2" >
+        <div className="flex flex-col justify-center items-center font-bold">
+        <ChannelAvatar firstMembers={firstMembers}/>
+        <h1 className="p-2">{!!context.channel ? context.channel.name.replace(context.channel.ownerId, ''):'placeHolder'} </h1>
+        </div>
         <div className="mb-4">
           <label className="block text-white  mb-2">
-            Channel Name
+            Update channel name
           </label>
           <input
             type="text"
@@ -102,7 +118,7 @@ const Demo = () => {
             className="bg-[#66757F] text-white rounded w-full py-2 px-3 text-whiteleading-tight focus:outline-none focus:shadow-outline"
           >
             <option value="" disabled>
-              Select the channel type
+              update channel type
             </option>
             <option value="PUBLIC">Public</option>
             <option value="PROTECTED">Protected</option>
@@ -130,24 +146,22 @@ const Demo = () => {
           <button
             onClick={(e) => {
 
-              createAChannel(e);
+              updateAChannel(e);
             }}
             className="bg-slate-700 hover:bg-slate-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Create Channel
+            Update
           </button>
         </div>
         </div>
       </Modal>
       <div className="flex flex-row   justify-center space-x-3 text-white">
-        <Button color={'violet'} className="rounded"
-          onClick={open}
-        >
-          + Add a channel
-        </Button>
+      <CiSettings className="text-white hover:scale-125" 
+                     onClick={open}
+        />
       </div>
     </>
   );
 }
 
-export default Demo;
+export default UpdateChannelSetting;
