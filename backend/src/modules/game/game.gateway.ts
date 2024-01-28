@@ -11,7 +11,6 @@ import {
 	GameSession,
 	PlayerMove,
 	GameConfigState,
-	MatchType,
 } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,30 +30,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
+	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
 		console.log(`Client connected via ${client.id}`);
-		//! How do I get the user ID from the client that joined the lobby?
-
-		if (!client.handshake.auth.token) {
-			console.log('Client does not have a valid token');
-			//! Some alert that he needs to login again
-			client.disconnect();
-			return;
+		if (this.duplicateUsers.has(client.handshake.auth.token)) {
+			console.log('Duplicate user detected');
+			client.emit('duplicateSocket', true);
 		}
+		client.emit('duplicateSocket', false);
+		this.duplicateUsers.add(client.handshake.auth.token);
 	}
 
-	//? Do I really want to disconnect the client if they quit the game or the game is over?
 	handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
 		const roomID = client.data.roomID;
-		if (this.gameService.isInGame(roomID)) {
-			clearInterval(this.gameService.getIntervalID(roomID));
+		if (this.gameService.hasRoom(roomID))
 			this.gameService.deleteGameSession(client.id, roomID);
+		if (this.gameService.isInGame(roomID)) {
 			console.log('Client was in a running game, clearing interval');
+			clearInterval(this.gameService.getIntervalID(roomID));
 		}
+		this.duplicateUsers.delete(client.handshake.auth.token);
 	}
 
 	checkForAvailablePlayers() {
@@ -69,24 +68,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		console.log(player1.handshake.auth.token);
-		console.log(player2.handshake.auth.token);
-
 		const user1 = this.authService.getUserFromJwt(player1.handshake.auth.token);
 		const user2 = this.authService.getUserFromJwt(player2.handshake.auth.token);
 
 		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(
-			roomID,
-			player1,
-			player2,
-			user1.intraId,
-			user2.intraId
-		);
-		//! Can I get the user ID aswell? That would make uncessary to store the id's seperately
-
-		// Get the username and avatar from the clients that are joining the game
-		//! How do I this?
+		this.gameService.createGameSession(roomID, player1, player2, user1, user2);
 
 		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
@@ -119,6 +105,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
 			const gameSession = this.gameService.getSession(roomID);
+			if (!gameSession) return;
 
 			// if (deltaTime > 0.02) {
 			// 	console.log(`High Delta Time Detected: ${deltaTime}`);
@@ -145,10 +132,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				//! Save match result here!
 				this.gameService
 					.saveMatchResult(
+						gameSession,
 						gameResult.winnerId,
 						gameResult.loserId,
-						gameResult.score,
-						gameResult.outcome
+						gameResult.score
 					)
 					.catch((error) => {
 						console.error('Error saving match result:', error);
@@ -204,7 +191,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('setupInteraction')
 	handleSetupInteraction(client: IO, payload: GameConfigState): void {
-		console.log('setup interaction called', payload, client.data);
+		console.log('setup interaction called', client.data);
 		this.gameService.setCommand(
 			payload,
 			this.gameService.getSession(client.data.roomID),
@@ -231,7 +218,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handleAddToLobby(client: IO, payload: any): void {
 		if (this.lobby.includes(client)) return;
 
-		console.log('addToLobby event received', payload);
+		// console.log('addToLobby event received', payload);
 
 		// if (payload.matchType === MatchType.PRIVATE) {
 		// 	console.log('Private match requested');

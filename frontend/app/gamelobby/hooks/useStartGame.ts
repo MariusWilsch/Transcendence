@@ -24,23 +24,22 @@ const useStartGame = () => {
 
 	//* Connect user to socket server and start matchmaking
 	const initSocketPushGame = (matchType: MatchType, inviteeID?: string) => {
-		console.log('initSocketPushGame called');
 		dispatch(startConnection());
-		dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: dispatch(addToLobby({ matchType, inviteeID })) && showModal();
+			: dispatch(addToLobby({ matchType: 0 })) && showModal();
 	};
 
 	//* User is connected to socket server and start matchmaking
+
 	const pushToGame = (matchType: MatchType) => {
 		showModal();
-		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
-		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-		dispatch(addToLobby(matchType));
+		dispatch(addToLobby({ matchType }));
 	};
 
 	const showModal = () => {
+		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
+		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 		const modal = document.getElementById(
 			'startMatchmakingModal',
 		) as HTMLDialogElement;

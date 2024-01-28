@@ -1,4 +1,3 @@
-import { MiddlewareAPI, Dispatch, AnyAction } from '@reduxjs/toolkit';
 import { io, Socket } from 'socket.io-client';
 import {
 	initGame,
@@ -7,51 +6,56 @@ import {
 	gameFinished,
 	setPlayerOutcome,
 	GameOutcome,
-	MatchmakingStatus,
-	setMatchmaking,
+	ConnectionStatus,
+	setConnectionStatus,
 } from '../features';
-import { GameState } from '@/interfaces/GameState';
+import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
 
-// Types
-type MiddlewareStore = MiddlewareAPI<Dispatch<AnyAction>>;
-type MiddlewareNext = Dispatch<AnyAction>;
-type MiddlewareAction = AnyAction;
-
-// Middleware interface
-interface Middleware {
-	(store: MiddlewareStore): (
-		next: MiddlewareNext,
-	) => (action: MiddlewareAction) => any;
-}
-
+//* Global variables
 let ClientSocket: Socket | null = null;
 let AISocket: Socket | null = null;
 const cookies = new Cookies();
 
 //* Helper functions for WebSocket middleware
 const connect = (store: MiddlewareStore, socket: Socket | null) => {
+	const token = cookies.get('jwt');
+
+	if (!token) {
+		console.log('Client does not have a valid token');
+		//! Some alert that he needs to login again
+		return;
+	}
+
 	socket = io('http://localhost:3001', {
 		auth: {
-			token: cookies.get('jwt'),
+			token,
 		},
 	});
 
-	socket.on('connect', () => console.log('Connected to server'));
+	socket.on('connect', () => {
+		console.log('Connected to server');
+	});
 
 	socket.on('disconnect', () => {
 		console.log('Disconnected from server');
 		store.dispatch(gameFinished());
-		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
+		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
+	});
+
+	socket.on('duplicateSocket', (payload: boolean) => {
+		console.log('duplicateSocket');
+		if (payload == false)
+			return store.dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
+		console.log('Duplicate user detected');
+		store.dispatch(setConnectionStatus(ConnectionStatus.DUPLICATE));
+		socket.disconnect();
 	});
 
 	socket.on('createGame', (gameState: GameState) => {
-		console.log('Game created');
-		console.log('gameState', gameState.userData);
 		store.dispatch(initGame(gameState));
 		//* Will be set twice, once for each player
 		store.dispatch(gameStarted());
-		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('gameState', (gameState: GameState) =>
@@ -61,7 +65,6 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket.on('opponentDisconnected', () => {
 		console.log('Opponent disconnected');
 		store.dispatch(gameFinished());
-		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('gameOver', (won: boolean) => {
@@ -85,8 +88,6 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			ClientSocket?.emit('onMouseMove', action.payload);
 			break;
 		case 'connection/startLoop':
-			console.log('startLoop');
-
 			ClientSocket?.emit('startLoop', action.payload);
 			break;
 		case 'connection/cancelMatchmaking':

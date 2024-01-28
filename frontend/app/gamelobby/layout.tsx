@@ -1,5 +1,3 @@
-import type { Metadata } from 'next';
-import { Quicksand } from 'next/font/google';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
 
 const Content = ({ children }: any) => {

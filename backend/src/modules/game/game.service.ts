@@ -15,7 +15,6 @@ import {
 	AiDifficulty,
 	InputType,
 	GameResult,
-	Score,
 	MatchOutcome,
 	Players,
 } from './helpers/interfaces';
@@ -58,8 +57,8 @@ export class GameService {
 		roomID: string,
 		player1: Socket,
 		player2: Socket,
-		userID1: string,
-		userID2: string
+		user1: any,
+		user2: any
 	) {
 		// Join both Sockets to a Socket.io room
 		player1.join(roomID);
@@ -77,8 +76,8 @@ export class GameService {
 			),
 			//! Strings need to be changed to the actual ID's but how do I get them?
 			players: [
-				{ playerIDs: userID1, playerSockets: player1 },
-				{ playerIDs: userID2, playerSockets: player2 },
+				{ playerIDs: user1.intraId, playerSockets: player1 },
+				{ playerIDs: user2.intraId, playerSockets: player2 },
 			],
 			gameState: this.initGameState(),
 			intervalID: undefined,
@@ -95,7 +94,16 @@ export class GameService {
 				},
 			],
 			command: [],
-			//! How do I get the ID's?
+			userData: [
+				{
+					avatar: user1.Avatar,
+					username: user1.login,
+				},
+				{
+					avatar: user2.Avatar,
+					username: user2.login,
+				},
+			],
 		});
 	}
 
@@ -368,11 +376,12 @@ export class GameService {
 			score.player2 < GAME_CONFIG.WinningScore
 		)
 			return undefined;
+		const scoreAsString = `${score.player1}${score.player2}`;
 		if (score.player1 === GAME_CONFIG.WinningScore) {
 			return {
 				winnerId: players[0].playerIDs,
 				loserId: players[1].playerIDs,
-				score,
+				score: scoreAsString,
 				result: [true, false],
 				outcome: MatchOutcome.FINISHED,
 			};
@@ -380,7 +389,7 @@ export class GameService {
 			return {
 				winnerId: players[1].playerIDs,
 				loserId: players[0].playerIDs,
-				score,
+				score: scoreAsString,
 				result: [false, true],
 				outcome: MatchOutcome.FINISHED,
 			};
@@ -460,6 +469,10 @@ export class GameService {
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
+	public hasRoom(roomID: string): boolean {
+		return this.gameSessions.has(roomID);
+	}
+
 	/**
 	 * The function checks if the ball is close to the paddle based on its position and proximity
 	 * threshold.
@@ -512,17 +525,20 @@ export class GameService {
 	}
 
 	async saveMatchResult(
+		{ userData }: GameSession,
 		winnerId: string,
 		loserId: string,
-		score: Score,
-		outcome: any
+		score: string
 	) {
 		return prisma.matchHistory.create({
 			data: {
 				winnerId,
 				loserId,
-				score: JSON.stringify(score),
-				outcome,
+				score,
+				user1Avatar: userData[0].avatar,
+				user1Login: userData[0].username,
+				user2Login: userData[1].username,
+				user2Avatar: userData[1].avatar,
 			},
 		});
 	}

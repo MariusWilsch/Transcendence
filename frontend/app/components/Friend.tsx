@@ -13,7 +13,6 @@ import { FiUserPlus } from 'react-icons/fi';
 import { TbUserOff } from 'react-icons/tb';
 import { FaUserTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { MatchType } from '@/interfaces';
 
 export const Friend = ({
@@ -26,7 +25,6 @@ export const Friend = ({
 	friendId: string;
 }) => {
 	const context = useAppContext();
-	const { initSocketPushGame } = useStartGame();
 
 	const [friendshipStatus, setStatus] = useState<
 		'NOTFRIENDS' | 'PENDING' | 'ACCEPTED' | 'BLOCKED'

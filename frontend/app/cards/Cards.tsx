@@ -3,12 +3,12 @@ import pic1 from '@/public/static/images/playInstantGame.png';
 import pic2 from '@/public/static/images/customizeGame.png';
 import Image, { StaticImageData } from 'next/image';
 import React from 'react';
-import useStartGame from '../hooks/useStartGame';
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { useRouter } from 'next/navigation';
-import { Modal } from '../components';
+import { Modal } from '@/app/gamelobby/components';
 import { useSelector } from 'react-redux';
-import { RootState } from '../GlobalRedux/store';
-import { ConnectionStatus } from '../GlobalRedux/features';
+import { RootState } from '@/app/gamelobby/GlobalRedux/store';
+import { ConnectionStatus } from '@/app/gamelobby/GlobalRedux/features';
 import { MatchType } from '@/interfaces';
 
 type CardProps = {
@@ -56,6 +56,12 @@ const Cards: React.FC = () => {
 		(state: RootState) => state.connection.isConnected,
 	);
 
+	const handlePlayNow = () => {
+		isConnected === ConnectionStatus.CONNECTED
+			? pushToGame(MatchType.PUBLIC)
+			: initSocketPushGame(MatchType.PUBLIC);
+	};
+
 	return (
 		<>
 			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12">
@@ -67,11 +73,7 @@ const Cards: React.FC = () => {
 					desc={
 						'Click here to play the game! You will use your Mouse to move the paddle and play against another player!'
 					}
-					onClick={
-						isConnected === ConnectionStatus.CONNECTED
-							? () => pushToGame(MatchType.PUBLIC)
-							: () => initSocketPushGame(MatchType.PUBLIC)
-					}
+					onClick={handlePlayNow}
 				/>
 				<Card
 					img={pic2}
