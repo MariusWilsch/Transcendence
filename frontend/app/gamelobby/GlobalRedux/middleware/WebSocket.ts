@@ -8,6 +8,8 @@ import {
 	GameOutcome,
 	ConnectionStatus,
 	setConnectionStatus,
+	setMatchmaking,
+	MatchmakingStatus,
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
@@ -15,6 +17,7 @@ import Cookies from 'universal-cookie';
 //* Global variables
 let ClientSocket: Socket | null = null;
 let AISocket: Socket | null = null;
+
 const cookies = new Cookies();
 
 //* Helper functions for WebSocket middleware
@@ -35,21 +38,13 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 
 	socket.on('connect', () => {
 		console.log('Connected to server');
+		store.dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
 	});
 
 	socket.on('disconnect', () => {
 		console.log('Disconnected from server');
 		store.dispatch(gameFinished());
 		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
-	});
-
-	socket.on('duplicateSocket', (payload: boolean) => {
-		console.log('duplicateSocket');
-		if (payload == false)
-			return store.dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
-		console.log('Duplicate user detected');
-		store.dispatch(setConnectionStatus(ConnectionStatus.DUPLICATE));
-		socket.disconnect();
 	});
 
 	socket.on('createGame', (gameState: GameState) => {
@@ -77,7 +72,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
-	if (action.type === 'game/startConnection' && !ClientSocket)
+	if (action.type === 'game/startConnection')
 		ClientSocket = connect(store, ClientSocket);
 
 	switch (action.type) {
@@ -91,6 +86,7 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			ClientSocket?.emit('startLoop', action.payload);
 			break;
 		case 'connection/cancelMatchmaking':
+			store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 			ClientSocket?.emit('cancelMatchmaking');
 			break;
 		case 'connection/addToLobby':

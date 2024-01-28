@@ -36,9 +36,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected via ${client.id}`);
 		if (this.duplicateUsers.has(client.handshake.auth.token)) {
 			console.log('Duplicate user detected');
-			client.emit('duplicateSocket', true);
+			client.disconnect();
 		}
-		client.emit('duplicateSocket', false);
 		this.duplicateUsers.add(client.handshake.auth.token);
 	}
 
@@ -216,8 +215,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('addToLobby')
 	handleAddToLobby(client: IO, payload: any): void {
-		if (this.lobby.includes(client)) return;
-
 		// console.log('addToLobby event received', payload);
 
 		// if (payload.matchType === MatchType.PRIVATE) {

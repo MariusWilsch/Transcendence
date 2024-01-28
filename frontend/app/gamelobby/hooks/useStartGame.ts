@@ -25,21 +25,22 @@ const useStartGame = () => {
 	//* Connect user to socket server and start matchmaking
 	const initSocketPushGame = (matchType: MatchType, inviteeID?: string) => {
 		dispatch(startConnection());
+		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: dispatch(addToLobby({ matchType: 0 })) && showModal();
+			: dispatch(addToLobby({ matchType: 0 }));
 	};
 
 	//* User is connected to socket server and start matchmaking
 
 	const pushToGame = (matchType: MatchType) => {
-		showModal();
 		dispatch(addToLobby({ matchType }));
+		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+		// showModal();
 	};
 
 	const showModal = () => {
-		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
-		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 		const modal = document.getElementById(
 			'startMatchmakingModal',
 		) as HTMLDialogElement;
@@ -47,6 +48,7 @@ const useStartGame = () => {
 	};
 
 	const closeModal = () => {
+		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
 		const modal = document.getElementById(
 			'startMatchmakingModal',
 		) as HTMLDialogElement;
@@ -64,7 +66,21 @@ const useStartGame = () => {
 			closeModal();
 			router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/game`);
 		}
+		return () => {
+			closeModal();
+		};
 	}, [connection.isGameStarted, router]);
+
+	useEffect(() => {
+		if (
+			connection.isConnected === ConnectionStatus.CONNECTED &&
+			!connection.isGameStarted &&
+			connection.isInMatchmaking === MatchmakingStatus.SEARCHING
+		) {
+			showModal();
+		}
+	}),
+		[connection.isConnected, connection.isGameStarted];
 
 	return {
 		initSocketPushGame,
