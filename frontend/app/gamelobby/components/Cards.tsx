@@ -2,13 +2,14 @@
 import pic1 from '@/public/static/images/playInstantGame.png';
 import pic2 from '@/public/static/images/customizeGame.png';
 import Image, { StaticImageData } from 'next/image';
-import React from 'react';
+import React, { useEffect } from 'react';
 import useStartGame from '../hooks/useStartGame';
 import { useRouter } from 'next/navigation';
 import { Modal } from '.';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../GlobalRedux/store';
-import { ConnectionStatus } from '../GlobalRedux/features';
+import { ConnectionStatus, startConnection } from '../GlobalRedux/features';
+import { MatchType } from '@/interfaces/GameState';
 
 type CardProps = {
 	img: StaticImageData;
@@ -55,6 +56,12 @@ const Cards: React.FC = () => {
 		(state: RootState) => state.connection.isConnected,
 	);
 
+	const handlePlayNow = () => {
+		isConnected === ConnectionStatus.DISCONNECTED
+			? initSocketPushGame(MatchType.PUBLIC)
+			: pushToGame(MatchType.PUBLIC);
+	};
+
 	return (
 		<>
 			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12">
@@ -66,11 +73,7 @@ const Cards: React.FC = () => {
 					desc={
 						'Click here to play the game! You will use your Mouse to move the paddle and play against another player!'
 					}
-					onClick={
-						isConnected === ConnectionStatus.CONNECTED
-							? pushToGame
-							: initSocketPushGame
-					}
+					onClick={handlePlayNow}
 				/>
 				<Card
 					img={pic2}
@@ -81,7 +84,9 @@ const Cards: React.FC = () => {
 						'Click here to customize the game! You can choose to play against a friend or the computer and much more!'
 					}
 					onClick={() =>
-						router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`)
+						router.push(
+							`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`,
+						)
 					}
 				/>
 			</div>

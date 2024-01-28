@@ -27,7 +27,6 @@ export interface GameConfigState {
 	aiDifficulty: aiDifficulty;
 	inputType: InputType;
 	mapChoice: mapType;
-	// playerType: playerType;
 }
 
 const initialState = {

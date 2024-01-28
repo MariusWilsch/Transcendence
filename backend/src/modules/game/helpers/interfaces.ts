@@ -70,7 +70,7 @@ export interface Players {
 export interface GameResult {
 	winnerId: string;
 	loserId: string;
-	score: Score;
+	score: string;
 	result: boolean[];
 	outcome: MatchOutcome;
 }
@@ -83,6 +83,16 @@ export interface GameSession {
 	intervalID: NodeJS.Timeout | undefined;
 	input: PlayerInput[];
 	command: PaddleControlCommand[];
+	userData: [
+		{
+			avatar: string;
+			username: string;
+		},
+		{
+			avatar: string;
+			username: string;
+		},
+	];
 }
 
 //* Client side interfaces

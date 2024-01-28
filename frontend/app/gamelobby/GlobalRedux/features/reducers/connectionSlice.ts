@@ -1,6 +1,5 @@
 import { MatchType } from '@/interfaces';
 import { createAction, createSlice } from '@reduxjs/toolkit';
-import { userAgent } from 'next/server';
 
 export enum GameOutcome {
 	WON = 'WON',
@@ -12,6 +11,7 @@ export enum GameOutcome {
 export enum ConnectionStatus {
 	CONNECTED = 'CONNECTED',
 	DISCONNECTED = 'DISCONNECTED',
+	DUPLICATE = 'DUPLICATE',
 }
 
 export enum MatchmakingStatus {
@@ -28,7 +28,6 @@ export interface ConnectionState {
 	isConnected: ConnectionStatus; // The connection status of the user
 	isInMatchmaking: MatchmakingStatus; // The matchmaking status of the user
 	isGameStarted: boolean; // True if the game has started, false if finished
-	isGamePaused: boolean; // True if the game is paused, false if resumed
 	playerOutcome: GameOutcome; // The outcome of the game for the player
 	gameData: {
 		username: string;
@@ -41,7 +40,6 @@ const initialState = {
 	isInMatchmaking: MatchmakingStatus.NOT_SEARCHING,
 	playerOutcome: GameOutcome.NONE,
 	isGameStarted: false,
-	isGamePaused: false,
 	gameData: {
 		username: '',
 		avatar: '',
@@ -62,17 +60,11 @@ const connectionSlice = createSlice({
 		},
 		gameStarted: (state) => {
 			state.isGameStarted = true;
+			state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
 		},
 		gameFinished: (state) => {
 			state.isGameStarted = false;
-		},
-		gamePaused: (state) => {
-			//* Not implemented yet
-			state.isGamePaused = true;
-		},
-		gameResumed: (state) => {
-			//* Not implemented yet
-			state.isGamePaused = false;
+			state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
 		},
 		setPlayerOutcome: (state, action) => {
 			state.playerOutcome = action.payload;
@@ -92,8 +84,6 @@ export const addToLobby = createAction<LobbyProps>('connection/addToLobby');
 export const {
 	gameStarted,
 	gameFinished,
-	gamePaused,
-	gameResumed,
 	setPlayerOutcome,
 	setConnectionStatus,
 	setMatchmaking,

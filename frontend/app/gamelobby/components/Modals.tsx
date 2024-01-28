@@ -1,8 +1,4 @@
-import {
-	ConnectionStatus,
-	GameOutcome,
-	cancelMatchmaking,
-} from '../GlobalRedux/features';
+import { GameOutcome, cancelMatchmaking } from '../GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useRef } from 'react';
 import useStartGame from '../hooks/useStartGame';
