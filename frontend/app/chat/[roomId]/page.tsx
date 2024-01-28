@@ -346,18 +346,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   console.log('this is the chat');
   return (
     <div className=" min-h-screen w-screen  bg-[#12141A]">
-      <Navbar isProfileOwner={false} />
       <div className="flex ">
-        {context.isSidebarVisible && (
-          <div className="w-16 custom-height ">
-            <div
-              className={`transition-all duration-500 ease-in-out ${context.isSidebarVisible ? "w-16 opacity-100" : "w-0 opacity-0"
-                }`}
-            >
-              <Sidebar />
-            </div>
-          </div>
-        )}
         <div className="flex-1 overflow-y-auto custom-height ">
           <div className="flex custom-height">
             {context.responsive
