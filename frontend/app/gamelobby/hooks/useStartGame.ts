@@ -40,6 +40,11 @@ const useStartGame = () => {
 		// showModal();
 	};
 
+	const handleInvite = (inviteeID: string) => {
+		dispatch(startConnection());
+		dispatch(addToLobby({ matchType: MatchType.PRIVATE, inviteeID }));
+	};
+
 	const showModal = () => {
 		const modal = document.getElementById(
 			'startMatchmakingModal',
@@ -85,6 +90,7 @@ const useStartGame = () => {
 	return {
 		initSocketPushGame,
 		pushToGame,
+		handleInvite,
 	};
 };
 
