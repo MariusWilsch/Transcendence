@@ -76,12 +76,16 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 										</div>
 										<div className="w-1/3 p-2 m-2 h-10 flex flex-col items-center justify-center">
 											{intraId !== game.winnerId ? (
-												<div className="text-gray-200 text-sm ">
+												<div className="text-gray-200 text-sm flex flex-row">
+													<div className="text-gray-200 text-sm">{game.score[1]}&nbsp;</div>
 													<FaRegSquarePlus size="20" className="text-green-500" />
+													<div className="text-gray-200 text-sm">&nbsp;{game.score[0]}</div>
 												</div>
 											) : (
-												<div className="text-gray-300 text-sm ">
+												<div className=" text-gray-200 text-sm flex flex-row">
+													<div className="text-gray-200 text-sm">{game.score[1]}&nbsp;</div>
 													<FaRegMinusSquare size="20" className="text-red-500" />
+													<div className="text-gray-200 text-sm">&nbsp;{game.score[0]}</div>
 												</div>
 											)}
 											<div className="text-xs mt-1">{game.matchDate.split('T')[0]}</div>
