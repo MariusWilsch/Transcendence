@@ -212,7 +212,7 @@ export default function Profile(params: any) {
 
 	return (
 		<div className="relative w-[100vw]">
-			<div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
+			{/* <div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
 				<Lottie
 					animationData={loading}
 					className="w-full h-auto"
@@ -221,7 +221,7 @@ export default function Profile(params: any) {
 					}}
 					lottieRef={lottieRef as any}
 				/>
-			</div>
+			</div> */}
 
 			<div className="z-10 relative flex-1 overflow-y-auto">
 				<UserProfileImage
