@@ -14,6 +14,8 @@ import { TbUserOff } from 'react-icons/tb';
 import { FaUserTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MatchType } from '@/interfaces';
+import { useDispatch } from 'react-redux'
+import useStartGame from '@/app/gamelobby/hooks/useStartGame'
 
 export const Friend = ({
 	isProfileOwner,
@@ -25,6 +27,7 @@ export const Friend = ({
 	friendId: string;
 }) => {
 	const context = useAppContext();
+	const { handleInvite } = useStartGame()
 
 	const [friendshipStatus, setStatus] = useState<
 		'NOTFRIENDS' | 'PENDING' | 'ACCEPTED' | 'BLOCKED'
@@ -315,8 +318,13 @@ export const Friend = ({
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							//! Friend ID here
-							onClick={
-								()=>console.log('right')}
+							onClick={()=>{
+								handleInvite(userId);
+								if (context.socket)
+								{
+									context.socket.emit('privateMatch', {to:userId, other:friendId});
+								}
+							}}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}

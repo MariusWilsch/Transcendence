@@ -103,7 +103,7 @@ const ChannelDashBoard = (props: any) => {
         <div className="info-card text-white p-4 m-5border border-[#292D39] ">
           <h1 className="text-start"> Members :</h1>
         </div>
-        <div className=" text-white p-4 w-full">
+        <div className="  z-20 text-white p-4 w-full">
           <label className="">
             <input
               id="searchField"

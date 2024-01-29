@@ -157,7 +157,7 @@ const ChannelsLobby = () => {
   }
 
   return (
-    <div className="custom-height w-screen bg-[#12141A]">
+    <div className="custom-height z-20 w-screen bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto">
           <div className="p-10">
@@ -286,7 +286,7 @@ const ChannelsLobby = () => {
                                   </div>
 
                                   <div className="ml-3 f">
-                                    <p className="text-md font-sans text-white">
+                                    <p className="text-md font-sans text-white  text-center">
                                       {channel.name}
                                     </p>
                                   </div>
@@ -327,8 +327,8 @@ const ChannelsLobby = () => {
                                       />
                                     </div>
 
-                                    <div className="ml-3 f">
-                                      <p className="text-md font-sans text-white">
+                                    <div className="ml-3 flex flex-col items-center">
+                                      <p className="text-md font-sans text-white ">
                                         {channel.channelId}
                                       </p>
                                     </div>

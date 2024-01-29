@@ -209,8 +209,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
   @SubscribeMessage('privateMatch')
-  async privateMatch(client:any, payload:{hostPlayer:User, invitedPlayer:string}){
-    console.log(payload.invitedPlayer);
+  async privateMatch(client:any, payload:{to:string, other:string}){
+    const friendSocket = this.getAllSocketsByUserId(payload.other);
+    friendSocket.map((socket:any)=>{
+      socket.emit('privateMatch', {from:client.user});
+      console.log(client.user);
+    })
   }
   // @SubscribeMessage('updateChannelSettings')
   // async updateChannelSettings(client:any, payload:{jwt:string, channelId:string, info:{type:string, password:string}}){

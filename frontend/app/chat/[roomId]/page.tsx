@@ -345,7 +345,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   }
   console.log('this is the chat');
   return (
-    <div className=" min-h-screen w-screen  bg-[#12141A]">
+    <div className=" w-screen  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
           <div className="flex custom-height">
