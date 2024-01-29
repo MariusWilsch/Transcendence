@@ -11,24 +11,23 @@ datasource db {
 }
 
 model User {
-  intraId        String          @unique @id
-  fullname       String          @unique
-  login          String          @unique
-  email          String          @unique
-  Avatar         String?
-  password       String?
-  isRegistred    Boolean   @default(false)
-  isTfaEnabled   Boolean   @default(false)
-  status         Status    @default(ONLINE)
-  tfa            Tfa?
-  friends        Friend[]        @relation("userFriends")
-  user           Friend[]        @relation("friendsUser") 
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
-  sentMessages   Message[]       @relation("SentMessages")
-  receivedMessages Message[]     @relation("ReceivedMessages")
-  privateRooms   PrivateRoom[]
-  membership       MemberShip[]
+  intraId      String         @unique
+  fullname     String         @unique
+  login        String         @unique
+  email        String         @unique
+  Avatar       String?
+  password     String?
+  won          Int            @default(0)
+  lost         Int            @default(0)
+  winrate      Float          @default(0)
+  isRegistred  Boolean        @default(false)
+  isTfaEnabled Boolean        @default(false)
+  status       Status         @default(ONLINE)
+  tfa          Tfa?
+  friends      Friend[]       @relation("userFriends")
+  user         Friend[]       @relation("friendsUser")
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
   wonMatches   MatchHistory[] @relation("userWins")
   lostMatches  MatchHistory[] @relation("userLosses")
 }
