@@ -9,6 +9,7 @@ import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { Loading } from '../../components/Loading';
 import { Navbar } from '../../components/Navbar';
+import { Achievements } from '../../components/Achievements';
 import { Gamehistory } from '../../components/Gamehistory';
 import { UserDetailsCard } from '../../components/UserDetailsCard';
 import { UserProfileImage } from '../../components/UserProfileImage';
@@ -253,6 +254,7 @@ export default function Profile(params: any) {
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
 					<Gamehistory intraId={intraId} />
+					<Achievements intraId={intraId} />
 				</div>
 			</div>
 			<Toaster />

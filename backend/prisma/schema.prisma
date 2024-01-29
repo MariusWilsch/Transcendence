@@ -22,6 +22,7 @@ model User {
   winrate      Float          @default(0)
   isRegistred  Boolean        @default(false)
   isTfaEnabled Boolean        @default(false)
+  Achievements String[]
   status       Status         @default(ONLINE)
   tfa          Tfa?
   friends      Friend[]       @relation("userFriends")

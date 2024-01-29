@@ -100,6 +100,19 @@ export class UserController {
     }
   }
 
+  @Get('Achievements/:id')
+  @UseGuards(JwtAuthGuard)
+  async Achievements(@Param('id') id: string, @Res() res: any) {
+    try {
+      const Achievements = await this.userService.Achievements(id);
+
+      return res.json({ success: true, Achievements });
+    } catch (error: any) {
+      console.error('Error Achievements:', error);
+      return res.json({ success: false });
+    }
+  }
+
   @Get(':id')
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
     try {
