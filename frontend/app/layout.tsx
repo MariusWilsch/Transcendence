@@ -8,9 +8,10 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import '@mantine/core/styles.css';
+// import { MantineProvider } from "@mantine/core";
+import { Provider } from 'react-redux';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
-// import '@mantine/core/styles.css';
-// import { MantineProvider } from '@mantine/core';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,9 +27,9 @@ export default function RootLayout({
 		<html lang="en">
 			{pathname === '/' ? (
 				<body className={inter.className}>
-					{/* <MantineProvider> */}
 					<Providers>
 						<AppProvider>
+							{/* <MantineProvider> */}
 							<motion.div
 								initial={{ opacity: 0, y: -100 }}
 								animate={{ opacity: 1, y: 0 }}
@@ -36,14 +37,14 @@ export default function RootLayout({
 							>
 								<AnimatePresence>{children}</AnimatePresence>
 							</motion.div>
+							{/* </MantineProvider> */}
 						</AppProvider>
-						{/* </MantineProvider> */}
 					</Providers>
 				</body>
 			) : (
 				<body className={inter.className}>
-					{/* <MantineProvider> */}
 					<Providers>
+						{/* <MantineProvider> */}
 						<AppProvider>
 							<motion.div
 								initial={{ opacity: 0, y: -100 }}
@@ -63,8 +64,8 @@ export default function RootLayout({
 								</AnimatePresence>
 							</motion.div>
 						</AppProvider>
+						{/* </MantineProvider> */}
 					</Providers>
-					{/* </MantineProvider> */}
 				</body>
 			)}
 		</html>

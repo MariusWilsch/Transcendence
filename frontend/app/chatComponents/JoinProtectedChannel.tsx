@@ -3,6 +3,7 @@ import { User, useAppContext } from "../AppContext";
 import Cookies from "universal-cookie";
 import toast from "react-hot-toast";
 import { Button, Popover } from "@mantine/core";
+import Link from "next/link";
 
 const JoinProtectedChannel = ({ selectedChannel }: any) => {
     const context = useAppContext();
@@ -76,7 +77,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
         }
         {
           selectedChannel.type !== "PROTECTED" &&
-          <button className="p-2 text-blue-700 font-bold" onClick={() => handleSubmit("default")}>JOIN</button>
+          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${selectedChannel.name}`}><button className="p-2 text-blue-700 font-bold" onClick={() => handleSubmit("default")}>JOIN</button></Link>
         }
       </>
     );

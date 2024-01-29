@@ -181,6 +181,13 @@ export const Friend = ({
 		FriendshipStatus();
 	}, [userId]);
 
+	const handler = () => {
+		if (context.socket) {
+			context.socket.emit('privateMatch', { to: userId, other: friendId });
+		}
+		handleInvite(friendId, isConnected, Invite.INVITING);
+	};
+
 	return (
 		<div className="mt-6">
 			{!isProfileOwner && (
@@ -319,7 +326,7 @@ export const Friend = ({
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							//! Friend ID here
-							onClick={() => handleInvite(friendId, isConnected, Invite.INVITING)}
+							onClick={handler}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import { use, useEffect, useState } from 'react';
-import { useAppContext, AppProvider, User } from '../AppContext';
+import { useAppContext, AppProvider, User, Message } from '../AppContext';
 import { RiPingPongLine } from 'react-icons/ri';
 import { IoChatbubblesOutline } from 'react-icons/io5';
 import { GrGroup } from 'react-icons/gr';
@@ -18,6 +18,12 @@ import { CiLogout } from 'react-icons/ci';
 import { usePathname } from 'next/navigation';
 import { FaCircleDot } from 'react-icons/fa6';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'universal-cookie';
+import { io } from 'socket.io-client';
+import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
+
+
+
 
 export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
@@ -73,6 +79,56 @@ export const Sidebar = () => {
 			listenForFriendships();
 		}
 	}, [context.user, context.notifSocket]);
+
+	useEffect(() => {
+		
+		if (!context.socket) {
+				const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+			  const cookie = new Cookies();
+			  const newSocket = io(chatNameSpace, {
+				query: { user: cookie.get('jwt') },
+			  });
+			  context.setSocket(newSocket);
+		}
+		if (context.socket) {
+			context.socket.on('privateChat', (data:Message)=>{
+				if (data){
+					if (data.sender !== context.user?.intraId){
+
+						toast.success('new message');
+					}
+				}
+			})
+			context.socket.on('privateMatch', (data:any)=>{
+				// if (data.from.intraId !== context.user?.intraId)
+				// {	
+					const msg = 'invitation from ' + data.from.login +' for a game';
+					toast(() =>(
+						<>
+							<p> {msg} </p>
+							<span className='flex flex-row space-x-6'>
+							 <button
+												className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+												onClick={() => {
+													console.log('event handler here')
+												}}
+												>
+												<FiCheckCircle size="30" className="text-green-300" />
+							</button>
+							<button
+												className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+												onClick={() => console.log('dismiss handler')}
+												>
+												<FiXCircle size="30" className="text-red-300" />
+											</button>
+							</span>
+												</>
+						  ));
+						  console.log('the private chat event has been occured');
+				// }
+			})
+	}
+}, [context.socket]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
