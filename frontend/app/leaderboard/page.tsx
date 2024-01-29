@@ -43,6 +43,14 @@ export default function Search(params: any) {
 		leaderboard();
 	}, [page]);
 
+	const getRadialProgressStyles = (winrate : any) => {
+		return {
+		  '--size': '60px',
+		  fontSize: '16px',
+		  '--value': winrate.toFixed(0),
+		};
+	  };
+
 	return (
 		<div className="flex-1 overflow-y-auto overflow-x-hidden">
 			<div className="p-10">
@@ -75,7 +83,7 @@ export default function Search(params: any) {
 														<div className="flex items-center">
 															<div className="relative flex-shrink-0 pt-0.5">
 																<img
-																	className="h-10 w-10 rounded-full"
+																	className="h-14 w-14 rounded-full"
 																	src={user.Avatar}
 																	alt=""
 																/>
@@ -105,7 +113,13 @@ export default function Search(params: any) {
 													<div className="flex">
 														<button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 ">
 															<div className="text-lg font-bold text-blue-400 mr-2">
-																{user.winrate.toFixed(0)}%
+																<div
+																	className="radial-progress"
+																	style = {getRadialProgressStyles(user.winrate)}
+																	role="progressbar"
+																>
+																	{user.winrate.toFixed(0)}%
+																</div>
 															</div>
 														</button>
 													</div>
