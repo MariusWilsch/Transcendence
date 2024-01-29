@@ -410,25 +410,74 @@ export class UserService {
     }
   }
 
-  async leaderboard(page : number): Promise<User[] | undefined> {
-    try {
-      const numberOfUserInOnePage = 10;
+  async leaderboard(page : number) {
 
-      const leaderboard = await prisma.user.findMany({
+    try{
+
+      var users;
+      const numberOfUserInOnePage = 10;
+      
+      
+      var leaderboard = await prisma.user.findMany({
         orderBy: {
           login: 'asc',
         },
+        include: {
+          wonMatches: true,
+          lostMatches: true,
+        },
       });
-      // get tonly the users that are in the page that we want
-      leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
-      leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
       
+      
+      
+      
+      await leaderboard.map(async (user) => {
+        const totalMatches = user.wonMatches.length + user.lostMatches.length;
+        const winPercentage = totalMatches === 0 ? 0 : (user.lostMatches.length / totalMatches) * 100;
+
+        await prisma.user.update({
+          where: {
+            intraId: user.intraId,
+          },
+          data: {
+            winrate: winPercentage,
+          },
+        });
+        
+
+      });
+
+      leaderboard.sort((a, b) => {
+        return b.winrate - a.winrate;
+      }
+
+      );
       return leaderboard;
-    } catch (error: any) {
-      console.error('Error leaderboard:', error);
-      return;
     }
-  }
+    catch {}
+          
+
+
+}    
+
+    // try {
+    //   const numberOfUserInOnePage = 10;
+
+    //   const leaderboard = await prisma.user.findMany({
+    //     orderBy: {
+    //       login: 'asc',
+    //     },
+    //   });
+    //   // get tonly the users that are in the page that we want
+    //   leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
+    //   leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
+      
+    //   return leaderboard;
+    // } catch (error: any) {
+    //   console.error('Error leaderboard:', error);
+    //   return;
+    // }
+  
 
   async Gamehistory(userId: string) {
     try {
