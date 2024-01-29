@@ -5,15 +5,16 @@ import { RootState } from '../GlobalRedux/store';
 import { useEffect } from 'react';
 import {
 	ConnectionStatus,
+	Invite,
 	MatchmakingStatus,
+	acceptPrivate,
 	addToLobby,
 	aiDifficulty,
+	invitePrivate,
 	setMatchmaking,
 	setupAIMatch,
 	startConnection,
 } from '../GlobalRedux/features';
-import { MatchType } from '@/interfaces';
-import { ToastContainer, toast } from 'react-toastify';
 
 const useStartGame = () => {
 	const router = useRouter();
@@ -25,25 +26,32 @@ const useStartGame = () => {
 	//! Modal shouldn't be fetched by using getElementById
 
 	//* Connect user to socket server and start matchmaking
-	const initSocketPushGame = (matchType: MatchType, inviteeID?: string) => {
+	const initSocketPushGame = () => {
 		dispatch(startConnection());
 		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: dispatch(addToLobby({ matchType }));
+			: dispatch(addToLobby());
 	};
 
 	//* User is connected to socket server and start matchmaking
 
-	const pushToGame = (matchType: MatchType) => {
-		dispatch(addToLobby({ matchType }));
+	const pushToGame = () => {
+		dispatch(addToLobby());
 		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 	};
 
-	const handleInvite = (inviteeID: string) => {
-		dispatch(startConnection());
-		dispatch(addToLobby({ matchType: MatchType.PRIVATE, inviteeID }));
+	const handleInvite = (
+		inviteeID: string,
+		connectionStatus: ConnectionStatus,
+		invite: Invite,
+	) => {
+		if (connectionStatus === ConnectionStatus.DISCONNECTED)
+			dispatch(startConnection());
+		invite === Invite.INVITING
+			? dispatch(invitePrivate({ inviteeID }))
+			: dispatch(acceptPrivate({ inviteeID }));
 	};
 
 	const showModal = () => {

@@ -13,7 +13,10 @@ import { FiUserPlus } from 'react-icons/fi';
 import { TbUserOff } from 'react-icons/tb';
 import { FaUserTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MatchType } from '@/interfaces';
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
+import { RootState } from '../gamelobby/GlobalRedux/store';
+import { useSelector } from 'react-redux';
+import { Invite } from '../gamelobby/GlobalRedux/features';
 
 export const Friend = ({
 	isProfileOwner,
@@ -25,6 +28,10 @@ export const Friend = ({
 	friendId: string;
 }) => {
 	const context = useAppContext();
+	const { handleInvite } = useStartGame();
+	const isConnected = useSelector(
+		(state: RootState) => state.connection.isConnected,
+	);
 
 	const [friendshipStatus, setStatus] = useState<
 		'NOTFRIENDS' | 'PENDING' | 'ACCEPTED' | 'BLOCKED'
@@ -183,32 +190,31 @@ export const Friend = ({
 					}`}
 				>
 					<div className="mx-2">
-						{friendshipStatus !== 'ACCEPTED' &&
-							friendshipStatus !== 'PENDING' && (
-								<button
-									className={`${blocked ? 'pointer-events-none' : ''}`}
-									onClick={() => {
-										addfriend();
-										if (context.notifSocket) {
-											context.notifSocket.emit('FriendShipRequest', {
-												userId: `${userId}`,
-												friendId: `${friendId}`,
-											});
-										}
-										setStatus('PENDING');
-									}}
+						{friendshipStatus !== 'ACCEPTED' && friendshipStatus !== 'PENDING' && (
+							<button
+								className={`${blocked ? 'pointer-events-none' : ''}`}
+								onClick={() => {
+									addfriend();
+									if (context.notifSocket) {
+										context.notifSocket.emit('FriendShipRequest', {
+											userId: `${userId}`,
+											friendId: `${friendId}`,
+										});
+									}
+									setStatus('PENDING');
+								}}
+							>
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+									initial={{ opacity: 0, y: -5 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.02 }}
 								>
-									<motion.div
-										whileHover={{ scale: 1.1 }}
-										whileTap={{ scale: 0.9 }}
-										initial={{ opacity: 0, y: -5 }}
-										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: 0.02 }}
-									>
-										<FiUserPlus size="25" />
-									</motion.div>
-								</button>
-							)}
+									<FiUserPlus size="25" />
+								</motion.div>
+							</button>
+						)}
 						{friendshipStatus === 'PENDING' && (
 							<button
 								className={`${blocked ? '  pointer-events-none' : ''}
@@ -296,9 +302,7 @@ export const Friend = ({
 						)}
 					</div>
 					<div>
-						<button
-							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
-						>
+						<button className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}>
 							<motion.div
 								whileHover={{ scale: 1.1 }}
 								whileTap={{ scale: 0.9 }}
@@ -315,8 +319,7 @@ export const Friend = ({
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							//! Friend ID here
-							onClick={
-								()=>console.log('right')}
+							onClick={() => handleInvite(friendId, isConnected, Invite.INVITING)}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}

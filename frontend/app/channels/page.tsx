@@ -66,7 +66,16 @@ const ChannelsLobby = () => {
           exploreChannels();
         }
       })
-    }
+		}
+		
+		// disconnect socket when component unmount
+
+		return () => {
+			console.log({out: 'channels lobby'})
+			// if (context.socket) {
+			// 	context.socket.disconnect();
+			// }
+		};
   }, [context.socket, availabelChannels]);
 
   // const [users, setUsers] = useState<User[] | undefined>(undefined);

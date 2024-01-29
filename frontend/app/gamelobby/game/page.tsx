@@ -59,6 +59,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
 function CountdownModal() {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const countdownRef = useRef<HTMLSpanElement>(null);
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const isGameStarted = useSelector(
 		(state: RootState) => state.connection.isGameStarted,
 	);
@@ -69,6 +70,9 @@ function CountdownModal() {
 		if (isGameStarted) {
 			countDown();
 		}
+		return () => {
+			if (intervalRef.current) clearInterval(intervalRef.current!);
+		};
 	}, [isGameStarted]);
 
 	useEffect(() => {
@@ -94,13 +98,13 @@ function CountdownModal() {
 		dispatch(setupInteraction(gameConfig));
 		if (modal && countdown) {
 			modal.showModal();
-			const interval = setInterval(() => {
+			intervalRef.current = setInterval(() => {
 				remainingTime--;
 				countdown.style.setProperty('--value', remainingTime.toString());
 				if (remainingTime <= 0) {
 					dispatch(startLoop());
 					modal.close();
-					clearInterval(interval);
+					clearInterval(intervalRef.current!);
 				}
 			}, 1000);
 		}

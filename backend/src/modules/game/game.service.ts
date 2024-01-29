@@ -471,6 +471,11 @@ export class GameService {
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
+	public isCommandSet(roomID: string): boolean {
+		if (this.gameSessions.size === 0) return;
+		return this.gameSessions.get(roomID).command.length === 2;
+	}
+
 	public hasRoom(roomID: string): boolean {
 		return this.gameSessions.has(roomID);
 	}

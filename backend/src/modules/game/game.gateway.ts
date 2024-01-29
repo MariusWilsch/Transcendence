@@ -30,9 +30,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
+	privateLobby = new Map<string, IO>();
 	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
+		// Identify the client not by token but by his username
 		console.log(`Client connected via ${client.id}`);
 		if (this.duplicateUsers.has(client.handshake.auth.token)) {
 			console.log('Duplicate user detected');
@@ -201,6 +203,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
+		if (!this.gameService.isCommandSet(client.data.roomID)) return;
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
@@ -214,13 +217,28 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		);
 	}
 
+	@SubscribeMessage('invitePrivate')
+	handlePrivateGame(client: IO, payload: any): void {
+		console.log('privateGame event received', payload);
+		this.privateLobby.set(payload.inviteeID, client);
+	}
+
+	@SubscribeMessage('acceptPrivate')
+	handleAcceptPrivate(client: IO, payload: any): void {
+		console.log('acceptPrivate event received', payload);
+		if (!this.privateLobby.has(payload.inviterID))
+			return console.log('No such invite');
+		if (payload.accepted === false) {
+			this.privateLobby.delete(payload.inviterID);
+			return;
+		}
+		this.createGame(client, this.privateLobby.get(payload.inviterID));
+		this.privateLobby.delete(payload.inviterID);
+	}
+
 	@SubscribeMessage('addToLobby')
 	handleAddToLobby(client: IO, payload: any): void {
 		// console.log('addToLobby event received', payload);
-
-		// if (payload.matchType === MatchType.PRIVATE) {
-		// 	console.log('Private match requested');
-		// }
 
 		this.lobby.push(client);
 		console.log(

@@ -8,6 +8,11 @@ export enum GameOutcome {
 	NONE = 'NONE',
 }
 
+export enum Invite {
+	INVITING,
+	ACCEPTING,
+}
+
 export enum ConnectionStatus {
 	CONNECTED = 'CONNECTED',
 	DISCONNECTED = 'DISCONNECTED',
@@ -19,9 +24,9 @@ export enum MatchmakingStatus {
 	DUPLICATE = 'DUPLICATE',
 }
 
-export interface LobbyProps {
-	matchType: MatchType;
-	inviteeID?: string;
+interface PrivateMatch {
+	inviteeID: string;
+	accepted?: boolean; // True if the friend has accepted the invite
 }
 
 export interface ConnectionState {
@@ -78,8 +83,14 @@ const connectionSlice = createSlice({
 //* Action creators
 export const startLoop = createAction('connection/startLoop');
 export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
-export const addToLobby = createAction<LobbyProps>('connection/addToLobby');
+export const addToLobby = createAction('connection/addToLobby');
 export const disconnect = createAction('connection/disconnect');
+export const invitePrivate = createAction<PrivateMatch>(
+	'connection/invitePrivate',
+);
+export const acceptPrivate = createAction<PrivateMatch>(
+	'connection/acceptPrivate',
+);
 
 //* Slice definitions
 export const {
