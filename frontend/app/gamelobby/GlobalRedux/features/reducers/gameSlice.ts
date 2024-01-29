@@ -48,6 +48,9 @@ const gameSlice = createSlice({
 			state.ball = action.payload.ball;
 			state.score = action.payload.score;
 		},
+		resetScore: (state) => {
+			state.score = { player1: 0, player2: 0 };
+		},
 	},
 });
 
@@ -59,5 +62,5 @@ export const mouseMove = createAction<MouseMove>('game/mouseMove');
 export const startConnection = createAction('game/startConnection');
 
 //* Slice definitions
-export const { initGame, updateGame } = gameSlice.actions;
+export const { initGame, updateGame, resetScore } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;

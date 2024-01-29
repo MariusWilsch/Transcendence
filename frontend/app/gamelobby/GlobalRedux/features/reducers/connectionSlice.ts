@@ -11,12 +11,12 @@ export enum GameOutcome {
 export enum ConnectionStatus {
 	CONNECTED = 'CONNECTED',
 	DISCONNECTED = 'DISCONNECTED',
-	DUPLICATE = 'DUPLICATE',
 }
 
 export enum MatchmakingStatus {
 	SEARCHING = 'SEARCHING',
 	NOT_SEARCHING = 'NOT_SEARCHING',
+	DUPLICATE = 'DUPLICATE',
 }
 
 export interface LobbyProps {
@@ -64,7 +64,7 @@ const connectionSlice = createSlice({
 		},
 		gameFinished: (state) => {
 			state.isGameStarted = false;
-			state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
+			// state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
 		},
 		setPlayerOutcome: (state, action) => {
 			state.playerOutcome = action.payload;
@@ -79,6 +79,7 @@ const connectionSlice = createSlice({
 export const startLoop = createAction('connection/startLoop');
 export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
 export const addToLobby = createAction<LobbyProps>('connection/addToLobby');
+export const disconnect = createAction('connection/disconnect');
 
 //* Slice definitions
 export const {

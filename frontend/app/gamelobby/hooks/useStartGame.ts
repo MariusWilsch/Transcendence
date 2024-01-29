@@ -8,17 +8,19 @@ import {
 	MatchmakingStatus,
 	addToLobby,
 	aiDifficulty,
-	setConnectionStatus,
 	setMatchmaking,
 	setupAIMatch,
 	startConnection,
 } from '../GlobalRedux/features';
 import { MatchType } from '@/interfaces';
+import { ToastContainer, toast } from 'react-toastify';
 
 const useStartGame = () => {
 	const router = useRouter();
 	const dispatch = useDispatch();
-	const connection = useSelector((state: RootState) => state.connection);
+	const { isConnected, isInMatchmaking, isGameStarted } = useSelector(
+		(state: RootState) => state.connection,
+	);
 	const gameConfig = useSelector((state: RootState) => state.gameConfig);
 	//! Modal shouldn't be fetched by using getElementById
 
@@ -29,7 +31,7 @@ const useStartGame = () => {
 
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: dispatch(addToLobby({ matchType: 0 }));
+			: dispatch(addToLobby({ matchType }));
 	};
 
 	//* User is connected to socket server and start matchmaking
@@ -37,7 +39,6 @@ const useStartGame = () => {
 	const pushToGame = (matchType: MatchType) => {
 		dispatch(addToLobby({ matchType }));
 		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-		// showModal();
 	};
 
 	const handleInvite = (inviteeID: string) => {
@@ -53,7 +54,7 @@ const useStartGame = () => {
 	};
 
 	const closeModal = () => {
-		if (connection.isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
+		if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
 		const modal = document.getElementById(
 			'startMatchmakingModal',
 		) as HTMLDialogElement;
@@ -67,25 +68,34 @@ const useStartGame = () => {
 	//* This useEffect hook will redirect the user to the game page
 	//* if the isGameStarted state is true
 	useEffect(() => {
-		if (connection.isGameStarted) {
+		if (isGameStarted) {
 			closeModal();
 			router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/game`);
 		}
-		return () => {
-			closeModal();
-		};
-	}, [connection.isGameStarted, router]);
+	}, [isGameStarted, router]);
 
 	useEffect(() => {
 		if (
-			connection.isConnected === ConnectionStatus.CONNECTED &&
-			!connection.isGameStarted &&
-			connection.isInMatchmaking === MatchmakingStatus.SEARCHING
+			isConnected === ConnectionStatus.CONNECTED &&
+			isInMatchmaking === MatchmakingStatus.SEARCHING
 		) {
 			showModal();
+		} else if (isInMatchmaking === MatchmakingStatus.DUPLICATE) {
+			alert('You are already connected on another tab');
+			//? How can I make react-toastify work here?
 		}
-	}),
-		[connection.isConnected, connection.isGameStarted];
+	}, [isConnected, isInMatchmaking]);
+
+	// useEffect(() => {
+	// 	if (
+	// 		connection.isConnected === ConnectionStatus.CONNECTED &&
+	// 		!connection.isGameStarted &&
+	// 		connection.isInMatchmaking === MatchmakingStatus.SEARCHING
+	// 	) {
+	// 		showModal();
+	// 	}
+	// }),
+	// 	[connection.isConnected, connection.isGameStarted];
 
 	return {
 		initSocketPushGame,

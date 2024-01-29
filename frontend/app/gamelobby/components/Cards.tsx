@@ -31,7 +31,7 @@ export const Card: React.FC<CardProps> = ({
 	return (
 		<div
 			onClick={onClick}
-			className="card bg-base-200 rounded-xl boxTransform sm:w-3/4 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] md:max-h-[40vh] lg:max-h-[60vh]"
+			className="card bg-base-200 rounded-xl boxTransform w-2/4  sm:w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] md:max-h-[40vh] lg:max-h-[60vh]"
 		>
 			<figure>
 				<Image src={img} alt={alt} />

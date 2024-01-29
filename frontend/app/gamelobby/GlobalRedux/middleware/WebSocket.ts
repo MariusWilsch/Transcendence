@@ -10,6 +10,7 @@ import {
 	setConnectionStatus,
 	setMatchmaking,
 	MatchmakingStatus,
+	resetScore,
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
@@ -47,6 +48,11 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
 	});
 
+	socket.on('duplicateRequest', () => {
+		console.log('Duplicate request');
+		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
+	});
+
 	socket.on('createGame', (gameState: GameState) => {
 		store.dispatch(initGame(gameState));
 		//* Will be set twice, once for each player
@@ -56,11 +62,6 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	socket.on('gameState', (gameState: GameState) =>
 		store.dispatch(updateGame(gameState)),
 	);
-
-	socket.on('opponentDisconnected', () => {
-		console.log('Opponent disconnected');
-		store.dispatch(gameFinished());
-	});
 
 	socket.on('gameOver', (won: boolean) => {
 		//* Will be set twice, once for each player
@@ -95,6 +96,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'gameConfig/setupInteraction':
 			console.log('setupInteraction');
 			ClientSocket?.emit('setupInteraction', action.payload);
+			break;
+		case 'connection/disconnect':
+			ClientSocket?.disconnect();
 			break;
 		case 'gameConfig/setupAIMatch':
 			AISocket = connect(store, AISocket);

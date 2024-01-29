@@ -20,7 +20,7 @@ import {
 } from './helpers/interfaces';
 import { Socket } from 'socket.io';
 import { createCommand } from './helpers/inputCommand';
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 //! What is the right way to import this?
 
 const prisma = new PrismaClient();
@@ -340,6 +340,7 @@ export class GameService {
 	public deleteGameSession(clientID: string, roomID: string): void {
 		if (this.gameSessions.size == 0) return;
 		const gameSession = this.gameSessions.get(roomID);
+		console.log('Client was in a room, deleting game session...');
 
 		if (gameSession) {
 			// Remove the game session
@@ -349,7 +350,8 @@ export class GameService {
 				(player) => player.playerIDs !== clientID
 			);
 			if (otherPlayer) {
-				otherPlayer.playerSockets.emit('opponentDisconnected');
+				console.log('Disconnecting other player...');
+				otherPlayer.playerSockets.disconnect();
 			}
 		}
 	}

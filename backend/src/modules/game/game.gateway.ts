@@ -36,6 +36,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected via ${client.id}`);
 		if (this.duplicateUsers.has(client.handshake.auth.token)) {
 			console.log('Duplicate user detected');
+			client.emit('duplicateRequest');
 			client.disconnect();
 		}
 		this.duplicateUsers.add(client.handshake.auth.token);

@@ -4,6 +4,7 @@ import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import {
 	setupInteraction,
 	startLoop,
+	disconnect,
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,8 +35,6 @@ interface StatsProps {
 
 const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
 	const score = useSelector((state: RootState) => state.game.score);
-
-	console.log(gameData);
 
 	return (
 		<div className="flex items-center gap-x-8">
@@ -71,6 +70,21 @@ function CountdownModal() {
 			countDown();
 		}
 	}, [isGameStarted]);
+
+	useEffect(() => {
+		const handleBackButton = (event: any) => {
+			// Custom logic here
+			console.log('Back button pressed');
+			dispatch(disconnect());
+			// You can perform actions like redirecting the user here
+		};
+
+		window.addEventListener('popstate', handleBackButton);
+
+		return () => {
+			window.removeEventListener('popstate', handleBackButton);
+		};
+	}, []);
 
 	const countDown = () => {
 		const modal = modalRef.current;

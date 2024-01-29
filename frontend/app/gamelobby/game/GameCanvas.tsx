@@ -1,15 +1,12 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import {
-	ConnectionStatus,
-	InputType,
-	mapType,
-} from '@/app/gamelobby/GlobalRedux/features';
+import { InputType, mapType } from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameService } from './GameService';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { Direction } from '@/interfaces';
 import { handleKeyDown, handleKeyUp, handleMouseMove } from './interaction';
+import { disconnect } from '@/app/gamelobby/GlobalRedux/features';
 
 export const GameCanvas: React.FC = () => {
 	//* Refs
@@ -73,6 +70,21 @@ export const GameCanvas: React.FC = () => {
 
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
 	}, [gameState, mapChoice, isConnected]);
+
+	useEffect(() => {
+		const handleBackButton = (event: any) => {
+			// Custom logic here
+			console.log('Back button pressed');
+			dispatch(disconnect());
+			// You can perform actions like redirecting the user here
+		};
+
+		window.addEventListener('popstate', handleBackButton);
+
+		return () => {
+			window.removeEventListener('popstate', handleBackButton);
+		};
+	}, []);
 
 	return (
 		<div
