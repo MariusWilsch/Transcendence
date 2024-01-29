@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -84,6 +86,18 @@ export class UserController {
       searchTerm
     )}`;
     return res.redirect(targetURL);
+  }
+
+  @Get('Gamehistory/:id')
+  @UseGuards(JwtAuthGuard)
+  async Gamehistory(@Param('id') id: string, @Res() res: any) {
+    try {
+      const Gamehistory = await this.userService.Gamehistory(id);
+      return res.json({ success: true, Gamehistory });
+    } catch (error: any) {
+      console.error('Error Gamehistory:', error);
+      return res.json({ success: false });
+    }
   }
 
   @Get(':id')
@@ -192,7 +206,13 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar'))
   async editavatar(
     @Param('id') userId: string,
-    @UploadedFile() avatar: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(gif|png|jpeg|jpg)' }),
+        ],
+      })
+    ) avatar: Express.Multer.File,
     @Res() res: any,
     @Req() req: any
   ) {

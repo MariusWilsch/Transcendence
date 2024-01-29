@@ -21,6 +21,20 @@ export type User = {
   status: string;
 };
 
+
+export type  MatchHistory = {
+  winnerId    : String  ;
+  loserId     : String  ;
+  score       : String   ;
+  user1Avatar : String   ;
+  user2Avatar : String   ;
+  user1Login  : String   ;
+  user2Login  : String   ;
+  matchDate   : string ;
+}
+
+
+
 type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;

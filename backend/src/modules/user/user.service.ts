@@ -429,4 +429,22 @@ export class UserService {
       return;
     }
   }
+
+  async Gamehistory(userId: string) {
+    try {
+      const Gamehistory = await prisma.matchHistory.findMany({
+        where: {
+          OR: [
+            { winnerId: userId },
+            { loserId: userId },
+          ],
+        },
+      });
+      return Gamehistory;
+    } catch (error: any) {
+      console.error('Error Gamehistory:', error);
+      return;
+    }
+  }
+
 }

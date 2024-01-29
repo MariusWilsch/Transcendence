@@ -9,6 +9,7 @@ import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { Loading } from '../../components/Loading';
 import { Navbar } from '../../components/Navbar';
+import { Gamehistory } from '../../components/Gamehistory';
 import { UserDetailsCard } from '../../components/UserDetailsCard';
 import { UserProfileImage } from '../../components/UserProfileImage';
 import { Sidebar } from '../../components/Sidebar';
@@ -161,11 +162,8 @@ export default function Profile(params: any) {
 
 		if (socket) {
 			listenForEvents();
-
-			// listenForFriendships();
 			return () => {
 				socket.off('update');
-				// socket.off("FriendShipRequest");
 			};
 		}
 	}, [socket]);
@@ -213,17 +211,17 @@ export default function Profile(params: any) {
 	}
 
 	return (
-		<div className="">
-			<div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
+		<div className="relative w-[100vw]">
+			{/* <div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
 				<Lottie
 					animationData={loading}
-					className="w-auto h-auto"
+					className="w-full h-auto"
 					onDOMLoaded={(e) => {
 						lottieRef.current?.setSpeed(0.05);
 					}}
 					lottieRef={lottieRef as any}
 				/>
-			</div>
+			</div> */}
 
 			<div className="z-10 relative flex-1 overflow-y-auto">
 				<UserProfileImage
@@ -233,9 +231,7 @@ export default function Profile(params: any) {
 					intraId={intraId}
 				/>
 				<div
-					className={`${
-						isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'
-					} p-10`}
+					className={`${isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'} p-10 `}
 				>
 					<UserDetailsCard value={Login} intraId={intraId} />
 					{user !== null ? (
@@ -252,6 +248,7 @@ export default function Profile(params: any) {
 						</div>
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+					<Gamehistory intraId={intraId} />
 				</div>
 			</div>
 			<Toaster />
