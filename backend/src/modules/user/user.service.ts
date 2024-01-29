@@ -452,6 +452,11 @@ export class UserService {
       }
 
       );
+
+            leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
+      leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
+
+
       return leaderboard;
     }
     catch {}

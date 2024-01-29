@@ -233,7 +233,7 @@ export const UserProfileImage = ({
 		<div>
 			<div className="flex flex-col items-center justify-center">
 				<div
-					className={`backgroundDiv  md:h-80 h-48 flex justify-center relative backgroundDivNotVisible`}
+					className={`backgroundDiv  md:h-80 h-48 flex justify-center relative `}
 				>
 					<div
 						className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}

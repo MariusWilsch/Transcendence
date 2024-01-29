@@ -69,7 +69,7 @@ const useStartGame = () => {
 	useEffect(() => {
 		if (connection.isGameStarted) {
 			closeModal();
-			router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/game`);
+			router.push(`/gamelobby/game`);
 		}
 		return () => {
 			closeModal();

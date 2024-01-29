@@ -211,8 +211,12 @@ export default function Profile(params: any) {
 	}
 
 	return (
-		<div className="relative w-[100vw]">
-			{/* <div className="z-0 absolute overflow-hidden w-full mt-80 overflow-y-hidden">
+		<div className="relative w-full  flex justify-center"
+		style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
+	
+		
+		>
+			{/* <div className="z-0 absolute w-full mt-80 ">
 				<Lottie
 					animationData={loading}
 					className="w-full h-auto"
@@ -223,7 +227,7 @@ export default function Profile(params: any) {
 				/>
 			</div> */}
 
-			<div className="z-10 relative flex-1 overflow-y-auto">
+			<div className="z-10 relative flex-1 ">
 				<UserProfileImage
 					status={userFromRoutId?.status}
 					isProfileOwner={isProfileOwner}

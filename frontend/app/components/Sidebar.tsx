@@ -120,7 +120,7 @@ export const Sidebar = () => {
 											<div className="">
 												<li className="">
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${context.user?.intraId}`}
+														href={`/profile/${context.user?.intraId}`}
 														className={`${
 															context.user === null
 																? 'pointer-events-none'
@@ -154,7 +154,7 @@ export const Sidebar = () => {
 														transition={{ delay: 0.01 }}
 													>
 														<Link
-															href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}
+															href={`/notif`}
 														>
 															<IoMdNotificationsOutline
 																size="30"
@@ -183,7 +183,7 @@ export const Sidebar = () => {
 														transition={{ delay: 0.01 }}
 													>
 														<Link
-															href={`${process.env.NEXT_PUBLIC_API_URL}:3000/leaderboard`}
+															href={`/leaderboard`}
 														>
 															<MdLeaderboard
 																size="30"
@@ -198,7 +198,7 @@ export const Sidebar = () => {
 												</li>
 												<li>
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}
+														href={`/friends`}
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
@@ -219,7 +219,7 @@ export const Sidebar = () => {
 												</li>
 												<li>
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels`}
+														href={`/channels`}
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
@@ -240,7 +240,7 @@ export const Sidebar = () => {
 												</li>
 												<li>
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
+														href={`/chat`}
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
@@ -261,7 +261,7 @@ export const Sidebar = () => {
 												</li>
 												<li>
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}
+														href={`/gamelobby`}
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
