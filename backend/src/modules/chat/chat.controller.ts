@@ -1,4 +1,235 @@
-import { Controller } from '@nestjs/common';
+// chat.controller.ts
+import { Controller, Post, Body, Get, Res,Param, UseGuards, Query } from '@nestjs/common';
+import { ChatService } from './chat.service';
+import { Room , User, Message, Channel } from './dto/chat.dto';
+import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 
 @Controller('chat')
-export class ChatController {}
+export class ChatController {
+  constructor(private readonly chatService: ChatService) {}
+
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  async searchUsers(@Query('q') query: string) {
+    return await this.chatService.searchUsers(query);
+  }
+  @Get('chan/:id/Search')
+  @UseGuards(JwtAuthGuard)
+  async searchMembers(@Param('id') id:string,@Query('q') query: string) {
+    return await this.chatService.searchMembers(query, id);
+  }
+  @Get('chanMember/:id/:intraId')
+  @UseGuards(JwtAuthGuard)
+  async getMember(@Param('id') id:string,@Param('intraId') intraId:string) {
+    return await this.chatService.getMember(id, intraId);
+  }
+  
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getAllRooms(@Res() res:any): Promise<Room | undefined>{
+    const data = await this.chatService.getAllPrivateRooms();
+    res.json(data);
+    console.log(data);
+    return data;
+  }
+  @Get(':id/privateRooms')
+  @UseGuards(JwtAuthGuard)
+  async getPrivateRoomsByUser(@Param('id') id:string , @Res() res:any)
+  {
+    try{
+
+      const data = await this.chatService.getPrivateRoomsByUser(id);
+      res.json(data);
+      return data;
+    }
+    catch(e){
+      return undefined;
+    }
+  }
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getRoom(@Param('id') id: string, @Res() res:any) :Promise<void>{
+    const data = await this.chatService.getPrivateRoom(id);
+    res.json({success:true, data});
+    return data;
+  }
+  @Get(':id/messages')
+  @UseGuards(JwtAuthGuard)
+  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number=1, @Query('pageSize') pageSize:number=20) :Promise<void>{
+    try{
+      const skip = (page - 1 ) * pageSize;
+      const data = await this.chatService.getPrivateRoomMessages(id, pageSize, skip);
+      res.json(data);
+      return data;
+    }
+    catch(e){
+      res.json({response:e});
+    }
+  }
+  @Get('channels/public')
+  @UseGuards(JwtAuthGuard)
+  async getPublicChannels(@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllTypeChannels("PUBLIC");
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  @Get('channels/protected')
+  @UseGuards(JwtAuthGuard)
+  async getProtectedChannels(@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllTypeChannels("PROTECTED");
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  @Get('channel/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    try{
+      const data = await this.chatService.getChannel(id);
+      const dataBeta = res.json(data);
+      return dataBeta;
+    }
+    catch(e)
+    {
+      return undefined;
+    }
+  }
+  @Get('channels/:id/availabelChannels')
+  @UseGuards(JwtAuthGuard)
+  async getAvailableChannels(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    const data = await this.chatService.getAllAvailableChannels(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  @Get('invitesChannels/:id')
+  @UseGuards(JwtAuthGuard)
+  async getIviteChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
+    try{
+      const data = await this.chatService.getInviteChannel(id);
+      const dataBeta = res.json(data);
+      return dataBeta;
+    }
+    catch(e)
+    {
+      return undefined;
+    }
+  }
+  @Get('channels/:id/userChannels')
+  @UseGuards(JwtAuthGuard)
+  async getUserChannels(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getUserChannels(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+  @Get('channels/messages/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannelMessages(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getChannelMessages(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+
+  @Get('chanAvatar/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChanAvatar(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getChanAvatar(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+
+  @Get('channelInvitation/:id')
+  @UseGuards(JwtAuthGuard)
+  async getChannelInvitation(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
+    const data = await this.chatService.getInviteChannel(id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
+
+  @Post('createChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async createChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{type:string, password:string},
+  @Res() res:any){
+    try{
+      await this.chatService.createChannel(intraId, channelName, payload);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({e});
+    }
+  }
+  @Post('leaveChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async leaveChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Res() res:any){
+    try{
+      await this.chatService.leaveChannel(intraId, channelName);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false, e});
+    }
+  }
+  // async joinChannel(payload:{channelId:string, type:string,password:string}){
+  //   try{
+  //     await this.chatService.joinChannel(payload.channelId, payload.type, payload.password);
+  //   }
+  //   catch(e){
+  //   }
+  // }
+  @Post('joinChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async joinChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{channelId:string, type:string,password:string} ,
+  @Res() res:any){
+    try{
+      await this.chatService.joinChannel(intraId, payload.channelId, payload.type, payload.password);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.status(500).json({ success: false, error: e });
+    }
+  }
+  @Post('inviteToChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async inviteChannel(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{invitedId:string} ,
+  @Res() res:any){
+    try{
+      await this.chatService.inviteChannel(intraId,payload.invitedId, channelName);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.status(500).json({ success: false, error: e });
+    }
+  }
+  @Post('updateChannel/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async updateChannelSettings( @Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{newName:string, type:string, password:string},
+  @Res() res:any){
+    try{
+      await this.chatService.updateChannelSettings(intraId, channelName,payload);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false,e});
+    }
+  }
+
+  @Post('private-message')
+  @UseGuards(JwtAuthGuard)
+  async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
+    const { sender, recipient, message } = data;
+    await this.chatService.sendPrivateMessage(sender, recipient, message);
+  }
+}

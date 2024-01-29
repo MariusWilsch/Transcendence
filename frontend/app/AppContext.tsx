@@ -8,6 +8,34 @@ import React, {
 import { io, Socket } from "socket.io-client";
 import Cookies from "universal-cookie";
 
+export interface Message {
+  id: number;
+  sender: string;
+  recipient: string;
+  content: string;
+  createdAt: Date;
+  PrivateRoomName: string;
+}
+
+export interface Room {
+  id: number;
+  name: string;
+  paraticipants: string[];
+  participantsIds: string[];
+  participants: User[];
+  messages: Message[];
+  createdAt: Date
+  updated_at: Date
+}
+export type ChannelMessage = {
+  id: number,
+  channelId: string,
+  sender: string,
+  recipient: string,
+  content: string,
+  createdAt: Date,
+}
+
 export type User = {
   intraId: string;
   fullname: string;
@@ -20,22 +48,30 @@ export type User = {
   updated_at: Date;
   status: string;
 };
-
-
-export type  MatchHistory = {
-  winnerId    : String  ;
-  loserId     : String  ;
-  score       : String   ;
-  user1Avatar : String   ;
-  user2Avatar : String   ;
-  user1Login  : String   ;
-  user2Login  : String   ;
-  matchDate   : string ;
+export type Channel = {
+  id: number;
+  name: string;
+  type: string;
+  ownerId: string;
+  password: string;
+  description: string;
 }
 
+export type MemberShip={
+  memberId: string;
+    intraId: string;
+    channelId: string;
+    Avatar: string;
+    login: string;
+    isOwner: boolean;
+    isModerator: boolean;
+    isBanned: boolean;
+    isMuted: boolean;
+    mutedTime: Date;
+    joined_at: Date;
+}
 
-
-type AppContextProps = {
+export type AppContextProps = {
   isDivVisible: boolean;
   toggleDivVisibility: () => void;
   setDivVisible: (isDivVisible: boolean) => void;
@@ -44,10 +80,32 @@ type AppContextProps = {
   isSidebarVisible: boolean;
   setisSidebarVisible: (isSidebarVisible: boolean) => void;
   toggleSidebarVisibleVisibility: () => void;
+  recipientUserId: string;
+  setRecipientLogin: (recipientUserId: string) => void;
+  setUserData: (userData: any) => void;
+  userData: any;
+  setUsersData: (userData: any) => void;
+  usersData: any;
+  friendsData: any;
+  setFriends: (userData: any) => void;
+  setMessages: (messages: Message[]) => void;
+  messages: Message[];
+  messageText: string;
+  setMessageText: (messageText: string) => void;
+  socket: Socket | null;
+  setSocket: (socket: Socket | null) => void;
+  rooms: Room[];
+  setRooms: (rooms: Room[]) => void;
+  channel: Channel | undefined;
+  setChannel: (channel: Channel) => void;
   notifSocket: Socket | null;
   setNotifSocket: (notifSocket: Socket | null) => void;
   notif: boolean;
   setnotif: (notif: boolean) => void;
+  setComponent : (component:string)=>void;
+  component:string;
+  setResponsive : (responsive :boolean)=>void;
+  responsive : boolean;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -60,8 +118,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isDivVisible, setDivVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isSidebarVisible, setisSidebarVisible] = useState<boolean>(true);
+  const [recipientUserId, setRecipientLogin] = useState<string>('');
+  const [userData, setUserData] = useState(null);
+  const [usersData, setUsersData] = useState(null);
+  const [friendsData, setFriends] = useState(null);
+  const [messages, setMessages] = useState<Message[]>([]); // Provide a type for the messages state
+  const [messageText, setMessageText] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
   const [notifSocket, setNotifSocket] = useState<Socket | null>(null);
   const [notif, setnotif] = useState<boolean>(false);
+  const [component, setComponent] = useState('conversation');//for resposive purposes
+  const [responsive, setResponsive] = useState(true);
+  const [channel, setChannel] = useState<Channel | undefined>();
 
 
   const toggleDivVisibility = () => {
@@ -71,8 +140,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const toggleSidebarVisibleVisibility = () => {
     setisSidebarVisible((prev) => !prev);
   };
-
   const contextValue: AppContextProps = {
+    setChannel,
+    channel,
+    setComponent,
+    component,
+    setResponsive,
+    responsive,
+    setUsersData,
+    usersData,
+    rooms,
+    setRooms,
+    socket,
+    setSocket,
+    messages,
+    setMessages,
+    messageText,
+    setMessageText,
+    setFriends,
+    friendsData,
+    setUserData,
+    userData,
+    recipientUserId,
+    setRecipientLogin,
     isDivVisible,
     toggleDivVisibility,
     setDivVisible,

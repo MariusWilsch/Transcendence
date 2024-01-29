@@ -1,3 +1,5 @@
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as socketio from 'socket.io';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import * as cookieParser from 'cookie-parser';
@@ -16,9 +18,10 @@ async function bootstrap() {
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
+  
 
-
-
+  
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.use(cookieParser());
   
   await app.listen(3001);

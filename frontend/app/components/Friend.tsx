@@ -315,7 +315,8 @@ export const Friend = ({
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							//! Friend ID here
-							onClick={() => initSocketPushGame(MatchType.PRIVATE, 'friendId')}
+							onClick={
+								()=>console.log('right')}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}

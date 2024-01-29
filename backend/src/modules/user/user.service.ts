@@ -419,7 +419,6 @@ export class UserService {
           login: 'asc',
         },
       });
-      // get tonly the users that are in the page that we want
       leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
       leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
       
