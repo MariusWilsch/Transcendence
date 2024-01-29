@@ -100,6 +100,12 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'connection/disconnect':
 			ClientSocket?.disconnect();
 			break;
+		case 'connection/invitePrivate':
+			ClientSocket?.emit('invitePrivate', action.payload);
+			break;
+		case 'connection/acceptPrivate':
+			ClientSocket?.emit('acceptPrivate', action.payload);
+			break;
 		case 'gameConfig/setupAIMatch':
 			AISocket = connect(store, AISocket);
 			AISocket?.emit('setupAIMatch', action.payload);
