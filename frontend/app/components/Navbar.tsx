@@ -83,7 +83,7 @@ export const Navbar = () => {
 	}, [user, pathname]);
 
 	return (
-		<div className="bg-[#1F212A] flex flex-row  w-full overflow-hidden">
+		<div className="z-20 bg-[#1F212A] flex flex-row w-full overflow-hidden">
 			<div className="w-16 h-16 bg-[#292D39]">
 				<Image
 					unoptimized={true}
@@ -107,7 +107,7 @@ export const Navbar = () => {
 								</button>
 							</div>
 							<div className="flex items-center md:p-3">
-								<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/search`}>
+								<Link href={`/search`}>
 									<CiSearch size="30" className="text-slate-400 " />
 								</Link>
 								<div className="md:inline-block hidden">
@@ -145,7 +145,7 @@ export const Navbar = () => {
 							)}
 							{!isProfileOwner && user && (
 								<Link
-									href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+									href={`/profile/${user.intraId}`}
 									className="flex flex-row"
 								>
 									<Image

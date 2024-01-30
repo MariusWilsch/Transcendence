@@ -33,7 +33,6 @@ export default function Search(params: any) {
 			const data = await response.json();
 			if (data.success === true) {
 				setUsers(data.leaderboard);
-				console.log(data.leaderboard);
 			}
 		} catch (error) {
 			console.log(error);
@@ -43,6 +42,14 @@ export default function Search(params: any) {
 	useEffect(() => {
 		leaderboard();
 	}, [page]);
+
+	const getRadialProgressStyles = (winrate : any) => {
+		return {
+		  '--size': '60px',
+		  fontSize: '16px',
+		  '--value': winrate.toFixed(0),
+		};
+	  };
 
 	return (
 		<div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -56,8 +63,9 @@ export default function Search(params: any) {
 							{users &&
 								users.map((user, index) => (
 									<Link
+										prefetch={false}
 										key={user.intraId}
-										href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+										href={`/profile/${user.intraId}`}
 									>
 										<motion.div
 											whileHover={{ scale: 1.1 }}
@@ -75,7 +83,7 @@ export default function Search(params: any) {
 														<div className="flex items-center">
 															<div className="relative flex-shrink-0 pt-0.5">
 																<img
-																	className="h-10 w-10 rounded-full"
+																	className="h-14 w-14 rounded-full"
 																	src={user.Avatar}
 																	alt=""
 																/>
@@ -104,8 +112,14 @@ export default function Search(params: any) {
 
 													<div className="flex">
 														<button className="items-center justify-center w-full border border-transparent rounded-none rounded-r-lg p-4 flex text-sm font-medium text-indigo-600 ">
-															<div className="text-lg font-bold text-green-400 mr-2">
-																{user.winrate.toFixed(0)}%
+															<div className="text-lg font-bold text-blue-400 mr-2">
+																<div
+																	className="radial-progress"
+																	style = {getRadialProgressStyles(user.winrate)}
+																	role="progressbar"
+																>
+																	{user.winrate.toFixed(0)}%
+																</div>
 															</div>
 														</button>
 													</div>
@@ -118,8 +132,8 @@ export default function Search(params: any) {
 					</div>
 				</div>
 			</div>
-			<div className="flex flex-row items-end justify-center">
-				<div className="join">
+			<div className="flex flex-row items-end justify-center  z-20 mb-5">
+				<div className="join z-20">
 					<button
 						className="join-item btn"
 						onClick={() => {

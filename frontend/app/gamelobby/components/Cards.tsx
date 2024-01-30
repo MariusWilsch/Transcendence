@@ -85,7 +85,7 @@ const Cards: React.FC = () => {
 					}
 					onClick={() =>
 						router.push(
-							`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`,
+							`/gamelobby/steps`,
 						)
 					}
 				/>

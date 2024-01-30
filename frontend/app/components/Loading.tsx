@@ -4,7 +4,7 @@ import Lottie from "lottie-react";
 
 export const Loading = () => {
   return (
-    <div className="bg-[#12141A] custom-height flex items-center justify-center">
+    <div className="bg-[#12141A] custom-height w-full flex items-center justify-center">
       <Lottie
         animationData={morti}
         className="w-40"

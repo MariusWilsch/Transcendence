@@ -49,6 +49,7 @@ body {
 }
 
 .custom-width {
+	/* width: 100%; */
 	width: calc(100vh - 64px);
 }
 
@@ -56,14 +57,17 @@ body {
 	background-image: url('../public/one.jpg');
 	background-size: cover;
 	background-position: center;
-	width: calc(100vw - 64px);
+	width: 100%;
+	/* width: calc(100vw - 64px); */
 }
 
 .backgroundDivNotVisible {
 	background-image: url('../public/one.jpg');
 	background-size: cover;
 	background-position: center;
-	width: 100vw;
+	width: 100%;
+
+	/* width: 100vw; */
 }
 
 .twofabackround {

@@ -438,6 +438,8 @@ export class UserService {
 					},
 					data: {
 						winrate: winPercentage,
+						lost: user.lostMatches.length,
+						won: user.wonMatches.length,
 					},
 				});
 			});
@@ -445,30 +447,20 @@ export class UserService {
 			leaderboard.sort((a, b) => {
 				return b.winrate - a.winrate;
 			});
+
+			leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
+			leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
+
 			return leaderboard;
-		} catch {}
+		} catch {
+			console.error('Error leaderboard');
+		}
 	}
-
-	// try {
-	//   const numberOfUserInOnePage = 10;
-
-	//   const leaderboard = await prisma.user.findMany({
-	//     orderBy: {
-	//       login: 'asc',
-	//     },
-	//   });
-	//   // get tonly the users that are in the page that we want
-	//   leaderboard.splice(0, (page - 1) * numberOfUserInOnePage);
-	//   leaderboard.splice(numberOfUserInOnePage, leaderboard.length);
-
-	//   return leaderboard;
-	// } catch (error: any) {
-	//   console.error('Error leaderboard:', error);
-	//   return;
-	// }
 
 	async Gamehistory(userId: string) {
 		try {
+			this.leaderboard(1);
+
 			const Gamehistory = await prisma.matchHistory.findMany({
 				where: {
 					OR: [{ winnerId: userId }, { loserId: userId }],
@@ -477,6 +469,79 @@ export class UserService {
 			return Gamehistory;
 		} catch (error: any) {
 			console.error('Error Gamehistory:', error);
+			return;
+		}
+	}
+
+	async Achievements(userId: string) {
+		try {
+			const user = await prisma.user.findUnique({
+				where: {
+					intraId: userId,
+				},
+				include: {
+					wonMatches: true,
+					lostMatches: true,
+				},
+			});
+
+			if (!user) {
+				console.error('User not found');
+				return;
+			}
+
+			const achievements = [];
+
+			if (user.won + user.lost >= 0) {
+				achievements.push('Welcome to the game');
+			}
+
+			if (user.won + user.lost >= 1) {
+				achievements.push('Noob Player: Play 1 game');
+			}
+
+			if (user.won + user.lost >= 2) {
+				achievements.push('Still noob: Play 2 game');
+			}
+
+			if (user.won + user.lost >= 5) {
+				achievements.push('Novice Player: Play 5 games');
+			}
+
+			if (user.won + user.lost >= 10) {
+				achievements.push('Experienced Competitor: Play 10 games');
+			}
+
+			if (user.winrate >= 50) {
+				achievements.push('Victorious Warrior: Reach a win percentage of 50%');
+			}
+
+			if (user.winrate >= 80) {
+				achievements.push('Elite Champion: Reach a win percentage of 80%');
+			}
+
+			if (user.winrate >= 100) {
+				achievements.push('Top Champion: Reach a win percentage of 100%');
+			}
+
+			await prisma.user.update({
+				where: {
+					intraId: userId,
+				},
+				data: {
+					Achievements: achievements,
+				},
+			});
+
+			const user1 = await prisma.user.findUnique({
+				where: {
+					intraId: userId,
+				},
+			});
+
+			return user1.Achievements;
+		} catch (error: any) {
+			console.error('Error Achievements:', error);
 			return;
 		}
 	}
