@@ -69,10 +69,11 @@ const connectionSlice = createSlice({
 		gameStarted: (state) => {
 			state.isGameStarted = true;
 			state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
+			state.playerOutcome = GameOutcome.NONE;
 		},
 		gameFinished: (state) => {
 			state.isGameStarted = false;
-			state.countDownDone = false
+			state.countDownDone = false;
 			// state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
 		},
 		setPlayerOutcome: (state, action) => {

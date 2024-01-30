@@ -7,6 +7,6 @@ export const GAME_CONFIG = {
 	paddleHeight: 50,
 	paddleSpeedFactor: 1.25,
 	ballRadius: 8,
-	ballSpeedFactor: 0.9,
+	ballSpeedFactor: 0.8,
 	WinningScore: 7,
 };

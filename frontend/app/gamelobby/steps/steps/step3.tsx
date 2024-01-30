@@ -27,10 +27,10 @@ export const Step3 = () => {
 				onClick={
 					isConnected === ConnectionStatus.CONNECTED
 						? () => {
-								initSocketPushGame(MatchType.PUBLIC);
+								initSocketPushGame();
 						  }
 						: () => {
-								pushToGame(MatchType.PRIVATE);
+								pushToGame();
 						  }
 				}
 			>

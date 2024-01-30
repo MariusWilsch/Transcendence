@@ -6,7 +6,7 @@ const StepsList: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState(1);
 
 	return (
-		<div className="flex pt-4 flex-col items-center gap-x-12 h-full justify-between">
+		<div className="z-50 flex pt-4 flex-col items-center gap-x-12 h-full justify-between">
 			<ul className="steps steps-horizontal w-[60%] pt-4">
 				<li
 					className={`step ${
