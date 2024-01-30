@@ -1,6 +1,10 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import { InputType, mapType } from '@/app/gamelobby/GlobalRedux/features';
+import { useEffect, useRef, useState } from 'react';
+import {
+	InputType,
+	gameFinished,
+	mapType,
+} from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameService } from './GameService';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
@@ -18,7 +22,7 @@ export const GameCanvas: React.FC = () => {
 	const { inputType, mapChoice } = useSelector(
 		(state: RootState) => state.gameConfig,
 	);
-	const { isGameStarted, isConnected } = useSelector(
+	const { isGameStarted, isConnected, countDownDone } = useSelector(
 		(state: RootState) => state.connection,
 	);
 	const dispatch = useDispatch();
@@ -62,9 +66,9 @@ export const GameCanvas: React.FC = () => {
 			);
 			serviceRef.current.initGameElements(gameState.ball, gameState.paddles);
 		}
-
 		//* Update the game service with the current game state
 		if (serviceRef.current) {
+			console.log('Updating game service with', gameState);
 			serviceRef.current.updateGameElements(gameState);
 		}
 
@@ -85,6 +89,21 @@ export const GameCanvas: React.FC = () => {
 			window.removeEventListener('popstate', handleBackButton);
 		};
 	}, []);
+
+	useEffect(() => {
+		let timer: NodeJS.Timeout;
+
+		if (isGameStarted && countDownDone) {
+			timer = setTimeout(() => {
+				console.log(
+					'No game state updates received for 1 second, resetting isGameStarted',
+				);
+				dispatch(gameFinished());
+			}, 1000); // 1 second
+		}
+
+		return () => clearTimeout(timer);
+	}, [isGameStarted, countDownDone, gameState]);
 
 	return (
 		<div

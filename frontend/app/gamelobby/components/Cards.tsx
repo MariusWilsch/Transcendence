@@ -58,8 +58,8 @@ const Cards: React.FC = () => {
 
 	const handlePlayNow = () => {
 		isConnected === ConnectionStatus.DISCONNECTED
-			? initSocketPushGame(MatchType.PUBLIC)
-			: pushToGame(MatchType.PUBLIC);
+			? initSocketPushGame()
+			: pushToGame();
 	};
 
 	return (
@@ -84,9 +84,7 @@ const Cards: React.FC = () => {
 						'Click here to customize the game! You can choose to play against a friend or the computer and much more!'
 					}
 					onClick={() =>
-						router.push(
-							`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`,
-						)
+						router.push(`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps`)
 					}
 				/>
 			</div>

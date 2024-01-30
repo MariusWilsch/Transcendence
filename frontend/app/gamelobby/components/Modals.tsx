@@ -1,10 +1,15 @@
-import { GameOutcome, cancelMatchmaking } from '../GlobalRedux/features';
+import {
+	GameOutcome,
+	cancelMatchmaking,
+	gameFinished,
+} from '../GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useRef } from 'react';
 import useStartGame from '../hooks/useStartGame';
 import Link from 'next/link';
 import { MatchType } from '@/interfaces';
 import { RootState } from '../GlobalRedux/store';
+import { useAppContext } from '@/app/AppContext';
 
 export const Modal = () => {
 	const dispatch = useDispatch();
@@ -17,8 +22,7 @@ export const Modal = () => {
 					<span className="ml-2 loading loading-dots loading-md"></span>
 				</h3>
 				<p className="py-4">
-					Click outside of the modal or click the button to cancel the
-					matchmaking.
+					Click outside of the modal or click the button to cancel the matchmaking.
 				</p>
 				<div className="modal-action">
 					<form onClick={() => dispatch(cancelMatchmaking())} method="dialog">
@@ -43,6 +47,15 @@ export function GameOutcomeModal({ outcome }: any) {
 		(state: RootState) => state.connection.isGameStarted,
 	);
 	const { pushToGame } = useStartGame();
+	const context = useAppContext();
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		context.socket?.on('gameStopped', () => {
+			modalRef.current?.showModal();
+			dispatch(gameFinished());
+		});
+	});
 
 	useEffect(() => {
 		if (!isGameStarted) {
@@ -61,15 +74,9 @@ export function GameOutcomeModal({ outcome }: any) {
 						<div className="font-bold text-lg">You {outcome}</div>
 					)}
 					<div className="modal-action flex justify-center items-center">
-						<form
-							method="dialog"
-							className="space-x-4 w-full flex justify-center"
-						>
+						<form method="dialog" className="space-x-4 w-full flex justify-center">
 							{outcome !== GameOutcome.NONE && (
-								<button
-									onClick={() => pushToGame(MatchType.PUBLIC)}
-									className="btn"
-								>
+								<button onClick={() => pushToGame(MatchType.PUBLIC)} className="btn">
 									Play again
 								</button>
 							)}

@@ -49,6 +49,7 @@ const useStartGame = () => {
 	) => {
 		if (connectionStatus === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
+		console.log(inviteeID, invite);
 		invite === Invite.INVITING
 			? dispatch(invitePrivate({ inviteeID }))
 			: dispatch(acceptPrivate({ inviteeID }));

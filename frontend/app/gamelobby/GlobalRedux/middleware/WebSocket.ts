@@ -14,13 +14,12 @@ import {
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
+import { FaPersonWalkingDashedLineArrowRight } from 'react-icons/fa6';
 
 //* Global variables
 let ClientSocket: Socket | null = null;
 let AISocket: Socket | null = null;
-
 const cookies = new Cookies();
-
 //* Helper functions for WebSocket middleware
 const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	const token = cookies.get('jwt');
@@ -59,9 +58,11 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 		store.dispatch(gameStarted());
 	});
 
-	socket.on('gameState', (gameState: GameState) =>
-		store.dispatch(updateGame(gameState)),
-	);
+	socket.on('gameState', (gameState: GameState) => {
+		store.dispatch(updateGame(gameState));
+	});
+
+	socket.on('test', () => console.log('Test received'));
 
 	socket.on('gameOver', (won: boolean) => {
 		//* Will be set twice, once for each player
@@ -94,7 +95,6 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			ClientSocket?.emit('addToLobby');
 			break;
 		case 'gameConfig/setupInteraction':
-			console.log('setupInteraction');
 			ClientSocket?.emit('setupInteraction', action.payload);
 			break;
 		case 'connection/disconnect':
@@ -106,6 +106,8 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'connection/acceptPrivate':
 			ClientSocket?.emit('acceptPrivate', action.payload);
 			break;
+		case 'connection/otherSocket':
+			ClientSocket?.emit('otherSocket', action.payload);
 		case 'gameConfig/setupAIMatch':
 			AISocket = connect(store, AISocket);
 			AISocket?.emit('setupAIMatch', action.payload);

@@ -16,7 +16,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { RootState } from '../gamelobby/GlobalRedux/store';
 import { useSelector } from 'react-redux';
-import { Invite } from '../gamelobby/GlobalRedux/features';
+import { Invite, otherSocket } from '../gamelobby/GlobalRedux/features';
+import { useDispatch } from 'react-redux';
 
 export const Friend = ({
 	isProfileOwner,
@@ -32,6 +33,7 @@ export const Friend = ({
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,
 	);
+	const dispatch = useDispatch();
 
 	const [friendshipStatus, setStatus] = useState<
 		'NOTFRIENDS' | 'PENDING' | 'ACCEPTED' | 'BLOCKED'
@@ -183,6 +185,7 @@ export const Friend = ({
 
 	const handler = () => {
 		if (context.socket) {
+			console.log('emitting to private match');
 			context.socket.emit('privateMatch', { to: userId, other: friendId });
 		}
 		handleInvite(friendId, isConnected, Invite.INVITING);

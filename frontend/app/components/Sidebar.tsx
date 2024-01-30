@@ -21,13 +21,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'universal-cookie';
 import { io } from 'socket.io-client';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
-
-
-
+import useStartGame from '@/app/gamelobby/hooks/useStartGame';
+import { ConnectionStatus, Invite } from '../gamelobby/GlobalRedux/features';
+import { useSelector } from 'react-redux';
+import { RootState } from '../gamelobby/GlobalRedux/store';
 
 export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
 	const pathname = usePathname();
+	const { handleInvite } = useStartGame();
+	const isConnected = useSelector(
+		(state: RootState) => state.connection.isConnected,
+	);
 
 	const context = useAppContext();
 
@@ -81,54 +86,57 @@ export const Sidebar = () => {
 	}, [context.user, context.notifSocket]);
 
 	useEffect(() => {
-		
 		if (!context.socket) {
-				const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-			  const cookie = new Cookies();
-			  const newSocket = io(chatNameSpace, {
+			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
+			const cookie = new Cookies();
+			const newSocket = io(chatNameSpace, {
 				query: { user: cookie.get('jwt') },
-			  });
-			  context.setSocket(newSocket);
+			});
+			context.setSocket(newSocket);
 		}
-		if (context.socket) {
-			context.socket.on('privateChat', (data:Message)=>{
-				if (data){
-					if (data.sender !== context.user?.intraId){
-
+		if (context.socket && context.user) {
+			context.socket.on('privateChat', (data: Message) => {
+				if (data) {
+					if (data.sender !== context.user?.intraId) {
 						toast.success('new message');
 					}
 				}
-			})
-			context.socket.on('privateMatch', (data:any)=>{
+			});
+			context.socket.on('privateMatch', (data: any) => {
 				// if (data.from.intraId !== context.user?.intraId)
-				// {	
-					const msg = 'invitation from ' + data.from.login +' for a game';
-					toast(() =>(
-						<>
-							<p> {msg} </p>
-							<span className='flex flex-row space-x-6'>
-							 <button
-												className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-												onClick={() => {
-													console.log('event handler here')
-												}}
-												>
-												<FiCheckCircle size="30" className="text-green-300" />
+				// {
+				const msg = 'invitation from ' + data.from.login + ' for a game';
+				toast((t) => (
+					<>
+						<p> {msg} </p>
+						<span className="flex flex-row space-x-6">
+							<button
+								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+								onClick={() => {
+									console.log('accept handler');
+									toast.dismiss(t.id);
+									handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
+								}}
+							>
+								<FiCheckCircle size="30" className="text-green-300" />
 							</button>
 							<button
-												className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-												onClick={() => console.log('dismiss handler')}
-												>
-												<FiXCircle size="30" className="text-red-300" />
-											</button>
-							</span>
-												</>
-						  ));
-						  console.log('the private chat event has been occured');
+								className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+								onClick={() => {
+									toast.dismiss(t.id);
+									console.log('dismiss handler');
+								}}
+							>
+								<FiXCircle size="30" className="text-red-300" />
+							</button>
+						</span>
+					</>
+				));
+				console.log('the private chat event has been occured');
 				// }
-			})
-	}
-}, [context.socket]);
+			});
+		}
+	}, [context.socket, context.user]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
@@ -193,9 +201,7 @@ export const Sidebar = () => {
 															<CgProfile
 																size="30"
 																className={`${
-																	RouterName === 'profile'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'profile' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8
                         `}
 															/>
@@ -209,15 +215,11 @@ export const Sidebar = () => {
 														animate={{ opacity: 1, y: 0 }}
 														transition={{ delay: 0.01 }}
 													>
-														<Link
-															href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}
-														>
+														<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
 															<IoMdNotificationsOutline
 																size="30"
 																className={`${
-																	RouterName === 'notif'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'notif' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
 															{context.notif && (
@@ -253,9 +255,7 @@ export const Sidebar = () => {
 													</motion.div>
 												</li>
 												<li>
-													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}
-													>
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/friends`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -265,18 +265,14 @@ export const Sidebar = () => {
 															<FaUserFriends
 																size="30"
 																className={`${
-																	RouterName === 'friends'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'friends' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
 												</li>
 												<li>
-													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels`}
-													>
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -286,18 +282,14 @@ export const Sidebar = () => {
 															<GrGroup
 																size="30"
 																className={`${
-																	RouterName === 'channels'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'channels' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
 												</li>
 												<li>
-													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
-													>
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -307,18 +299,14 @@ export const Sidebar = () => {
 															<IoChatbubblesOutline
 																size="30"
 																className={`${
-																	RouterName === 'chat'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
 												</li>
 												<li>
-													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}
-													>
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -328,9 +316,7 @@ export const Sidebar = () => {
 															<RiPingPongLine
 																size="30"
 																className={`${
-																	RouterName === 'play'
-																		? 'text-slate-50'
-																		: 'text-slate-500'
+																	RouterName === 'play' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
@@ -338,13 +324,8 @@ export const Sidebar = () => {
 												</li>
 											</div>
 											<div>
-												<li
-													onClick={() => console.log('cfsdfaf')}
-													className=" "
-												>
-													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}
-													>
+												<li onClick={() => console.log('cfsdfaf')} className=" ">
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}

@@ -27,6 +27,7 @@ export enum MatchmakingStatus {
 interface PrivateMatch {
 	inviteeID: string;
 	accepted?: boolean; // True if the friend has accepted the invite
+	socket?: any;
 }
 
 export interface ConnectionState {
@@ -38,6 +39,7 @@ export interface ConnectionState {
 		username: string;
 		avatar: string;
 	};
+	countDownDone: boolean;
 }
 
 const initialState = {
@@ -49,6 +51,7 @@ const initialState = {
 		username: '',
 		avatar: '',
 	},
+	countDownDone: false,
 } as ConnectionState;
 
 const connectionSlice = createSlice({
@@ -69,6 +72,7 @@ const connectionSlice = createSlice({
 		},
 		gameFinished: (state) => {
 			state.isGameStarted = false;
+			state.countDownDone = false
 			// state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
 		},
 		setPlayerOutcome: (state, action) => {
@@ -76,6 +80,9 @@ const connectionSlice = createSlice({
 		},
 		setGameData: (state, action) => {
 			state.gameData = action.payload;
+		},
+		setCountDownDone: (state, action) => {
+			state.countDownDone = action.payload;
 		},
 	},
 });
@@ -91,6 +98,7 @@ export const invitePrivate = createAction<PrivateMatch>(
 export const acceptPrivate = createAction<PrivateMatch>(
 	'connection/acceptPrivate',
 );
+export const otherSocket = createAction('connection/otherSocket');
 
 //* Slice definitions
 export const {
@@ -100,5 +108,6 @@ export const {
 	setConnectionStatus,
 	setMatchmaking,
 	setGameData,
+	setCountDownDone,
 } = connectionSlice.actions;
 export const connectionReducer = connectionSlice.reducer;

@@ -351,6 +351,7 @@ export class GameService {
 			);
 			if (otherPlayer) {
 				console.log('Disconnecting other player...');
+				otherPlayer.playerSockets.emit('test');
 				otherPlayer.playerSockets.disconnect();
 			}
 		}

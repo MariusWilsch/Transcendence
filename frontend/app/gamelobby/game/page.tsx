@@ -5,6 +5,7 @@ import {
 	setupInteraction,
 	startLoop,
 	disconnect,
+	setCountDownDone,
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -96,6 +97,7 @@ function CountdownModal() {
 		let remainingTime = 5;
 
 		dispatch(setupInteraction(gameConfig));
+
 		if (modal && countdown) {
 			modal.showModal();
 			intervalRef.current = setInterval(() => {
@@ -105,6 +107,7 @@ function CountdownModal() {
 					dispatch(startLoop());
 					modal.close();
 					clearInterval(intervalRef.current!);
+					dispatch(setCountDownDone(true));
 				}
 			}, 1000);
 		}
