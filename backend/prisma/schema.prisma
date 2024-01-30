@@ -11,26 +11,31 @@ datasource db {
 }
 
 model User {
-  intraId      String         @unique
-  fullname     String         @unique
-  login        String         @unique
-  email        String         @unique
-  Avatar       String?
-  password     String?
-  won          Int            @default(0)
-  lost         Int            @default(0)
-  winrate      Float          @default(0)
-  isRegistred  Boolean        @default(false)
-  isTfaEnabled Boolean        @default(false)
-  Achievements String[]
-  status       Status         @default(ONLINE)
-  tfa          Tfa?
-  friends      Friend[]       @relation("userFriends")
-  user         Friend[]       @relation("friendsUser")
-  created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
-  wonMatches   MatchHistory[] @relation("userWins")
-  lostMatches  MatchHistory[] @relation("userLosses")
+  intraId       String         @unique
+  fullname      String         @unique
+  login         String         @unique
+  email         String         @unique
+  Avatar        String?
+  password      String?
+  won           Int            @default(0)
+  lost          Int            @default(0)
+  winrate       Float          @default(0)
+  isRegistred   Boolean        @default(false)
+  isTfaEnabled  Boolean        @default(false)
+  Achievements  String[]
+  status        Status         @default(ONLINE)
+  tfa           Tfa?
+  friends       Friend[]       @relation("userFriends")
+  user          Friend[]       @relation("friendsUser")
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  wonMatches    MatchHistory[] @relation("userWins")
+  lostMatches   MatchHistory[] @relation("userLosses")
+  MemberShip    MemberShip[]
+  Message       Message[]
+  Message       Message[]
+  PrivateRoom   PrivateRoom?   @relation(fields: [privateRoomId], references: [id])
+  privateRoomId Int?
 }
 
 model MatchHistory {
@@ -50,63 +55,65 @@ model MatchHistory {
 }
 
 model Channel {
-  id             Int             @id @default(autoincrement())
-  name           String          @unique
-  type           String          @default("")
-  ownerId        String          
-  password       String          @default("")
-  members        MemberShip[]    @relation("channelMember")
-  description    String?
-  messages       ChannelMessage[] 
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  type        String           @default("")
+  ownerId     String
+  password    String           @default("")
+  members     MemberShip[]     @relation("channelMember")
+  description String?
+  messages    ChannelMessage[]
 }
 
 model MemberShip {
-  memberId        String        @unique @id
-  intraId         String
-  channelId       String
-  Avatar          String        @default("")
-  login           String        @default("")
-  isOwner        Boolean @default(false)
-  isModerator    Boolean @default(false)
-  isBanned       Boolean @default(false)
-  isMuted        Boolean @default(false)
-  mutedTime      DateTime? 
-  joined_at      DateTime        @default(now())
-  onInviteState  Boolean @default(false)
-  channel        Channel  @relation("channelMember",fields: [channelId], references  : [name])
-  user           User     @relation(fields: [intraId], references: [intraId])
+  memberId      String    @id @unique
+  intraId       String
+  channelId     String
+  Avatar        String    @default("")
+  login         String    @default("")
+  isOwner       Boolean   @default(false)
+  isModerator   Boolean   @default(false)
+  isBanned      Boolean   @default(false)
+  isMuted       Boolean   @default(false)
+  mutedTime     DateTime?
+  joined_at     DateTime  @default(now())
+  onInviteState Boolean   @default(false)
+  channel       Channel   @relation("channelMember", fields: [channelId], references: [name])
+  user          User      @relation(fields: [intraId], references: [intraId])
 }
 
 model ChannelMessage {
-  id             Int       @id @default(autoincrement())
-  channelId      String
-  sender         String
-  Avatar         String?
-  content        String
-  createdAt      DateTime  @default(now())
-  senderUser     Channel      @relation(fields: [channelId], references: [name])
-}
-model Message {
-  id             Int       @id @default(autoincrement())
-  sender         String
-  recipient      String
-  content        String
-  createdAt      DateTime  @default(now())
-  senderUser     User      @relation("SentMessages", fields: [sender], references: [intraId])
-  recipientUser  User      @relation("ReceivedMessages", fields: [recipient], references: [intraId])
-  PrivateRoomName    String
-  PrivateRoom       PrivateRoom  @relation(fields: [PrivateRoomName], references: [name])
+  id         Int      @id @default(autoincrement())
+  channelId  String
+  sender     String
+  Avatar     String?
+  content    String
+  createdAt  DateTime @default(now())
+  senderUser Channel  @relation(fields: [channelId], references: [name])
 }
 
-model PrivateRoom{
-  id            Int       @id @default(autoincrement())
-  name         String     @unique
-  participantsIds String[]
-  participants User[]
-  messages     Message[]
-  createdAt      DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+model Message {
+  id              Int         @id @default(autoincrement())
+  sender          String
+  recipient       String
+  content         String
+  createdAt       DateTime    @default(now())
+  senderUser      User        @relation("SentMessages", fields: [sender], references: [intraId])
+  recipientUser   User        @relation("ReceivedMessages", fields: [recipient], references: [intraId])
+  PrivateRoomName String
+  PrivateRoom     PrivateRoom @relation(fields: [PrivateRoomName], references: [name])
 }
+
+model PrivateRoom {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  participantsIds String[]
+  participants    User[]
+  messages        Message[]
+  createdAt       DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+}
+
 model Tfa {
   user       User     @relation(fields: [intraId], references: [intraId])
   intraId    String   @unique
