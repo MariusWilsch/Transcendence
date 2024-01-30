@@ -9,7 +9,7 @@ import { Modal } from '.';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../GlobalRedux/store';
 import { ConnectionStatus, startConnection } from '../GlobalRedux/features';
-import { MatchType } from '@/interfaces/GameState';
+
 
 type CardProps = {
 	img: StaticImageData;
