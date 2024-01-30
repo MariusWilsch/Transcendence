@@ -380,7 +380,7 @@ export default function Friends() {
 									users?.map((user) => (
 										<Link
 											key={user.intraId}
-											href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+											href={`/profile/${user.intraId}`}
 										>
 											<div
 												key={user.intraId}

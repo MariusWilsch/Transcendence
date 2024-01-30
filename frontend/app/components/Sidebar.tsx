@@ -184,7 +184,7 @@ export const Sidebar = () => {
 											<div className="">
 												<li className="">
 													<Link
-														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${context.user?.intraId}`}
+														href={`/profile/${context.user?.intraId}`}
 														className={`${
 															context.user === null
 																? 'pointer-events-none'
@@ -241,7 +241,7 @@ export const Sidebar = () => {
 														transition={{ delay: 0.01 }}
 													>
 														<Link
-															href={`${process.env.NEXT_PUBLIC_API_URL}:3000/leaderboard`}
+															href={`/leaderboard`}
 														>
 															<MdLeaderboard
 																size="30"

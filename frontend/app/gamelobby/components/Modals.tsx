@@ -80,7 +80,7 @@ export function GameOutcomeModal({ outcome }: any) {
 									Play again
 								</button>
 							)}
-							<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby`}>
+							<Link href={`/gamelobby`}>
 								<button className="btn">Go Home</button>
 							</Link>
 						</form>

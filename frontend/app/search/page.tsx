@@ -157,7 +157,7 @@ export default function Search(params: any) {
                     users?.map((user) => (
                       <Link
                         key={user.intraId}
-                        href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${user.intraId}`}
+                        href={`/profile/${user.intraId}`}
                         className=""
                       >
                         <motion.div

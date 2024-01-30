@@ -53,7 +53,7 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 
 	return (
 		<div className="flex items-center justify-center text-gray-400 w-full mt-10 p-10 overflow-hidden">
-			<div className="border border-gray-600 bg-[#292D39] bg-opacity-70 rounded-md w-full md:w-[700px] lg:w-[800px] h-[400px] p-4 ">
+			<div className="border border-gray-600 bg-[#292D39] bg-opacity-70 rounded-md w-full md:w-[600px] lg:w-[800px] h-[400px] p-4 ">
 				<div className="mt-1 font-bold text-gray-300">GAME HISTORY</div>
 				<div className="mt-5 border-b border-zinc-500 "></div>
 				<div className="p-5 w-full h-[300px] overflow-x-hidden">

@@ -66,7 +66,6 @@ export const UserProfileImage = ({
 			if (response.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friends) {
 				setfriends(data.friends.length);
@@ -74,7 +73,6 @@ export const UserProfileImage = ({
 		} catch (error: any) {
 			const msg = 'Error getting friends: ' + error.message;
 			toast.error(msg);
-			console.error('Error getting friends:', error.message);
 		}
 	};
 
@@ -94,7 +92,6 @@ export const UserProfileImage = ({
 			if (response.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.onlinefriends) {
 				setOnlinefriends(data.onlinefriends.length);
@@ -102,7 +99,6 @@ export const UserProfileImage = ({
 		} catch (error: any) {
 			const msg = 'Error getting friends: ' + error.message;
 			toast.error(msg);
-			console.error('Error getting friends:', error.message);
 		}
 	};
 
@@ -179,9 +175,7 @@ export const UserProfileImage = ({
 					return;
 				}
 				setnumberofgames(data.Gamehistory.length);
-				console.log(data.Gamehistory);
 
-				// number of games won
 				let gameswon = 0;
 				let gamesloss = 0;
 				data.Gamehistory.forEach((game: any) => {
@@ -198,11 +192,6 @@ export const UserProfileImage = ({
 					totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
 
 				setwinpercentage(winPercentage);
-
-				console.log(gameswon);
-				console.log(gamesloss);
-				console.log(totalGames);
-				console.log(winPercentage);
 			} catch (error) {
 				console.log(error);
 			}
@@ -233,7 +222,7 @@ export const UserProfileImage = ({
 		<div>
 			<div className="flex flex-col items-center justify-center">
 				<div
-					className={`backgroundDiv  md:h-80 h-48 flex justify-center relative backgroundDivNotVisible`}
+					className={`backgroundDiv  md:h-80 h-48 flex justify-center relative `}
 				>
 					<div
 						className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}
