@@ -74,6 +74,7 @@ export default function Home() {
 		) {
 			return toast.error('Please fill all the fields');
 		}
+
 		if (
 			usual_full_name.trim().length > 100 ||
 			passwordsigne.trim().length > 100 ||
@@ -82,6 +83,39 @@ export default function Home() {
 		) {
 			return toast.error('TOO LONG');
 		}
+
+		if (
+			username.trim().length > 20 ||
+			username.trim().length < 3 ||
+			!/^[a-zA-Z0-9_\-+]+$/.test(username)
+		  ) {
+			toast.error("Choose another username");
+			return;
+		  }
+		if (
+			passwordsigne.trim().length > 20 ||
+			passwordsigne.trim().length < 3
+		  ) {
+			toast.error("Choose another password");
+			return;
+		  }
+		if (
+			usual_full_name.trim().length > 100 ||
+			usual_full_name.trim().length < 3 ||
+			!/^[a-zA-Z0-9_\-+]+$/.test(usual_full_name)
+		  ) {
+			toast.error("Error in full name");
+			return;
+		  }
+		if (
+			email.trim().length > 100 ||
+			email.trim().length < 3
+		  ) {
+			toast.error("Error in email");
+			return;
+		  }
+
+
 		try {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/signup`,
@@ -92,9 +126,9 @@ export default function Home() {
 					},
 					credentials: 'include',
 					body: JSON.stringify({
-						usual_full_name: usual_full_name,
-						username: username,
-						email: email,
+						usual_full_name: usual_full_name.trim(),
+						username: username.trim(),
+						email: email.trim(),
 						password: passwordsigne,
 					}),
 				},
@@ -118,6 +152,24 @@ export default function Home() {
 		if (login.trim().length === 0 || password.trim().length === 0) {
 			return toast.error('Please fill all the fields');
 		}
+
+
+		if (
+			login.trim().length > 20 ||
+			login.trim().length < 3 ||
+			!/^[a-zA-Z0-9_\-+]+$/.test(login)
+		  ) {
+			toast.error("wrong login");
+			return;
+		  }
+		if (
+			password.trim().length > 20 ||
+			password.trim().length < 3
+		  ) {
+			toast.error("wrong password");
+			return;
+		  }
+
 		try {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/login`,
@@ -128,7 +180,7 @@ export default function Home() {
 					},
 					credentials: 'include',
 					body: JSON.stringify({
-						username: login,
+						username: login.trim(),
 						password: password,
 					}),
 				},

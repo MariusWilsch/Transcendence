@@ -12,7 +12,7 @@ datasource db {
 
 model User {
   intraId      String         @unique
-  fullname     String         @unique
+  fullname     String
   login        String         @unique
   email        String         @unique
   Avatar       String?
