@@ -136,7 +136,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
           console.log('the channel is ', chan);
         }
         const userMemberShip = await getCurrentMember(params.channelId, context.userData.intraId );
-        if (userMemberShip === undefined || userMemberShip.isBanned)
+        if (userMemberShip === undefined || userMemberShip.isBanned || userMemberShip.onInviteState)
         {
           throw('permission denied');
         }
@@ -152,7 +152,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
           context.setSocket(newSocket);
           console.log('socket ', context.socket);
         }
-        const ChannelMessages = await getChannelMessages(params.channelId);
+        const ChannelMessages = await getChannelMessages(params.channelId, context.user?.intraId);
         if (ChannelMessages) {
           setMessages(ChannelMessages);
           console.log(ChannelMessages);
@@ -171,6 +171,8 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
       : e === "no such channel"
       ? toast.error("no such channel") : true;
       setPermission(false);
+      console.log('we have a problem');
+      console.log(e);
       setLoading(false);
     }
   }
@@ -232,6 +234,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     return () => {
       if (context.socket) {
         context.socket.off('channelBroadcast');
+        context.socket.off('updateChannelUser');
       }
     };
   }, [context.socket,context.userData])
@@ -276,7 +279,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     )
   }
   const desplayedMessages: ChannelMessage[] = messages.length ? messages.toReversed() : [];
-  console.log('what the fuck');
+  console.log('permission', permission);
   const channelName = channel!==undefined? channel?.name.replace(channel.ownerId,''): '';
   return (
     <>

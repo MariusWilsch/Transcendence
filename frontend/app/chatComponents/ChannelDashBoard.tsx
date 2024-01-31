@@ -10,6 +10,7 @@ import Cookies from "universal-cookie";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import UpdateChannelSetting from "./UpdateChannelSetting";
+import InviteUsers from "./InviteUsers";
 
 async function leaveChannel(Channelname: string, user: User) {
   try {
@@ -48,7 +49,7 @@ const ChannelDashBoard = (props: any) => {
     useEffect(() => {
       const fetchAvatar = async () => {
         if (context.channel){
-          const members = await getChannelFirstMembers(context.channel.name);
+          const members = await getChannelFirstMembers(context.channel.id);
           console.log('channel', context.channel);
         }
       }
@@ -58,7 +59,7 @@ const ChannelDashBoard = (props: any) => {
       const search = async () => {
         if (context.channel){
 
-          const members = await searchMember(query, context.channel.name); 
+          const members = await searchMember(query, context.channel.id); 
           setmembers(members);
         }
       }
@@ -70,7 +71,7 @@ const ChannelDashBoard = (props: any) => {
     };
     const handleLeavingChannel=()=>{
         if (context.channel && context.userData){
-          leaveChannel(context.channel.name, context.userData);
+          leaveChannel(context.channel.id, context.userData);
           }
     }
     return (
@@ -86,19 +87,20 @@ const ChannelDashBoard = (props: any) => {
          (
           <>
          <UpdateChannelSetting firstMembers={firstMembers} member={currentMember} />
-        <FcInvite 
+        {/* <FcInvite 
         className="text-white hover:scale-125" 
         onClick={()=>{
           console.log('Invite pep');
         }}
-        />
+        /> */}
+        <InviteUsers />
         </>
         ) 
       }
         </div>
         </div>
         <div className='justify-center items-center text-white  border border-[#292D39] p-4'>
-          <h1 className="text-center">{context.channel?.name.replace(context.channel.ownerId, '')}</h1>
+          <h1 className="text-center">{context.channel?.name}</h1>
         </div>
         <div className="info-card text-white p-4 m-5border border-[#292D39] ">
           <h1 className="text-start"> Members :</h1>

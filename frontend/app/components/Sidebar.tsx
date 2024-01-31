@@ -32,6 +32,7 @@ import { RootState } from '../gamelobby/GlobalRedux/store';
 
 export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
+	const [renderOnce, setRenderOnce] = useState(false);
 	const pathname = usePathname();
 	const { handleInvite } = useStartGame();
 	const { isConnected, isGameStarted, countDownDone } = useSelector(
@@ -44,7 +45,9 @@ export const Sidebar = () => {
 	//   useEffect(() => {
 	//     context.setisSidebarVisible(window.innerWidth > 768);
 	//   }, []);
+	const createSocket=()=>{
 
+	}
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -99,55 +102,69 @@ export const Sidebar = () => {
 	useEffect(() => {
 		if (!context.socket) {
 			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-			const cookie = new Cookies();
-			const newSocket = io(chatNameSpace, {
-				query: { user: cookie.get('jwt') },
-			});
-			context.setSocket(newSocket);
-		}
+		  const cookie = new Cookies();
+		  const newSocket = io(chatNameSpace, {
+			query: { user: cookie.get('jwt') },
+		  });
+		  context.setSocket(newSocket);
+		  return ()=>{
+			if (context.socket){
+
+				context.socket.off('privateMatch');
+				context.socket.off('privateChat');
+			}
+		  }
+	}
 		if (context.socket && context.user) {
-			context.socket.on('privateChat', (data: Message) => {
-				if (data) {
-					if (data.sender !== context.user?.intraId) {
+			context.socket.on('privateChat', (data:Message)=>{
+				if (data){
+					if (data.sender !== context.user?.intraId){
+
 						toast.success('new message');
 					}
 				}
-			});
-			context.socket.on('privateMatch', (data: any) => {
-				// if (data.from.intraId !== context.user?.intraId)
-				// {
-				const msg = 'invitation from ' + data.from.login + ' for a game';
-				toast((t) => (
-					<>
-						<p> {msg} </p>
-						<span className="flex flex-row space-x-6">
-							<button
-								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-								onClick={() => {
-									console.log('accept handler');
-									toast.dismiss(t.id);
-									handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
-								}}
-							>
-								<FiCheckCircle size="30" className="text-green-300" />
+			})
+			context.socket.on('privateMatch', (data:any)=>{
+				if (data.from.intraId !== context.user?.intraId)
+				{
+					const msg = 'invitation from ' + data.from.login +' for a game';
+					toast((t) =>(
+						<>
+							<p> {msg} </p>
+							<span className='flex flex-row space-x-6'>
+							 <button
+												className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+												onClick={() => {
+													toast.dismiss(t.id);
+													
+												}}
+												>
+												<FiCheckCircle size="30" className="text-green-300" />
 							</button>
 							<button
-								className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-								onClick={() => {
-									toast.dismiss(t.id);
-									console.log('dismiss handler');
-								}}
-							>
-								<FiXCircle size="30" className="text-red-300" />
-							</button>
-						</span>
-					</>
-				));
-				console.log('the private chat event has been occured');
-				// }
-			});
-		}
-	}, [context.socket, context.user, isConnected]);
+												className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+												onClick={() => {
+													toast.dismiss(t.id);
+													console.log('dismiss handler')}
+												}
+												>
+												<FiXCircle size="30" className="text-red-300" />
+											</button>
+							</span>
+												</>
+						  ));
+				}
+			})
+			return ()=>{
+				if (context.socket){
+	
+					context.socket.off('privateMatch');
+					context.socket.off('privateChat');
+				}
+			  }
+	}
+	
+}, [context.socket, context.user]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
