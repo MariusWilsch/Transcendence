@@ -31,7 +31,7 @@ const StepsList: React.FC = () => {
 				</li>
 			</ul>
 			<div className="flex items-center justify-center flex-grow w-full">
-				<div className="w-4/5">
+				<div className="w-4/5 flex flex-col items-center">
 					{currentStep === 1 && <Step1 setStep={setCurrentStep} />}
 					{currentStep === 2 && <Step2 setStep={setCurrentStep} />}
 					{currentStep === 3 && <Step3 />}

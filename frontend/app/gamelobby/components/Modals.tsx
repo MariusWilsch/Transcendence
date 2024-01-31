@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useRef } from 'react';
 import useStartGame from '../hooks/useStartGame';
 import Link from 'next/link';
-import { MatchType } from '@/interfaces';
 import { RootState } from '../GlobalRedux/store';
 import { useAppContext } from '@/app/AppContext';
 
@@ -76,7 +75,7 @@ export function GameOutcomeModal({ outcome }: any) {
 					<div className="modal-action flex justify-center items-center">
 						<form method="dialog" className="space-x-4 w-full flex justify-center">
 							{outcome !== GameOutcome.NONE && (
-								<button onClick={() => pushToGame(MatchType.PUBLIC)} className="btn">
+								<button onClick={() => pushToGame()} className="btn">
 									Play again
 								</button>
 							)}

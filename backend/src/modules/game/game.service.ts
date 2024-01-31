@@ -68,6 +68,11 @@ export class GameService {
 		player1.data = { roomID, playerID: Player.P1 };
 		player2.data = { roomID, playerID: Player.P2 };
 
+		if (user1.login === user2.login) {
+			console.log('AI game detected, user1 needs AI Avatar and username');
+			user1.login = 'Computer';
+		}
+
 		// Create a new game session and store it in the Map
 		this.gameSessions.set(roomID, {
 			ballVelocity: createVec2(
@@ -411,23 +416,18 @@ export class GameService {
 	) {
 		const { paddles, ball } = gameState;
 
-		//! Very dirty fix but I can't be botherd to refactor the whole thing
-		if (
-			command[0] !== undefined &&
-			command[1] === undefined &&
-			playerRole === Player.P1 &&
-			aiDifficulty !== AiDifficulty.NONE
-		) {
-			playerRole = Player.P2;
-			inputType = InputType.AI;
+		if (inputType === InputType.AI) {
+			console.log('AI Match detected');
+			playerRole = Player.P1;
 		}
-		const test = createCommand(inputType, {
+
+		command[playerRole] = createCommand(inputType, {
 			paddle: playerRole === Player.P1 ? paddles.player1 : paddles.player2,
 			speed: this.paddleSpeed,
 			ball,
 			difficulty: aiDifficulty,
 		});
-		command[playerRole] = test;
+		console.log(command[playerRole]);
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {

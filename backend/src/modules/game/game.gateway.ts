@@ -21,6 +21,7 @@ import { AuthService } from 'modules/auth/auth.service';
 	cors: {
 		origin: 'http://localhost:3000',
 	},
+	// namespace: '/gamelobby/game',
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
@@ -35,8 +36,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
-		// Identify the client not by token but by his username
+		//! Identify the client not by token but by his username
 		console.log(`Client connected via ${client.id}`);
+		if (!client.handshake.auth.token) return;
 		if (this.duplicateUsers.has(client.handshake.auth.token)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
@@ -199,7 +201,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('setupInteraction')
 	handleSetupInteraction(client: IO, payload: GameConfigState): void {
-		console.log('setup interaction called', client.data);
+		console.log('Client playerID', client.data.playerID);
+		console.log("Client's gameConfigState", payload.inputType);
 		this.gameService.setCommand(
 			payload,
 			this.gameService.getSession(client.data.roomID),
@@ -209,7 +212,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		if (!this.gameService.isCommandSet(client.data.roomID)) return;
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
@@ -227,7 +229,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handlePrivateGame(client: IO, payload: any): void {
 		console.log('invitePrivate event received', payload);
 		this.privateLobby.set(payload.inviteeID, client);
-		this.test.set(client, payload.socket);
 	}
 
 	@SubscribeMessage('acceptPrivate')
@@ -239,24 +240,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.privateLobby.delete(payload.inviteeID);
 			return;
 		}
+		console.log('Match found --> calling `createGame function`');
 		this.createGame(client, this.privateLobby.get(payload.inviteeID));
 		this.privateLobby.delete(payload.inviteeID);
 	}
 
 	@SubscribeMessage('addToLobby')
 	handleAddToLobby(client: IO, payload: any): void {
-		// console.log('addToLobby event received', payload);
-
 		this.lobby.push(client);
 		console.log(
 			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
 		);
 		this.checkForAvailablePlayers();
-	}
-
-	@SubscribeMessage('otherSocket')
-	handleOtherSocket(client: IO, payload: any): void {
-		console.log('otherSocket event received', payload);
-		// this.test.set(client, payload.socket);
 	}
 }

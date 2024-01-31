@@ -25,7 +25,7 @@ export enum MatchmakingStatus {
 }
 
 interface PrivateMatch {
-	inviteeID: string;
+	inviteeID: string | undefined;
 	accepted?: boolean; // True if the friend has accepted the invite
 	socket?: any;
 }
@@ -58,8 +58,6 @@ const connectionSlice = createSlice({
 	name: 'connection',
 	initialState,
 	reducers: {
-		//! This is kind of a reduancy as we also have ethe startConnection/Matchmaking action in gameSlice.ts
-		//! Needs refactoring
 		setConnectionStatus: (state, action) => {
 			state.isConnected = action.payload;
 		},
@@ -74,7 +72,7 @@ const connectionSlice = createSlice({
 		gameFinished: (state) => {
 			state.isGameStarted = false;
 			state.countDownDone = false;
-			// state.isInMatchmaking = MatchmakingStatus.NOT_SEARCHING;
+			state.playerOutcome = GameOutcome.NONE;
 		},
 		setPlayerOutcome: (state, action) => {
 			state.playerOutcome = action.payload;
@@ -89,17 +87,17 @@ const connectionSlice = createSlice({
 });
 
 //* Action creators
-export const startLoop = createAction('connection/startLoop');
-export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
-export const addToLobby = createAction('connection/addToLobby');
+export const startConnection = createAction('connection/startConnection');
 export const disconnect = createAction('connection/disconnect');
+export const addToLobby = createAction('connection/addToLobby');
+export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
+export const startLoop = createAction('connection/startLoop');
 export const invitePrivate = createAction<PrivateMatch>(
 	'connection/invitePrivate',
 );
 export const acceptPrivate = createAction<PrivateMatch>(
 	'connection/acceptPrivate',
 );
-export const otherSocket = createAction('connection/otherSocket');
 
 //* Slice definitions
 export const {

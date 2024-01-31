@@ -10,18 +10,16 @@ import {
 	setConnectionStatus,
 	setMatchmaking,
 	MatchmakingStatus,
-	resetScore,
+	resetConfig,
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
-import { FaPersonWalkingDashedLineArrowRight } from 'react-icons/fa6';
 
 //* Global variables
-let ClientSocket: Socket | null = null;
-let AISocket: Socket | null = null;
+let ClientSocket: Socket | undefined = undefined;
 const cookies = new Cookies();
 //* Helper functions for WebSocket middleware
-const connect = (store: MiddlewareStore, socket: Socket | null) => {
+const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 	const token = cookies.get('jwt');
 
 	if (!token) {
@@ -31,10 +29,10 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	}
 
 	socket = io('http://localhost:3001', {
-		auth: {
-			token,
-		},
+		auth: { token },
 	});
+
+	if (!socket) return;
 
 	socket.on('connect', () => {
 		console.log('Connected to server');
@@ -42,6 +40,8 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 	});
 
 	socket.on('disconnect', () => {
+		if (socket?.active === false)
+			setConnectionStatus(ConnectionStatus.DISCONNECTED);
 		console.log('Disconnected from server');
 		store.dispatch(gameFinished());
 		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
@@ -74,7 +74,7 @@ const connect = (store: MiddlewareStore, socket: Socket | null) => {
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
-	if (action.type === 'game/startConnection')
+	if (action.type === 'connection/startConnection')
 		ClientSocket = connect(store, ClientSocket);
 
 	switch (action.type) {
@@ -106,11 +106,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'connection/acceptPrivate':
 			ClientSocket?.emit('acceptPrivate', action.payload);
 			break;
-		case 'connection/otherSocket':
-			ClientSocket?.emit('otherSocket', action.payload);
-		case 'gameConfig/setupAIMatch':
-			AISocket = connect(store, AISocket);
-			AISocket?.emit('setupAIMatch', action.payload);
+		case 'connection/gameFinished':
+			store.dispatch(resetConfig());
+			break;
 		//* Can be expanded to handle more actions - Add below
 		default:
 			break;

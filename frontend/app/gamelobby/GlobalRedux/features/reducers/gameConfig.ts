@@ -8,19 +8,14 @@ export enum aiDifficulty {
 }
 
 export enum InputType {
-	KEYBOARD = 0,
-	MOUSE = 1,
-	AI = 2,
+	KEYBOARD = 'KEY',
+	MOUSE = 'MOUSE',
+	AI = 'AI',
 }
 
 export enum mapType {
 	CLASSIC = 0,
 	STANDARD = 1,
-}
-
-export enum playerType {
-	PLAYER = 0,
-	AI = 1,
 }
 
 export interface GameConfigState {
@@ -48,6 +43,9 @@ const gameConfigSlice = createSlice({
 		setMapChoice: (state, action) => {
 			state.mapChoice = action.payload;
 		},
+		resetConfig: () => {
+			return initialState;
+		},
 	},
 });
 
@@ -56,10 +54,6 @@ export const setupInteraction = createAction<GameConfigState>(
 	'gameConfig/setupInteraction',
 );
 
-export const setupAIMatch = createAction<GameConfigState>(
-	'gameConfig/setupAIMatch',
-);
-
-export const { setAiDifficulty, setInputType, setMapChoice } =
+export const { setAiDifficulty, setInputType, setMapChoice, resetConfig } =
 	gameConfigSlice.actions;
 export const gameConfigReducer = gameConfigSlice.reducer;

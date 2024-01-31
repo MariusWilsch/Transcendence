@@ -6,11 +6,14 @@ import {
 	startLoop,
 	disconnect,
 	setCountDownDone,
+	aiDifficulty,
+	InputType,
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameOutcomeModal } from '@/app/gamelobby/components';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
+import computer from '@/public/static/images/computer.png';
 
 interface ScoreProps {
 	score: number;
@@ -34,7 +37,7 @@ interface StatsProps {
 	};
 }
 
-const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
+const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
 	return (
@@ -43,12 +46,11 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }: any) => {
 				<Score score={score.player1} username={gameData.username} />
 			) : null}
 			<div className="avatar">
-				<Image
-					src={gameData.avatar}
-					alt={'Some text here'}
-					width={100}
-					height={100}
-				/>
+				{gameData.username === 'Computer' ? (
+					<Image src={computer} width={100} height={100} alt="Computer" />
+				) : (
+					<Image src={gameData.avatar} alt="Avatar" width={100} height={100} />
+				)}
 			</div>
 			{scorePos === 'left' ? (
 				<Score score={score.player2} username={gameData.username} />
@@ -97,6 +99,8 @@ function CountdownModal() {
 		let remainingTime = 5;
 
 		dispatch(setupInteraction(gameConfig));
+		if (gameConfig.aiDifficulty !== aiDifficulty.NONE)
+			dispatch(setupInteraction({ ...gameConfig, inputType: InputType.AI }));
 
 		if (modal && countdown) {
 			modal.showModal();

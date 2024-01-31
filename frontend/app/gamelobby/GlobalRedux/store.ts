@@ -8,6 +8,7 @@ import {
 import { socketMiddleware } from './middleware/WebSocket';
 import { GameState } from '@/interfaces';
 import { GameConfigState } from './features/reducers/gameConfig';
+import { get } from 'http';
 
 //* The Redux store for the application.
 
@@ -27,6 +28,6 @@ export const store = configureStore({
 		gameConfig: gameConfigReducer,
 		//* Add other reducers here if needed
 	},
-	middleware: (getDefaultMiddleware) =>
+	middleware: (getDefaultMiddleware: any) =>
 		getDefaultMiddleware().concat(socketMiddleware),
 });

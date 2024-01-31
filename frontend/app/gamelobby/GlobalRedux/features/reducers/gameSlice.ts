@@ -48,9 +48,6 @@ const gameSlice = createSlice({
 			state.ball = action.payload.ball;
 			state.score = action.payload.score;
 		},
-		reset: (state) => {
-			state.score = { player1: 0, player2: 0 };
-		},
 	},
 });
 
@@ -59,8 +56,7 @@ export const movePaddle = createAction<PlayerMove>('game/movePaddle');
 export const mouseMove = createAction<MouseMove>('game/mouseMove');
 
 //! I think this one should go to connectionSlice.ts
-export const startConnection = createAction('game/startConnection');
 
 //* Slice definitions
-export const { initGame, updateGame, reset } = gameSlice.actions;
+export const { initGame, updateGame } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;

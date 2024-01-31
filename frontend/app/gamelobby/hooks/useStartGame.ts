@@ -5,6 +5,7 @@ import { RootState } from '../GlobalRedux/store';
 import { useEffect } from 'react';
 import {
 	ConnectionStatus,
+	InputType,
 	Invite,
 	MatchmakingStatus,
 	acceptPrivate,
@@ -12,7 +13,6 @@ import {
 	aiDifficulty,
 	invitePrivate,
 	setMatchmaking,
-	setupAIMatch,
 	startConnection,
 } from '../GlobalRedux/features';
 
@@ -27,29 +27,41 @@ const useStartGame = () => {
 
 	//* Connect user to socket server and start matchmaking
 	const initSocketPushGame = () => {
+		console.log('initSocketPushGame');
 		dispatch(startConnection());
-		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-
+		dispatch(addToLobby());
 		gameConfig.aiDifficulty !== aiDifficulty.NONE
 			? handleAIMatch()
-			: dispatch(addToLobby());
+			: dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 	};
 
 	//* User is connected to socket server and start matchmaking
 
 	const pushToGame = () => {
+		console.log('pushToGame');
 		dispatch(addToLobby());
-		dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+		gameConfig.aiDifficulty !== aiDifficulty.NONE
+			? handleAIMatch()
+			: dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+	};
+
+	//* Simplifed version of the above two functions
+	const pushGame = (isConnected: ConnectionStatus) => {
+		if (isConnected === ConnectionStatus.DISCONNECTED)
+			dispatch(startConnection());
+		dispatch(addToLobby());
+		gameConfig.aiDifficulty !== aiDifficulty.NONE
+			? dispatch(addToLobby())
+			: dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 	};
 
 	const handleInvite = (
-		inviteeID: string,
+		inviteeID: string | undefined,
 		connectionStatus: ConnectionStatus,
 		invite: Invite,
 	) => {
 		if (connectionStatus === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
-		console.log(inviteeID, invite);
 		invite === Invite.INVITING
 			? dispatch(invitePrivate({ inviteeID }))
 			: dispatch(acceptPrivate({ inviteeID }));
@@ -70,9 +82,7 @@ const useStartGame = () => {
 		modal?.close();
 	};
 
-	const handleAIMatch = () => {
-		dispatch(setupAIMatch(gameConfig));
-	};
+	const handleAIMatch = () => {};
 
 	//* This useEffect hook will redirect the user to the game page
 	//* if the isGameStarted state is true
@@ -81,6 +91,7 @@ const useStartGame = () => {
 			closeModal();
 			router.push(`/gamelobby/game`);
 		}
+		return () => {};
 	}, [isGameStarted, router]);
 
 	useEffect(() => {
@@ -95,20 +106,10 @@ const useStartGame = () => {
 		}
 	}, [isConnected, isInMatchmaking]);
 
-	// useEffect(() => {
-	// 	if (
-	// 		connection.isConnected === ConnectionStatus.CONNECTED &&
-	// 		!connection.isGameStarted &&
-	// 		connection.isInMatchmaking === MatchmakingStatus.SEARCHING
-	// 	) {
-	// 		showModal();
-	// 	}
-	// }),
-	// 	[connection.isConnected, connection.isGameStarted];
-
 	return {
 		initSocketPushGame,
 		pushToGame,
+		pushGame,
 		handleInvite,
 	};
 };

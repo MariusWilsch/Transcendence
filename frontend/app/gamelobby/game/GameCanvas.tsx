@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import {
 	InputType,
 	gameFinished,
@@ -11,6 +11,9 @@ import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { Direction } from '@/interfaces';
 import { handleKeyDown, handleKeyUp, handleMouseMove } from './interaction';
 import { disconnect } from '@/app/gamelobby/GlobalRedux/features';
+import { useAppContext } from '@/app/AppContext';
+import { usePathname } from 'next/navigation';
+import path from 'path';
 
 export const GameCanvas: React.FC = () => {
 	//* Refs
@@ -26,6 +29,7 @@ export const GameCanvas: React.FC = () => {
 		(state: RootState) => state.connection,
 	);
 	const dispatch = useDispatch();
+
 
 	useEffect(() => {
 		const mouseMoveHandler = (e: MouseEvent) =>
@@ -51,8 +55,6 @@ export const GameCanvas: React.FC = () => {
 		};
 	}, [inputType, canvasRef, dispatch]);
 
-	//* Paddle movement event listeners
-
 	useEffect(() => {
 		//* Create the game service if it doesn't exist
 		if (!serviceRef.current) {
@@ -71,7 +73,6 @@ export const GameCanvas: React.FC = () => {
 			console.log('Updating game service with', gameState);
 			serviceRef.current.updateGameElements(gameState);
 		}
-
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
 	}, [gameState, mapChoice, isConnected]);
 
@@ -88,7 +89,7 @@ export const GameCanvas: React.FC = () => {
 		return () => {
 			window.removeEventListener('popstate', handleBackButton);
 		};
-	}, []);
+	});
 
 	useEffect(() => {
 		let timer: NodeJS.Timeout;

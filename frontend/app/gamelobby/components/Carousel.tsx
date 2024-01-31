@@ -3,6 +3,7 @@ import pongOld from '@/public/static/images/pongOld2.png';
 import Image, { StaticImageData } from 'next/image';
 import { useDispatch } from 'react-redux';
 import { mapType, setMapChoice } from '../GlobalRedux/features';
+import Link from 'next/link';
 
 // CarouselItem.tsx
 const CarouselItem = ({
@@ -36,20 +37,20 @@ export const CarouselNavigation = () => {
 	const dispatch = useDispatch();
 	return (
 		<div className="flex justify-center w-full py-2 gap-2">
-			<a
-				href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps/#item1`}
+			<Link
+				href="/gamelobby/steps/#item1"
 				onClick={() => dispatch(setMapChoice(mapType.STANDARD))}
 				className="btn btn-xs"
 			>
 				1
-			</a>
-			<a
-				href={`${process.env.NEXT_PUBLIC_API_URL}:3000/gamelobby/steps/#item2`}
+			</Link>
+			<Link
+				href="/gamelobby/steps/#item2"
 				onClick={() => dispatch(setMapChoice(mapType.CLASSIC))}
 				className="btn btn-xs"
 			>
 				2
-			</a>
+			</Link>
 		</div>
 	);
 };

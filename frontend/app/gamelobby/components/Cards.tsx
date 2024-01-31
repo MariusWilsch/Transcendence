@@ -10,7 +10,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../GlobalRedux/store';
 import { ConnectionStatus, startConnection } from '../GlobalRedux/features';
 
-
 type CardProps = {
 	img: StaticImageData;
 	alt: string;
@@ -50,17 +49,11 @@ export const Card: React.FC<CardProps> = ({
 };
 
 const Cards: React.FC = () => {
-	const { initSocketPushGame, pushToGame } = useStartGame();
+	const { pushGame } = useStartGame();
 	const router = useRouter();
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,
 	);
-
-	const handlePlayNow = () => {
-		isConnected === ConnectionStatus.DISCONNECTED
-			? initSocketPushGame()
-			: pushToGame();
-	};
 
 	return (
 		<>
@@ -73,7 +66,7 @@ const Cards: React.FC = () => {
 					desc={
 						'Click here to play the game! You will use your Mouse to move the paddle and play against another player!'
 					}
-					onClick={handlePlayNow}
+					onClick={() => pushGame(isConnected)}
 				/>
 				<Card
 					img={pic2}

@@ -22,18 +22,22 @@ import Cookies from 'universal-cookie';
 import { io } from 'socket.io-client';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import useStartGame from '@/app/gamelobby/hooks/useStartGame';
-import { ConnectionStatus, Invite } from '../gamelobby/GlobalRedux/features';
-import { useSelector } from 'react-redux';
+import {
+	ConnectionStatus,
+	Invite,
+	disconnect,
+} from '../gamelobby/GlobalRedux/features';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../gamelobby/GlobalRedux/store';
 
 export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
 	const pathname = usePathname();
 	const { handleInvite } = useStartGame();
-	const isConnected = useSelector(
-		(state: RootState) => state.connection.isConnected,
+	const { isConnected, isGameStarted, countDownDone } = useSelector(
+		(state: RootState) => state.connection,
 	);
-
+	const dispatch = useDispatch();
 	const context = useAppContext();
 
 	// console.log("isSidebarVisible", context.isSidebarVisible);
@@ -68,6 +72,13 @@ export const Sidebar = () => {
 			console.error('Error getting friends:', error.message);
 		}
 	};
+
+	useEffect(() => {
+		if (countDownDone && isGameStarted && pathname !== '/gamelobby/game') {
+			console.log('in game should not be in game');
+			dispatch(disconnect());
+		}
+	}, [pathname, isGameStarted]);
 
 	const handleFriendshipRequest = () => {
 		getFriends();
@@ -240,9 +251,7 @@ export const Sidebar = () => {
 														animate={{ opacity: 1, y: 0 }}
 														transition={{ delay: 0.01 }}
 													>
-														<Link
-															href={`/leaderboard`}
-														>
+														<Link href={`/leaderboard`}>
 															<MdLeaderboard
 																size="30"
 																className={`${

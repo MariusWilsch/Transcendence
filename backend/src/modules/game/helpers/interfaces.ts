@@ -87,6 +87,7 @@ export interface GameSession {
 		{
 			avatar: string;
 			username: string;
+			// aiMode?: boolean;
 		},
 		{
 			avatar: string;
@@ -105,9 +106,9 @@ export enum AiDifficulty {
 }
 
 export enum InputType {
-	KEYBOARD = 0,
-	MOUSE = 1,
-	AI = 2,
+	KEYBOARD = 'KEY',
+	MOUSE = 'MOUSE',
+	AI = 'AI',
 }
 
 export enum MapChoice {
