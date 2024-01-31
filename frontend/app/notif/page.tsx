@@ -193,6 +193,11 @@ export default function Search() {
 														className="h-10 w-10 rounded-full"
 														src={friend.Avatar}
 														alt=""
+														onError={(e: any) => {
+															e.target.onerror = null;
+															e.target.src =
+																'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+														}}
 													/>
 												</div>
 												<div className="ml-3 f">

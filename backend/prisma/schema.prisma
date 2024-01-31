@@ -11,33 +11,30 @@ datasource db {
 }
 
 model User {
-  intraId          String         @unique
-  fullname         String         @unique
-  login            String         @unique
-  email            String         @unique
-  Avatar           String?
-  password         String?
-  won              Int            @default(0)
-  lost             Int            @default(0)
-  winrate          Float          @default(0)
-  isRegistred      Boolean        @default(false)
-  isTfaEnabled     Boolean        @default(false)
-  Achievements     String[]
-  status           Status         @default(ONLINE)
-  tfa              Tfa?
-  friends          Friend[]       @relation("userFriends")
-  user             Friend[]       @relation("friendsUser")
-  created_at       DateTime       @default(now())
-  updated_at       DateTime       @updatedAt
-  wonMatches       MatchHistory[] @relation("userWins")
-  lostMatches      MatchHistory[] @relation("userLosses")
-  MemberShip       MemberShip[]
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  PrivateRoom      PrivateRoom?   @relation(fields: [privateRoomId], references: [id])
-  privateRoomId    Int?
-
-  Message Message[]
+  intraId       String         @unique
+  fullname      String
+  login         String         @unique
+  email         String         @unique
+  Avatar        String?
+  password      String?
+  won           Int            @default(0)
+  lost          Int            @default(0)
+  winrate       Float          @default(0)
+  isRegistred   Boolean        @default(false)
+  isTfaEnabled  Boolean        @default(false)
+  Achievements  String[]
+  status        Status         @default(ONLINE)
+  tfa           Tfa?
+  friends       Friend[]       @relation("userFriends")
+  user          Friend[]       @relation("friendsUser")
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  wonMatches    MatchHistory[] @relation("userWins")
+  lostMatches   MatchHistory[] @relation("userLosses")
+  MemberShip    MemberShip[]
+  Message       Message[]
+  PrivateRoom   PrivateRoom?   @relation(fields: [privateRoomId], references: [id])
+  privateRoomId Int?
 }
 
 model MatchHistory {

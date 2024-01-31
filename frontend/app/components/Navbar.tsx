@@ -94,6 +94,11 @@ export const Navbar = () => {
 					height={100}
 					sizes=""
 					style={{ filter: 'invert(100%)' }}
+					onError={(e: any) => {
+						e.target.onerror = null;
+						e.target.src =
+							'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+					}}
 				/>
 			</div>
 
