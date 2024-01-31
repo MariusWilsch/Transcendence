@@ -284,6 +284,7 @@ export class GameService {
 	 * from the `gameState.paddles` object. If `playerID` is not provided, the function will not be able to
 	 * check
 	 */ //! The ball still sticks to the paddle sometimes
+	//! imporve collsion so I can fasten the ball
 	private checkPaddleCollision(
 		{ gameState, ballVelocity }: GameSession,
 		playerID: string

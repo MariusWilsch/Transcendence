@@ -36,7 +36,6 @@ model User {
   privateRoomId    Int?
   sentMessages     Message[]      @relation("SentMessages")
   receivedMessages Message[]      @relation("ReceivedMessages")
-  Message          Message[]
 }
 
 model MatchHistory {
