@@ -83,7 +83,7 @@ export const Navbar = () => {
 	}, [user, pathname]);
 
 	return (
-		<div className="z-20 bg-[#1F212A] flex flex-row w-full overflow-hidden">
+		<div className="z-20 bg-[#1F212A] flex flex-row w-[100vw]">
 			<div className="w-16 h-16 bg-[#292D39]">
 				<Image
 					unoptimized={true}
@@ -134,7 +134,7 @@ export const Navbar = () => {
 								</div>
 							</div>
 						</div>
-						<div className="flex justify-end p-4 flex-grow">
+						<div className="flex justify-end p-4 flex-grow md:mr-3">
 							{!isDivVisible && isProfileOwner && (
 								<button onClick={toggleDivVisibility} className="tooltip">
 									<div className="text-sm tooltiptext w-24 bg-gray-800 bg-opacity-80 top-0 right-8 text-white p-1 rounded-md hover:transition duration-300 ease-in">

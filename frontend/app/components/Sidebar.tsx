@@ -41,10 +41,7 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-	// console.log("isSidebarVisible", context.isSidebarVisible);
-	//   useEffect(() => {
-	//     context.setisSidebarVisible(window.innerWidth > 768);
-	//   }, []);
+
 	const createSocket=()=>{
 
 	}
@@ -78,7 +75,6 @@ export const Sidebar = () => {
 
 	useEffect(() => {
 		if (countDownDone && isGameStarted && pathname !== '/gamelobby/game') {
-			console.log('in game should not be in game');
 			dispatch(disconnect());
 		}
 	}, [pathname, isGameStarted]);
@@ -127,7 +123,6 @@ export const Sidebar = () => {
 							<button
 								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
 								onClick={() => {
-									console.log('accept handler');
 									toast.dismiss(t.id);
 									handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
 								}}
@@ -138,7 +133,6 @@ export const Sidebar = () => {
 								className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
 								onClick={() => {
 									toast.dismiss(t.id);
-									console.log('dismiss handler');
 								}}
 							>
 								<FiXCircle size="30" className="text-red-300" />
@@ -146,8 +140,6 @@ export const Sidebar = () => {
 						</span>
 					</>
 				));
-				console.log('the private chat event has been occured');
-				// }
 			});
 			return ()=>{
 				if (context.socket){
@@ -343,7 +335,7 @@ export const Sidebar = () => {
 												</li>
 											</div>
 											<div>
-												<li onClick={() => console.log('cfsdfaf')} className=" ">
+												<li className=" ">
 													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}

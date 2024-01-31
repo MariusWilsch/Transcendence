@@ -34,10 +34,8 @@ export const TwoFactorAuth = ({
   
         if (res.sucess) {
           toast.success("2FA is enabled");
-          console.log("2FA is enabled");
         } else {
           toast.error("Error in enabling 2FA");
-          console.log("Error in enabling 2FA");
         }
       } else {
         const response = await fetch(
@@ -51,10 +49,8 @@ export const TwoFactorAuth = ({
   
         if (res.sucess) {
           toast.success("2FA is disabled");
-          console.log("2FA is disabled");
         } else {
           toast.error("Error in disabling 2FA");
-          console.log("Error in disabling 2FA");
         }
       }
     };

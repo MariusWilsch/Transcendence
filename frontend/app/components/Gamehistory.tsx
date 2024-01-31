@@ -32,7 +32,6 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 				}
 				setGameResult(data.Gamehistory);
 			} catch (error) {
-				console.log(error);
 			}
 		};
 		Gamehistory();

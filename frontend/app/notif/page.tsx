@@ -76,7 +76,6 @@ export default function Search() {
 				if (data.success === false) {
 					const msg = 'Error getting friends';
 					toast.error(msg);
-					console.log(msg);
 				}
 				if (data.success === true && data.friendsDetails) {
 					setFriends(data.friendsDetails);

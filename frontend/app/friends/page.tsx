@@ -77,7 +77,6 @@ export default function Friends() {
 			if (data.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friendsDetails) {
 				setUsers(data.friendsDetails);
@@ -106,7 +105,6 @@ export default function Friends() {
 			if (data.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friendsDetails) {
 				setUsers(data.friendsDetails);
@@ -176,12 +174,9 @@ export default function Friends() {
 			if (response.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friends) {
 				setUsers(data.friends);
-
-				// console.log("User friends ", users);
 			}
 		} catch (error: any) {
 			const msg = 'Error getting friends: ' + error.message;

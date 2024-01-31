@@ -193,7 +193,6 @@ export const UserProfileImage = ({
 
 				setwinpercentage(winPercentage);
 			} catch (error) {
-				console.log(error);
 			}
 		};
 		Gamehistory();
@@ -227,7 +226,9 @@ export const UserProfileImage = ({
 					<div
 						className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}
 					>
-						<div className="flex flex-row justify-between gap-[4%] w-[90%] h-5/6">
+						<div 
+						className="flex flex-row justify-between gap-[4%] w-[90%] h-5/6"
+						>
 							<div className="w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30">
 								<div className="m-3">
 									<div className="text-white "> Win percentage : </div>

@@ -185,7 +185,6 @@ export const Friend = ({
 
 	const handler = () => {
 		if (context.socket) {
-			console.log('emitting to private match');
 			context.socket.emit('privateMatch', { to: userId, other: friendId });
 		}
 		handleInvite(friendId, isConnected, Invite.INVITING);

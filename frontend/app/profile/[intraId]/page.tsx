@@ -59,7 +59,6 @@ export default function Profile(params: any) {
 					secondary: '#FFFAEE',
 				},
 			});
-			console.log('🌟 Please update your nickname and avatar.');
 		}
 	};
 
@@ -99,7 +98,6 @@ export default function Profile(params: any) {
 
 			if (!response.ok) {
 				toast.error('User not found');
-				console.log('User not found');
 				return;
 			}
 			const contentType = response.headers.get('content-type');
@@ -109,7 +107,6 @@ export default function Profile(params: any) {
 				setuserFromRoutId(data);
 			} else {
 				toast.error('User not found');
-				console.log('User not found');
 			}
 		} catch (error: any) {
 			const msg = 'Error during login' + error.message;
@@ -212,22 +209,7 @@ export default function Profile(params: any) {
 	}
 
 	return (
-		<div className="relative w-full  flex justify-center"
-		style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
-	
-		
-		>
-			{/* <div className="z-0 absolute w-full mt-80 ">
-				<Lottie
-					animationData={loading}
-					className="w-full h-auto"
-					onDOMLoaded={(e) => {
-						lottieRef.current?.setSpeed(0.05);
-					}}
-					lottieRef={lottieRef as any}
-				/>
-			</div> */}
-
+		<div className="w-full  flex justify-center overflow-y-scroll no-scrollbar">
 			<div className="z-10 relative flex-1 ">
 				<UserProfileImage
 					status={userFromRoutId?.status}
@@ -253,6 +235,7 @@ export default function Profile(params: any) {
 						</div>
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+
 					<Gamehistory intraId={intraId} />
 					<Achievements intraId={intraId} />
 				</div>
