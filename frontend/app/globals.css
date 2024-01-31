@@ -14,12 +14,9 @@ body {
 	background-color: white;
 } */
 
-@layer {
-	:root {
-		font-size: 1vw;
-		/* font-family: Sand; */
-	}
-}
+
+
+
 
 .mantine-Modal-body {
 	background-color: rgb(75 85 99);

@@ -24,19 +24,6 @@ import FindAConversation from "../chatComponents/FindAConversation";
 import Conversations from "../chatComponents/Converstions";
 import ConversationNotSelected from "../chatComponents/ConversationNotSelected";
 
-// const ChannelSection=()=>
-
-toast((t) => (
-  <span>
-    user1 want to play <b>bold</b>
-    <button onClick={() => toast.dismiss(t.id)}>
-      dismiss
-    </button>
-    <button onClick={() => console.log('ok')}>
-      ACCEPTE
-    </button>
-  </span>
-)); 
 
 const Chat = () => {
   const context = useAppContext();
@@ -121,7 +108,6 @@ const Chat = () => {
           <div className="flex custom-height">
             <Conversations />
             {context.responsive && <ConversationNotSelected />}
-            {/* <ProfileInfo></ProfileInfo> */}
           </div>
         </div>
       </div>
