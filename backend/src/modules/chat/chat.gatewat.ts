@@ -213,6 +213,53 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
+	@SubscribeMessage('channelBroadcast')
+	async handleChannelChat(
+		client: any,
+		payload: { to: string; message: string; jwt: string }
+	): Promise<void> {
+		try {
+			const user = this.chatService.getUserFromJwt(payload.jwt);
+			if (!user) {
+				return;
+			}
+			const members = await this.chatService.getAllChannelUsers(payload.to);
+			const message = await this.chatService.createChannelMessage(
+				payload.to,
+				payload.message,
+				client.user
+			);
+			let blockedUsers = await this.chatService.getBlockedUser(
+				client.user.intraId
+			);
+			console.log(blockedUsers);
+			members.map((member) => {
+				if (
+					!member.isBanned &&
+					!blockedUsers.some((entry) => {
+						if (entry.userId === user.intraId) {
+							return entry.friendId === member.intraId;
+						} else if (entry.friendId === user.intraId) {
+							return entry.userId === member.intraId;
+						}
+						return false; // Make sure to have a default return value
+					})
+				) {
+					const recipientSocket = this.getAllSocketsByUserId(member.intraId);
+					recipientSocket.map((socket: any) => {
+						if (socket.id !== client.id) {
+							console.log('message brodcast to', member.login);
+							socket.emit('channelBroadcast', message);
+						}
+					});
+				}
+			});
+		} catch (e) {
+			console.log(e);
+			client.emit('channelBroadcast', { e });
+		}
+	}
+
 	@SubscribeMessage('updateChannelUser')
 	async updateChannel(
 		client: any,
@@ -254,6 +301,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const friendSocket = this.getAllSocketsByUserId(payload.other);
 		friendSocket.map((socket: any) => {
 			socket.emit('privateMatch', { from: client.user });
+			console.log(client.user);
 		});
 	}
 	// @SubscribeMessage('updateChannelSettings')
