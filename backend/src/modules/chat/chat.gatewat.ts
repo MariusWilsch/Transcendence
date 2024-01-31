@@ -197,38 +197,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				payload.message,
 				client.user
 			);
-			members.map((member) => {
-				if (!member.isBanned) {
-					const recipientSocket = this.getAllSocketsByUserId(member.intraId);
-					recipientSocket.map((socket: any) => {
-						if (socket.id !== client.id) {
-							socket.emit('channelBroadcast', message);
-							console.log('message broadcasted to channel');
-						}
-					});
-				}
-			});
-		} catch (e) {
-			client.emit('channelBroadcast', { e });
-		}
-	}
-
-	@SubscribeMessage('channelBroadcast')
-	async handleChannelChat(
-		client: any,
-		payload: { to: string; message: string; jwt: string }
-	): Promise<void> {
-		try {
-			const user = this.chatService.getUserFromJwt(payload.jwt);
-			if (!user) {
-				return;
-			}
-			const members = await this.chatService.getAllChannelUsers(payload.to);
-			const message = await this.chatService.createChannelMessage(
-				payload.to,
-				payload.message,
-				client.user
-			);
 			let blockedUsers = await this.chatService.getBlockedUser(
 				client.user.intraId
 			);

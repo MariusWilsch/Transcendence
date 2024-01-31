@@ -104,8 +104,6 @@ model Message {
   recipientUser   User        @relation("ReceivedMessages", fields: [recipient], references: [intraId])
   PrivateRoomName String
   PrivateRoom     PrivateRoom @relation(fields: [PrivateRoomName], references: [name])
-  User            User?       @relation(fields: [userIntraId], references: [intraId])
-  userIntraId     String?
 }
 
 model PrivateRoom {
