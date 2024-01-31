@@ -278,7 +278,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   //       e.target.scrollTop = lastScrollPosition;
   //     }
   //   };
-  const handleScroll = () => {
+  const handleScroll =  () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
       console.log('the scrollTop', scrollTop);
@@ -288,7 +288,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
 
       // You can adjust the threshold based on your needs
       if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !loading && noMoreData) {
-        setLastScrollPosition(-(scrollHeight - clientHeight));
+        setLastScrollPosition(-(scrollHeight - clientHeight - 0.5));
         console.log('this is the last position', lastScrollPosition);
         fetchNewMessages();
          // Restore scroll position
@@ -315,6 +315,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       console.error('Error fetching new messages:', error);
     } finally {
       setLoading(false);
+      if (chatContainerRef.current){
+      }
     }
   };
 

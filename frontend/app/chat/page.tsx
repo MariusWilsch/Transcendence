@@ -24,20 +24,6 @@ import FindAConversation from "../chatComponents/FindAConversation";
 import Conversations from "../chatComponents/Converstions";
 import ConversationNotSelected from "../chatComponents/ConversationNotSelected";
 
-// const ChannelSection=()=>
-
-toast((t) => (
-  <span>
-    user1 want to play <b>bold</b>
-    <button onClick={() => toast.dismiss(t.id)}>
-      dismiss
-    </button>
-    <button onClick={() => console.log('ok')}>
-      ACCEPTE
-    </button>
-  </span>
-)); 
-
 const Chat = () => {
   const context = useAppContext();
   const fetchDataAndSetupSocket = async () => {
@@ -65,19 +51,12 @@ const Chat = () => {
       if (context.recipientUserId && context.socket) {
         context.socket?.emit('createPrivateRoom', { user1: context.userData?.intraId, user2: context.recipientUserId });
       }
-      return () => {
-        context.socket?.disconnect();
-      };
     } catch (error) {
       console.error("Error during login:", error);
     }
   };
   useEffect(() => {
     fetchDataAndSetupSocket();
-    if (context.socket) {
-      context.socket.on("createChannel", (data: any) => {
-        console.log(data);
-      })
       if (context.socket) {
 
         context.socket?.on('privateChat', (message: any) => {
@@ -86,12 +65,13 @@ const Chat = () => {
 
           toast.success(`you have a new message : ${msg}`);
         })
-        context.socket?.on('privateMatch', (data:any)=>{
-          console.log('holy shit');
-            toast.success('the request sent by' + data.from.fullname);
-        })
       }
-    }
+      return ()=>{
+        if (context.socket){
+
+          context.socket.off('privateChat');
+        }
+      }
   }, [context.socket]);
   useEffect(() => {
     const handleResize = () => {

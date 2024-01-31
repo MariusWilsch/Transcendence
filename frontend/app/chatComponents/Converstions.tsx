@@ -73,8 +73,7 @@ const Conversations = () => {
           </div>
         }
         {
-          selected == 'channels' &&
-<h1>channels</h1>
+          selected == 'channels' && <></>
         }
       </div>
     );

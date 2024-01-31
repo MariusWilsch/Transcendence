@@ -323,6 +323,7 @@ export const Friend = ({
 								if (context.socket)
 								{
 									context.socket.emit('privateMatch', {to:userId, other:friendId});
+									
 								}
 							}}
 						>

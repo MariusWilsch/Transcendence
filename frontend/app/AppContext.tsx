@@ -49,7 +49,7 @@ export type User = {
   status: string;
 };
 export type Channel = {
-  id: number;
+  id: string;
   name: string;
   type: string;
   ownerId: string;
@@ -61,11 +61,13 @@ export type MemberShip={
   memberId: string;
     intraId: string;
     channelId: string;
+    channelName:string;
     Avatar: string;
     login: string;
     isOwner: boolean;
     isModerator: boolean;
     isBanned: boolean;
+    onInviteState:boolean;
     isMuted: boolean;
     mutedTime: Date;
     joined_at: Date;

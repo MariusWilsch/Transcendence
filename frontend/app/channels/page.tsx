@@ -12,16 +12,56 @@ import { RiSearchLine } from "react-icons/ri";
 import { GrGroup } from "react-icons/gr";
 import JoinProtectedChannel from "../chatComponents/JoinProtectedChannel";
 import Demo from "../chatComponents/Demo";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { Query } from "matter-js";
 
 
-async function handleChannelInvitation(){}
+async function inviteHandler(Channelname: string, status:boolean, user: User) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/updateChannelInvite/${user.intraId}/${Channelname}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          status: `${status}`,
+        }),
+      }
+    );
+    if (response.ok) {
+      if (status)
+      {
+        toast.success('you  successfully joined the channel')
+      }
+      else{
+        toast.success('invitation is declained');
+      }
+    }
+    else {
+      const msg = 'Error: ' + response;
+      toast.error(msg);
+    }
+  }
+  catch (e) {
+    const msg = 'Error' + e;
+    toast.error(msg);
+  }
+}
+
 const ChannelsLobby = () => {
   const context = useAppContext();
   const [availabelChannels, setAvailableChannels] = useState<Channel[] | []>([]);
   const [invitationChannels, setInvitationChannels] = useState<Channel[] | []>([]);
   const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages stat
+  const [inputValue, setInputValue] = useState("");
+  const [selectedFeild, setselectedFeild] = useState("my channels");
 
+  const handleFilterCHannels=(query:string, channels:Channel[] | [])=>{
+    return channels.filter(item=>item.name.startsWith(query));
+  }
   useEffect(() => {
     const checkJwtCookie = async () => {
       try {
@@ -68,10 +108,13 @@ const ChannelsLobby = () => {
       })
     }
   }, [context.socket, availabelChannels]);
-
+  
+  useEffect(()=>{
+    if (inputValue && availabelChannels){
+      setAvailableChannels(handleFilterCHannels(inputValue, availabelChannels));
+    }
+  },[inputValue])
   // const [users, setUsers] = useState<User[] | undefined>(undefined);
-  const [inputValue, setInputValue] = useState("");
-  const [selectedFeild, setselectedFeild] = useState("my channels");
 
   const userChannels = async () => {
     if (!context.userData) {
@@ -155,7 +198,6 @@ const ChannelsLobby = () => {
       console.error("Error getting channels:", error.message);
     }
   }
-
   return (
     <div className="custom-height z-20 w-screen bg-[#12141A]">
       <div className="flex ">
@@ -225,7 +267,6 @@ const ChannelsLobby = () => {
                   <div className="w-full flex items-center justify-center mb-6">
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
                       <div className="md:w-[50vw] w-full flex flex-row-reverse">
-                        <form className="min-w-[80vw] md:min-w-[50vw]" onSubmit={() => console.log('need to be handled')}>
                           <label className=" flex flex-grow ">
                             <input
                               id="searchField"
@@ -235,20 +276,19 @@ const ChannelsLobby = () => {
                               placeholder="Search ..."
                               onChange={(e) => {
                                 setInputValue(e.target.value);
-                                console.log(e);
                               }}
                               className="min-w-[80vw] md:min-w-[50vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
                             />
                             <div className="md:hidden">&nbsp; &nbsp;</div>
-                            <button
+                            {/* <button
                               onClick={() => console.log('cho-fo-uniiiii')}
                               className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
                               type="submit"
                             >
                               <RiSearchLine size="30" className="" />
-                            </button>
+                            </button> */}
                           </label>
-                        </form>
+                       
                       </div>
                     </div>
                   </div>
@@ -264,7 +304,7 @@ const ChannelsLobby = () => {
                   <div className=" w-full flex flex-col items-center">
                 {selectedFeild === "my channels" &&  <div><Demo /> </div>}
                     {availabelChannels && selectedFeild === "Explore" &&
-                      availabelChannels.map((channel: Channel) => (
+                       availabelChannels.map((channel: Channel) => (
                         <div
                           key={channel.name}
                           className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
@@ -278,7 +318,7 @@ const ChannelsLobby = () => {
                           >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
-                                <div className="flex items-start">
+                                <div className="flex items-center">
                                   <div className="relative flex-shrink-0 pt-0.5">
                                     <GrGroup
                                       className="h-10 w-10"
@@ -320,7 +360,7 @@ const ChannelsLobby = () => {
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">
-                                  <div className="flex items-start">
+                                  <div className="flex items-center">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <GrGroup
                                         className="h-10 w-10"
@@ -329,7 +369,7 @@ const ChannelsLobby = () => {
 
                                     <div className="ml-3 flex flex-col items-center">
                                       <p className="text-md font-sans text-white ">
-                                        {channel.channelId}
+                                        {channel.channelName}
                                       </p>
                                     </div>
                                   </div>
@@ -356,33 +396,40 @@ const ChannelsLobby = () => {
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">
-                                  <div className="flex items-start">
+                                  <div className="flex items-center">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <GrGroup
                                         className="h-10 w-10"
                                       />
                                     </div>
 
-                                    <div className="ml-3 f">
+                                    <div className="ml-3">
                                       <p className="text-md font-sans text-white">
-                                        {channel.channelId}
+                                        {channel.channelName}
                                       </p>
                                     </div>
+                                    <span className='flex flex-row space-x-3 ml-auto'>
+							 <button
+												className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+												onClick={() => {
+                          inviteHandler(channel.channelId, true, context.userData);
+												}}
+												>
+												<FiCheckCircle size="25" className="text-green-300 hover:scale-110" />
+							</button>
+							<button
+												className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+												onClick={() => {
+													inviteHandler(channel.channelId, false, context.userData);
+												}
+                      }
+												>
+												<FiXCircle size="25" className="text-red-300 hover:scale-110" />
+											</button>
+							</span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex ">
-                            <button
-                              className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-                              onClick={() => {
-                              }}
-                            >
-                              <FiCheckCircle
-                                size="30"
-                                className="text-green-300"
-                              />
-                            </button>
-                          </div>
                             </div>
                           </motion.div>
                         </div>

@@ -1,6 +1,21 @@
 
-import { Channel, ChannelMessage, MemberShip, Room } from "../AppContext";
+import { Channel, ChannelMessage, MemberShip, Room, User } from "../AppContext";
 
+
+export async function searchUsers(query: string) {
+  const response = await fetch(`http://localhost:3001/chat/search?q=${query}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+
+    });
+
+  const data = await response.json();
+  return data;
+}
 
 export async function searchMember(query:string, channelId:string) {
     const response = await fetch(`http://localhost:3001/chat/chan/${channelId}/Search?q=${query}`,
@@ -56,11 +71,11 @@ export async function searchMember(query:string, channelId:string) {
     return channel;
   }
 
- export async function getChannelMessages(channelId: string): Promise<ChannelMessage[] | []> {
+ export async function getChannelMessages(channelId: string, userId:string | undefined): Promise<ChannelMessage[] | []> {
     const res = await fetch(`http://localhost:3001/chat/channels/messages/${channelId}`,
       {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
       },
     );
     // if (!res.ok){

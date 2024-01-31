@@ -5,21 +5,7 @@ import { Spotlight, spotlight } from "@mantine/spotlight";
 import { Badge, Center, Group, Text } from "@mantine/core";
 import Image from "next/image";
 import { CiSearch } from "react-icons/ci";
-
-async function searchUsers(query: string) {
-    const response = await fetch(`http://localhost:3001/chat/search?q=${query}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-  
-      });
-  
-    const data = await response.json();
-    return data;
-  }
+import { searchUsers } from "../utiles/utiles";
 
 function FindAConversation() {
     const [query, setQuery] = useState('');
