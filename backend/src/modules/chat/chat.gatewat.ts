@@ -168,14 +168,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       const members = await this.chatService.getAllChannelUsers(payload.to);
       const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
+      let blockedUsers = await this.chatService.getBlockedUser(client.user.intraId);
+      console.log(blockedUsers);
       members.map((member)=>{
-        if (!member.isBanned)
+        if (!member.isBanned && !blockedUsers.some((entry) => {
+          if (entry.userId === user.intraId) {
+            return entry.friendId === member.intraId;
+          } else if (entry.friendId === user.intraId) {
+            return entry.userId === member.intraId;
+          }
+          return false; // Make sure to have a default return value
+        }))
         {
           const recipientSocket = this.getAllSocketsByUserId(member.intraId);
           recipientSocket.map((socket:any) =>{
             if (socket.id !== client.id){
+              console.log('message brodcast to', member.login);
               socket.emit('channelBroadcast',message);
-              console.log('message broadcasted to channel');
             }
           }
           );
@@ -183,6 +192,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     }
     catch(e){
+      console.log(e);
       client.emit('channelBroadcast', {e});
     }
   }

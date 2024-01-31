@@ -1,12 +1,17 @@
 // chat.controller.ts
-import { Controller, Post, Body, Get, Res,Param, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res,Param, UseGuards, Query, Req } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Room , User, Message, Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
+import { AuthService } from 'modules/auth/auth.service';
+import { Console } from 'console';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private authService: AuthService,
+    ) {}
 
   @Get('search')
   @UseGuards(JwtAuthGuard)
@@ -122,10 +127,30 @@ export class ChatController {
   }
   @Get('channels/messages/:id')
   @UseGuards(JwtAuthGuard)
-  async getChannelMessages(@Param('id') id: string, @Res() res:any): Promise<any | undefined>{
-    const data = await this.chatService.getChannelMessages(id);
-    const dataBeta = res.json(data);
-    return dataBeta;
+  async getChannelMessages(@Param('id') id: string, @Req() req:any, @Res() res:any): Promise<any | undefined>{
+    try{
+      const cookie = req.cookies;
+      const user = this.authService.getUserFromCookie(cookie) ;
+      let data = await this.chatService.getChannelMessages(id);
+      let blockedUsers = await this.chatService.getBlockedUser(user.intraId);
+      console.log(data);
+      data = data.filter((item: any) => {
+        return !blockedUsers.some((entry) => {
+          if (entry.userId === user.intraId) {
+            return entry.friendId === item.sender;
+          } else if (entry.friendId === user.intraId) {
+            return entry.userId === item.sender;
+          }
+          return false; // Make sure to have a default return value
+        });
+      });
+      // console.log(data);
+      const dataBeta = res.json(data);
+      return dataBeta;
+    }
+    catch(e){
+      console.log(e);
+    }
   }
 
   @Get('chanAvatar/:id')
@@ -173,6 +198,21 @@ export class ChatController {
       res.json({sucess:false, e});
     }
   }
+  @Post('updateChannelInvite/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async updateInviteStatus(@Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{status:boolean},
+  @Res() res:any){
+    try{
+      await this.chatService.updateInvite(intraId, channelName, payload.status);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false, e});
+    }
+  }
   // async joinChannel(payload:{channelId:string, type:string,password:string}){
   //   try{
   //     await this.chatService.joinChannel(payload.channelId, payload.type, payload.password);
@@ -192,7 +232,7 @@ export class ChatController {
     }
     catch(e){
       console.log(e);
-      res.status(500).json({ success: false, error: e });
+      res.json({ success: false, error: e });
     }
   }
   @Post('inviteToChannel/:id/:name')
@@ -207,7 +247,7 @@ export class ChatController {
     }
     catch(e){
       console.log(e);
-      res.status(500).json({ success: false, error: e });
+      res.json({ success: false, error: e });
     }
   }
   @Post('updateChannel/:id/:name')

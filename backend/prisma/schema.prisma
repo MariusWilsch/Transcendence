@@ -50,7 +50,7 @@ model MatchHistory {
 }
 
 model Channel {
-  id             Int             @id @default(autoincrement())
+   id            String         @id @default(uuid())
   name           String          @unique
   type           String          @default("")
   ownerId        String          
@@ -64,6 +64,7 @@ model MemberShip {
   memberId        String        @unique @id
   intraId         String
   channelId       String
+  channelName     String
   Avatar          String        @default("")
   login           String        @default("")
   isOwner        Boolean @default(false)
@@ -73,18 +74,19 @@ model MemberShip {
   mutedTime      DateTime? 
   joined_at      DateTime        @default(now())
   onInviteState  Boolean @default(false)
-  channel        Channel  @relation("channelMember",fields: [channelId], references  : [name])
+  channel        Channel  @relation("channelMember",fields: [channelName], references  : [name])
   user           User     @relation(fields: [intraId], references: [intraId])
 }
 
 model ChannelMessage {
   id             Int       @id @default(autoincrement())
   channelId      String
+  channelName  String
   sender         String
   Avatar         String?
   content        String
   createdAt      DateTime  @default(now())
-  senderUser     Channel      @relation(fields: [channelId], references: [name])
+  senderUser     Channel      @relation(fields: [channelName], references: [name])
 }
 model Message {
   id             Int       @id @default(autoincrement())

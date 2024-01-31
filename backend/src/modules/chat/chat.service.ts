@@ -33,19 +33,21 @@ export class ChatService {
     if (!senderUser || !recipientUser) {
       throw new Error('Sender or recipient not found.');
     }
-    const userStatue = prisma.friend.findFirst({
+    const userStatue = await prisma.friend.findFirst({
       where:{
         friendId:sender,
       }
     });
-    const userStatueReciepent = prisma.friend.findFirst({
+    const userStatueReciepent = await prisma.friend.findFirst({
       where:{
         userId:sender,
       },
     });
 
-    if (userStatue && ((await userStatue)?.friendshipStatus === 'BLOCKED' || (await userStatueReciepent)?.friendshipStatus === 'BLOCKED'))
+    if ( (userStatue?.friendshipStatus === 'BLOCKED') || (userStatueReciepent?.friendshipStatus === 'BLOCKED') )
     {
+      console.log(userStatue?.friendshipStatus);
+      console.log( userStatueReciepent?.friendshipStatus);
       throw ('message can\'t be sent');
     }
     if (!room && (senderUser && recipientUser))
@@ -256,7 +258,7 @@ export class ChatService {
     const randomId = crypto.randomBytes(8).toString('hex');
     return randomId;
   }
-  async createMember(intraId:string, channelId:string, isOwner:boolean, onInviteState:boolean):Promise<void> {
+  async createMember(intraId:string,channelName:string ,channelId:string, isOwner:boolean, onInviteState:boolean):Promise<void> {
     const memberId = this.generateRandomId();
     const user = await prisma.user.findUnique({
       where:{
@@ -273,6 +275,7 @@ export class ChatService {
         memberId:this.generateRandomId(),
         intraId,
         channelId,
+        channelName,
         isOwner:isOwner,
         isModerator:isOwner,
         Avatar:user.Avatar,
@@ -298,7 +301,7 @@ export class ChatService {
     {
       password = await bcrypt.hash(typePass.password, saltRounds);
     }
-    await prisma.channel.create({
+    const createdChannel = await prisma.channel.create({
       data:{
         name,
         ownerId,
@@ -308,7 +311,7 @@ export class ChatService {
     });
     try{
 
-      await this.createMember(ownerId, name, true, false);
+      await this.createMember(ownerId, name, createdChannel.id, true, false);
     }
     catch(e)
     {
@@ -369,32 +372,50 @@ export class ChatService {
           throw("password incorrect");
         }
     }
-    await this.createMember(user.intraId, channelId, false, false);
+    await this.createMember(user.intraId,channel.name,channel.id, false, false);
   }
   async getAllChannelUsers(channelId:string){
     return await prisma.memberShip.findMany({
       where:{
         channelId,
         isBanned:false,
-        isMuted:false,
+        onInviteState:false,
       },
     })
   }
   async createChannelMessage(channelId:string, message:string, sender:User){
+    const dateNow = new Date();
+    const dateOs = dateNow.toISOString();
+    console.log('now ',dateOs);
     const memberShip = await  prisma.memberShip.findFirst({
       where:{
         channelId,
         intraId :sender.intraId
       },
     })
-
+    
     if (!memberShip)
     {
       throw ('no such member');
     }
-    if (memberShip.isBanned || memberShip.isMuted) 
+    if (memberShip.isBanned) 
     {
       throw ('you can t send message into that channel ');
+    }
+    if (memberShip.isMuted){
+      if (memberShip.mutedTime !== null &&  memberShip.mutedTime <= dateNow){
+        await prisma.memberShip.update({
+          where:{
+            memberId:memberShip.memberId,
+          },
+          data:{
+            isMuted:false,
+          }
+        })
+      }
+      else{
+        throw(`you re muted for until ` );
+      }
     }
     const user =  await prisma.user.findUnique({
       where:{
@@ -404,6 +425,7 @@ export class ChatService {
     return await prisma.channelMessage.create({
       data:{
         channelId,
+        channelName:memberShip.channelName,
         sender:sender.intraId,
         Avatar: user.Avatar,
         content:message,
@@ -431,7 +453,7 @@ export class ChatService {
   async getChannel(channelId:string):Promise<any>{
     const channel = await prisma.channel.findUnique({
       where:{
-        name:channelId,
+        id:channelId,
       },
     });
     if (!channel)
@@ -444,7 +466,7 @@ export class ChatService {
   {
     const channel = await prisma.channel.findUnique({
       where:{
-        name:channelId,
+        id:channelId,
       },
     });
     if (!channel)
@@ -480,6 +502,7 @@ export class ChatService {
       where: {
         channelId,
         isBanned:false,
+        onInviteState:false,
         login: {
           contains: query,
         },
@@ -541,7 +564,7 @@ export class ChatService {
     let password = '';
     const channel = await prisma.channel.findUnique({
       where:{
-        name:channelId,
+        id:channelId,
       }
     });
     if (!channel){
@@ -572,7 +595,7 @@ export class ChatService {
     }
     await prisma.channel.update({
       where:{
-        name:channelId,
+        id:channelId,
       },
       data:{
         name:info.newName?info.newName:channel.name,
@@ -586,7 +609,7 @@ export class ChatService {
     
     const channel = await prisma.channel.findUnique({
       where:{
-        name:channelName,
+        id:channelName,
       }
     });
     if (!channel){
@@ -642,7 +665,7 @@ export class ChatService {
   async inviteChannel(ownerId:string, invitedId:string,channelId:string){
     const channel = await prisma.channel.findUnique({
       where:{
-        name :channelId,
+        id :channelId,
       }
     })
     if (!channel){
@@ -665,9 +688,14 @@ export class ChatService {
       }
     })
     if (member){
-      throw('already on channel');
+      if (member.onInviteState){
+        throw('the invitation is already sent');
+      }
+      else{
+        throw('already on the channel');
+      } 
     }
-    await this.createMember(invitedId, channelId, false, true);
+    await this.createMember(invitedId,channel.name, channel.id, false, true);
   }
 
   async getInviteChannel(intraId:string){
@@ -675,6 +703,52 @@ export class ChatService {
       where:{
         intraId,
         onInviteState:true,
+      }
+    })
+  }
+  async updateInvite(intraId:string, channelName:string, status:boolean){
+    const memeber = await prisma.memberShip.findFirst({
+      where:{
+        intraId,
+        channelId:channelName,
+      }
+    })
+    if (!memeber){
+      throw('no such invitation');
+    }
+    if (status){
+      await prisma.memberShip.update({
+        where:{
+          memberId:memeber.memberId,
+        },
+        data:{
+          onInviteState:false,
+        }
+      })
+    }
+    else{
+      await prisma.memberShip.delete({
+        where:{
+          memberId:memeber.memberId,
+        },
+      })
+    }
+  }
+  async getBlockedUser(user:string){
+    return await prisma.friend.findMany({
+      where:{
+        OR:
+        [
+          {
+            friendshipStatus : 'BLOCKED',
+            friendId : user,
+          },
+          {
+            
+            friendshipStatus : 'BLOCKED',
+            userId : user,
+          }
+        ]
       }
     })
   }

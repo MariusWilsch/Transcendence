@@ -51,6 +51,7 @@ export type User = {
       isModerator: boolean;
       isBanned: boolean;
       isMuted: boolean;
+      onInviteState:boolean;
       mutedTime: Date;
       joined_at: Date;
   }
