@@ -24,7 +24,7 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 
 	if (!token) {
 		console.log('Client does not have a valid token');
-		//! Some alert that he needs to login again
+		alert('You are not logged in');
 		return;
 	}
 
@@ -45,11 +45,14 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		console.log('Disconnected from server');
 		store.dispatch(gameFinished());
 		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('duplicateRequest', () => {
 		console.log('Duplicate request');
+		alert('You are already connected on another tab');
 		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
+		socket.disconnect();
 	});
 
 	socket.on('createGame', (gameState: GameState) => {
@@ -106,6 +109,7 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		case 'connection/acceptPrivate':
 			ClientSocket?.emit('acceptPrivate', action.payload);
 			break;
+		//* Action creators middleware
 		case 'connection/gameFinished':
 			store.dispatch(resetConfig());
 			break;

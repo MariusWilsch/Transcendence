@@ -32,19 +32,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
 	privateLobby = new Map<string, IO>();
-	test = new Map<IO, IO>();
 	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
 		//! Identify the client not by token but by his username
 		console.log(`Client connected via ${client.id}`);
 		if (!client.handshake.auth.token) return;
-		if (this.duplicateUsers.has(client.handshake.auth.token)) {
+		const id = this.authService.getUserFromJwt(
+			client.handshake.auth.token
+		).intraId;
+		if (this.duplicateUsers.has(id)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
-			client.disconnect();
+			client.disconnect(true);
 		}
-		this.duplicateUsers.add(client.handshake.auth.token);
+		this.duplicateUsers.add(id);
 	}
 
 	handleDisconnect(client: IO) {
@@ -58,12 +60,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
-		this.duplicateUsers.delete(client.handshake.auth.token);
-		if (this.test.size === 0) return;
-		// if (this.test.has(client)) {
-		// 	this.test.get(client).emit('gameStopped');
-		// 	this.test.delete(client);
-		// }
+		this.duplicateUsers.delete(
+			this.authService.getUserFromJwt(client.handshake.auth.token).intraId
+		);
 	}
 
 	checkForAvailablePlayers() {

@@ -147,7 +147,7 @@ export const Sidebar = () => {
 				// }
 			});
 		}
-	}, [context.socket, context.user]);
+	}, [context.socket, context.user, isConnected]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');

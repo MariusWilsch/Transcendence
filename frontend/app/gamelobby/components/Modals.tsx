@@ -1,14 +1,14 @@
 import {
+	ConnectionStatus,
 	GameOutcome,
 	cancelMatchmaking,
 	gameFinished,
 } from '../GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import useStartGame from '../hooks/useStartGame';
 import Link from 'next/link';
 import { RootState } from '../GlobalRedux/store';
-import { useAppContext } from '@/app/AppContext';
 
 export const Modal = () => {
 	const dispatch = useDispatch();
@@ -45,16 +45,7 @@ export function GameOutcomeModal({ outcome }: any) {
 	const isGameStarted = useSelector(
 		(state: RootState) => state.connection.isGameStarted,
 	);
-	const { pushToGame } = useStartGame();
-	const context = useAppContext();
-	const dispatch = useDispatch();
-
-	useEffect(() => {
-		context.socket?.on('gameStopped', () => {
-			modalRef.current?.showModal();
-			dispatch(gameFinished());
-		});
-	});
+	const { pushGame } = useStartGame();
 
 	useEffect(() => {
 		if (!isGameStarted) {
@@ -75,7 +66,10 @@ export function GameOutcomeModal({ outcome }: any) {
 					<div className="modal-action flex justify-center items-center">
 						<form method="dialog" className="space-x-4 w-full flex justify-center">
 							{outcome !== GameOutcome.NONE && (
-								<button onClick={() => pushToGame()} className="btn">
+								<button
+									onClick={() => pushGame(ConnectionStatus.CONNECTED)}
+									className="btn"
+								>
 									Play again
 								</button>
 							)}

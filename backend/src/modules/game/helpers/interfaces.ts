@@ -87,7 +87,6 @@ export interface GameSession {
 		{
 			avatar: string;
 			username: string;
-			// aiMode?: boolean;
 		},
 		{
 			avatar: string;
