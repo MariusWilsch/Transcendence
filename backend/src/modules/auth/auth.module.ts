@@ -29,6 +29,7 @@ import { Email2FAService } from './nodemailer/email.service';
     UserService,
     JwtStrategy,
     Email2FAService,
+    UserService,
   ],
   exports: [AuthService],
 })

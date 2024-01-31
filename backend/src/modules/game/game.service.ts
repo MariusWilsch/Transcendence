@@ -428,7 +428,6 @@ export class GameService {
 			ball,
 			difficulty: aiDifficulty,
 		});
-		console.log(command[playerRole]);
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {

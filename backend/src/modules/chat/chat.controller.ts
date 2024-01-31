@@ -133,7 +133,6 @@ export class ChatController {
       const user = this.authService.getUserFromCookie(cookie) ;
       let data = await this.chatService.getChannelMessages(id);
       let blockedUsers = await this.chatService.getBlockedUser(user.intraId);
-      console.log(data);
       data = data.filter((item: any) => {
         return !blockedUsers.some((entry) => {
           if (entry.userId === user.intraId) {

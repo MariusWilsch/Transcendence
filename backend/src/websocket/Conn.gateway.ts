@@ -58,7 +58,7 @@ export class handleClientsConnection
 	}
 
 	@SubscribeMessage('FriendShipRequest')
-	handleFriendRequest(
+	async handleFriendRequest(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() data: any
 	) {
@@ -66,7 +66,7 @@ export class handleClientsConnection
 		const { userId, friendId } = data;
 
 		for (const [key, value] of this.connectedClients.entries()) {
-			const user = this.authService.getUserFromJwt(value);
+			const user = await this.authService.getUserFromJwt(value);
 			if (user.intraId === friendId) {
 				// console.log('user : ', user.login);
 				this.server.to(key).emit('FriendShipRequest');
@@ -81,7 +81,7 @@ export class handleClientsConnection
 			this.addClient(client);
 			// this.printConnectedClients();
 			if (client.handshake.auth && client.handshake.auth.jwt) {
-				const user = this.authService.getUserFromJwt(client.handshake.auth.jwt);
+				const user = await this.authService.getUserFromJwt(client.handshake.auth.jwt);
 				// console.log('user connected : ', user.login, '\n');
 				if (user) {
 					this.server.emit('update');
@@ -95,7 +95,7 @@ export class handleClientsConnection
 		try {
 			this.removeClient(client);
 			if (client.handshake.auth && client.handshake.auth.jwt) {
-				const user = this.authService.getUserFromJwt(client.handshake.auth.jwt);
+				const user = await this.authService.getUserFromJwt(client.handshake.auth.jwt);
 				// console.log('user disconnected ', user.login);
 				if (user) {
 					this.server.emit('update');

@@ -13,7 +13,8 @@ import { GrGroup } from "react-icons/gr";
 import JoinProtectedChannel from "../chatComponents/JoinProtectedChannel";
 import Demo from "../chatComponents/Demo";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
-import { Query } from "matter-js";
+import { MantineProvider } from "@mantine/core";
+
 
 
 async function inviteHandler(Channelname: string, status:boolean, user: User) {
@@ -208,6 +209,7 @@ const ChannelsLobby = () => {
     }
   }
   return (
+    <MantineProvider>
     <div className="custom-height z-20 w-screen bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto">
@@ -223,12 +225,12 @@ const ChannelsLobby = () => {
                       userChannels();
                       setselectedFeild("my channels");
                     }}
-                  >
+                    >
                     <div
                       className={`${selectedFeild === "my channels"
-                          ? "underline underline-offset-8 text-slate-200"
-                          : "text-slate-300"
-                        } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
+                      ? "underline underline-offset-8 text-slate-200"
+                      : "text-slate-300"
+                    } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
                     >
                       My channels
                     </div>
@@ -239,12 +241,12 @@ const ChannelsLobby = () => {
                       exploreChannels();
                       setselectedFeild("Explore");
                     }}
-                  >
+                    >
                     <div
                       className={`${selectedFeild === "Explore"
-                          ? "underline underline-offset-8 text-slate-200"
-                          : "text-slate-300"
-                        } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
+                      ? "underline underline-offset-8 text-slate-200"
+                      : "text-slate-300"
+                    } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
                     >
                       Explore
                     </div>
@@ -255,12 +257,12 @@ const ChannelsLobby = () => {
                       inviteChannels();
                       setselectedFeild("Invitations");
                     }}
-                  >
+                    >
                     <div
                       className={`${selectedFeild === "Invitations"
-                          ? "underline underline-offset-8 text-slate-200"
-                          : "text-slate-300"
-                        } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
+                      ? "underline underline-offset-8 text-slate-200"
+                      : "text-slate-300"
+                    } font-sans p-3 hover:bg-gray-500 rounded-md w-full`}
                     >
                       Invitations
                     </div>
@@ -269,9 +271,9 @@ const ChannelsLobby = () => {
               </div>
               {selectedFeild === "Explore" && (
                 <motion.div
-                  initial={{ opacity: 0, x: -100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.02 }}
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.02 }}
                 >
                   <div className="w-full flex items-center justify-center mb-6">
                     <div className="md:w-[50vw] w-full flex items-center justify-center">
@@ -287,13 +289,13 @@ const ChannelsLobby = () => {
                                 setInputValue(e.target.value);
                               }}
                               className="min-w-[80vw] md:min-w-[50vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
-                            />
+                              />
                             <div className="md:hidden">&nbsp; &nbsp;</div>
                             {/* <button
                               onClick={() => console.log('cho-fo-uniiiii')}
                               className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
                               type="submit"
-                            >
+                              >
                               <RiSearchLine size="30" className="" />
                             </button> */}
                           </label>
@@ -308,23 +310,23 @@ const ChannelsLobby = () => {
                 initial={{ opacity: 0, y: -100 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.02 }}
-              >
+                >
                 <div className="mt-4 flex  justify-center ">
                   <div className=" w-full flex flex-col items-center">
                 {selectedFeild === "my channels" &&  <div><Demo /> </div>}
                     {availabelChannels && selectedFeild === "Explore" &&
                        availabelChannels.map((channel: Channel) => (
-                        <div
-                          key={channel.name}
-                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
-                        >
+                         <div
+                         key={channel.name}
+                         className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                         >
                           <motion.div
                             whileTap={{ scale: 0.9 }}
                             whileHover={{ scale: 1.1 }}
                             initial={{ opacity: 0, y: -100 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.02 }}
-                          >
+                            >
                             <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                               <div className="flex-1 w-0 p-4">
                                 <div className="flex items-center">
@@ -351,8 +353,8 @@ const ChannelsLobby = () => {
                     {channels && selectedFeild === "my channels" &&
                       channels?.map((channel: any) => (
                         <div
-                          key={channel.channelId}
-                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                        key={channel.channelId}
+                        className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
                         >
                           <motion.div
                             whileTap={{ scale: 0.9 }}
@@ -360,20 +362,20 @@ const ChannelsLobby = () => {
                             initial={{ opacity: 0, y: -100 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.02 }}
-                          >
+                            >
                             <Link
                               href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${channel.channelId}`}
                               onClick={()=>{
                                 context.setComponent('conversation');
                               }}
-                            >
+                              >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
                                 <div className="flex-1 w-0 p-4">
                                   <div className="flex items-center">
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <GrGroup
                                         className="h-10 w-10"
-                                      />
+                                        />
                                     </div>
 
                                     <div className="ml-3 flex flex-col items-center">
@@ -391,8 +393,8 @@ const ChannelsLobby = () => {
                     {invitationChannels && selectedFeild === "Invitations" &&
                       invitationChannels?.map((channel: any) => (
                         <div
-                          key={channel.channelId}
-                          className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
+                        key={channel.channelId}
+                        className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
                         >
                           <motion.div
                             whileTap={{ scale: 0.9 }}
@@ -400,7 +402,7 @@ const ChannelsLobby = () => {
                             initial={{ opacity: 0, y: -100 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.02 }}
-                          >
+                            >
                             <div
                             >
                               <div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
@@ -409,7 +411,7 @@ const ChannelsLobby = () => {
                                     <div className="relative flex-shrink-0 pt-0.5">
                                       <GrGroup
                                         className="h-10 w-10"
-                                      />
+                                        />
                                     </div>
 
                                     <div className="ml-3">
@@ -429,10 +431,10 @@ const ChannelsLobby = () => {
 							<button
 												className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
 												onClick={() => {
-													inviteHandler(channel.channelId, false, context.userData);
+                          inviteHandler(channel.channelId, false, context.userData);
 												}
                       }
-												>
+                      >
 												<FiXCircle size="25" className="text-red-300 hover:scale-110" />
 											</button>
 							</span>
@@ -452,6 +454,7 @@ const ChannelsLobby = () => {
       </div>
       <Toaster />
     </div>
+  </MantineProvider>
   );
 }
 

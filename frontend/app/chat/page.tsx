@@ -11,7 +11,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { CgDanger } from "react-icons/cg";
 import Link from "next/link";
 import { useDisclosure } from '@mantine/hooks';
-import { BackgroundImage, Modal } from '@mantine/core';
+import { BackgroundImage, MantineProvider, Modal } from '@mantine/core';
 import { IoMdAdd } from "react-icons/io";
 import Cookies from "universal-cookie";
 import { Loading } from "../components/Loading";
@@ -95,6 +95,7 @@ const Chat = () => {
   }, [context.component])
   console.log('this is the chat');
   return (
+    <MantineProvider>
     <div className=" custom-height w-screen  bg-[#12141A] ">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto">
@@ -106,6 +107,7 @@ const Chat = () => {
       </div>
       <Toaster />
     </div>
+    </MantineProvider>
   );
 };
 

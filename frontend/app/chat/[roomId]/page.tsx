@@ -11,7 +11,7 @@ import { Loading } from '@/app/components/Loading';
 import { FaCircle } from 'react-icons/fa';
 import { Friend } from '@/app/components/Friend';
 import { IoMdArrowBack } from "react-icons/io";
-import { Avatar, Indicator } from '@mantine/core';
+import { Avatar, Indicator, MantineProvider } from '@mantine/core';
 import { FaCircleArrowDown } from "react-icons/fa6";
 import UserProfileImage from '@/app/chatComponents/UderProfileImage';
 import { SingleMessageSent } from '@/app/chatComponents/SingleMessageSent';
@@ -345,8 +345,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       </h1>
     )
   }
-  console.log('this is the chat');
   return (
+    <MantineProvider>
+
     <div className=" w-screen  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
@@ -372,10 +373,10 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                             size="lg"
                             radius="xl"
                             src={recipient.Avatar}
-                          />
+                            />
                         </Indicator>
                           : ( recipient && <Image width={144} height={144} src={recipient.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />)
-                          }
+                        }
                         </div>
                         <div className="flex flex-col leading-tight">
                           <div className="text-2xl mt-1 flex items-center">
@@ -401,8 +402,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                     {/* {chatContainerRef.current?.scrollHeight  &&
                        <FaCircleArrowDown
                        onClick={()=>{
-                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-                        setPage(2);
+                         chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+                         setPage(2);
                       }}
                        size={"30"}
                        className=' relative bottom-1 self-center text-white hover:scale-90 z-30 ' />
@@ -475,11 +476,11 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                     {/* {chatContainerRef.current?.scrollHeight  &&
                        <FaCircleArrowDown
                        onClick={()=>{
-                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-                        setPage(2);
+                         chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+                         setPage(2);
                       }}
-                       size={"30"}
-                       className='  text-white hover:scale-90 z-30 ' />
+                      size={"30"}
+                      className='  text-white hover:scale-90 z-30 ' />
                     } */}
                     </div>
                     <div className="p-4">
@@ -522,6 +523,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
       </div>
     </div>
+</MantineProvider>
   );
 }
 

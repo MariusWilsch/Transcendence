@@ -16,6 +16,10 @@ import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 
 @WebSocketGateway({
 	cors: {
@@ -34,13 +38,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	privateLobby = new Map<string, IO>();
 	duplicateUsers: Set<string> = new Set();
 
-	handleConnection(client: IO) {
+	async handleConnection(client: IO) {
 		//! Identify the client not by token but by his username
 		console.log(`Client connected via ${client.id}`);
 		if (!client.handshake.auth.token) return;
-		const id = this.authService.getUserFromJwt(
+		const id  = await this.authService.getUserFromJwt(
 			client.handshake.auth.token
-		).intraId;
+		);
+		console.log(id.intraId)
 		if (this.duplicateUsers.has(id)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
@@ -49,7 +54,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.duplicateUsers.add(id);
 	}
 
-	handleDisconnect(client: IO) {
+	async handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
@@ -61,7 +66,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
 		this.duplicateUsers.delete(
-			this.authService.getUserFromJwt(client.handshake.auth.token).intraId
+			await this.authService.getUserFromJwt(client.handshake.auth.token)
 		);
 	}
 
@@ -73,12 +78,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.createGame(player1, player2);
 	}
 
-	createGame(player1: IO, player2: IO) {
+	async createGame(player1: IO, player2: IO) {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		const user1 = this.authService.getUserFromJwt(player1.handshake.auth.token);
-		const user2 = this.authService.getUserFromJwt(player2.handshake.auth.token);
+		const user1 = await this.authService.getUserFromJwt(player1.handshake.auth.token);
+		const user2 = await  this.authService.getUserFromJwt(player2.handshake.auth.token);
+
+
+		console.log('user1 avatar', user1.Avatar);
+		console.log('user2 avatar', user2.Avatar);
 
 		// Create a new game session and store it in the Map
 		this.gameService.createGameSession(roomID, player1, player2, user1, user2);
@@ -135,7 +144,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.gameState
 				);
 				if (gameResult === undefined) return;
-				console.log('Game result', gameResult);
 				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
 				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);
 				//! Save match result here!
@@ -214,6 +222,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
+		
+		
 	}
 
 	@SubscribeMessage('cancelMatchmaking')

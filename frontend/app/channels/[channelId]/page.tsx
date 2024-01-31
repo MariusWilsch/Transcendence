@@ -9,7 +9,7 @@ import { Navbar } from "@/app/components/Navbar"
 import { Sidebar } from "@/app/components/Sidebar"
 import { IoMdArrowBack } from "react-icons/io"
 import Image from "next/image"
-import { Select,  } from '@mantine/core';
+import { MantineProvider, Select,  } from '@mantine/core';
 import { FcInvite } from "react-icons/fc";
 import { PiFlagBannerLight } from "react-icons/pi";
 import { CiLogout } from "react-icons/ci";
@@ -283,6 +283,8 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   const channelName = channel!==undefined? channel?.name.replace(channel.ownerId,''): '';
   return (
     <>
+    <MantineProvider>
+
       <div className=" custom-height w-screen  bg-[#12141A]">
         <div className="flex ">
           {
@@ -394,11 +396,11 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
               {
                 context.responsive ?
                 <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
-              : context.component === 'profile' &&
-              <ChannelDashBoard
-              currentMember={currentMember}
-              firstMembers={firstMembers}
-              />
+                : context.component === 'profile' &&
+                <ChannelDashBoard
+                currentMember={currentMember}
+                firstMembers={firstMembers}
+                />
               }
             </div>
           </div>)
@@ -407,6 +409,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
         <Toaster />
       </div>
+    </MantineProvider>
     </>
   )
 }

@@ -371,6 +371,7 @@ export class UserService {
 		status: 'ONLINE' | 'OFFLINE' | 'INGAME'
 	) {
 		try {
+			if (userId === undefined) return;
 			const userexist = await prisma.user.findUnique({
 				where: {
 					intraId: userId,

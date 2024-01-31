@@ -329,14 +329,7 @@ export const Friend = ({
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							//! Friend ID here
-							onClick={()=>{
-								handleInvite(userId);
-								if (context.socket)
-								{
-									context.socket.emit('privateMatch', {to:userId, other:friendId});
-									
-								}
-							}}
+							onClick={handler}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}
