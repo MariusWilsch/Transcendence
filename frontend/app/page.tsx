@@ -102,7 +102,7 @@ export default function Home() {
 		if (
 			usual_full_name.trim().length > 100 ||
 			usual_full_name.trim().length < 3 ||
-			!/^[a-zA-Z0-9_\-+]+$/.test(usual_full_name)
+			!/^[a-zA-Z0-9_\-+ ]+$/.test(usual_full_name)
 		  ) {
 			toast.error("Error in full name");
 			return;

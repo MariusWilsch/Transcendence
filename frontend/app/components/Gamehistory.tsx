@@ -5,19 +5,6 @@ import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import { use, useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User, MatchHistory } from '../AppContext';
-import { RiPingPongLine } from 'react-icons/ri';
-import { IoChatbubblesOutline } from 'react-icons/io5';
-import { GrGroup } from 'react-icons/gr';
-import { FaUserFriends } from 'react-icons/fa';
-import { GrAchievement } from 'react-icons/gr';
-import { MdLeaderboard } from 'react-icons/md';
-import { IoHome } from 'react-icons/io5';
-import { IoMdNotificationsOutline } from 'react-icons/io';
-import { CgProfile } from 'react-icons/cg';
-import { CiLogout } from 'react-icons/ci';
-import { usePathname } from 'next/navigation';
-import { FaCircleDot } from 'react-icons/fa6';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FaRegMinusSquare } from 'react-icons/fa';
 import { FaRegSquarePlus } from 'react-icons/fa6';
 
@@ -69,6 +56,11 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 											<div className="">
 												<img
 													src={game.user1Avatar}
+													onError={(e: any) => {
+														e.target.onerror = null;
+														e.target.src =
+															'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+													}}
 													className="ml-2  hidden md:inline w-10 h-10  rounded-full"
 												></img>
 											</div>
@@ -95,6 +87,11 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 											<div className="">
 												<img
 													src={game.user2Avatar}
+													onError={(e: any) => {
+														e.target.onerror = null;
+														e.target.src =
+															'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+													}}
 													className="mr-2 hidden md:inline w-10 h-10 rounded-full"
 												></img>
 											</div>
