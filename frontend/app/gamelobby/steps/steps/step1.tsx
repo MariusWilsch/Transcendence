@@ -3,12 +3,7 @@ import playAgainstHuman from '@/public/static/images/playAgainstHuman.png';
 import { CardOverlay } from '@/app/gamelobby/components';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { aiDifficulty } from '@/app/gamelobby/GlobalRedux/features';
-import { useDispatch, useSelector } from 'react-redux';
-import { Dispatch, SetStateAction } from 'react';
-
-interface Step1Props {
-	setStep: Dispatch<SetStateAction<number>>;
-}
+import { useSelector } from 'react-redux';
 
 export const Step1 = ({ setStep }: any) => {
 	const difficulty = useSelector(

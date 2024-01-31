@@ -1,18 +1,9 @@
 'use client';
 import { GameCanvas } from './GameCanvas';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
-import {
-	setupInteraction,
-	startLoop,
-	disconnect,
-	setCountDownDone,
-	aiDifficulty,
-	InputType,
-} from '@/app/gamelobby/GlobalRedux/features';
-import { useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { GameOutcomeModal } from '@/app/gamelobby/components';
-import Image, { StaticImageData } from 'next/image';
+import { useSelector } from 'react-redux';
+import { GameOutcomeModal, CountdownModal } from '@/app/gamelobby/components';
+import Image from 'next/image';
 import computer from '@/public/static/images/computer.png';
 
 interface ScoreProps {
@@ -58,81 +49,6 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 		</div>
 	);
 };
-
-function CountdownModal() {
-	const modalRef = useRef<HTMLDialogElement>(null);
-	const countdownRef = useRef<HTMLSpanElement>(null);
-	const intervalRef = useRef<NodeJS.Timeout | null>(null);
-	const isGameStarted = useSelector(
-		(state: RootState) => state.connection.isGameStarted,
-	);
-	const gameConfig = useSelector((state: RootState) => state.gameConfig);
-	const dispatch = useDispatch();
-
-	useEffect(() => {
-		if (isGameStarted) {
-			countDown();
-		}
-		return () => {
-			if (intervalRef.current) clearInterval(intervalRef.current!);
-		};
-	}, [isGameStarted]);
-
-	useEffect(() => {
-		const handleBackButton = (event: any) => {
-			// Custom logic here
-			console.log('Back button pressed');
-			dispatch(disconnect());
-			// You can perform actions like redirecting the user here
-		};
-
-		window.addEventListener('popstate', handleBackButton);
-
-		return () => {
-			window.removeEventListener('popstate', handleBackButton);
-		};
-	}, []);
-
-	const countDown = () => {
-		const modal = modalRef.current;
-		const countdown = countdownRef.current;
-		let remainingTime = 5;
-
-		dispatch(setupInteraction(gameConfig));
-		if (gameConfig.aiDifficulty !== aiDifficulty.NONE)
-			dispatch(setupInteraction({ ...gameConfig, inputType: InputType.AI }));
-
-		if (modal && countdown) {
-			modal.showModal();
-			intervalRef.current = setInterval(() => {
-				remainingTime--;
-				countdown.style.setProperty('--value', remainingTime.toString());
-				if (remainingTime <= 0) {
-					dispatch(startLoop());
-					modal.close();
-					clearInterval(intervalRef.current!);
-					dispatch(setCountDownDone(true));
-				}
-			}, 1000);
-		}
-	};
-
-	return (
-		<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-			<div className="modal-box flex justify-center">
-				<div className="py-4">
-					Game starting in{' '}
-					<span className="countdown">
-						<span
-							ref={countdownRef}
-							style={{ '--value': 5 } as React.CSSProperties}
-						></span>
-					</span>
-				</div>
-			</div>
-		</dialog>
-	);
-}
 
 const GameHeader = () => {
 	const userData = useSelector((state: RootState) => state.game.userData);

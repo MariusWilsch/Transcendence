@@ -80,7 +80,3 @@ const useStartGame = () => {
 };
 
 export default useStartGame;
-
-//  else if (isInMatchmaking === MatchmakingStatus.DUPLICATE) {
-// 			alert('You are already connected on another tab');
-// 		}

@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { RootState } from '../gamelobby/GlobalRedux/store';
 import { useSelector } from 'react-redux';
-import { Invite, otherSocket } from '../gamelobby/GlobalRedux/features';
+import { Invite } from '../gamelobby/GlobalRedux/features';
 import { useDispatch } from 'react-redux';
 
 export const Friend = ({

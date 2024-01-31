@@ -58,9 +58,6 @@ export const handleMouseMove = (
 	if (canvasRef.current) {
 		const canvasBounds = canvasRef.current.getBoundingClientRect();
 		const relativeYPos = e.clientY - canvasBounds.top;
-
-		console.log('relativeYPos: ', relativeYPos);
-
 		dispatch(mouseMove({ yPos: relativeYPos }));
 	}
 };

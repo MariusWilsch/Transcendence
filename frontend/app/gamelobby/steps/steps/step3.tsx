@@ -8,9 +8,7 @@ import useStartGame from '@/app/gamelobby/hooks/useStartGame';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 
-// Step3.tsx
 export const Step3 = () => {
-	//! Instead of sending the setMapChoice everytime only send it once when the game starts
 	const { pushGame } = useStartGame();
 	const isConnected = useSelector(
 		(state: RootState) => state.connection.isConnected,

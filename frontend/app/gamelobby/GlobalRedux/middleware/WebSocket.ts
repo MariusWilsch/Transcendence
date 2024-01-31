@@ -52,7 +52,7 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		console.log('Duplicate request');
 		alert('You are already connected on another tab');
 		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
-		socket.disconnect();
+		socket?.disconnect();
 	});
 
 	socket.on('createGame', (gameState: GameState) => {
@@ -64,8 +64,6 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 	socket.on('gameState', (gameState: GameState) => {
 		store.dispatch(updateGame(gameState));
 	});
-
-	socket.on('test', () => console.log('Test received'));
 
 	socket.on('gameOver', (won: boolean) => {
 		//* Will be set twice, once for each player

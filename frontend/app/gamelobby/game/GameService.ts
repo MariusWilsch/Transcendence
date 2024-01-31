@@ -8,7 +8,6 @@ import { mapType } from '@/app/gamelobby/GlobalRedux/features';
 export class GameService {
 	//* Base variables
 	private app: PIXI.Application;
-	private container: HTMLDivElement;
 	//* Game elements
 	private ball = new PIXI.Graphics();
 	private leftPaddle = new PIXI.Graphics();
@@ -32,8 +31,6 @@ export class GameService {
 		height: number,
 		mapChoice: number,
 	) {
-		this.container = container;
-		console.log('Map choice: ', mapChoice);
 		const options =
 			mapChoice === mapType.STANDARD
 				? { backgroundAlpha: 0 }
@@ -81,8 +78,6 @@ export class GameService {
 	}
 
 	private drawMap2(length: number) {
-		console.log('Drawing map 2');
-
 		const graphics = new PIXI.Graphics();
 
 		graphics.lineStyle(2, 0xffffff, 1);
@@ -185,13 +180,4 @@ export class GameService {
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
 	}
-
-	// public clearGameElements() {
-	// 	//! What do I actually need to clear?
-	// 	console.log('Clearing game elements');
-	// 	if (this.app) {
-	// 		this.container.removeChild(this.app.view as HTMLCanvasElement);
-	// 		this.app.destroy(true, true);
-	// 	}
-	// }
 }
