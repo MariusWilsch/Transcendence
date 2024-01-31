@@ -311,7 +311,29 @@ export const Friend = ({
 						)}
 					</div>
 					<div>
-						<button className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}>
+						{ userId && friendId ?(
+						<Link
+							href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${
+								parseInt(friendId as string) > parseInt(userId as string)
+									? friendId + userId
+									: userId + friendId
+							}`}
+							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+						>
+							<motion.div
+								whileHover={{ scale: 1.1 }}
+								whileTap={{ scale: 0.9 }}
+								initial={{ opacity: 0, y: -5 }}
+								animate={{ opacity: 1, x: 0 }}
+								transition={{ delay: 0.02 }}
+							>
+								<BiMessageRounded size="25" className='mb-1'/>
+							</motion.div>
+						</Link>
+						)
+						:
+						(
+							<div className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}>
 							<motion.div
 								whileHover={{ scale: 1.1 }}
 								whileTap={{ scale: 0.9 }}
@@ -321,7 +343,10 @@ export const Friend = ({
 							>
 								<BiMessageRounded size="25" />
 							</motion.div>
-						</button>
+						</div>
+
+						)
+					}
 					</div>
 					<div>
 						{/* Here comes the private match logic */}
