@@ -1,10 +1,9 @@
 // chat.controller.ts
 import { Controller, Post, Body, Get, Res,Param, UseGuards, Query, Req } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { Room , User, Message, Channel } from './dto/chat.dto';
+import { Room , Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { AuthService } from 'modules/auth/auth.service';
-import { Console } from 'console';
 
 @Controller('chat')
 export class ChatController {
@@ -34,7 +33,6 @@ export class ChatController {
   async getAllRooms(@Res() res:any): Promise<Room | undefined>{
     const data = await this.chatService.getAllPrivateRooms();
     res.json(data);
-    console.log(data);
     return data;
   }
   @Get(':id/privateRooms')
@@ -60,9 +58,9 @@ export class ChatController {
   }
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
-  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number=1, @Query('pageSize') pageSize:number=20) :Promise<void>{
+  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number, @Query('pageSize') pageSize:number=30) :Promise<void>{
     try{
-      const skip = (page - 1 ) * pageSize;
+      const skip = page * pageSize;
       const data = await this.chatService.getPrivateRoomMessages(id, pageSize, skip);
       res.json(data);
       return data;
@@ -143,7 +141,6 @@ export class ChatController {
           return false; // Make sure to have a default return value
         });
       });
-      // console.log(data);
       const dataBeta = res.json(data);
       return dataBeta;
     }
@@ -227,7 +224,7 @@ export class ChatController {
   @Res() res:any){
     try{
       await this.chatService.joinChannel(intraId, payload.channelId, payload.type, payload.password);
-      res.json({sucess:true});
+      res.json({success:true,error:"Invitation sent"});
     }
     catch(e){
       console.log(e);

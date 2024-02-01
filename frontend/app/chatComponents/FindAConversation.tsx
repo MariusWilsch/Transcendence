@@ -25,11 +25,8 @@ function FindAConversation() {
         fetchData();
       }
     }, [query]);
-    // if (data ===undefined )
-    // {
-    //   setData([]);
-    // };
-    const items = data
+    const items = data !==undefined ?
+    data
       ?.map((item: User) => (
         <Link
           key={item.intraId}
@@ -61,7 +58,8 @@ function FindAConversation() {
             </Group>
           </Spotlight.Action>
         </Link>
-      ));
+      )):
+      undefined;
   
     return (
       <>
@@ -78,7 +76,7 @@ function FindAConversation() {
           <Spotlight.Root   query={query} onQueryChange={setQuery}>
             <Spotlight.Search placeholder="Search by username..."  leftSection={<CiSearch stroke={1.5} />} />
             <Spotlight.ActionsList>
-              {data !== undefined && data.length > 0
+              {(data !== undefined && data.length > 0)
                 ? (
                   <div className="flex flex-col">
                     {items}

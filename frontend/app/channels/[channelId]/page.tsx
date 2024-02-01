@@ -5,19 +5,9 @@ import Cookies from "universal-cookie"
 import { io } from "socket.io-client"
 import { Loading } from "@/app/components/Loading"
 import toast, { Toaster } from "react-hot-toast"
-import { Navbar } from "@/app/components/Navbar"
-import { Sidebar } from "@/app/components/Sidebar"
 import { IoMdArrowBack } from "react-icons/io"
 import Image from "next/image"
-import { MantineProvider, Select,  } from '@mantine/core';
-import { FcInvite } from "react-icons/fc";
-import { PiFlagBannerLight } from "react-icons/pi";
-import { CiLogout } from "react-icons/ci";
-import { CiSettings } from "react-icons/ci";
-import EditMemberShip from "@/app/chatComponents/EditMemberShip"
-import Search from "@/app/notif/page"
-import { time } from "console"
-import Link from "next/link"
+import { MantineProvider} from '@mantine/core';
 import ChannelAvatar from "@/app/chatComponents/ChannelAvatar"
 import ChannelDashBoard from "@/app/chatComponents/ChannelDashBoard"
 import { getChannel, getChannelFirstMembers, getChannelMessages, getCurrentMember, getCurrentUser, getRooms } from "@/app/utiles/utiles"
@@ -43,72 +33,6 @@ const SingleMessageReceived = ({channelMessage}: any) => {
     </div>
   );
 };
-
-// async function searchMember(query:string, channelId:string) {
-//   const response = await fetch(`http://localhost:3001/chat/chan/${channelId}/Search?q=${query}`,
-//   {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     credentials: "include",
-  
-//   });
-
-//   const data = await response.json();
-//   return data;
-// }
-
-// async function getChannelFirstMembers(channelId: string): Promise<MemberShip[] | []> {
-//   const res = await fetch(`http://localhost:3001/chat/chanAvatar/${channelId}`, {
-//     method: "GET",
-//     credentials: "include",
-//   });
-//   if (!res.ok){
-//     return [];
-//   }
-//   const members = res.json();
-
-//   return members;
-// }
-// async function getChannel(channelId: string): Promise<Channel | undefined> {
-//   const res = await fetch(`http://localhost:3001/chat/channel/${channelId}`, {
-//     method: "GET",
-//     credentials: "include",
-//   });
-//   if (!res.ok){
-//     return undefined;
-//   }
-//   const channel = res.json();
-
-//   return channel;
-// }
-// async function getCurrentMember(channelId: string, intraId:string): Promise<MemberShip | undefined> {
-//   const res = await fetch(`http://localhost:3001/chat/chanMember/${channelId}/${intraId}`, {
-//     method: "GET",
-//     credentials: "include",
-//   });
-//   if (!res.ok){
-//     return undefined;
-//   }
-//   const channel = res.json();
-
-//   return channel;
-// }
-// async function getChannelMessages(channelId: string): Promise<ChannelMessage[] | []> {
-//   const res = await fetch(`http://localhost:3001/chat/channels/messages/${channelId}`,
-//     {
-//       method: "GET",
-//       credentials: "include"
-//     },
-//   );
-//   if (!res.ok){
-//     return [];
-//   }
-//   const messages = res.json();
-
-//   return messages;
-// }
 
 const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [channel, setChannel] = useState<Channel | undefined>();
@@ -245,7 +169,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     if (context.socket && channel && messageText.trimStart().trimEnd()) {
       const cookie = new Cookies();
       const jwt = cookie.get('jwt')
-      context.socket.emit('channelBroadcast', { to: channel.name, message: messageText,jwt });
+      context.socket.emit('channelBroadcast', { to: channel.id, message: messageText,jwt });
       setMessages((prevMessages: ChannelMessage[]) => {
         const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
 
@@ -284,7 +208,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
   return (
     <>
     <MantineProvider>
-
       <div className=" custom-height w-screen  bg-[#12141A]">
         <div className="flex ">
           {
@@ -314,7 +237,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="chat-message z-40 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                   {desplayedMessages?.map((msg: any, index: number) => (
                     (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                     (msg.sender !== context.userData?.intraId && channel ? <SingleMessageReceived key={index}  channelMessage={msg} /> : null)
@@ -362,7 +285,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="chat-message z-40 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                   {desplayedMessages?.map((msg: any, index: number) => (
                     (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                     (msg.sender !== context.userData?.intraId && channel ? <SingleMessageReceived key={index}  channelMessage={msg} /> : null)
@@ -396,11 +319,11 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
               {
                 context.responsive ?
                 <ChannelDashBoard currentMember={currentMember} firstMembers={firstMembers} channelId={params.channelId} />
-                : context.component === 'profile' &&
-                <ChannelDashBoard
-                currentMember={currentMember}
-                firstMembers={firstMembers}
-                />
+              : context.component === 'profile' &&
+              <ChannelDashBoard
+              currentMember={currentMember}
+              firstMembers={firstMembers}
+              />
               }
             </div>
           </div>)
@@ -409,7 +332,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
         <Toaster />
       </div>
-    </MantineProvider>
+      </MantineProvider>
     </>
   )
 }

@@ -43,7 +43,7 @@ const Conversations = () => {
       }
     }, [context.socket, context.rooms]);
     return (
-      <div className=" flex flex-col h-full p-4 w-full  lg:w-1/5 xl:1/5   text-white space-y-3 rounded  border border-[#292D39]">
+      <div className=" z-40 flex flex-col h-full p-4 w-full  lg:w-1/5 xl:1/5   text-white space-y-3 rounded  border border-[#292D39]">
         <FindAConversation />
         <div className='flex justify-center py-3'>
           {selected === "channels" && <div

@@ -10,7 +10,7 @@ import { UserService } from 'modules/user/user.service';
 @Module({
   imports:[JwtModule.register({
   }),],
-  providers: [ChatService, ChatGateway, PrismaClient, AuthService, UserService],
+  providers: [ChatService, ChatGateway, PrismaClient, AuthService,UserService],
   controllers: [ChatController],
 })
 export class ChatModule {}

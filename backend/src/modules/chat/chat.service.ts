@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
-import { PrismaClient } from '@prisma/client';
+import { MemberShip, Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'modules/auth/constants';
 
 enum ChannelType {
-	Public = 1,
-	PROTECTED,
-	PRIVATE,
+  Public = 1,
+  PROTECTED,
+  PRIVATE
 }
 const prisma = new PrismaClient();
 @Injectable()
@@ -19,6 +19,17 @@ export class ChatService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService
     ) { }
+
+  async updateUserStatus(intraId:string, status:string){
+    await prisma.user.update({
+      where:{
+        intraId,
+      },
+      data:{
+        status:status==='ONLINE'?'ONLINE':'OFFLINE',
+      }
+    })
+  }
   async createMessage(sender: string, recipient: string, content: string): Promise<any> {
     const date = new Date();
     const dateToIso : string = date.toISOString(); 
@@ -35,19 +46,22 @@ export class ChatService {
     }
     const userStatue = await prisma.friend.findFirst({
       where:{
-        friendId:sender,
+        OR:
+        [
+          {
+            friendId : sender,
+            userId : recipient,
+          },
+          {
+            userId : sender,
+            friendId:recipient,
+          }
+        ]
       }
     });
-    const userStatueReciepent = await prisma.friend.findFirst({
-      where:{
-        userId:sender,
-      },
-    });
 
-    if ( (userStatue?.friendshipStatus === 'BLOCKED') || (userStatueReciepent?.friendshipStatus === 'BLOCKED') )
+    if ((userStatue?.friendshipStatus === 'BLOCKED') )
     {
-      console.log(userStatue?.friendshipStatus);
-      console.log( userStatueReciepent?.friendshipStatus);
       throw ('message can\'t be sent');
     }
     if (!room && (senderUser && recipientUser))
@@ -85,104 +99,87 @@ export class ChatService {
         updated_at:dateToIso
       },
     });
-    console.log(message);
     return message;
   }
 
-	getUserFromJwt(jwt: any): User | undefined {
-		if (!jwt) {
-			return undefined;
-		}
+  async createPrivateRoom(user1: string, user2: string, clientRoomid:string): Promise<void> {
+    if (user1 === user2)
+    {
+      return;
+    }
+    const romeName  = parseInt(user1) > parseInt(user2) ? user1 + user2 :user2 + user1;
+    if (romeName !== clientRoomid)
+    {
+      return ;
+    }
+    const room = await prisma.privateRoom.findUnique({
+      where:{
+        name:romeName,
+      }
+    });
+    if (room)
+    {
+      console.log('room already exist');
+      return;
+    }
+    const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
+    const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
+    if (!member1 || !member2) {
+      // Handle the case where either sender or recipient does not exis
+      throw ('Sender or recipient not found.');
+    }
+    await prisma.privateRoom.create({
+      data: {
+        name:romeName,
+        participantsIds:[member1.intraId, member2.intraId],
+        participants: {
+          connect: [
+            { intraId: member1.intraId },
+            { intraId: member2.intraId},
+          ],
+        },
+      },
+    });
+  }
 
-		try {
-			const payload = this.jwtService.verify(jwt, {
-				secret: JWT_SECRET,
-			});
+  async getMessagesByUsr(userId: string): Promise<any[]> {
+    return prisma.message.findMany({
+      where: {
+        OR: [
+          { sender: userId },
+          { recipient: userId },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
 
-			const user = payload.userWithoutDate;
-			return user;
-		} catch (error) {
-			console.error('JWT Verification Error:', error);
-			return undefined;
-		}
-	}
+  // You can add other methods for more database operations as needed
+  async getAllMessages(): Promise<any[]> {
+    return prisma.message.findMany();
+  }
+  //get user by id
+  async getUserById(userId: string): Promise<any> {
+    return prisma.user.findUnique({
+      where: {
+        intraId: userId,
+      },
+    });
+  }
+  //get all users
+  async getAllUsers(): Promise<any[]> {
+    return prisma.user.findMany();
+  }
 
-	async createPrivateRoom(
-		user1: string,
-		user2: string,
-		clientRoomid: string
-	): Promise<void> {
-		if (user1 === user2) {
-			return;
-		}
-		const romeName =
-			parseInt(user1) > parseInt(user2) ? user1 + user2 : user2 + user1;
-		if (romeName !== clientRoomid) {
-			return;
-		}
-		const room = await prisma.privateRoom.findUnique({
-			where: {
-				name: romeName,
-			},
-		});
-		if (room) {
-			console.log('room already exist');
-			return;
-		}
-		const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
-		const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
-		console.log(member1);
-		console.log(member2);
-		if (!member1 || !member2) {
-			// Handle the case where either sender or recipient does not exis
-			throw 'Sender or recipient not found.';
-		}
-		await prisma.privateRoom.create({
-			data: {
-				name: romeName,
-				participantsIds: [member1.intraId, member2.intraId],
-				participants: {
-					connect: [{ intraId: member1.intraId }, { intraId: member2.intraId }],
-				},
-			},
-		});
-	}
-
-	async getMessagesByUsr(userId: string): Promise<any[]> {
-		return prisma.message.findMany({
-			where: {
-				OR: [{ sender: userId }, { recipient: userId }],
-			},
-			orderBy: {
-				createdAt: 'asc',
-			},
-		});
-	}
-
-	// You can add other methods for more database operations as needed
-	async getAllMessages(): Promise<any[]> {
-		return prisma.message.findMany();
-	}
-	//get user by id
-	async getUserById(userId: string): Promise<any> {
-		return prisma.user.findUnique({
-			where: {
-				intraId: userId,
-			},
-		});
-	}
-	//get all users
-	async getAllUsers(): Promise<any[]> {
-		return prisma.user.findMany();
-	}
-
-	async getAllRooms() {
-		try {
-			const rooms = await prisma.privateRoom.findMany({
-				orderBy: {
-					updated_at: 'asc',
-				},
-			});
+  async getAllRooms() {
+    try {
+      const rooms = await prisma.privateRoom.findMany({
+        orderBy: {
+          updated_at: 'asc',
+        },
+      });
 
       return rooms;
     } catch (e) {
@@ -602,7 +599,7 @@ export class ChatService {
   }
 
   async leaveChannel(intraId:string, channelName:string){
-    
+    let newOwner :MemberShip ;
     const channel = await prisma.channel.findUnique({
       where:{
         id:channelName,
@@ -621,8 +618,9 @@ export class ChatService {
       throw('no such member');
     }
     if (membership.isOwner){
-      let newOwner = await prisma.memberShip.findFirst({
+       newOwner = await prisma.memberShip.findFirst({
         where:{
+          channelId:channelName,
           intraId:{
             not:intraId,
           },
@@ -632,6 +630,7 @@ export class ChatService {
       if (!newOwner){
         newOwner = await prisma.memberShip.findFirst({
           where:{
+            channelId:channelName,
             intraId:{
               not:intraId,
             },
@@ -639,7 +638,16 @@ export class ChatService {
           }
         })
       }
-
+      if (!newOwner){
+        await prisma.memberShip.deleteMany();
+        await prisma.channelMessage.deleteMany();
+        await prisma.channel.delete({
+          where:{
+            id:channelName,
+          },
+        });
+        return;
+      }
       await prisma.memberShip.update({
         where:{
           memberId:newOwner.memberId,
