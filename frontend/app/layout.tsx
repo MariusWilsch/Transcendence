@@ -29,7 +29,6 @@ export default function RootLayout({
 				<body className={inter.className}>
 					<Providers>
 						<AppProvider>
-							<MantineProvider>
 								<motion.div
 									initial={{ opacity: 0, y: -100 }}
 									animate={{ opacity: 1, y: 0 }}
@@ -37,7 +36,6 @@ export default function RootLayout({
 								>
 									<AnimatePresence>{children}</AnimatePresence>
 								</motion.div>
-							</MantineProvider>
 						</AppProvider>
 					</Providers>
 
@@ -45,7 +43,6 @@ export default function RootLayout({
 			) : (
 				<body className={inter.className}>
 					<Providers>
-					<MantineProvider>
 						<AppProvider>
 							<motion.div
 								initial={{ opacity: 0, y: -100 }}
@@ -65,7 +62,6 @@ export default function RootLayout({
 								</AnimatePresence>
 							</motion.div>
 						</AppProvider>
-					</MantineProvider>
 					</Providers>
 				</body>
 			)}

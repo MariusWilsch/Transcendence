@@ -19,6 +19,17 @@ export class ChatService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService
     ) { }
+
+  async updateUserStatus(intraId:string, status:string){
+    await prisma.user.update({
+      where:{
+        intraId,
+      },
+      data:{
+        status:status==='ONLINE'?'ONLINE':'OFFLINE',
+      }
+    })
+  }
   async createMessage(sender: string, recipient: string, content: string): Promise<any> {
     const date = new Date();
     const dateToIso : string = date.toISOString(); 
@@ -49,7 +60,6 @@ export class ChatService {
 
     if ((userStatue?.friendshipStatus === 'BLOCKED') )
     {
-      console.log(userStatue);
       throw ('message can\'t be sent');
     }
     if (!room && (senderUser && recipientUser))
@@ -87,26 +97,7 @@ export class ChatService {
         updated_at:dateToIso
       },
     });
-    console.log(message);
     return message;
-  }
-
-  getUserFromJwt(jwt: any): User | undefined {
-    if (!jwt) {
-      return undefined;
-    }
-
-    try {
-      const payload = this.jwtService.verify(jwt, {
-        secret: JWT_SECRET,
-      });
-
-      const user = payload.userWithoutDate;
-      return user;
-    } catch (error) {
-      console.error('JWT Verification Error:', error);
-      return undefined;
-    }
   }
 
   async createPrivateRoom(user1: string, user2: string, clientRoomid:string): Promise<void> {
@@ -131,8 +122,6 @@ export class ChatService {
     }
     const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
     const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
-    console.log(member1);
-    console.log(member2);
     if (!member1 || !member2) {
       // Handle the case where either sender or recipient does not exis
       throw ('Sender or recipient not found.');

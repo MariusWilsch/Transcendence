@@ -5,7 +5,7 @@ import { User, useAppContext, Message} from '@/app/AppContext';
 import { io } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { IoMdArrowBack } from "react-icons/io";
-import { Avatar, Indicator } from '@mantine/core';
+import { Avatar, Indicator, MantineProvider } from '@mantine/core';
 import { SingleMessageSent } from '@/app/chatComponents/SingleMessageSent';
 import { SingleMessageReceived } from '@/app/chatComponents/SingleMessageReceived';
 import ProfileInfo from '@/app/chatComponents/ProfileInfo';
@@ -74,23 +74,16 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   };
   const fetchData = async () => {
     try {
-      const user: User | undefined = await getUser(context.recipientUserId);
-      const roomid = user !== undefined ? parseInt(user.intraId) > parseInt(context.userData.intraId) ? user.intraId + context.userData.intraId : context.userData.intraId + user.intraId : 1;
-      if (user === undefined || params.roomId !== roomid) {
-        setPermission(false);
-        setLoading(false);
-        return;
-      }
-      setRecipient(user);
       const dataMessages = await getMessages(params.roomId, 0);
       if (dataMessages) {
         if (dataMessages.response !== "no such room") {
-          console.log(dataMessages);
           setMessages(dataMessages);
         }
       }
       setLoading(false);
     } catch (error) {
+      setPermission(false);
+      setLoading(false);
       console.log(error);
     }
   };
@@ -143,22 +136,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     
   }, [context.component])
   
-  useEffect(()=>{
-    const updateUser= async ()=>{
-      const recp = await getUser(context.recipientUserId);
-      setRecipient(recp);
-    }
-    if(context.socket)
-    {
-      context.socket.on("update", () => {
-        updateUser();
-        });
-      
-    }
-  },[context.socket]);
-  useEffect(()=>{
-
-  },[])
   const sendPrivateMessage = () => {
         console.log('socket',context.socket);
         console.log('recipient',context.recipientUserId );
@@ -196,12 +173,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const handleScroll =  () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-      // You can adjust the threshold based on your needs
       if (scrollTop <= -(scrollHeight - clientHeight - 0.5)  && noMoreData) {
         setLastScrollPosition(-(scrollHeight - clientHeight - 0.5));
-        console.log('this is the last position', lastScrollPosition);
         fetchNewMessages();
-         // Restore scroll position
       }
     }
   };
@@ -236,8 +210,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       </h1>
     )
   }
-  console.log('this is the chat');
   return (
+    <MantineProvider>
     <div className=" w-screen  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
@@ -389,6 +363,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
       </div>
     </div>
+    </MantineProvider>
   );
 }
 

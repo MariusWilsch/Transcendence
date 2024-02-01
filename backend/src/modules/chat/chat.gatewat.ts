@@ -28,10 +28,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<string, any>();
 
   handleConnection(client: any): void {
+    if (client.handshake.query.user === undefined)return;
     const user = this.authService.getUserFromJwt(client.handshake.query.user);
     if (user)
     {
-      console.log(`Client connected: ${user.intraId}`);
+      this.chatService.updateUserStatus(user.intraId, 'ONLINE');
       client.user = user;
       if (this.connectedClients.has(user.intraId))
       {
@@ -42,13 +43,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
     }
+    else console.log('you should authenticated first');
   }
   
   handleDisconnect(client: any): void {
-    console.log(`Client disconnected: ${client.id}`);
+    if (client.user){
+      this.chatService.updateUserStatus(client.user.intraId, 'OFFLINE');
+    }
     this.connectedClients.delete(client.id);
   }
-
   // handleConnection(client:any ) {
   //   // Get the user ID from the socket connection
   //   const userId = client.handshake.query.userId;
@@ -117,7 +120,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           }
         })
         // Save the private message to the database
-        console.log(`Private message from ${client.user.intraId} to ${payload.to}: ${message.content}`);
       } else {
         client.emit('error', { message: 'Recipient not found or offline.' });
       }
@@ -130,7 +132,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createChannel')
   async createChannel(client :any, payload:{jwt:string,name:string, typePass:{type:string, password:string}}){
     try{
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
          
@@ -168,11 +170,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       {
         return;
       }
-      console.log(payload);
       const members = await this.chatService.getAllChannelUsers(payload.to);
       const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
       let blockedUsers = await this.chatService.getBlockedUser(client.user.intraId);
-      console.log(blockedUsers);
       members.map((member)=>{
         if (!member.isBanned && !blockedUsers.some((entry) => {
           if (entry.userId === user.intraId) {
@@ -186,7 +186,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const recipientSocket = this.getAllSocketsByUserId(member.intraId);
           recipientSocket.map((socket:any) =>{
             if (socket.id !== client.id){
-              console.log('message brodcast to', member.login);
               socket.emit('channelBroadcast',message);
             }
           }
@@ -203,7 +202,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('updateChannelUser')
   async updateChannel(client:any, payload:{jwt:string, memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}}){
     try{
-      console.log(payload);
       const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
@@ -226,7 +224,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friendSocket = this.getAllSocketsByUserId(payload.other);
     friendSocket.map((socket:any)=>{
       socket.emit('privateMatch', {from:client.user});
-      console.log(client.user);
     })
   }
   // @SubscribeMessage('updateChannelSettings')

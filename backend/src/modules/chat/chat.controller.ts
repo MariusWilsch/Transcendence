@@ -1,10 +1,9 @@
 // chat.controller.ts
 import { Controller, Post, Body, Get, Res,Param, UseGuards, Query, Req } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { Room , User, Message, Channel } from './dto/chat.dto';
+import { Room , Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { AuthService } from 'modules/auth/auth.service';
-import { Console, error } from 'console';
 
 @Controller('chat')
 export class ChatController {
@@ -34,7 +33,6 @@ export class ChatController {
   async getAllRooms(@Res() res:any): Promise<Room | undefined>{
     const data = await this.chatService.getAllPrivateRooms();
     res.json(data);
-    console.log(data);
     return data;
   }
   @Get(':id/privateRooms')
@@ -143,7 +141,6 @@ export class ChatController {
           return false; // Make sure to have a default return value
         });
       });
-      // console.log(data);
       const dataBeta = res.json(data);
       return dataBeta;
     }

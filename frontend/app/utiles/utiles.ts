@@ -12,7 +12,9 @@ export async function searchUsers(query: string) {
       credentials: "include",
 
     });
-
+    if (!response.ok){
+      return undefined
+    }
   const data = await response.json();
   return data;
 }
