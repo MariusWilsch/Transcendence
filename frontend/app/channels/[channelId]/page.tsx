@@ -1,4 +1,5 @@
 'use client'
+import '@mantine/core/styles.css';
 import { FC, useEffect, useState } from "react"
 import { Channel, ChannelMessage, MemberShip, User, useAppContext } from "@/app/AppContext"
 import Cookies from "universal-cookie"
@@ -57,7 +58,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
           }
           setChannel(chan);
           context.setChannel(chan);
-          console.log('the channel is ', chan);
         }
         const userMemberShip = await getCurrentMember(params.channelId, context.userData.intraId );
         if (userMemberShip === undefined || userMemberShip.isBanned || userMemberShip.onInviteState)
@@ -65,7 +65,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
           throw('permission denied');
         }
         setCurrentMember(userMemberShip);
-        console.log('userMembership', userMemberShip);
         if (!context.socket || context.socket === undefined)
         {
           const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
@@ -74,16 +73,13 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
             query: { user: cookie.get('jwt') },
           });
           context.setSocket(newSocket);
-          console.log('socket ', context.socket);
         }
         const ChannelMessages = await getChannelMessages(params.channelId, context.user?.intraId);
         if (ChannelMessages) {
           setMessages(ChannelMessages);
-          console.log(ChannelMessages);
         }
         const rooms = await getRooms(context.userData.intraId);
         if (rooms !==undefined){
-            console.log('this is the rooms', rooms);
             context.setRooms(rooms);
           }
         setLoading(false);
@@ -95,8 +91,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
       : e === "no such channel"
       ? toast.error("no such channel") : true;
       setPermission(false);
-      console.log('we have a problem');
-      console.log(e);
       setLoading(false);
     }
   }
@@ -111,11 +105,8 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
       if (userData === undefined) { 
         throw ('you need to login first');
       }
-      console.log(userData);
       context.setUserData(userData);
-      console.log('this is the context', context.userData);
     }
-    console.log('userData', context.userData);
   }
   const handleResize = () => {
     if (window.innerWidth <= 1030) {
@@ -163,9 +154,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     };
   }, [context.socket,context.userData])
   const broadCastMessage = () => {
-    console.log("this is the socket",context.socket);
-    console.log("this is the channel",channel);
-    console.log("message ",messageText.trimStart().trimEnd());
     if (context.socket && channel && messageText.trimStart().trimEnd()) {
       const cookie = new Cookies();
       const jwt = cookie.get('jwt')
@@ -203,7 +191,6 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     )
   }
   const desplayedMessages: ChannelMessage[] = messages.length ? messages.toReversed() : [];
-  console.log('permission', permission);
   const channelName = channel!==undefined? channel?.name.replace(channel.ownerId,''): '';
   return (
     <>

@@ -1,5 +1,6 @@
 // components/Chat.tsx
 'use client';
+import '@mantine/core/styles.css';
 import { BiConversation } from "react-icons/bi";
 import { useEffect } from 'react';
 import Image from 'next/image';

@@ -56,8 +56,6 @@ const EditMemberShip = (props: any) => {
                       {value:'131651616516165167', label:'until Unmute'},
                        
                     ];
-                    console.log(currentMember);
-                    console.log(addHoursToNow(muteValue));
     return (
       <>
         <Modal opened={opened} withCloseButton={false}  onClose={()=>{

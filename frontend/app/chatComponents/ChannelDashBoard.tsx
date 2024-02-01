@@ -50,7 +50,6 @@ const ChannelDashBoard = (props: any) => {
       const fetchAvatar = async () => {
         if (context.channel){
           const members = await getChannelFirstMembers(context.channel.id);
-          console.log('channel', context.channel);
         }
       }
       fetchAvatar();
@@ -87,12 +86,6 @@ const ChannelDashBoard = (props: any) => {
          (
           <>
          <UpdateChannelSetting firstMembers={firstMembers} member={currentMember} />
-        {/* <FcInvite 
-        className="text-white hover:scale-125" 
-        onClick={()=>{
-          console.log('Invite pep');
-        }}
-        /> */}
         <InviteUsers />
         </>
         ) 
