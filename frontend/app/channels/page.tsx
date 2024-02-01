@@ -1,4 +1,5 @@
 'use client';
+import '@mantine/core/styles.css';
 import { Channel, User, useAppContext } from "@/app/AppContext";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -128,7 +129,6 @@ const ChannelsLobby = () => {
       if (!data) {
         const msg = "Error getting channels";
         toast.error(msg);
-        console.log(msg);
       }
       if (data) {
         setUserChannels(data);
@@ -155,7 +155,6 @@ const ChannelsLobby = () => {
       if (!data) {
         const msg = "Error getting channels";
         toast.error(msg);
-        console.log(msg);
       }
       if (data) {
         setAvailableChannels(data);
@@ -183,7 +182,6 @@ const ChannelsLobby = () => {
       if (!data) {
         const msg = "Error getting channels";
         toast.error(msg);
-        console.log(msg);
       }
       if (data) {
         setInvitationChannels(data);

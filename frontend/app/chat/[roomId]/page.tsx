@@ -1,4 +1,5 @@
 'use client';
+import '@mantine/core/styles.css';
 import { FC, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { User, useAppContext, Message} from '@/app/AppContext';

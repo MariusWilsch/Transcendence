@@ -8,9 +8,6 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
-import '@mantine/core/styles.css';
-import { MantineProvider } from '@mantine/core';
-import { Provider } from 'react-redux';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
 
 const inter = Inter({ subsets: ['latin'] });

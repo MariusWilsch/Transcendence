@@ -126,7 +126,7 @@ const Demo = () => {
             />
           </div>
         }
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-center p-3">
           <button
             onClick={(e) => {
 
