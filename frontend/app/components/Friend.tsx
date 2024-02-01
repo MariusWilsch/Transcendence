@@ -310,7 +310,7 @@ export const Friend = ({
 							</button>
 						)}
 					</div>
-					<div>
+					<div className="mx-2">
 						{ userId && friendId ?(
 						<Link
 							href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${
@@ -348,11 +348,9 @@ export const Friend = ({
 						)
 					}
 					</div>
-					<div>
-						{/* Here comes the private match logic */}
+					<div className="mx-2">
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
-							//! Friend ID here
 							onClick={handler}
 						>
 							<motion.div
