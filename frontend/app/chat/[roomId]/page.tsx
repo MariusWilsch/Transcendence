@@ -112,10 +112,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       context.socket.on('privateChat', (message: any) => {
         handlePrivateChat(message);
         fetchDataAndSetupSocket();
-        if (message.senderId !== context.userData.intraId) {
-          // const props = {message:message.content, user:context.userData}
-          // Mytoast(props);
-        }
       });
     }
     setLoading(false);

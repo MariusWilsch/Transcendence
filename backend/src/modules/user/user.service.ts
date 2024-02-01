@@ -188,14 +188,14 @@ export class UserService {
 			},
 		});
 		if (ifTheFriendshipExists) {
-			await prisma.friend.deleteMany({
-				where: {
-					OR: [
-						{ userId: userId, friendId: friendId },
-						{ userId: friendId, friendId: userId },
-					],
-				},
-			});
+			// await prisma.friend.deleteMany({
+			// 	where: {
+			// 		OR: [
+			// 			{ userId: userId, friendId: friendId },
+			// 			{ userId: friendId, friendId: userId },
+			// 		],
+			// 	},
+			// });
 
 			return 'alreadyFriend';
 		}
