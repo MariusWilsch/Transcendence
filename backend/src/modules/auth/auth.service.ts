@@ -95,7 +95,7 @@ export class AuthService {
 		}
 	}
 
-	getUserFromJwtstatic(jwt: any): Promise<User | undefined> {
+	getUserFromJwtstatic(jwt: any): User | undefined {
 		if (!jwt) {
 			return undefined;
 		}
