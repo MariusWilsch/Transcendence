@@ -26,8 +26,9 @@ async function inviteUser(Channelname: string, invitedUser: string, owner: User)
       }
     );
     if (response.ok) {
+      const msg = 'invitation Sent';
       const res = await response.json();
-      res.success ? toast.success('invitation is sent'): toast.success(res.error);
+     toast.success(res.error);
     }
     else {
       const msg = 'Error: ' + response;

@@ -4,7 +4,7 @@ import { ChatService } from './chat.service';
 import { Room , User, Message, Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { AuthService } from 'modules/auth/auth.service';
-import { Console } from 'console';
+import { Console, error } from 'console';
 
 @Controller('chat')
 export class ChatController {
@@ -60,9 +60,9 @@ export class ChatController {
   }
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
-  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number=1, @Query('pageSize') pageSize:number=20) :Promise<void>{
+  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number, @Query('pageSize') pageSize:number=30) :Promise<void>{
     try{
-      const skip = (page - 1 ) * pageSize;
+      const skip = page * pageSize;
       const data = await this.chatService.getPrivateRoomMessages(id, pageSize, skip);
       res.json(data);
       return data;
@@ -133,7 +133,6 @@ export class ChatController {
       const user = this.authService.getUserFromCookie(cookie) ;
       let data = await this.chatService.getChannelMessages(id);
       let blockedUsers = await this.chatService.getBlockedUser(user.intraId);
-      console.log(data);
       data = data.filter((item: any) => {
         return !blockedUsers.some((entry) => {
           if (entry.userId === user.intraId) {
@@ -228,7 +227,7 @@ export class ChatController {
   @Res() res:any){
     try{
       await this.chatService.joinChannel(intraId, payload.channelId, payload.type, payload.password);
-      res.json({sucess:true});
+      res.json({success:true,error:"Invitation sent"});
     }
     catch(e){
       console.log(e);

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { MemberShip, Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
@@ -35,19 +35,21 @@ export class ChatService {
     }
     const userStatue = await prisma.friend.findFirst({
       where:{
-        friendId:sender,
+        OR:
+        [
+          {
+            friendId : sender,
+          },
+          {
+            userId : sender,
+          }
+        ]
       }
     });
-    const userStatueReciepent = await prisma.friend.findFirst({
-      where:{
-        userId:sender,
-      },
-    });
 
-    if ( (userStatue?.friendshipStatus === 'BLOCKED') || (userStatueReciepent?.friendshipStatus === 'BLOCKED') )
+    if ((userStatue?.friendshipStatus === 'BLOCKED') )
     {
-      console.log(userStatue?.friendshipStatus);
-      console.log( userStatueReciepent?.friendshipStatus);
+      console.log(userStatue);
       throw ('message can\'t be sent');
     }
     if (!room && (senderUser && recipientUser))
@@ -606,7 +608,7 @@ export class ChatService {
   }
 
   async leaveChannel(intraId:string, channelName:string){
-    
+    let newOwner :MemberShip ;
     const channel = await prisma.channel.findUnique({
       where:{
         id:channelName,
@@ -625,8 +627,9 @@ export class ChatService {
       throw('no such member');
     }
     if (membership.isOwner){
-      let newOwner = await prisma.memberShip.findFirst({
+       newOwner = await prisma.memberShip.findFirst({
         where:{
+          channelId:channelName,
           intraId:{
             not:intraId,
           },
@@ -636,6 +639,7 @@ export class ChatService {
       if (!newOwner){
         newOwner = await prisma.memberShip.findFirst({
           where:{
+            channelId:channelName,
             intraId:{
               not:intraId,
             },
@@ -643,7 +647,16 @@ export class ChatService {
           }
         })
       }
-
+      if (!newOwner){
+        await prisma.memberShip.deleteMany();
+        await prisma.channelMessage.deleteMany();
+        await prisma.channel.delete({
+          where:{
+            id:channelName,
+          },
+        });
+        return;
+      }
       await prisma.memberShip.update({
         where:{
           memberId:newOwner.memberId,

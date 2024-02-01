@@ -245,7 +245,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
     if (context.socket && channel && messageText.trimStart().trimEnd()) {
       const cookie = new Cookies();
       const jwt = cookie.get('jwt')
-      context.socket.emit('channelBroadcast', { to: channel.name, message: messageText,jwt });
+      context.socket.emit('channelBroadcast', { to: channel.id, message: messageText,jwt });
       setMessages((prevMessages: ChannelMessage[]) => {
         const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
 

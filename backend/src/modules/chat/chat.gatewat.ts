@@ -7,6 +7,7 @@ import { User } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { channel } from 'diagnostics_channel';
+import { AuthService } from 'modules/auth/auth.service';
 
 
 @WebSocketGateway(3002,{
@@ -19,6 +20,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // chat.gateway.ts
     constructor(
       private readonly chatService: ChatService,
+      private authService: AuthService,
       ) {}
 
   @WebSocketServer() server: Server;
@@ -26,7 +28,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<string, any>();
 
   handleConnection(client: any): void {
-    const user = this.chatService.getUserFromJwt(client.handshake.query.user);
+    const user = this.authService.getUserFromJwt(client.handshake.query.user);
     if (user)
     {
       console.log(`Client connected: ${user.intraId}`);
@@ -82,7 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createPrivateRoom')
   async createPrivRoom(client :any, payload:{jwt:string, user2:string, clientRoomid:string}): Promise<void>{
     try{
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
         return;
@@ -97,7 +99,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('privateChat')
   async handlePrivateChat(client: any, payload: { to: string, message: string, jwt:string}): Promise<void> {
     try{
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
         return;
@@ -144,7 +146,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('JoinAChannel')
   async joinChannel(client:any, payload:{channelId:string, type:string,password:string,jwt:string}){
     try{
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
          
@@ -161,11 +163,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('channelBroadcast')
   async handleChannelChat(client:any, payload:{to:string,message:string, jwt:string}): Promise<void> {
     try{
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
         return;
       }
+      console.log(payload);
       const members = await this.chatService.getAllChannelUsers(payload.to);
       const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
       let blockedUsers = await this.chatService.getBlockedUser(client.user.intraId);
@@ -201,7 +204,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async updateChannel(client:any, payload:{jwt:string, memberId:string, info:{userPrivilige:boolean, banning:boolean, Muting:{action:boolean, time:Date}}}){
     try{
       console.log(payload);
-      const user = this.chatService.getUserFromJwt(payload.jwt);
+      const user = this.authService.getUserFromJwt(payload.jwt);
       if (!user)
       {
         return;

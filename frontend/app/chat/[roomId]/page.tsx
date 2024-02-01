@@ -1,19 +1,11 @@
 'use client';
-import { FC, use, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { User, useAppContext, Message, Room, AppContextProps } from '@/app/AppContext';
-import toast, { Toaster } from 'react-hot-toast';
+import { User, useAppContext, Message} from '@/app/AppContext';
 import { io } from 'socket.io-client';
 import Cookies from 'universal-cookie';
-import { Navbar } from '@/app/components/Navbar';
-import { Sidebar } from '@/app/components/Sidebar';
-import { Loading } from '@/app/components/Loading';
-import { FaCircle } from 'react-icons/fa';
-import { Friend } from '@/app/components/Friend';
 import { IoMdArrowBack } from "react-icons/io";
 import { Avatar, Indicator } from '@mantine/core';
-import { FaCircleArrowDown } from "react-icons/fa6";
-import UserProfileImage from '@/app/chatComponents/UderProfileImage';
 import { SingleMessageSent } from '@/app/chatComponents/SingleMessageSent';
 import { SingleMessageReceived } from '@/app/chatComponents/SingleMessageReceived';
 import ProfileInfo from '@/app/chatComponents/ProfileInfo';
@@ -33,10 +25,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [permission, setPermission] = useState<boolean>(true);
   const [recipient, setRecipient] = useState<User>(); // Provide a type for the recipient state
   const [loading, setLoading] = useState<boolean>(true);
-  const [messageLoading, setMessageLoading] = useState<boolean>(true);
   const [noMoreData, setNoMoreData] = useState(true);
   const [lastScrollPosition, setLastScrollPosition] = useState(0.5);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(1);
   const context = useAppContext();
   const fetchDataAndSetupSocket = async () => {
     try {
@@ -91,9 +82,10 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         return;
       }
       setRecipient(user);
-      const dataMessages = await getMessages(params.roomId, 1);
+      const dataMessages = await getMessages(params.roomId, 0);
       if (dataMessages) {
         if (dataMessages.response !== "no such room") {
+          console.log(dataMessages);
           setMessages(dataMessages);
         }
       }
@@ -141,23 +133,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       }
     };
   }, [context.socket]);
-  // useEffect(() => {
-  //   console.log('hereeeee');
-  //   const scrollPosition = window.scrollY;
-  //   console.log('Scroll Position:', scrollPosition);
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, [loading]);
-  // const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  // useEffect(() => {
-  //   if (myElementRef.current) {
-  //     const elementHeight = myElementRef.current.clientHeight;
-  //     console.log('Element Height:', elementHeight);
-  //   }
-  // }, []);
   useEffect(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -217,77 +192,12 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
       sendPrivateMessage();
     }
   }
-
-  // const fetchNewMessges=async()=>{
-  //   try{
-  //   setLoading(true);
-  //   const data = await getMessages(context.userData.intraId, page);
-  //   console.log('i m here')
-  //   if (data){
-  //     setMessages((prevMessages: Message[]) => {
-  //       const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];
-  //       let currentDateVariable: Date = new Date();
-
-  //       const singleMsg: Message = {
-  //         id: 0,
-  //         sender: context.userData?.intraId,
-  //         recipient: context.recipientUserId,
-  //         content: messageText,
-  //         createdAt: currentDateVariable,
-  //         PrivateRoomName: params.roomId,
-  //       };
-
-  //       newMessages.push(singleMsg);
-
-  //       return newMessages;
-  //     }
-  //     );
-  //   }
-  //   setPage((prevPage) => prevPage + 1);
-  //   }
-  //   catch(e){
-  //     console.log(e)
-  //   }
-  //   finally{
-  //     setLoading(false);
-  //   }
-  // }
-  // const handleScroll = () => {
-  //   console.log('this is me');
-  //   const scrollY = window.scrollY;
-  //   const windowHeight = window.innerHeight;
-  //   const documentHeight = document.documentElement.scrollHeight;
-  //   if (scrollY + windowHeight >= documentHeight - 200 && !loading) {
-  //     fetchNewMessges();
-  //   }
-  // };
-
-  /* this is the start*/
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  // const handleScroll = (e:any) => {
-  //     const { scrollTop, scrollHeight, clientHeight } = e.target;
-  //     console.log('the scrollTop', scrollTop);
-  //     console.log('the scrollHeight', scrollHeight);
-  //     console.log('the client height', clientHeight);
-  //     console.log('result', scrollHeight - clientHeight);
-  //     if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !loading && noMoreData) {
-  //       setLastScrollPosition(scrollTop);
-  //       console.log('i m right here')
-  //       fetchNewMessages(scrollTop);
-  //       e.target.scrollTop = lastScrollPosition;
-  //     }
-  //   };
   const handleScroll =  () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-      console.log('the scrollTop', scrollTop);
-          console.log('the scrollHeight', scrollHeight);
-          console.log('the client height', clientHeight);
-          console.log('result', scrollHeight - clientHeight);
-
       // You can adjust the threshold based on your needs
-      if (scrollTop <= -(scrollHeight - clientHeight - 0.5) && !loading && noMoreData) {
+      if (scrollTop <= -(scrollHeight - clientHeight - 0.5)  && noMoreData) {
         setLastScrollPosition(-(scrollHeight - clientHeight - 0.5));
         console.log('this is the last position', lastScrollPosition);
         fetchNewMessages();
@@ -298,10 +208,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
 
   const fetchNewMessages = async () => {
     try {
-      setLoading(true);
       const data = await getMessages(params.roomId, page);
       if (data) {
-        data.length < 20 ? setNoMoreData(false):true;
+        data.length < 30 ? setNoMoreData(false):true;
         setMessages((prevMessages: Message[]) =>
         {
           return [...prevMessages,...data];
@@ -314,29 +223,11 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     } catch (error) {
       console.error('Error fetching new messages:', error);
     } finally {
-      setLoading(false);
       if (chatContainerRef.current){
       }
     }
   };
 
-  // useEffect(() => {
-  //   // Attach scroll event listener to the chat container
-  //   console.log('referevce for good');
-  //   console.log(chatContainerRef.current);
-  //   if (chatContainerRef.current) {
-  //     chatContainerRef.current.addEventListener('scroll', handleScroll);
-  //   }
-
-  //   // Cleanup: remove the event listener when the component unmounts
-  //   return () => {
-  //     if (chatContainerRef.current) {
-  //       chatContainerRef.current.scrollTop = lastScrollPosition;
-  //       chatContainerRef.current.removeEventListener('scroll', handleScroll);
-  //     }
-  //   };
-  // }, [loading]);
-  /* this is the end*/
   const desplayedMessages: Message[] = messages.length ? messages : [];
   if (loading) {
     return (
@@ -391,22 +282,13 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         handleScroll();
                       }
                     }
-                    className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    className="chat-message  z-40 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {loading && <div>loading...</div>}
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
                     </div>
-                    {/* {chatContainerRef.current?.scrollHeight  &&
-                       <FaCircleArrowDown
-                       onClick={()=>{
-                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-                        setPage(2);
-                      }}
-                       size={"30"}
-                       className=' relative bottom-1 self-center text-white hover:scale-90 z-30 ' />
-                    } */}
                     <div className="p-4">
                       <div className="relative flex">
                         <input
@@ -417,11 +299,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                           onKeyDown={handleKeyPress}
                           className="w-full focus:outline-none focus:placeholder-gray-400  placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
                         <div className="absolute right-0 items-center inset-y-0">
-                          <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                            </svg>
-                          </button>
                           <button type="button" style={{ display: messageText.length ? "" : "none" }} onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
                             {/* <span className="font-bold hidden sm:block">Send</span> */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
@@ -467,20 +344,15 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         handleScroll();
                       }
                     }
-                    className="chat-message  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    className="chat-message z-40  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
                       ))}
-                    {/* {chatContainerRef.current?.scrollHeight  &&
-                       <FaCircleArrowDown
-                       onClick={()=>{
-                        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-                        setPage(2);
-                      }}
-                       size={"30"}
-                       className='  text-white hover:scale-90 z-30 ' />
-                    } */}
+                    {
+                      
+                    }
+                    
                     </div>
                     <div className="p-4">
                       <div className="relative flex">
@@ -492,11 +364,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                           onKeyDown={handleKeyPress}
                           className="w-full focus:outline-none focus:placeholder-gray-400  placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
                         <div className="absolute right-0 items-center inset-y-0">
-                          <button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                            </svg>
-                          </button>
                           <button type="button" style={{ display: messageText.length ? "" : "none" }} onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
                             {/* <span className="font-bold hidden sm:block">Send</span> */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
