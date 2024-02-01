@@ -88,8 +88,25 @@ export class AuthService {
 			const userIntraId = user.intraId;
 			const user1 = await this.userService.getUserbyId(userIntraId);
 
-			console.log('user1: ', user1);
 			return user1;
+		} catch (error) {
+			console.error('JWT Verification Error:', error);
+			return undefined;
+		}
+	}
+
+	getUserFromJwtztatic(jwt: any): Promise<User | undefined> {
+		if (!jwt) {
+			return undefined;
+		}
+
+		try {
+			const payload = this.jwtService.verify(jwt, {
+				secret: JWT_SECRET,
+			});
+
+			const user = payload.userWithoutDate;
+			return user;
 		} catch (error) {
 			console.error('JWT Verification Error:', error);
 			return undefined;
