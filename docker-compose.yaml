@@ -43,7 +43,6 @@ services:
     restart: always
     depends_on:
       - backend
-      - database
     env_file:
       - ./frontend/.env
     networks:

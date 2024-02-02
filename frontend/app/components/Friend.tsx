@@ -28,7 +28,7 @@ export const Friend = ({
 	isProfileOwner: boolean;
 	userId: string | undefined;
 	friendId: string;
-	inChat:boolean;
+	inChat: boolean;
 }) => {
 	const context = useAppContext();
 	const { handleInvite } = useStartGame();
@@ -183,7 +183,7 @@ export const Friend = ({
 
 	useEffect(() => {
 		FriendshipStatus();
-	}, [userId]);
+	}, [userId, inChat, friendId]);
 
 	const handler = () => {
 		if (context.socket) {
@@ -312,16 +312,51 @@ export const Friend = ({
 							</button>
 						)}
 					</div>
-						{ userId && friendId && !inChat  && (
-					<div className="mx-2">
-						<Link
-							href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${
-								parseInt(friendId as string) > parseInt(userId as string)
-									? friendId + userId
-									: userId + friendId
-							}`}
-							onClick={()=>context.setComponent('conversation')}
+					{userId && friendId && !inChat && (
+						<div className="mx-2">
+							<Link
+								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${
+									parseInt(friendId as string) > parseInt(userId as string)
+										? friendId + userId
+										: userId + friendId
+								}`}
+								onClick={() => context.setComponent('conversation')}
+								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+							>
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+									initial={{ opacity: 0, y: -5 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.02 }}
+								>
+									<BiMessageRounded size="25" className="mb-1" />
+								</motion.div>
+							</Link>
+						</div>
+					)}
+					{inChat && (
+						<div className="mx-2">
+							<Link
+								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${friendId}`}
+								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+							>
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+									initial={{ opacity: 0, y: -5 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.02 }}
+								>
+									<CgProfile size="25" className="mb-1" />
+								</motion.div>
+							</Link>
+						</div>
+					)}
+					<div className="ml-1 mr-2">
+						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+							onClick={handler}
 						>
 							<motion.div
 								whileHover={{ scale: 1.1 }}
@@ -330,52 +365,10 @@ export const Friend = ({
 								animate={{ opacity: 1, x: 0 }}
 								transition={{ delay: 0.02 }}
 							>
-								<BiMessageRounded size="25" className='mb-1'/>
-							</motion.div>
-						</Link>
-					</div >
-						)
-					}
-						{
-							inChat && (
-								<div className="mx-2" >
-								<Link
-								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${friendId}`}
-								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
-							>
-								<motion.div
-							whileHover={{ scale: 1.1 }}
-									whileTap={{ scale: 0.9 }}
-									initial={{ opacity: 0, y: -5 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.02 }}
-								>
-									<CgProfile size="25" className='mb-1'/>
-								</motion.div>
-							</Link>
-					</div>
-							)
-						}
-						{
-							friendshipStatus === "ACCEPTED" && 
-					(<div className="mx-2">
-						<button
-							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
-							onClick={handler}
-							>
-							<motion.div
-								whileHover={{ scale: 1.1 }}
-								whileTap={{ scale: 0.9 }}
-								initial={{ opacity: 0, y: -5 }}
-								animate={{ opacity: 1, x: 0 }}
-								transition={{ delay: 0.02 }}
-								>
 								<IoGameControllerOutline size="25" />
 							</motion.div>
 						</button>
 					</div>
-					)
-								}
 				</div>
 			)}
 		</div>

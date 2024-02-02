@@ -46,22 +46,27 @@ const useStartGame = () => {
 			: dispatch(acceptPrivate({ inviteeID }));
 	};
 
-	const showModal = () => {
-		const modal = document.getElementById(
-			'startMatchmakingModal',
-		) as HTMLDialogElement;
-		modal?.showModal();
-	};
-
-	const closeModal = () => {
-		if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
-		const modal = document.getElementById(
-			'startMatchmakingModal',
-		) as HTMLDialogElement;
-		modal?.close();
-	};
-
+	
 	useEffect(() => {
+
+		const showModal = () => {
+			if (typeof document !== 'undefined') {
+					const modal = document.getElementById(
+					'startMatchmakingModal',
+				) as HTMLDialogElement;
+				modal?.showModal();
+			}
+		};
+	
+		const closeModal = () => {
+			if (typeof document !== 'undefined') {
+					if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
+				const modal = document.getElementById(
+					'startMatchmakingModal',
+				) as HTMLDialogElement;
+				modal?.close();
+			}
+		};
 		if (isGameStarted) {
 			closeModal();
 			router.push(`/gamelobby/game`);
