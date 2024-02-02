@@ -136,7 +136,6 @@ const ChannelsLobby = () => {
     } catch (error: any) {
       const msg = "Error getting friends: " + error.message;
       toast.error(msg);
-      console.error("Error getting friends:", error.message);
     }
   };
   const exploreChannels = async () => {
@@ -162,7 +161,6 @@ const ChannelsLobby = () => {
     } catch (error: any) {
       const msg = "Error getting channels: " + error.message;
       toast.error(msg);
-      console.error("Error getting channels:", error.message);
     }
   };
 
@@ -189,7 +187,6 @@ const ChannelsLobby = () => {
     } catch (error: any) {
       const msg = "Error getting channels: " + error.message;
       toast.error(msg);
-      console.error("Error getting channels:", error.message);
     }
   }
   return (

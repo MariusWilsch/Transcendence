@@ -67,7 +67,7 @@ const Chat = () => {
   }, [context.socket]);
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 950) {
+      if (window.innerWidth <= 1030) {
         context.setisSidebarVisible(false);
         context.setResponsive(false);
       }

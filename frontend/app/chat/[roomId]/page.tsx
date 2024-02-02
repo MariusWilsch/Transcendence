@@ -134,13 +134,9 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   }, [context.component])
   
   const sendPrivateMessage = () => {
-        console.log('socket',context.socket);
-        console.log('recipient',context.recipientUserId );
-        console.log(messageText.trimStart().trimEnd());
         if (context.socket && context.recipientUserId && messageText.trimStart().trimEnd()) {
           const cookie = new Cookies();
             const jwt = cookie.get('jwt');
-            console.log('ssssss');
           context.socket.emit('privateChat', { to: context.recipientUserId, message: messageText.trimStart().trimEnd(), jwt});
           setMessages((prevMessages: Message[]) => {
             const newMessages = Array.isArray(prevMessages) ? [...prevMessages] : [];

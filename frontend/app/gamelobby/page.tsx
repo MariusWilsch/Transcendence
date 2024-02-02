@@ -54,6 +54,7 @@ export default function Home() {
 		});
 		return () => {
 			toast.dismiss();
+			if (context.socket) context.socket.off('privateMatch');
 		};
 	}, [context.user]);
 

@@ -226,6 +226,7 @@ export default function Profile(params: any) {
 							isProfileOwner={isProfileOwner}
 							userId={user?.intraId}
 							friendId={params.params.intraId}
+							inChat={false}
 						/>
 					) : (
 						<div className="flex items-center justify-center text-gray-400">

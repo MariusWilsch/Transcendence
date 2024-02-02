@@ -41,6 +41,7 @@ const ProfileInfo = ({ recipient }: any) => {
           isProfileOwner={false}
           friendId={recipient?.intraId}
           userId={context.userData?.intraId}
+          inChat={true}
           />
           </div>
         <div className='flex flex-col  justify-center mt-4 items-center  px-1 w-3/4 h-fit bg-[#1a1d24] rounded border border-[#292D39] p-2'>
