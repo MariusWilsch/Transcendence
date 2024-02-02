@@ -36,7 +36,7 @@ export const Carousel = () => {
 export const CarouselNavigation = () => {
 	const dispatch = useDispatch();
 	return (
-		<div className="flex justify-center w-full py-2 gap-2">
+		<div className="flex justify-center w-full py-2 gap-2 text-white">
 			<Link
 				href="/gamelobby/steps/#item1"
 				onClick={() => dispatch(setMapChoice(mapType.STANDARD))}

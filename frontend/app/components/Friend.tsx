@@ -320,6 +320,7 @@ export const Friend = ({
 									? friendId + userId
 									: userId + friendId
 							}`}
+							onClick={()=>context.setComponent('conversation')}
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 						>
 							<motion.div
@@ -335,9 +336,9 @@ export const Friend = ({
 					</div >
 						)
 					}
-					<div className="mx-2" >
 						{
 							inChat && (
+								<div className="mx-2" >
 								<Link
 								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${friendId}`}
 								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
@@ -352,9 +353,9 @@ export const Friend = ({
 									<CgProfile size="25" className='mb-1'/>
 								</motion.div>
 							</Link>
+					</div>
 							)
 						}
-					</div>
 						{
 							friendshipStatus === "ACCEPTED" && 
 					(<div className="mx-2">

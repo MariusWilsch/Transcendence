@@ -17,7 +17,9 @@ body {
 
 
 
-
+.step{
+	color:aliceblue;
+}
 .mantine-Modal-body {
 	background-color: rgb(75 85 99);
 }

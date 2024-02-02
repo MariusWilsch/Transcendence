@@ -14,7 +14,7 @@ export const Step2 = ({ setStep }: any) => {
 
 	return (
 		<>
-			<div className="flex flex-col w-full lg:flex-row items-center gap-8">
+			<div className="flex flex-col w-full lg:flex-row items-center gap-8 text-white">
 				<CardOverlay
 					title={'Play using your mouse'}
 					desc={'Sum hipster ipsum here'}

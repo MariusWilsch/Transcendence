@@ -59,7 +59,7 @@ export default function Home() {
 	}, [context.user]);
 
 	return (
-		<div>
+		<div className='text-white'>
 			<Cards />
 			<Toaster />
 		</div>

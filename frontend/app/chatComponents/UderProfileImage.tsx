@@ -20,9 +20,10 @@ const UserProfileImage = ({
         >
           <Image
             src={src}
-            alt="image Preview"
+            alt="profile picture"
             width={120}
             height={120}
+            
             className="rounded-full border-2 border-black w-40 h-40  "
             onError={(e: any) => {
               e.target.onerror = null;
