@@ -1,18 +1,12 @@
 // components/Chat.tsx
 'use client';
-import '@mantine/core/styles.css';
-import { BiConversation } from "react-icons/bi";
 import { useEffect } from 'react';
-import Image from 'next/image';
 import io from 'socket.io-client';
 import {useAppContext, User } from '../AppContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { useDisclosure } from '@mantine/hooks';
 import { MantineProvider} from '@mantine/core';
-import { IoMdAdd } from "react-icons/io";
 import Cookies from "universal-cookie";
 import { getCurrentUser, getRooms } from "../utiles/utiles";
-import FindAConversation from "../chatComponents/FindAConversation";
 import Conversations from "../chatComponents/Converstions";
 import ConversationNotSelected from "../chatComponents/ConversationNotSelected";
 
@@ -78,7 +72,6 @@ const Chat = () => {
     }
     handleResize();
     window.addEventListener('resize', handleResize);
-    console.log('yes we can rerender');
     return () => {
 
       window.removeEventListener('resize', handleResize);

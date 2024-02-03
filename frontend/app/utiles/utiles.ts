@@ -116,6 +116,9 @@ export async function searchMember(query:string, channelId:string) {
       method: "GET",
       credentials: "include",
     });
+    if (!res.ok){
+      return undefined;
+    }
     const user = res.json();
     return user;
   }

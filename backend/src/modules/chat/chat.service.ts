@@ -379,7 +379,6 @@ export class ChatService {
   async createChannelMessage(channelId:string, message:string, sender:User){
     const dateNow = new Date();
     const dateOs = dateNow.toISOString();
-    console.log('now ',dateOs);
     const memberShip = await  prisma.memberShip.findFirst({
       where:{
         channelId,
@@ -407,14 +406,18 @@ export class ChatService {
         })
       }
       else{
-        throw(`you re muted for until ` );
+        throw(`you re muted for until a specific time ` );
       }
     }
     const user =  await prisma.user.findUnique({
       where:{
         intraId:sender.intraId
       }
-    })
+    });
+    if (!user)
+    {
+      throw ('no such user');
+    }
     return await prisma.channelMessage.create({
       data:{
         channelId,
@@ -756,4 +759,85 @@ export class ChatService {
       }
     })
   }
+  // async getUserActiveChannels(intraId: string) {
+  //   const memberShips = await prisma.memberShip.findMany({
+  //     where: {
+  //       intraId,
+  //     },
+  //   });
+  
+  //   const channels = await Promise.all(
+  //     memberShips.map(async (memberShip) => {
+  //       const channel = await prisma.channel.findUnique({
+  //         where: {
+  //           id: memberShip.channelId,
+  //         },
+  //         include: {
+  //           messages: {
+  //             orderBy: {
+  //               createdAt: 'desc',
+  //             },
+  //             take: 1,
+  //           },
+  //         },
+  //       });
+  
+  //       if (channel && channel.messages && channel.messages.length > 0) {
+  //         return channel;
+  //       }
+  
+  //       return null; // If the channel has no messages or is not found, return null
+  //     })
+  //   );
+  
+  //   return channels.filter((channel) => channel !== null);
+  // }
+  async getUserActiveChannels(intraId: string) {
+    const memberShips = await prisma.memberShip.findMany({
+      where: {
+        intraId,
+      },
+    });
+  
+    const channels = await Promise.all(
+      memberShips.map(async (memberShip) => {
+        const channel = await prisma.channel.findUnique({
+          where: {
+            id: memberShip.channelId,
+          },
+          include: {
+            messages: {
+              orderBy: {
+                createdAt: 'desc',
+              },
+              take: 1,
+            },
+          },
+        });
+  
+        if (channel && channel.messages && channel.messages.length > 0) {
+          return {
+            id: channel.id,
+            name: channel.name,
+            // Include other channel properties as needed
+            latestMessage: channel.messages[0], // Add the latest message to the result
+          };
+        }
+  
+        return null; // If the channel has no messages or is not found, return null
+      })
+    );
+  
+    // Remove channels with no messages
+    const filteredChannels = channels.filter((channel) => channel !== null);
+  
+    // Sort channels based on the date of the last message in descending order
+    const sortedChannels = filteredChannels.sort(
+      (a, b) => b.latestMessage.createdAt.getTime() - a.latestMessage.createdAt.getTime()
+    );
+  
+    return sortedChannels;
+  }
+  
+  
 }

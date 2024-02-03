@@ -27,18 +27,17 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const [recipient, setRecipient] = useState<User>(); // Provide a type for the recipient state
   const [loading, setLoading] = useState<boolean>(true);
   const [noMoreData, setNoMoreData] = useState(true);
-  const [lastScrollPosition, setLastScrollPosition] = useState(0.5);
   const [page, setPage] = useState(1);
   const context = useAppContext();
   const fetchDataAndSetupSocket = async () => {
     try {
-      const userData: User | undefined = await getCurrentUser();
+      const userData: User | undefined = !context.userData ? await getCurrentUser() : context.userData;
       if (userData === undefined || !params.roomId.includes(userData.intraId)) {
         setPermission(false);
         setLoading(false);
         return;
       }
-      context.setUserData(userData);
+      !context.userData ? context.setUserData(userData) :context.userData;
       const recp = params.roomId.replace(userData.intraId, '');
       const user: User | undefined = await getUser(recp);
       const roomid = user !== undefined ? parseInt(user.intraId) > parseInt(userData.intraId) ? user.intraId + userData.intraId : userData.intraId + user.intraId : 1;
@@ -69,8 +68,8 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         context.socket?.emit('createPrivateRoom', { user1: userData.intraId, user2: user.intraId, clientRoomid: params.roomId });
       }
     } catch (error) {
-      // setPermission(false);
-      // setLoading(false);
+      setPermission(false);
+      setLoading(false);
     }
   };
   const fetchData = async () => {
@@ -160,6 +159,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const handleKeyPress = (event: any) => {
     if (event.key === 'Enter') {
       sendPrivateMessage();
+      chatContainerRef.current?.scrollTo(0,0);
     }
   }
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -167,7 +167,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
       if (scrollTop <= -(scrollHeight - clientHeight - 0.5)  && noMoreData) {
-        setLastScrollPosition(-(scrollHeight - clientHeight - 0.5));
         fetchNewMessages();
       }
     }
@@ -232,7 +231,25 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                             src={recipient.Avatar}
                           />
                         </Indicator>
-                          : ( recipient && <Image width={144} height={144} src={recipient.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full" />)
+                          : ( recipient &&
+                          // <Image width={144} height={144} src={recipient.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full"
+                          // />
+                          <Image
+                          unoptimized={true}
+                          src={recipient.Avatar}
+                          alt="user avatar"
+                          width={144}
+                          height={144}
+                          priority={true}
+                          quality={100}
+                          className="w-10 sm:w-16 h-10 sm:h-16 rounded-full"
+                          onError={(e: any) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+                          }}
+                        />
+                          )
                           }
                         </div>
                         <div className="flex flex-col leading-tight">
@@ -331,8 +348,16 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                           onKeyDown={handleKeyPress}
                           className="w-full focus:outline-none focus:placeholder-gray-400  placeholder-gray-600 pl-12  rounded-md p-3 bg-gray-800 text-white" />
                         <div className="absolute right-0 items-center inset-y-0">
-                          <button type="button" style={{ display: messageText.length ? "" : "none" }} onClick={sendPrivateMessage} className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-                            {/* <span className="font-bold hidden sm:block">Send</span> */}
+                          <button
+                          type="button"
+                          style={{ display: messageText.length ? "" : "none" }}
+                          onClick={()=>{
+                            sendPrivateMessage();
+                            chatContainerRef.current?.scrollTo(0,0);
+                          }
+                        }
+                          className="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none"
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 ml-2 transform rotate-90">
                               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                             </svg>

@@ -1,5 +1,4 @@
 'use client';
-import '@mantine/core/styles.css';
 import { Channel, User, useAppContext } from "@/app/AppContext";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -92,18 +91,18 @@ const ChannelsLobby = () => {
       });
       context.setSocket(newSocket);
     }
-    if (context.socket) {
-      context.socket.on('JoinAChannel', (res: any) => {
-        const msg = res.e;
-        if (msg === "password incorrect") {
-          toast.error(msg);
-        }
-        else {
-          toast.success(msg);
-          exploreChannels();
-        }
-      })
-    }
+    // if (context.socket) {
+    //   context.socket.on('JoinAChannel', (res: any) => {
+    //     const msg = res.e;
+    //     if (msg === "password incorrect") {
+    //       toast.error(msg);
+    //     }
+    //     else {
+    //       toast.success(msg);
+    //       exploreChannels();
+    //     }
+    //   })
+    // }
   }, [context.socket, availabelChannels]);
 
   useEffect(() => {

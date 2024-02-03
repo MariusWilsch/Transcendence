@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { User, useAppContext } from "../AppContext";
-import { Loading } from "../components/Loading";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -40,6 +39,7 @@ const ConversationCard = ({ room }: any) => {
     // const users = context.friendsData.friends.find((user:User) => user.intraId === room.participantsIds[0]);
     return (
       <Link
+      rel="preload" as={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
         href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${roomName}`}
       >
         <div onClick={() => {

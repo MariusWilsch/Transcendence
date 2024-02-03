@@ -1,37 +1,37 @@
 import Image from "next/image";
 
 const UserProfileImage = ({
-    status,
-    isProfileOwner,
-    src,
-    intraId,
-  }: {
-    status: string | undefined;
-    isProfileOwner: boolean;
-    src: string;
-    intraId: string | undefined;
-  }) => {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 "
+  status,
+  isProfileOwner,
+  src,
+  intraId,
+}: {
+  status: string | undefined;
+  isProfileOwner: boolean;
+  src: string;
+  intraId: string | undefined;
+}) => {
+  return (
+    <div className="flex flex-col items-center justify-center p-6 "
+    >
+      <div
+        className=" flex justify-center items-center border-white border-y-4 border-x-4 rounded-full"
+        style={{ position: "relative", display: "inline-block" }}
       >
-        <div
-          className=" flex justify-center items-center border-white border-y-4 border-x-4 rounded-full"
-          style={{ position: "relative", display: "inline-block" }}
-        >
-          <Image
-            src={src}
-            alt="profile picture"
-            width={120}
-            height={120}
-            
-            className="rounded-full border-2 border-black w-40 h-40  "
-            onError={(e: any) => {
-              e.target.onerror = null;
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
+        <Image
+          src={src}
+          alt="profile picture"
+          width={120}
+          height={120}
 
-  export default UserProfileImage;
+          className="rounded-full border-2 border-black w-40 h-40  "
+          onError={(e: any) => {
+            e.target.onerror = null;
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default UserProfileImage;

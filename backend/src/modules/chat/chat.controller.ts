@@ -261,11 +261,22 @@ export class ChatController {
       res.json({sucess:false,e});
     }
   }
-
-  @Post('private-message')
+  @Get('channelsRoom/:userId')
   @UseGuards(JwtAuthGuard)
-  async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
-    const { sender, recipient, message } = data;
-    await this.chatService.sendPrivateMessage(sender, recipient, message);
+  async getUserActiveChannels(@Param('userId') intraId:string){
+    try{
+
+      const data = await this.chatService.getUserActiveChannels(intraId);
+      return data;
+    }
+    catch(e){
+      return [];
+    }
   }
+  // @Post('private-message')
+  // @UseGuards(JwtAuthGuard)
+  // async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
+  //   const { sender, recipient, message } = data;
+  //   await this.chatService.sendPrivateMessage(sender, recipient, message);
+  // }
 }
