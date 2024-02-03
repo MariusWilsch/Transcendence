@@ -79,7 +79,7 @@ const Demo = () => {
       <div className="pt-2" >
         <div className="mb-4">
           <label className="block text-white  mb-2">
-            Channel Name
+            Channel name
           </label>
           <input
             type="text"
@@ -132,7 +132,7 @@ const Demo = () => {
 
               createAChannel(e);
             }}
-            className="bg-slate-700 hover:bg-slate-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-slate-700 mt-2 hover:bg-slate-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
             Create Channel
           </button>

@@ -173,20 +173,17 @@ export default function Profile(params: any) {
 
 	let Login = 'Login';
 	let intraId = '';
-	let FullName = 'Full Name';
 	let isTfaEnabled = false;
 	let IntraPic = '/gon.jpg';
 
 	if (isProfileOwner && user !== null) {
 		Login = user.login;
 		intraId = user.intraId;
-		FullName = user.fullname;
 		isTfaEnabled = user.isTfaEnabled;
 		IntraPic = user.Avatar;
 	} else {
 		Login = userFromRoutId?.login;
 		intraId = userFromRoutId?.intraId;
-		FullName = userFromRoutId?.fullname;
 		isTfaEnabled = userFromRoutId?.isTfaEnabled;
 		IntraPic = userFromRoutId?.Avatar;
 	}

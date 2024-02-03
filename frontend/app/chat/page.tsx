@@ -1,5 +1,5 @@
-// components/Chat.tsx
 'use client';
+import '@mantine/core/styles.css';
 import { useEffect } from 'react';
 import io from 'socket.io-client';
 import {useAppContext, User } from '../AppContext';
