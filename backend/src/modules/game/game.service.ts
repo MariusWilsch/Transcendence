@@ -12,7 +12,6 @@ import {
 	PlayerMove,
 	Direction,
 	GameConfigState,
-	AiDifficulty,
 	InputType,
 	GameResult,
 	MatchOutcome,
@@ -53,24 +52,18 @@ export class GameService {
 	 * to the server. In this case, it is used to represent the second player's connection to the game
 	 * server.
 	 */
-	public createGameSession(
-		roomID: string,
-		player1: Socket,
-		player2: Socket,
-		user1: any,
-		user2: any
-	) {
+	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
 		// Join both Sockets to a Socket.io room
 		player1.join(roomID);
 		player2.join(roomID);
 
 		// Associate the room ID and PlayerID with each Socket
-		player1.data = { roomID, playerID: Player.P1 };
-		player2.data = { roomID, playerID: Player.P2 };
+		player1.data = { ...player1.data, roomID, playerID: Player.P1 };
+		player2.data = { ...player2.data, roomID, playerID: Player.P2 };
 
-		if (user1.login === user2.login) {
+		if (player1.data.user.intraId === player2.data.user.intraId) {
 			console.log('AI game detected, user1 needs AI Avatar and username');
-			user1.login = 'Computer';
+			player1.data.user.login = 'Computer';
 		}
 
 		// Create a new game session and store it in the Map
@@ -81,8 +74,8 @@ export class GameService {
 			),
 			//! Strings need to be changed to the actual ID's but how do I get them?
 			players: [
-				{ playerIDs: user1.intraId, playerSockets: player1 },
-				{ playerIDs: user2.intraId, playerSockets: player2 },
+				{ playerIDs: player1.data.user.intraId, playerSockets: player1 },
+				{ playerIDs: player2.data.user.intraId, playerSockets: player2 },
 			],
 			gameState: this.initGameState(),
 			intervalID: undefined,
@@ -101,12 +94,12 @@ export class GameService {
 			command: [],
 			userData: [
 				{
-					avatar: user1.Avatar,
-					username: user1.login,
+					avatar: player1.data.user.Avatar,
+					username: player1.data.user.login,
 				},
 				{
-					avatar: user2.Avatar,
-					username: user2.login,
+					avatar: player2.data.user.Avatar,
+					username: player2.data.user.login,
 				},
 			],
 		});
@@ -152,14 +145,25 @@ export class GameService {
 	 */
 	public updateGameState(gameSession: GameSession, deltaTime: number) {
 		if (this.gameSessions.size == 0) return;
-		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		this.updatePaddles(gameSession, deltaTime);
+		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
 		this.checkPaddleCollision(
 			gameSession,
 			this.choosePaddle(gameSession.gameState.ball)
 		);
 	}
+	//! This is the tested version. I'm tring to see what happens if I do updatePaddles first
+	// public updateGameState(gameSession: GameSession, deltaTime: number) {
+	// 	if (this.gameSessions.size == 0) return;
+	// 	this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
+	// 	this.updatePaddles(gameSession, deltaTime);
+	// 	if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
+	// 	this.checkPaddleCollision(
+	// 		gameSession,
+	// 		this.choosePaddle(gameSession.gameState.ball)
+	// 	);
+	// }
 
 	//* Private
 

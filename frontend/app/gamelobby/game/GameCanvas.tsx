@@ -30,7 +30,6 @@ export const GameCanvas: React.FC = () => {
 	);
 	const dispatch = useDispatch();
 
-
 	useEffect(() => {
 		const mouseMoveHandler = (e: MouseEvent) =>
 			handleMouseMove(dispatch, e, canvasRef);
@@ -70,7 +69,6 @@ export const GameCanvas: React.FC = () => {
 		}
 		//* Update the game service with the current game state
 		if (serviceRef.current) {
-			console.log('Updating game service with', gameState);
 			serviceRef.current.updateGameElements(gameState);
 		}
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
