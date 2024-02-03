@@ -25,7 +25,16 @@ export const CardOverlay = ({
 				onClick={handleClick}
 			>
 				<figure>
-					<Image src={img} alt="Pre-configured game" />
+					<Image
+						src={img}
+						alt="Pre-configured game"
+						unoptimized={true}
+						onError={(e: any) => {
+							e.target.onerror = null;
+							e.target.src =
+								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+						}}
+					/>
 				</figure>
 				<div className="absolute inset-0 bg-black bg-opacity-40 rounded-xl"></div>
 				<div className="card-body items-center justify-center">

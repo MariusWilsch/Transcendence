@@ -38,9 +38,33 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 			) : null}
 			<div className="avatar">
 				{gameData.username === 'Computer' ? (
-					<Image src={computer} width={100} height={100} alt="Computer" />
+					<Image
+						src={computer}
+						width={100}
+						height={100}
+						alt="Computer"
+						unoptimized={true}
+						onError={(e: any) => {
+							e.target.onerror = null;
+							e.target.src =
+								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+						}}
+						className="rounded-md border border-stone-600 w-40 h-40"
+					/>
 				) : (
-					<Image src={gameData.avatar} alt="Avatar" width={100} height={100} />
+					<Image
+						src={gameData.avatar}
+						alt="Avatar"
+						width={100}
+						height={100}
+						unoptimized={true}
+						onError={(e: any) => {
+							e.target.onerror = null;
+							e.target.src =
+								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+						}}
+						className="rounded-md border border-stone-600 w-40 h-40"
+					/>
 				)}
 			</div>
 			{scorePos === 'left' ? (

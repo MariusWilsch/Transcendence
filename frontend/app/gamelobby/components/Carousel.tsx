@@ -17,7 +17,17 @@ const CarouselItem = ({
 }) => {
 	return (
 		<div id={id} className="carousel-item w-full">
-			<Image src={src} className="w-full object-contain" alt={alt} />
+			<Image
+				src={src}
+				className="w-full object-contain"
+				alt={alt}
+				unoptimized={true}
+				onError={(e: any) => {
+					e.target.onerror = null;
+					e.target.src =
+						'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+				}}
+			/>
 		</div>
 	);
 };

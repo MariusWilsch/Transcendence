@@ -149,12 +149,8 @@ export const Navbar = () => {
 								</button>
 							)}
 							{!isProfileOwner && user && (
-								<Link
-									href={`/profile/${user.intraId}`}
-									className="flex flex-row"
-								>
+								<Link href={`/profile/${user.intraId}`} className="flex flex-row">
 									<Image
-										unoptimized={true}
 										src={user.Avatar}
 										alt="Description of the image"
 										priority={true}
@@ -162,6 +158,12 @@ export const Navbar = () => {
 										height={30}
 										sizes=""
 										className="rounded-full mr-2 w-[30px] h-[30px]"
+										unoptimized={true}
+										onError={(e: any) => {
+											e.target.onerror = null;
+											e.target.src =
+												'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+										}}
 									/>
 									<div className="text-slate-400 font-sans">{user.login}</div>
 								</Link>
