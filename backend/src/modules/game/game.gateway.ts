@@ -214,6 +214,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
+		if (this.gameService.areCommandsSet(client.data.roomID)) {
+			client.disconnect(true); //! should disconnect message to client
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
