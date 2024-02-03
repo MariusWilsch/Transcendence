@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { Room, useAppContext } from "../AppContext";
 import FindAConversation from "./FindAConversation";
-import Demo from "./Demo";
 import Toggle from "./Toggle";
 import ConversationCard from "./ConversationCard";
+import ChannelCards from "./ChannelCards";
 
 const Conversations = () => {
     const context = useAppContext();
     const [selected, setSelected] = useState<string>('messages');
     const [aRooms, setARooms] = useState<Room[] | []>([]);
-    const style = { borderBottom: "1px solid gray" };
     useEffect(() => {
       const fetchRooms = async () => {
         try {
@@ -73,7 +72,10 @@ const Conversations = () => {
           </div>
         }
         {
-          selected == 'channels' && <></>
+          selected == 'channels' && 
+          <>
+          <ChannelCards />
+          </>
         }
       </div>
     );

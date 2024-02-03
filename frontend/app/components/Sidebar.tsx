@@ -115,11 +115,13 @@ export const Sidebar = () => {
 			context.socket.on('privateMatch', (data: any) => {
 				// if (data.from.intraId !== context.user?.intraId)
 				// {
-				const msg = 'invitation from ' + data.from.login + ' for a game';
+				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
-					<>
+					<div className='flex flex-row'>
+					<div>
 						<p> {msg} </p>
-						<span className="flex flex-row space-x-6">
+					</div>
+						<div className="flex flex-1">
 							<button
 								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
 								onClick={() => {
@@ -137,8 +139,8 @@ export const Sidebar = () => {
 							>
 								<FiXCircle size="30" className="text-red-300" />
 							</button>
-						</span>
-					</>
+						</div>
+					</div>
 				));
 			});
 			return ()=>{

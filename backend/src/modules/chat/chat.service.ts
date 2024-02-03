@@ -413,83 +413,128 @@ export class ChatService {
 			},
 		});
 
-		if (!memberShip) {
-			throw 'no such member';
-		}
-		if (memberShip.isBanned) {
-			throw 'you can t send message into that channel ';
-		}
-		if (memberShip.isMuted) {
-			if (memberShip.mutedTime !== null && memberShip.mutedTime <= dateNow) {
-				await prisma.memberShip.update({
-					where: {
-						memberId: memberShip.memberId,
-					},
-					data: {
-						isMuted: false,
-					},
-				});
-			} else {
-				throw `you re muted for until `;
-			}
-		}
-		const user = await prisma.user.findUnique({
-			where: {
-				intraId: sender.intraId,
-			},
-		});
-		return await prisma.channelMessage.create({
-			data: {
-				channelId,
-				channelName: memberShip.channelName,
-				sender: sender.intraId,
-				Avatar: user.Avatar,
-				content: message,
-			},
-		});
-	}
-	async getAllAvailableChannels(intraId: string) {
-		return await prisma.channel.findMany({
-			where: {
-				type: {
-					not: {
-						equals: 'PRIVATE',
-					},
-				},
-				members: {
-					none: {
-						intraId,
-					},
-				},
-			},
-		});
-	}
-	async getChannel(channelId: string): Promise<any> {
-		const channel = await prisma.channel.findUnique({
-			where: {
-				id: channelId,
-			},
-		});
-		if (!channel) {
-			throw 'no such channel';
-		}
-		return channel;
-	}
-	async getChannelMessages(channelId: string): Promise<any> {
-		const channel = await prisma.channel.findUnique({
-			where: {
-				id: channelId,
-			},
-		});
-		if (!channel) {
-			throw 'no such channel';
-		}
-		return await prisma.channelMessage.findMany({
-			where: {
-				channelId,
-			},
-		});
-	}
+      await this.createMember(ownerId, name, createdChannel.id, true, false);
+    }
+    catch(e)
+    {
+      console.log("creating memeber successfully failed");
+    }
+  }
+  async getAllTypeChannels(type:string) {
+    const data = prisma.channel.findMany({
+      where:{
+        type,
+      },
+    })
+    return data;
+  }
+  async getUserChannels(userId:string) {
+    const data = await prisma.memberShip.findMany({
+      where:{
+        intraId:userId,
+        isBanned:false,
+        onInviteState:false,
+      },
+    });
+    return data;
+  }
+  async joinChannel(userId:string, channelId:string, type:string, password:string)
+  {
+    const channel = await prisma.channel.findUnique({
+      where:{
+        name:channelId,
+      },
+    })
+    if (!channel){
+      throw ('no such channel sorry');
+    }
+    const user = await prisma.user.findUnique({
+      where:{
+        intraId:userId,
+      }
+    })
+    if (!user){
+      throw('no such user');
+    }
+    const member = await prisma.memberShip.findFirst({
+      where:{
+        intraId:user.intraId,
+        channelId,
+      }
+    })
+    if (member)
+    {
+      throw('already in channel');
+    }
+    if (channel.type === 'PROTECTED')
+    {
+        const reslt = await bcrypt.compare(password, channel.password);
+        if (!reslt)
+        {
+          throw("password incorrect");
+        }
+    }
+    await this.createMember(user.intraId,channel.name,channel.id, false, false);
+  }
+  async getAllChannelUsers(channelId:string){
+    return await prisma.memberShip.findMany({
+      where:{
+        channelId,
+        isBanned:false,
+        onInviteState:false,
+      },
+    })
+  }
+  async createChannelMessage(channelId:string, message:string, sender:User){
+    const dateNow = new Date();
+    const dateOs = dateNow.toISOString();
+    const memberShip = await  prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId :sender.intraId
+      },
+    })
+    
+    if (!memberShip)
+    {
+      throw ('no such member');
+    }
+    if (memberShip.isBanned) 
+    {
+      throw ('you can t send message into that channel ');
+    }
+    if (memberShip.isMuted){
+      if (memberShip.mutedTime !== null &&  memberShip.mutedTime <= dateNow){
+        await prisma.memberShip.update({
+          where:{
+            memberId:memberShip.memberId,
+          },
+          data:{
+            isMuted:false,
+          }
+        })
+      }
+      else{
+        throw(`you re muted for until a specific time ` );
+      }
+    }
+    const user =  await prisma.user.findUnique({
+      where:{
+        intraId:sender.intraId
+      }
+    });
+    if (!user)
+    {
+      throw ('no such user');
+    }
+    return await prisma.channelMessage.create({
+      data:{
+        channelId,
+        channelName:memberShip.channelName,
+        sender:sender.intraId,
+        Avatar: user.Avatar,
+        content:message,
+      },
 
 	async searchUsers(query: string) {
 		return await prisma.user.findMany({
@@ -740,55 +785,175 @@ export class ChatService {
 		await this.createMember(invitedId, channel.name, channel.id, false, true);
 	}
 
-	async getInviteChannel(intraId: string) {
-		return await prisma.memberShip.findMany({
-			where: {
-				intraId,
-				onInviteState: true,
-			},
-		});
-	}
-	async updateInvite(intraId: string, channelName: string, status: boolean) {
-		const memeber = await prisma.memberShip.findFirst({
-			where: {
-				intraId,
-				channelId: channelName,
-			},
-		});
-		if (!memeber) {
-			throw 'no such invitation';
-		}
-		if (status) {
-			await prisma.memberShip.update({
-				where: {
-					memberId: memeber.memberId,
-				},
-				data: {
-					onInviteState: false,
-				},
-			});
-		} else {
-			await prisma.memberShip.delete({
-				where: {
-					memberId: memeber.memberId,
-				},
-			});
-		}
-	}
-	async getBlockedUser(user: string) {
-		return await prisma.friend.findMany({
-			where: {
-				OR: [
-					{
-						friendshipStatus: 'BLOCKED',
-						friendId: user,
-					},
-					{
-						friendshipStatus: 'BLOCKED',
-						userId: user,
-					},
-				],
-			},
-		});
-	}
+  async inviteChannel(ownerId:string, invitedId:string,channelId:string){
+    const channel = await prisma.channel.findUnique({
+      where:{
+        id :channelId,
+      }
+    })
+    if (!channel){
+      throw('no such channel');
+    }
+    const owner = await prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId:ownerId,
+        isOwner:true,
+      }
+    });
+    if (!owner){
+      throw('lack of previlige');
+    }
+    const member = await prisma.memberShip.findFirst({
+      where:{
+        intraId:invitedId,
+        channelId,
+      }
+    })
+    if (member){
+      if (member.onInviteState){
+        throw('the invitation is already sent');
+      }
+      else{
+        throw('already on the channel');
+      } 
+    }
+    await this.createMember(invitedId,channel.name, channel.id, false, true);
+  }
+
+  async getInviteChannel(intraId:string){
+    return   await prisma.memberShip.findMany({
+      where:{
+        intraId,
+        onInviteState:true,
+      }
+    })
+  }
+  async updateInvite(intraId:string, channelName:string, status:boolean){
+    const memeber = await prisma.memberShip.findFirst({
+      where:{
+        intraId,
+        channelId:channelName,
+      }
+    })
+    if (!memeber){
+      throw('no such invitation');
+    }
+    if (status){
+      await prisma.memberShip.update({
+        where:{
+          memberId:memeber.memberId,
+        },
+        data:{
+          onInviteState:false,
+        }
+      })
+    }
+    else{
+      await prisma.memberShip.delete({
+        where:{
+          memberId:memeber.memberId,
+        },
+      })
+    }
+  }
+  async getBlockedUser(user:string){
+    return await prisma.friend.findMany({
+      where:{
+        OR:
+        [
+          {
+            friendshipStatus : 'BLOCKED',
+            friendId : user,
+          },
+          {
+            
+            friendshipStatus : 'BLOCKED',
+            userId : user,
+          }
+        ]
+      }
+    })
+  }
+  // async getUserActiveChannels(intraId: string) {
+  //   const memberShips = await prisma.memberShip.findMany({
+  //     where: {
+  //       intraId,
+  //     },
+  //   });
+  
+  //   const channels = await Promise.all(
+  //     memberShips.map(async (memberShip) => {
+  //       const channel = await prisma.channel.findUnique({
+  //         where: {
+  //           id: memberShip.channelId,
+  //         },
+  //         include: {
+  //           messages: {
+  //             orderBy: {
+  //               createdAt: 'desc',
+  //             },
+  //             take: 1,
+  //           },
+  //         },
+  //       });
+  
+  //       if (channel && channel.messages && channel.messages.length > 0) {
+  //         return channel;
+  //       }
+  
+  //       return null; // If the channel has no messages or is not found, return null
+  //     })
+  //   );
+  
+  //   return channels.filter((channel) => channel !== null);
+  // }
+  async getUserActiveChannels(intraId: string) {
+    const memberShips = await prisma.memberShip.findMany({
+      where: {
+        intraId,
+      },
+    });
+  
+    const channels = await Promise.all(
+      memberShips.map(async (memberShip) => {
+        const channel = await prisma.channel.findUnique({
+          where: {
+            id: memberShip.channelId,
+          },
+          include: {
+            messages: {
+              orderBy: {
+                createdAt: 'desc',
+              },
+              take: 1,
+            },
+          },
+        });
+  
+        if (channel && channel.messages && channel.messages.length > 0) {
+          return {
+            id: channel.id,
+            name: channel.name,
+            // Include other channel properties as needed
+            latestMessage: channel.messages[0], // Add the latest message to the result
+          };
+        }
+  
+        return null; // If the channel has no messages or is not found, return null
+      })
+    );
+  
+    // Remove channels with no messages
+    const filteredChannels = channels.filter((channel) => channel !== null);
+  
+    // Sort channels based on the date of the last message in descending order
+    const sortedChannels = filteredChannels.sort(
+      (a, b) => b.latestMessage.createdAt.getTime() - a.latestMessage.createdAt.getTime()
+    );
+  
+    return sortedChannels;
+  }
+  
+  
 }

@@ -129,38 +129,38 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('createChannel')
-  async createChannel(client :any, payload:{jwt:string,name:string, typePass:{type:string, password:string}}){
-    try{
-      const user = this.authService.getUserFromJwtstatic(payload.jwt);
-      if (!user)
-      {
+  // @SubscribeMessage('createChannel')
+  // async createChannel(client :any, payload:{jwt:string,name:string, typePass:{type:string, password:string}}){
+  //   try{
+  //     const user = this.authService.getUserFromJwtstatic(payload.jwt);
+  //     if (!user)
+  //     {
          
-        return;
-      }
-      await this.chatService.createChannel(client.user.intraId, payload.name, payload.typePass);
-    }
-    catch(e){
-      client.emit(e);
-    }
-  }
+  //       return;
+  //     }
+  //     await this.chatService.createChannel(client.user.intraId, payload.name, payload.typePass);
+  //   }
+  //   catch(e){
+  //     client.emit(e);
+  //   }
+  // }
 
-  @SubscribeMessage('JoinAChannel')
-  async joinChannel(client:any, payload:{channelId:string, type:string,password:string,jwt:string}){
-    try{
-      const user = this.authService.getUserFromJwtstatic(payload.jwt);
-      if (!user)
-      {
+  // @SubscribeMessage('JoinAChannel')
+  // async joinChannel(client:any, payload:{channelId:string, type:string,password:string,jwt:string}){
+  //   try{
+  //     const user = this.authService.getUserFromJwtstatic(payload.jwt);
+  //     if (!user)
+  //     {
          
-        return;
-      }
-      await this.chatService.joinChannel(client.user, payload.channelId, payload.type, payload.password);
-      client.emit('JoinAChannel',{e:"Successufely join the channel"});
-    }
-    catch(e){
-        client.emit('JoinAChannel',{e});
-    }
-  }
+  //       return;
+  //     }
+  //     await this.chatService.joinChannel(client.user, payload.channelId, payload.type, payload.password);
+  //     client.emit('JoinAChannel',{e:"Successufely join the channel"});
+  //   }
+  //   catch(e){
+  //       client.emit('JoinAChannel',{e});
+  //   }
+  // }
 
   @SubscribeMessage('channelBroadcast')
   async handleChannelChat(client:any, payload:{to:string,message:string, jwt:string}): Promise<void> {
@@ -211,7 +211,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('updateChannelUser',{e:"member Successufely updated"});
       const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
       socketRec.map((socket:any)=>{
-        socket.emit('updateChannelUser', {e:`your memberShip at the channel ${memberShip.channelId} has been updated`});
+        socket.emit('updateChannelUser', {e:`your memberShip at the channel ${memberShip.channelName} has been updated`});
       })
     }
     catch(e){
