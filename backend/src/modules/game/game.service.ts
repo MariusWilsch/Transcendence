@@ -461,9 +461,21 @@ export class GameService {
 	 * @param {string} roomID - A string representing the ID of a game room.
 	 * @returns a boolean value.
 	 */
+	/**
+	 * The function checks if a game session is currently active in a given room.
+	 * @param {string} roomID - The `roomID` parameter is a string that represents the unique identifier of
+	 * a game room.
+	 * @returns a boolean value.
+	 */
+	//! I need to check if that works
 	public isInGame(roomID: string): boolean {
 		if (this.gameSessions.size == 0) return true;
-		return this.gameSessions.get(roomID)?.intervalID !== undefined;
+		const gameSession = this.gameSessions.get(roomID);
+		return (
+			gameSession.intervalID !== undefined &&
+			gameSession.command[0] !== undefined &&
+			gameSession.command[1] !== undefined
+		);
 	}
 
 	public isCommandSet(roomID: string): boolean {
