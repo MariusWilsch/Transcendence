@@ -1,24 +1,17 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
-import { use, useEffect, useState, useRef } from 'react';
-import { useAppContext, AppProvider, User } from '../../AppContext';
+import { useEffect, useState, useRef } from 'react';
+import { useAppContext, User } from '../../AppContext';
 import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { Loading } from '../../components/Loading';
-import { Navbar } from '../../components/Navbar';
 import { Achievements } from '../../components/Achievements';
 import { Gamehistory } from '../../components/Gamehistory';
 import { UserDetailsCard } from '../../components/UserDetailsCard';
 import { UserProfileImage } from '../../components/UserProfileImage';
-import { Sidebar } from '../../components/Sidebar';
 import { TwoFactorAuth } from '../../components/TwoFactorAuth';
 import { Friend } from '../../components/Friend';
-import { useParams, redirect, useRouter } from 'next/navigation';
-import loading from '../../../public/loading.json';
-import Lottie, { LottieRefCurrentProps } from 'lottie-react';
 
 export default function Profile(params: any) {
 	const {
@@ -27,11 +20,8 @@ export default function Profile(params: any) {
 		isDivVisible,
 		toggleDivVisibility,
 		setDivVisible,
-		isSidebarVisible,
 		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
 	} = useAppContext();
-	const router = useRouter();
 
 	const [socket, setsocket] = useState<Socket | null>(null);
 
@@ -39,7 +29,6 @@ export default function Profile(params: any) {
 		undefined,
 	);
 	const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
-	const lottieRef = useRef<LottieRefCurrentProps>(null);
 
 	useEffect(() => {
 		setisSidebarVisible(window.innerWidth > 768);
@@ -186,26 +175,20 @@ export default function Profile(params: any) {
 	let intraId = '';
 	let FullName = 'Full Name';
 	let isTfaEnabled = false;
-	let level = 'Level 6.31';
-	let email = 'Email';
 	let IntraPic = '/gon.jpg';
 
-	if (isProfileOwner) {
-		Login = user?.login || 'Login';
-		intraId = user?.intraId || '';
-		FullName = user?.fullname || 'Full Name';
-		isTfaEnabled = user?.isTfaEnabled || false;
-		level = 'Level 6.31';
-		email = user?.email || 'Email';
-		IntraPic = user?.Avatar || IntraPic;
+	if (isProfileOwner && user !== null) {
+		Login = user.login;
+		intraId = user.intraId;
+		FullName = user.fullname;
+		isTfaEnabled = user.isTfaEnabled;
+		IntraPic = user.Avatar;
 	} else {
-		Login = userFromRoutId?.login || 'Login';
-		intraId = userFromRoutId?.intraId || '';
-		FullName = userFromRoutId?.fullname || 'Full Name';
-		isTfaEnabled = userFromRoutId?.isTfaEnabled || false;
-		level = 'Level 6.31';
-		email = userFromRoutId?.email || 'Email';
-		IntraPic = userFromRoutId?.Avatar || IntraPic;
+		Login = userFromRoutId?.login;
+		intraId = userFromRoutId?.intraId;
+		FullName = userFromRoutId?.fullname;
+		isTfaEnabled = userFromRoutId?.isTfaEnabled;
+		IntraPic = userFromRoutId?.Avatar;
 	}
 
 	return (

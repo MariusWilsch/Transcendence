@@ -1,29 +1,26 @@
 'use client';
 
-import { Inter } from 'next/font/google';
 import './globals.css';
-import { AppProvider, User } from './AppContext';
+import { AppProvider } from './AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
 
-const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const [user, setUser] = useState<User | null>(null);
 	const pathname = usePathname();
 
 	return (
 		<html lang="en">
 			{pathname === '/' || pathname === '/2FA' ? (
-				<body className={inter.className}>
+				<body>
 					<Providers>
 						<AppProvider>
 							<motion.div
@@ -37,7 +34,7 @@ export default function RootLayout({
 					</Providers>
 				</body>
 			) : (
-				<body className={inter.className}>
+				<body>
 					<Providers>
 						<AppProvider>
 							<motion.div

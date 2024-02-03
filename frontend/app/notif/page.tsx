@@ -1,16 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { use, useEffect, useState } from 'react';
-import { useAppContext, AppProvider, User } from '../AppContext';
-import { CiCirclePlus } from 'react-icons/ci';
-import { CiSaveUp2 } from 'react-icons/ci';
-import { CiEdit } from 'react-icons/ci';
-import { IoIosCloseCircleOutline } from 'react-icons/io';
-import toast, { Toaster } from 'react-hot-toast';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
+import {  useEffect, useState } from 'react';
+import { useAppContext, User } from '../AppContext';
+import toast  from 'react-hot-toast';
 import { FiCheckCircle } from 'react-icons/fi';
 import { FiXCircle } from 'react-icons/fi';
 
@@ -19,12 +11,7 @@ export default function Search() {
 
 	const [friends, setFriends] = useState<User[] | null>(null);
 	const {
-		isDivVisible,
-		toggleDivVisibility,
-		setDivVisible,
-		isSidebarVisible,
 		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
 	} = useAppContext();
 
 	useEffect(() => {
