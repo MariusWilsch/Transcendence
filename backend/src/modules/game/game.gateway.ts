@@ -35,18 +35,26 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
-		//! Identify the client not by token but by his username
 		console.log(`Client connected via ${client.id}`);
-		if (!client.handshake.auth.token) return;
-		const id = this.authService.getUserFromJwt(
-			client.handshake.auth.token
-		).intraId;
-		if (this.duplicateUsers.has(id)) {
+		//* If the client is not authenticated, disconnect him
+		if (!client.handshake.auth.token) return client.disconnect(true);
+
+		const user = this.authService.getUserFromJwt(client.handshake.auth.token);
+
+		client.data = {
+			user: {
+				intraId: user.intraId,
+				Avatar: user.Avatar,
+				login: user.login,
+			},
+		};
+		//* If the user is already connected, disconnect him
+		if (this.duplicateUsers.has(client.data.user.intraId)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
 			client.disconnect(true);
 		}
-		this.duplicateUsers.add(id);
+		this.duplicateUsers.add(client.data.user.intraId);
 	}
 
 	handleDisconnect(client: IO) {
@@ -60,9 +68,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
-		this.duplicateUsers.delete(
-			this.authService.getUserFromJwt(client.handshake.auth.token).intraId
-		);
+		this.duplicateUsers.delete(client.data.user.intraId);
 	}
 
 	checkForAvailablePlayers() {
@@ -77,11 +83,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		const user1 = this.authService.getUserFromJwt(player1.handshake.auth.token);
-		const user2 = this.authService.getUserFromJwt(player2.handshake.auth.token);
-
 		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(roomID, player1, player2, user1, user2);
+		this.gameService.createGameSession(roomID, player1, player2);
 
 		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
@@ -91,12 +94,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			canvasHeight: GAME_CONFIG.canvasHeight,
 			userData: [
 				{
-					avatar: user1.Avatar,
-					username: user1.login,
+					avatar: player1.data.user.Avatar,
+					username: player1.data.user.login,
 				},
 				{
-					avatar: user2.Avatar,
-					username: user2.login,
+					avatar: player2.data.user.Avatar,
+					username: player2.data.user.login,
 				},
 			],
 		});
