@@ -36,7 +36,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 			{scorePos === 'right' ? (
 				<Score score={score.player1} username={gameData.username} />
 			) : null}
-			<div className="avatar">
+			<div className="">
 				{gameData.username === 'Computer' ? (
 					<Image
 						src={computer}
@@ -49,7 +49,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className="rounded-md border border-stone-600 w-40 h-40"
+						className="rounded-md border border-stone-600 w-32 h-32"
 					/>
 				) : (
 					<Image
@@ -63,7 +63,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className="rounded-md border border-stone-600 w-40 h-40"
+						className="rounded-md border border-stone-600 w-32 h-32"
 					/>
 				)}
 			</div>
