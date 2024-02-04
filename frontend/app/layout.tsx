@@ -2,10 +2,10 @@
 
 import './globals.css';
 import '@mantine/core/styles.css';
-import { AppProvider } from './AppContext';
+import { AppProvider, User } from './AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
@@ -17,6 +17,34 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
+
+
+
+	const router = useRouter();
+
+	const checkJwtCookie = async () => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+				{
+					method: 'GET',
+					credentials: 'include',
+				},
+			);
+			var data: User = await response.json();
+
+			if (data !== null && data !== undefined) {
+			}
+			else {
+				router.push('/');
+			}
+		} catch (error: any) {}
+	};
+
+	useEffect(() => {
+		checkJwtCookie();
+	}, []);
+
 
 	return (
 		<html lang="en">
