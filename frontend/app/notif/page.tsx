@@ -31,10 +31,12 @@ export default function Search() {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					context.setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					context.setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;

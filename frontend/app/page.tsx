@@ -30,19 +30,22 @@ export default function Home() {
 					credentials: 'include',
 				},
 			);
-			var data: User = await response.json();
+			var data  = await response.json();
+			if (data.succes === false) {
+				return;
+			}
 
-			if (data !== null && data !== undefined) {
-				contex.setUser(data);
-				if (data.intraId) {
-					toast('Welcome back ' + data.login + ' !', {
+			if (data.data !== null && data.data !== undefined) {
+				contex.setUser(data.data);
+				if (data.data.intraId) {
+					toast('Welcome back ' + data.data.login + ' !', {
 						style: {
 							border: '1px solid',
 							padding: '16px',
 						},
 						icon: '👋',
 					});
-					return router.push(`/profile/${data.intraId}`);
+					return router.push(`/profile/${data.data.intraId}`);
 				}
 			}
 		} catch (error: any) {}

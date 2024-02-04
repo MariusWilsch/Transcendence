@@ -62,10 +62,13 @@ export const Navbar = () => {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					setUser(data);
+				
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setUser(data.data);
 				}
 			} catch (error: any) {}
 		};

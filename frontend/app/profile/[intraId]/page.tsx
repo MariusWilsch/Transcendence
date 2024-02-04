@@ -61,10 +61,12 @@ export default function Profile(params: any) {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;
@@ -92,8 +94,13 @@ export default function Profile(params: any) {
 			const contentType = response.headers.get('content-type');
 
 			if (contentType && contentType.includes('application/json')) {
-				var data: User = await response.json();
-				setuserFromRoutId(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setuserFromRoutId(data.data);
+				}
 			} else {
 				toast.error('User not found');
 			}

@@ -118,17 +118,36 @@ export class UserController {
     }
   }
 
+  // @Get(':id')
+  // async getUserbyId(@Param('id') id: string , @Res() res : any): Promise<User | undefined> {
+  //   if (id === undefined || id === '' || id === null) {
+  //     return undefined;
+  //   }
+  //   try {
+  //     const data = await this.userService.getUserbyId(id);
+  //     if (data === undefined) {
+  //       return res.json({ succes: false });
+  //     }
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Error getUserbyId:', error);
+  //     return res.json({ succes: false });
+  //   }
+  // }
   @Get(':id')
-  async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
+  async getUserbyId(@Param('id') id: string , @Res() res : any): Promise<User | undefined> {
     if (id === undefined || id === '' || id === null) {
       return undefined;
     }
     try {
       const data = await this.userService.getUserbyId(id);
-      return data;
+      if (data === undefined) {
+        return res.json({ succes: false });
+      }
+      return res.json({ succes: true , data});
     } catch (error) {
       console.error('Error getUserbyId:', error);
-      return undefined;
+      return res.json({ succes: false });
     }
   }
 
