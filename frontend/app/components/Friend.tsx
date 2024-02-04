@@ -18,6 +18,7 @@ import { RootState } from '../gamelobby/GlobalRedux/store';
 import { useSelector } from 'react-redux';
 import { Invite } from '../gamelobby/GlobalRedux/features';
 import { useDispatch } from 'react-redux';
+import Cookies from 'universal-cookie';
 
 export const Friend = ({
 	isProfileOwner,
@@ -187,7 +188,9 @@ export const Friend = ({
 
 	const handler = () => {
 		if (context.socket) {
-			context.socket.emit('privateMatch', { to: userId, other: friendId });
+			const cookie = new Cookies();
+            const jwt = cookie.get('jwt');
+			context.socket.emit('privateMatch', { to: userId, other: friendId, jwt });
 		}
 		handleInvite(friendId, isConnected, Invite.INVITING);
 	};
@@ -320,7 +323,13 @@ export const Friend = ({
 										? friendId + userId
 										: userId + friendId
 								}`}
-								onClick={() => context.setComponent('conversation')}
+								onClick={() =>{
+
+									context.setMessageNotif(false);
+									context.setComponent('conversation')
+								}
+								
+								}
 								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							>
 								<motion.div

@@ -112,6 +112,8 @@ export type AppContextProps = {
 	notifSocket: Socket | null;
 	setNotifSocket: (notifSocket: Socket | null) => void;
 	notif: boolean;
+	setMessageNotif: (messageNotif: boolean) => void;
+	messageNotif: boolean;
 	setnotif: (notif: boolean) => void;
 	setComponent: (component: string) => void;
 	component: string;
@@ -139,6 +141,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 	const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
 	const [notifSocket, setNotifSocket] = useState<Socket | null>(null);
 	const [notif, setnotif] = useState<boolean>(false);
+	const [messageNotif, setMessageNotif] = useState<boolean>(false);
 	const [component, setComponent] = useState('conversation'); //for resposive purposes
 	const [responsive, setResponsive] = useState(true);
 	const [channel, setChannel] = useState<Channel | undefined>();
@@ -151,6 +154,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 		setisSidebarVisible((prev) => !prev);
 	};
 	const contextValue: AppContextProps = {
+		setMessageNotif,
+		messageNotif,
 		setChannel,
 		channel,
 		setComponent,
