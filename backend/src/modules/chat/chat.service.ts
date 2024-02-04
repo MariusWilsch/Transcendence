@@ -21,6 +21,12 @@ export class ChatService {
     ) { }
 
   async updateUserStatus(intraId:string, status:string){
+    const user = await prisma.user.findUnique({
+      where:{
+        intraId,
+      },
+    })
+    if (!user)return;
     await prisma.user.update({
       where:{
         intraId,
@@ -281,6 +287,9 @@ export class ChatService {
     const name = channelName;
     let password:string;
     const saltRounds = 10;
+    if (channelName.length > 30 || channelName.length < 3 ){
+      throw('Invalid input: channel name required 3 to 30 characters')
+    }
     const channel = await prisma.channel.findUnique({
       where:{
         name,

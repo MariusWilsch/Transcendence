@@ -1,5 +1,5 @@
 'use client';
-import '@mantine/core/styles.css';
+// import '@mantine/core/styles.css';
 import { useEffect } from 'react';
 import io from 'socket.io-client';
 import {useAppContext, User } from '../AppContext';
@@ -79,7 +79,7 @@ const Chat = () => {
 
   }, [context.component])
   return (
-    <MantineProvider>
+    // <MantineProvider>
       <div className=" custom-height w-screen  bg-[#12141A] ">
         <div className="flex ">
           <div className="flex-1 overflow-y-auto">
@@ -92,7 +92,7 @@ const Chat = () => {
         </div>
         <Toaster />
       </div>
-    </MantineProvider>
+    // </MantineProvider>
   );
 };
 

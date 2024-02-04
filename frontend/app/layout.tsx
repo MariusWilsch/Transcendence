@@ -1,6 +1,7 @@
 'use client';
 
 import './globals.css';
+import '@mantine/core/styles.css';
 import { AppProvider } from './AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useEffect } from 'react';
@@ -8,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
-
+import { MantineProvider } from '@mantine/core';
 
 export default function RootLayout({
 	children,
@@ -23,13 +24,15 @@ export default function RootLayout({
 				<body>
 					<Providers>
 						<AppProvider>
+							<MantineProvider>
 							<motion.div
 								initial={{ opacity: 0, y: -100 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: 0.3 }}
-							>
+								>
 								<AnimatePresence>{children}</AnimatePresence>
 							</motion.div>
+								</MantineProvider>
 						</AppProvider>
 					</Providers>
 				</body>
@@ -37,6 +40,7 @@ export default function RootLayout({
 				<body>
 					<Providers>
 						<AppProvider>
+						<MantineProvider>
 							<motion.div
 							className='overflow-y-scroll no-scrollbar'
 								initial={{ opacity: 0, y: -100 }}
@@ -55,6 +59,7 @@ export default function RootLayout({
 									</div>
 								</AnimatePresence>
 							</motion.div>
+							</MantineProvider>
 						</AppProvider>
 					</Providers>
 				</body>

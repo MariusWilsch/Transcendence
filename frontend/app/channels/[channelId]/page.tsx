@@ -1,5 +1,5 @@
 'use client';
-import '@mantine/core/styles.css';
+// import '@mantine/core/styles.css';
 import { FC, useEffect, useState } from 'react';
 import {
 	Channel,
@@ -228,7 +228,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
 		channel !== undefined ? channel?.name.replace(channel.ownerId, '') : '';
 	return (
 		<>
-			<MantineProvider>
+			{/* <MantineProvider> */}
 				<div className=" custom-height w-screen  bg-[#12141A]">
 					<div className="flex ">
 						{permission ? (
@@ -384,7 +384,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
 					</div>
 					<Toaster />
 				</div>
-			</MantineProvider>
+			{/* </MantineProvider> */}
 		</>
 	);
 };

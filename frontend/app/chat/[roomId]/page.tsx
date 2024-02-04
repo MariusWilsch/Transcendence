@@ -1,5 +1,5 @@
 'use client';
-import '@mantine/core/styles.css';
+// import '@mantine/core/styles.css';
 import { FC, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { User, useAppContext, Message} from '@/app/AppContext';
@@ -203,7 +203,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
     )
   }
   return (
-    <MantineProvider>
+    // <MantineProvider>
     <div className=" w-screen  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
@@ -381,7 +381,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
         </div>
       </div>
     </div>
-    </MantineProvider>
+    // </MantineProvider>
   );
 }
 

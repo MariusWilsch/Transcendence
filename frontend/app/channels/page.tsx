@@ -1,4 +1,5 @@
 'use client';
+// import '@mantine/core/styles.css';
 import { Channel, User, useAppContext } from "@/app/AppContext";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -189,7 +190,7 @@ const ChannelsLobby = () => {
     }
   }
   return (
-    <MantineProvider>
+    // <MantineProvider>
       <div className="custom-height z-20 w-screen bg-[#12141A]">
         <div className="flex ">
           <div className="flex-1 overflow-y-auto">
@@ -434,7 +435,7 @@ const ChannelsLobby = () => {
         </div>
         <Toaster />
       </div>
-    </MantineProvider>
+    // {/* </MantineProvider> */}
   );
 }
 

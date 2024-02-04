@@ -177,7 +177,7 @@ export class ChatController {
     }
     catch(e){
       console.log(e);
-      res.json({e});
+      res.json({sucess:false,error:e});
     }
   }
   @Post('leaveChannel/:id/:name')

@@ -23,8 +23,9 @@ async function creatChannel(Channelname: string, type: string, password: string,
         }),
       }
     );
+    const res = await response.json();
     if (response.ok) {
-      toast.success('channel created successfuly')
+      res.sucess ? toast.success('channel created successfuly') : toast.error(res.error);
     }
     else {
       const msg = 'Error: ' + response;
