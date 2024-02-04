@@ -204,7 +204,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   }
   return (
     // <MantineProvider>
-    <div className=" w-screen  bg-[#12141A]">
+    <div className=" w-full  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
           <div className="flex custom-height">

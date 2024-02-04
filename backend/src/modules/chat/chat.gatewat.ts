@@ -103,10 +103,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
       const recipientSocket = this.getAllSocketsByUserId(payload.to);
-      const senderSocket = this.getAllSocketsByUserId(client.user.intraId);
+      const senderSocket = this.getAllSocketsByUserId(user.intraId);
       if (recipientSocket) {
         
-        const message = await this.chatService.createMessage(client.user.intraId, payload.to, payload.message);
+        const message = await this.chatService.createMessage(user.intraId, payload.to, payload.message);
         recipientSocket.map((socket:any) =>socket.emit('privateChat',message));
         senderSocket.map((socket:any) =>{
           if (client.id != socket.id)
@@ -166,8 +166,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
       const members = await this.chatService.getAllChannelUsers(payload.to);
-      const message = await this.chatService.createChannelMessage(payload.to, payload.message, client.user);
-      let blockedUsers = await this.chatService.getBlockedUser(client.user.intraId);
+      const message = await this.chatService.createChannelMessage(payload.to, payload.message,user);
+      let blockedUsers = await this.chatService.getBlockedUser(user.intraId);
       members.map((member)=>{
         if (!member.isBanned && !blockedUsers.some((entry) => {
           if (entry.userId === user.intraId) {
@@ -202,7 +202,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       {
         return;
       }
-      const memberShip = await this.chatService.updateChannelUser(client.user.intraId, payload.memberId,payload.info);
+      const memberShip = await this.chatService.updateChannelUser(user.intraId, payload.memberId,payload.info);
       client.emit('updateChannelUser',{e:"member Successufely updated"});
       const socketRec = this.getAllSocketsByUserId(memberShip.intraId);
       socketRec.map((socket:any)=>{
@@ -215,7 +215,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
   @SubscribeMessage('privateMatch')
-  async privateMatch(client:any, payload:{to:string, other:string}){
+  async privateMatch(client:any, payload:{to:string, other:string,jwt:string}){
+    const user = this.authService.getUserFromJwtstatic(payload.jwt);
+    if (!user)
+    {
+      return;
+    }
+
     const friendSocket = this.getAllSocketsByUserId(payload.other);
     friendSocket.map((socket:any)=>{
       socket.emit('privateMatch', {from:client.user});

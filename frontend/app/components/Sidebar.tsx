@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { use, useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User, Message } from '../AppContext';
 import { RiPingPongLine } from 'react-icons/ri';
@@ -11,13 +11,12 @@ import { GrGroup } from 'react-icons/gr';
 import { FaUserFriends } from 'react-icons/fa';
 import { GrAchievement } from 'react-icons/gr';
 import { MdLeaderboard } from 'react-icons/md';
-import { IoHome } from 'react-icons/io5';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { CgProfile } from 'react-icons/cg';
 import { CiLogout } from 'react-icons/ci';
 import { usePathname } from 'next/navigation';
 import { FaCircleDot } from 'react-icons/fa6';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Cookies from 'universal-cookie';
 import { io } from 'socket.io-client';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
@@ -41,7 +40,7 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-	const createSocket = () => {};
+	const createSocket = () => { };
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -105,13 +104,12 @@ export const Sidebar = () => {
 			context.socket.on('privateChat', (data: Message) => {
 				if (data) {
 					if (data.sender !== context.user?.intraId) {
+						context.setMessageNum((prev)=> prev + 1);
 						toast.success('new message');
 					}
 				}
 			});
 			context.socket.on('privateMatch', (data: any) => {
-				// if (data.from.intraId !== context.user?.intraId)
-				// {
 				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
 					<div className="flex flex-row">
@@ -147,7 +145,7 @@ export const Sidebar = () => {
 				}
 			};
 		}
-	}, [context.socket, context.user, isConnected]);
+	}, [context.socket, context.user, isConnected, context.messageNumb]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
@@ -183,9 +181,8 @@ export const Sidebar = () => {
 			{context.isSidebarVisible && (
 				<div className="z-50 w-16 custom-height ">
 					<div
-						className={`transition-all duration-500 ease-in-out ${
-							context.isSidebarVisible ? 'w-16 opacity-100' : 'w-0 opacity-0'
-						}`}
+						className={`transition-all duration-500 ease-in-out ${context.isSidebarVisible ? 'w-16 opacity-100' : 'w-0 opacity-0'
+							}`}
 					>
 						<div className="relative custom-height bg-[#292D39] ">
 							<div className="absolute buttom-0 left-0 bg-[#292D39]">
@@ -193,11 +190,10 @@ export const Sidebar = () => {
 									<ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
 										<div className="flex flex-col justify-between custom-height bg-[#292D39]">
 											<div
-												className={`${
-													context.user === null
+												className={`${context.user === null
 														? 'pointer-events-none'
 														: 'pointer-events-auto'
-												}
+													}
                     `}
 											>
 												<li className="">
@@ -210,9 +206,8 @@ export const Sidebar = () => {
 														>
 															<CgProfile
 																size="30"
-																className={`${
-																	RouterName === 'profile' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8
+																className={`${RouterName === 'profile' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8
                         `}
 															/>
 														</motion.div>
@@ -228,9 +223,8 @@ export const Sidebar = () => {
 														<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
 															<IoMdNotificationsOutline
 																size="30"
-																className={`${
-																	RouterName === 'notif' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																className={`${RouterName === 'notif' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
 															{context.notif && (
 																<div className="absolute top-0 right-4 flex items-end">
@@ -253,11 +247,10 @@ export const Sidebar = () => {
 														<Link href={`/leaderboard`}>
 															<MdLeaderboard
 																size="30"
-																className={`${
-																	RouterName === 'leaderboard'
+																className={`${RouterName === 'leaderboard'
 																		? 'text-slate-50'
 																		: 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</Link>
 													</motion.div>
@@ -272,9 +265,8 @@ export const Sidebar = () => {
 														>
 															<FaUserFriends
 																size="30"
-																className={`${
-																	RouterName === 'friends' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																className={`${RouterName === 'friends' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
@@ -289,15 +281,17 @@ export const Sidebar = () => {
 														>
 															<GrGroup
 																size="30"
-																className={`${
-																	RouterName === 'channels' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																className={`${RouterName === 'channels' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
 												</li>
 												<li>
-													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
+													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
+														onClick={() => context.setMessageNum(0)}
+														className='relative'
+													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -306,10 +300,14 @@ export const Sidebar = () => {
 														>
 															<IoChatbubblesOutline
 																size="30"
-																className={`${
-																	RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																className={`${RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
+															{context.messageNumb > 0 &&(
+																<div className="notification-dot">
+																	 {context?.messageNumb > 99 ? '99+' : context?.messageNumb }
+																</div>
+															)}
 														</motion.div>
 													</Link>
 												</li>
@@ -323,9 +321,8 @@ export const Sidebar = () => {
 														>
 															<RiPingPongLine
 																size="30"
-																className={`${
-																	RouterName === 'play' ? 'text-slate-50' : 'text-slate-500'
-																} hover:text-slate-50 mx-auto m-8`}
+																className={`${RouterName === 'play' ? 'text-slate-50' : 'text-slate-500'
+																	} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
