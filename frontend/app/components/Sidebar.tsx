@@ -41,10 +41,7 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-
-	const createSocket=()=>{
-
-	}
+	const createSocket = () => {};
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -117,10 +114,10 @@ export const Sidebar = () => {
 				// {
 				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
-					<div className='flex flex-row'>
-					<div>
-						<p> {msg} </p>
-					</div>
+					<div className="flex flex-row">
+						<div>
+							<p> {msg} </p>
+						</div>
 						<div className="flex flex-1">
 							<button
 								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
@@ -143,13 +140,12 @@ export const Sidebar = () => {
 					</div>
 				));
 			});
-			return ()=>{
-				if (context.socket){
-	
+			return () => {
+				if (context.socket) {
 					context.socket.off('privateMatch');
 					context.socket.off('privateChat');
 				}
-			  }
+			};
 		}
 	}, [context.socket, context.user, isConnected]);
 
@@ -196,17 +192,16 @@ export const Sidebar = () => {
 								<div className=" custom-height fixed text-black bg-[#292D39]">
 									<ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
 										<div className="flex flex-col justify-between custom-height bg-[#292D39]">
-											<div className="">
-												<li className="">
-													<Link
-														href={`/profile/${context.user?.intraId}`}
-														className={`${
-															context.user === null
-																? 'pointer-events-none'
-																: 'pointer-events-auto'
-														}
+											<div
+												className={`${
+													context.user === null
+														? 'pointer-events-none'
+														: 'pointer-events-auto'
+												}
                     `}
-													>
+											>
+												<li className="">
+													<Link href={`/profile/${context.user?.intraId}`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
