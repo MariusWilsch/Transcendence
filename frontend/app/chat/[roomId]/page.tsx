@@ -166,7 +166,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   const handleScroll =  () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-      if (scrollTop <= -(scrollHeight - clientHeight -0.75)  && noMoreData) {
+      if (scrollTop <= -(scrollHeight - clientHeight -1)  && noMoreData) {
         fetchNewMessages();
       }
     }

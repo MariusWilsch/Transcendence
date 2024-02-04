@@ -81,7 +81,11 @@ function FindAConversation() {
 
 	return (
 		<>
-			<div onClick={spotlight.open} className="relative text-sm ">
+			<div onClick={()=>{
+				(context.userData &&  spotlight.open());
+			}
+			}
+			className="relative text-sm ">
 				<input
 					type="text"
 					value={'search or start a new conversation'}
@@ -93,10 +97,10 @@ function FindAConversation() {
 				<Spotlight.Root query={query} onQueryChange={setQuery}>
 					<Spotlight.Search
 						placeholder="Search by username..."
-						leftSection={<CiSearch stroke={1.5} />}
+						leftSection={<CiSearch stroke={"1.5"} />}
 					/>
 					<Spotlight.ActionsList>
-						{data !== undefined && data.length > 0 ? (
+						{ data !== undefined && data.length > 0 ? (
 							<div className="flex flex-col">{items}</div>
 						) : (
 							<Spotlight.Empty>Nothing found...</Spotlight.Empty>
