@@ -18,8 +18,6 @@ export default function RootLayout({
 }) {
 	const pathname = usePathname();
 
-
-
 	const router = useRouter();
 
 	const checkJwtCookie = async () => {
@@ -36,21 +34,19 @@ export default function RootLayout({
 
 			if (data !== null && data !== undefined) {
 				console.log('kayn jwt cookie');
-			}
-			else {
+			} else {
 				console.log('no jwt cookie');
 				router.push('/');
 			}
+			console.log('wa 3alikom salam jwt cookie');
 		} catch (error: any) {
-
 			console.log('error jwt cookie');
 		}
 	};
 
 	useEffect(() => {
 		checkJwtCookie();
-	}, []);
-
+	}, [pathname]);
 
 	return (
 		<html lang="en">
@@ -59,14 +55,14 @@ export default function RootLayout({
 					<Providers>
 						<AppProvider>
 							<MantineProvider>
-							<motion.div
-								initial={{ opacity: 0, y: -100 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.3 }}
+								<motion.div
+									initial={{ opacity: 0, y: -100 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.3 }}
 								>
-								<AnimatePresence>{children}</AnimatePresence>
-							</motion.div>
-								</MantineProvider>
+									<AnimatePresence>{children}</AnimatePresence>
+								</motion.div>
+							</MantineProvider>
 						</AppProvider>
 					</Providers>
 				</body>
@@ -74,25 +70,25 @@ export default function RootLayout({
 				<body>
 					<Providers>
 						<AppProvider>
-						<MantineProvider>
-							<motion.div
-							className='overflow-y-scroll no-scrollbar'
-								initial={{ opacity: 0, y: -100 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.3 }}
-							>
-								<AnimatePresence>
-									<div className=" min-h-screen w-screen bg-[#12141A] relative overflow-x-hidden">
-										<div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80"></div>
+							<MantineProvider>
+								<motion.div
+									className="overflow-y-scroll no-scrollbar"
+									initial={{ opacity: 0, y: -100 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.3 }}
+								>
+									<AnimatePresence>
+										<div className=" min-h-screen w-screen bg-[#12141A] relative overflow-x-hidden">
+											<div className="z-0 absolute w-auto h-auto overflow-hidden inset-0 mt-80"></div>
 
-										<Navbar />
-										<div className="flex ">
-											<Sidebar />
-											{children}
+											<Navbar />
+											<div className="flex ">
+												<Sidebar />
+												{children}
+											</div>
 										</div>
-									</div>
-								</AnimatePresence>
-							</motion.div>
+									</AnimatePresence>
+								</motion.div>
 							</MantineProvider>
 						</AppProvider>
 					</Providers>
