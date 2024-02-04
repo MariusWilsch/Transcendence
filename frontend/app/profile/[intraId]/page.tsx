@@ -196,6 +196,7 @@ export default function Profile(params: any) {
 					isProfileOwner={isProfileOwner}
 					src={IntraPic}
 					intraId={intraId}
+					userFromRoutId={userFromRoutId}
 				/>
 				<div
 					className={`${isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'} p-10 `}

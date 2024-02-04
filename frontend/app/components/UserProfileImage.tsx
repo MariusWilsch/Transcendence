@@ -22,11 +22,13 @@ export const UserProfileImage = ({
 	isProfileOwner,
 	src,
 	intraId,
+	userFromRoutId,
 }: {
 	status: string | undefined;
 	isProfileOwner: boolean;
 	src: string;
 	intraId: string | undefined;
+	userFromRoutId: User | undefined;
 }) => {
 	const {
 		user,
@@ -39,6 +41,7 @@ export const UserProfileImage = ({
 	const [friends, setfriends] = useState<number>(0);
 	const [Onlinefriends, setOnlinefriends] = useState<number>(0);
 	const [refreshFriends, setrefreshFriends] = useState<number>(0);
+
 
 	useEffect(() => {
 		setImagePreview(src);
@@ -193,10 +196,10 @@ export const UserProfileImage = ({
 	var readableDate1: string = '';
 	var readableDate2: string = '';
 
-	if (user) {
-		readableDate = new Date(user?.created_at).toISOString().split('T')[0];
-		readableDate1 = new Date(user?.updated_at).toISOString().split('T')[0];
-		readableDate2 = new Date(user?.updated_at)
+	if (userFromRoutId) {
+		readableDate = new Date(userFromRoutId?.created_at).toISOString().split('T')[0];
+		readableDate1 = new Date(userFromRoutId?.updated_at).toISOString().split('T')[0];
+		readableDate2 = new Date(userFromRoutId?.updated_at)
 			.toISOString()
 			.split('T')[1]
 			.substring(0, 5);
@@ -279,7 +282,7 @@ export const UserProfileImage = ({
 												</div>
 												<TfiFaceSmile size="22" className="inline mr-[1px]" /> :{' '}
 											</div>
-											<div className="inline text-green-400 ">{user?.fullname}</div>
+											<div className="inline text-green-400 ">{userFromRoutId?.fullname}</div>
 										</div>
 										<div className=" text-white mb-3">
 											<div className="tooltip">
@@ -288,7 +291,7 @@ export const UserProfileImage = ({
 												</div>
 												<MdOutlineMailOutline size="21" className="inline" /> :{' '}
 											</div>
-											<div className="inline text-green-400 ">{user?.email}</div>
+											<div className="inline text-green-400 ">{userFromRoutId?.email}</div>
 										</div>
 										<div className=" text-white mb-3">
 											<div className="tooltip">
