@@ -14,7 +14,7 @@ const ChannelCards = () => {
     useEffect(() => {
       const fetchChannels = async () => {
         try {
-          const response3 = await fetch(`http://localhost:3001/chat/channelsRoom/${context.userData.intraId}`, {
+          const response3 = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channelsRoom/${context.userData.intraId}`, {
             method: "GET",
             credentials: "include",
           });

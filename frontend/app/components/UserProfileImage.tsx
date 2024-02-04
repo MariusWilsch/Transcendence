@@ -30,13 +30,8 @@ export const UserProfileImage = ({
 }) => {
 	const {
 		user,
-		setUser,
 		isDivVisible,
 		toggleDivVisibility,
-		setDivVisible,
-		isSidebarVisible,
-		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
 	} = useAppContext();
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -153,8 +148,6 @@ export const UserProfileImage = ({
 	};
 
 	const [numberofgames, setnumberofgames] = useState(0);
-	const [gameswon, setgameswon] = useState(0);
-	const [gamesloss, setgamesloss] = useState(0);
 	const [winpercentage, setwinpercentage] = useState('');
 
 	useEffect(() => {
@@ -185,8 +178,6 @@ export const UserProfileImage = ({
 						gamesloss++;
 					}
 				});
-				setgameswon(gameswon);
-				setgamesloss(gamesloss);
 				const totalGames = gameswon + gamesloss;
 				const winPercentage =
 					totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
@@ -273,7 +264,7 @@ export const UserProfileImage = ({
 											<div className="inline text-green-400 font-mono">
 												{Onlinefriends}&nbsp;
 											</div>
-											of theme are online
+											 online
 										</div>
 									)}
 								</div>

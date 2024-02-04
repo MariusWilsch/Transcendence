@@ -12,7 +12,7 @@ const ConversationCard = ({ room }: any) => {
 		const fetchUser = async () => {
 			try {
 				const response3 = await fetch(
-					`http://localhost:3001/users/${room.participantsIds[0]}`,
+					`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${room.participantsIds[0]}`,
 					{
 						method: 'GET',
 						credentials: 'include',

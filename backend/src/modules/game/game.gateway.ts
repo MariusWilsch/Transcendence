@@ -17,13 +17,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
 import { PrismaClient } from '@prisma/client';
+import { URL } from '../auth/constants'
 
 const prisma = new PrismaClient();
 
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: `${URL}:3000`,
 	},
 	// namespace: '/gamelobby/game',
 })
