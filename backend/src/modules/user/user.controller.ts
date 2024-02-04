@@ -81,7 +81,7 @@ export class UserController {
   @Get('search')
   @UseGuards(JwtAuthGuard)
   async search(@Res() res, @Query('searchTerm') searchTerm: string) {
-    const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(
+    const targetURL = `${URL}:3000/search?query=${encodeURIComponent(
       searchTerm
     )}`;
     return res.redirect(targetURL);
