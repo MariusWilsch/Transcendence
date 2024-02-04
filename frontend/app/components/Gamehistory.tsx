@@ -7,7 +7,7 @@ import { use, useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User, MatchHistory } from '../AppContext';
 import { FaRegMinusSquare } from 'react-icons/fa';
 import { FaRegSquarePlus } from 'react-icons/fa6';
-import { gameConfigReducer } from '../gamelobby/GlobalRedux/features';
+import computer from '@/public/static/images/computer.png';
 
 export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 	const [GameResult, setGameResult] = useState<MatchHistory[] | undefined>(
@@ -55,15 +55,31 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 											<div className="w-full p-2 flex flex-row justify-center ">
 												<div className="w-1/3 flex flex-row items-center">
 													<div className="">
-														<img
-															src={game.user1Avatar}
-															onError={(e: any) => {
-																e.target.onerror = null;
-																e.target.src =
-																	'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
-															}}
-															className="ml-2  hidden md:inline w-10 h-10  rounded-full"
-														></img>
+														{game.user1Login === 'Computer' ? (
+															<Image
+																src={computer}
+																width={100}
+																height={100}
+																alt="Computer"
+																unoptimized={true}
+																onError={(e: any) => {
+																	e.target.onerror = null;
+																	e.target.src =
+																		'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+																}}
+																className="ml-2  hidden md:inline w-10 h-10  rounded-full"
+															/>
+														) : (
+															<img
+																src={game.user1Avatar}
+																onError={(e: any) => {
+																	e.target.onerror = null;
+																	e.target.src =
+																		'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+																}}
+																className="ml-2  hidden md:inline w-10 h-10  rounded-full"
+															></img>
+														)}
 													</div>
 													<div className="text-gray-300 text-sm m-2">{game.user1Login}</div>
 												</div>
@@ -94,15 +110,31 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 												<div className="flex flex-row justify-end items-center w-1/3">
 													<div className="text-gray-200 text-sm m-2">{game.user2Login}</div>
 													<div className="">
-														<img
-															src={game.user2Avatar}
-															onError={(e: any) => {
-																e.target.onerror = null;
-																e.target.src =
-																	'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
-															}}
-															className="mr-2 hidden md:inline w-10 h-10 rounded-full"
-														></img>
+														{game.user2Login === 'Computer' ? (
+															<Image
+																src={computer}
+																width={100}
+																height={100}
+																alt="Computer"
+																unoptimized={true}
+																onError={(e: any) => {
+																	e.target.onerror = null;
+																	e.target.src =
+																		'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+																}}
+																className="ml-2  hidden md:inline w-10 h-10  rounded-full"
+															/>
+														) : (
+															<img
+																src={game.user2Avatar}
+																onError={(e: any) => {
+																	e.target.onerror = null;
+																	e.target.src =
+																		'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+																}}
+																className="mr-2 hidden md:inline w-10 h-10 rounded-full"
+															></img>
+														)}
 													</div>
 												</div>
 											</div>

@@ -42,9 +42,7 @@ export default function Home() {
 						},
 						icon: '👋',
 					});
-					return router.push(
-						`/profile/${data.intraId}`,
-					);
+					return router.push(`/profile/${data.intraId}`);
 				}
 			}
 		} catch (error: any) {}
@@ -88,33 +86,30 @@ export default function Home() {
 			username.trim().length > 20 ||
 			username.trim().length < 3 ||
 			!/^[a-zA-Z0-9_\-+]+$/.test(username)
-		  ) {
-			toast.error("Choose another username");
+		) {
+			toast.error('Choose another username');
 			return;
-		  }
-		if (
-			passwordsigne.trim().length > 20 ||
-			passwordsigne.trim().length < 3
-		  ) {
-			toast.error("Choose another password");
+		}
+		if (username === 'Computer') {
+			toast.error('Choose another login');
 			return;
-		  }
+		}
+		if (passwordsigne.trim().length > 20 || passwordsigne.trim().length < 3) {
+			toast.error('Choose another password');
+			return;
+		}
 		if (
 			usual_full_name.trim().length > 100 ||
 			usual_full_name.trim().length < 3 ||
 			!/^[a-zA-Z0-9_\-+ ]+$/.test(usual_full_name)
-		  ) {
-			toast.error("Error in full name");
+		) {
+			toast.error('Error in full name');
 			return;
-		  }
-		if (
-			email.trim().length > 100 ||
-			email.trim().length < 3
-		  ) {
-			toast.error("Error in email");
+		}
+		if (email.trim().length > 100 || email.trim().length < 3) {
+			toast.error('Error in email');
 			return;
-		  }
-
+		}
 
 		try {
 			const res = await fetch(
@@ -136,9 +131,7 @@ export default function Home() {
 
 			const data = await res.json();
 			if (data.succes === true) {
-				return router.push(
-					`/profile/${data.Id}`,
-				);
+				return router.push(`/profile/${data.Id}`);
 			} else if (data.succes === false) {
 				toast.error(data.message);
 			}
@@ -153,22 +146,18 @@ export default function Home() {
 			return toast.error('Please fill all the fields');
 		}
 
-
 		if (
 			login.trim().length > 20 ||
 			login.trim().length < 3 ||
 			!/^[a-zA-Z0-9_\-+]+$/.test(login)
-		  ) {
-			toast.error("wrong login");
+		) {
+			toast.error('wrong login');
 			return;
-		  }
-		if (
-			password.trim().length > 20 ||
-			password.trim().length < 3
-		  ) {
-			toast.error("wrong password");
+		}
+		if (password.trim().length > 20 || password.trim().length < 3) {
+			toast.error('wrong password');
 			return;
-		  }
+		}
 
 		try {
 			const res = await fetch(
@@ -190,9 +179,7 @@ export default function Home() {
 
 			if (data.succes === true) {
 				if (data.Id) {
-					return router.push(
-						`/profile/${data.Id}`,
-					);
+					return router.push(`/profile/${data.Id}`);
 				} else {
 					return router.push(`/2FA`);
 				}
