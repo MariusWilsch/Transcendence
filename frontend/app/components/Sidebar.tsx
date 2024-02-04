@@ -105,6 +105,7 @@ export const Sidebar = () => {
 				if (data) {
 					if (data.sender !== context.user?.intraId) {
 						toast.success('new message');
+						context.setMessageNum(context.messageNumb + 1);
 					}
 				}
 			});
