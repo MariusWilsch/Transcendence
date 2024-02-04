@@ -30,8 +30,6 @@ const EditMemberShip = (props: any) => {
 		mutedTime,
 		joined_at,
 	} = member;
-
-	// const []
 	const [ModeValue, setModeValue] = useState('');
 	const [muteValue, setMuteValue] = useState('');
 	const handleSubmit = () => {
