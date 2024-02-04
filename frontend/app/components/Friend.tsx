@@ -43,6 +43,9 @@ export const Friend = ({
 	>('NOTFRIENDS');
 
 	const addfriend = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/addfriend`,
@@ -75,6 +78,9 @@ export const Friend = ({
 	};
 
 	const blockFriend = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/blockfriend`,
@@ -106,6 +112,9 @@ export const Friend = ({
 	};
 
 	const removefrinship = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/removefrinship`,
@@ -139,7 +148,7 @@ export const Friend = ({
 	const [sender, setSender] = useState<boolean>(false);
 
 	const FriendshipStatus = async () => {
-		if (!userId) {
+		if (!userId || !friendId) {
 			return;
 		}
 		try {
