@@ -1,12 +1,7 @@
 // chat.gateway.ts
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect,  } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { PrismaService } from 'modules/prisma/prisma.service';
+import { Server} from 'socket.io';
 import { ChatService } from './chat.service';
-import { User } from './dto/chat.dto';
-import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
-import { UseGuards } from '@nestjs/common';
-import { channel } from 'diagnostics_channel';
 import { AuthService } from 'modules/auth/auth.service';
 
 

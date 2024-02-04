@@ -42,43 +42,47 @@ const Conversations = () => {
       }
     }, [context.socket, context.rooms]);
     return (
-      <div className=" z-40 flex flex-col h-full p-4 w-full  lg:w-1/5 xl:1/5   text-white space-y-3 rounded  border border-[#292D39]">
+      <>
+      { context.userData &&
+        <div className=" z-40 flex flex-col h-full p-4 w-full  lg:w-1/5 xl:1/5   text-white space-y-3 rounded  border border-[#292D39]">
         <FindAConversation />
         <div className='flex justify-center py-3'>
-          {selected === "channels" && <div
-            onClick={() => setSelected("messages")}
-            className='h-8  text-gray-400 rounded overflow-hidden'
-          >
-            <Toggle val={"switch to messages"} />
-          </div>}
-          {selected === "messages" && <div
-            className='h-8 text-gray-400 rounded overflow-hidden'
-            onClick={() => setSelected("channels")}
-          >
-            <Toggle val={"switch to channels"} />
-          </div>
-          }
+        {selected === "channels" && <div
+        onClick={() => setSelected("messages")}
+        className='h-8  text-gray-400 rounded overflow-hidden'
+        >
+        <Toggle val={"switch to messages"} />
+        </div>}
+        {selected === "messages" && <div
+        className='h-8 text-gray-400 rounded overflow-hidden'
+        onClick={() => setSelected("channels")}
+        >
+        <Toggle val={"switch to channels"} />
         </div>
-        {
-          selected === 'messages' &&
-          <div>
-            {aRooms?.map((room: any, index: any) => (
-              <ConversationCard
-                key={index}
-                room={room}
-              />
+      }
+      </div>
+      {
+        selected === 'messages' &&
+        <div>
+          {aRooms?.map((room: any, index: any) => (
+            <ConversationCard
+            key={index}
+            room={room}
+            />
             )
             )}
+            </div>
+          }
+          {
+            selected == 'channels' && 
+            <>
+            <ChannelCards />
+            </>
+          }
           </div>
         }
-        {
-          selected == 'channels' && 
-          <>
-          <ChannelCards />
-          </>
-        }
-      </div>
-    );
-  };
-
+        </>
+          );
+        };
+        
   export default Conversations;
