@@ -79,20 +79,17 @@ const Chat = () => {
 
   }, [context.component])
   return (
-    // <MantineProvider>
       <div className=" custom-height w-full   bg-[#12141A] ">
         <div className="flex ">
           <div className="flex-1 overflow-y-auto">
             <div className="flex custom-height">
               <Conversations />
               {context.responsive && <ConversationNotSelected />}
-              {/* <ProfileInfo></ProfileInfo> */}
             </div>
           </div>
         </div>
         <Toaster />
       </div>
-    // </MantineProvider>
   );
 };
 

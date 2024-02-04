@@ -20,6 +20,20 @@ body {
 .step{
 	color:aliceblue;
 }
+.notification-dot {
+	width: 20px;
+	height: 20px;
+	background-color: red;
+	border-radius: 50%;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 12px;
+  }
 .mantine-Modal-body {
 	background-color: rgb(75 85 99);
 }

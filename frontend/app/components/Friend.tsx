@@ -325,7 +325,7 @@ export const Friend = ({
 								}`}
 								onClick={() =>{
 
-									context.setMessageNotif(false);
+									context.setMessageNum(0);
 									context.setComponent('conversation')
 								}
 								

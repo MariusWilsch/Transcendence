@@ -104,7 +104,7 @@ export const Sidebar = () => {
 			context.socket.on('privateChat', (data: Message) => {
 				if (data) {
 					if (data.sender !== context.user?.intraId) {
-						context.setMessageNotif(true);
+						context.setMessageNum((prev)=> prev + 1);
 						toast.success('new message');
 					}
 				}
@@ -145,7 +145,7 @@ export const Sidebar = () => {
 				}
 			};
 		}
-	}, [context.socket, context.user, isConnected, context.messageNotif]);
+	}, [context.socket, context.user, isConnected, context.messageNumb]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
@@ -289,7 +289,8 @@ export const Sidebar = () => {
 												</li>
 												<li>
 													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
-														onClick={() => context.setMessageNotif(false)}
+														onClick={() => context.setMessageNum(0)}
+														className='relative'
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
@@ -302,9 +303,9 @@ export const Sidebar = () => {
 																className={`${RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
 																	} hover:text-slate-50 mx-auto m-8`}
 															/>
-															{context.messageNotif && (
-																<div className="absolute bottom-3/4 right-4 flex items-end">
-																	<FaCircleDot size="14" className="text-red-600 opacity-80 animate-ping" />
+															{context.messageNumb > 0 &&(
+																<div className="notification-dot">
+																	 {context?.messageNumb > 99 ? '99+' : context?.messageNumb }
 																</div>
 															)}
 														</motion.div>
