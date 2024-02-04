@@ -21,7 +21,6 @@ export default function RootLayout({
 	const router = useRouter();
 
 	const checkJwtCookie = async () => {
-		console.log('salam jwt cookie');
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -30,17 +29,13 @@ export default function RootLayout({
 					credentials: 'include',
 				},
 			);
-			var data: User = await response.json();
+			var data  = await response.json();
 
-			if (data !== null && data !== undefined) {
-				console.log('kayn jwt cookie');
-			} else {
-				console.log('no jwt cookie');
+			if (data.succes === false ) {
 				router.push('/');
 			}
-			console.log('wa 3alikom salam jwt cookie');
 		} catch (error: any) {
-			console.log('error jwt cookie');
+			router.push('/');
 		}
 	};
 

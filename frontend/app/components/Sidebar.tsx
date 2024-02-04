@@ -104,7 +104,6 @@ export const Sidebar = () => {
 			context.socket.on('privateChat', (data: Message) => {
 				if (data) {
 					if (data.sender !== context.user?.intraId) {
-						context.setMessageNum((prev)=> prev + 1);
 						toast.success('new message');
 					}
 				}
