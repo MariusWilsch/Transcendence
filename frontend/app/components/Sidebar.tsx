@@ -104,7 +104,6 @@ export const Sidebar = () => {
 			context.socket.on('privateChat', (data: Message) => {
 				if (data) {
 					if (data.sender !== context.user?.intraId) {
-						toast.success('new message');
 						context.setMessageNum(context.messageNumb + 1);
 					}
 				}
@@ -141,7 +140,6 @@ export const Sidebar = () => {
 			return () => {
 				if (context.socket) {
 					context.socket.off('privateMatch');
-					context.socket.off('privateChat');
 				}
 			};
 		}
