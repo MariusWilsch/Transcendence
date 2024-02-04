@@ -90,6 +90,9 @@ export class UserController {
   @Get('Gamehistory/:id')
   @UseGuards(JwtAuthGuard)
   async Gamehistory(@Param('id') id: string, @Res() res: any) {
+    if (id === undefined || id === '' || id === null) {
+      return res.json({ success: false });
+    }
     try {
       const Gamehistory = await this.userService.Gamehistory(id);
       return res.json({ success: true, Gamehistory });
@@ -102,6 +105,9 @@ export class UserController {
   @Get('Achievements/:id')
   @UseGuards(JwtAuthGuard)
   async Achievements(@Param('id') id: string, @Res() res: any) {
+    if (id === undefined || id === '' || id === null) {
+      return res.json({ success: false });
+    }
     try {
       const Achievements = await this.userService.Achievements(id);
 
@@ -114,10 +120,10 @@ export class UserController {
 
   @Get(':id')
   async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
+    if (id === undefined || id === '' || id === null) {
+      return undefined;
+    }
     try {
-      if (id === undefined || id === '' || id === null) {
-        return undefined;
-      }
       const data = await this.userService.getUserbyId(id);
       return data;
     } catch (error) {
@@ -499,7 +505,7 @@ export class UserController {
     if (friendId === undefined || friendId === '' || friendId === null) {
       return res.json({ success: false });
     }
-    
+
     try {
       const friend = await this.userService.FriendshipStatus(userId, friendId);
       return res.json({ success: true, friend });

@@ -8,7 +8,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants';
 import { UserService } from 'modules/user/user.service';
-import { JwtStrategy } from './jwt.strategy';
 import { Email2FAService } from './nodemailer/email.service';
 
 @Module({
@@ -27,7 +26,6 @@ import { Email2FAService } from './nodemailer/email.service';
     IntraStrategy,
     ConfigService,
     UserService,
-    JwtStrategy,
     Email2FAService,
     UserService,
   ],
