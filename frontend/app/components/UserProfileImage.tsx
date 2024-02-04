@@ -30,18 +30,13 @@ export const UserProfileImage = ({
 	intraId: string | undefined;
 	userFromRoutId: User | undefined;
 }) => {
-	const {
-		user,
-		isDivVisible,
-		toggleDivVisibility,
-	} = useAppContext();
+	const { user, isDivVisible, toggleDivVisibility } = useAppContext();
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const [friends, setfriends] = useState<number>(0);
 	const [Onlinefriends, setOnlinefriends] = useState<number>(0);
 	const [refreshFriends, setrefreshFriends] = useState<number>(0);
-
 
 	useEffect(() => {
 		setImagePreview(src);
@@ -53,7 +48,7 @@ export const UserProfileImage = ({
 		}
 		try {
 			const response: any = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/friends`,
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${userFromRoutId?.intraId}/friends`,
 				{
 					method: 'GET',
 					credentials: 'include',
@@ -80,7 +75,7 @@ export const UserProfileImage = ({
 		}
 		try {
 			const response: any = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${user?.intraId}/onlinefriends`,
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${userFromRoutId?.intraId}/onlinefriends`,
 				{
 					method: 'GET',
 					credentials: 'include',
@@ -155,9 +150,10 @@ export const UserProfileImage = ({
 
 	useEffect(() => {
 		const Gamehistory = async () => {
+			if (!userFromRoutId) return;
 			try {
 				const response = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}:3001/users/Gamehistory/${intraId}`,
+					`${process.env.NEXT_PUBLIC_API_URL}:3001/users/Gamehistory/${userFromRoutId.intraId}`,
 					{
 						credentials: 'include',
 					},
@@ -186,8 +182,7 @@ export const UserProfileImage = ({
 					totalGames !== 0 ? ((gameswon / totalGames) * 100).toFixed(0) : '0';
 
 				setwinpercentage(winPercentage);
-			} catch (error) {
-			}
+			} catch (error) {}
 		};
 		Gamehistory();
 	}, [intraId]);
@@ -197,8 +192,12 @@ export const UserProfileImage = ({
 	var readableDate2: string = '';
 
 	if (userFromRoutId) {
-		readableDate = new Date(userFromRoutId?.created_at).toISOString().split('T')[0];
-		readableDate1 = new Date(userFromRoutId?.updated_at).toISOString().split('T')[0];
+		readableDate = new Date(userFromRoutId?.created_at)
+			.toISOString()
+			.split('T')[0];
+		readableDate1 = new Date(userFromRoutId?.updated_at)
+			.toISOString()
+			.split('T')[0];
 		readableDate2 = new Date(userFromRoutId?.updated_at)
 			.toISOString()
 			.split('T')[1]
@@ -220,9 +219,7 @@ export const UserProfileImage = ({
 					<div
 						className={`hidden md:flex absolute md:h-80 h-48 w-full justify-center items-center`}
 					>
-						<div 
-						className="flex flex-row justify-between gap-[4%] w-[90%] h-5/6"
-						>
+						<div className="flex flex-row justify-between gap-[4%] w-[90%] h-5/6">
 							<div className="w-1/3 bg-gray-900 rounded-md backdrop-blur-sm bg-opacity-30">
 								<div className="m-3">
 									<div className="text-white "> Win percentage : </div>
@@ -267,7 +264,7 @@ export const UserProfileImage = ({
 											<div className="inline text-green-400 font-mono">
 												{Onlinefriends}&nbsp;
 											</div>
-											 online
+											online
 										</div>
 									)}
 								</div>
@@ -282,7 +279,9 @@ export const UserProfileImage = ({
 												</div>
 												<TfiFaceSmile size="22" className="inline mr-[1px]" /> :{' '}
 											</div>
-											<div className="inline text-green-400 ">{userFromRoutId?.fullname}</div>
+											<div className="inline text-green-400 ">
+												{userFromRoutId?.fullname}
+											</div>
 										</div>
 										<div className=" text-white mb-3">
 											<div className="tooltip">
