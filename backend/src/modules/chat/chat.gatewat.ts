@@ -221,7 +221,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     {
       return;
     }
-
     const friendSocket = this.getAllSocketsByUserId(payload.other);
     friendSocket.map((socket:any)=>{
       socket.emit('privateMatch', {from:client.user});

@@ -101,20 +101,13 @@ export const Sidebar = () => {
 			context.setSocket(newSocket);
 		}
 		if (context.socket && context.user) {
-			context.socket.on('privateChat', (data: Message) => {
-				if (data) {
-					if (data.sender !== context.user?.intraId) {
-						context.setMessageNum(context.messageNumb + 1);
-					}
-				}
-			});
 			context.socket.on('privateMatch', (data: any) => {
 				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
-					<div className="flex flex-row items-center bg-[#323643]">
-						<div className='font-serif text-white w-[60%]'>{msg}</div>
+					<div className="flex flex-row items-center ">
+						<div className="font-serif text-black font-semibold w-[64%]">{msg}</div>
 						<button
-							className="w-[20%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+							className="w-[18%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
 							onClick={() => {
 								toast.dismiss(t.id);
 								handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
@@ -123,7 +116,7 @@ export const Sidebar = () => {
 							<FiCheckCircle size="30" className="text-green-300" />
 						</button>
 						<button
-							className="w-[20%] border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+							className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
 							onClick={() => {
 								toast.dismiss(t.id);
 							}}
@@ -139,7 +132,23 @@ export const Sidebar = () => {
 				}
 			};
 		}
-	}, [context.socket, context.user, isConnected, context.messageNumb]);
+	}, [context.socket, context.user, isConnected]);
+	useEffect(() => {
+		if (context.socket && context.user) {
+			context.socket.on('privateChat', (data: Message) => {
+				if (data) {
+					if (data.sender !== context.user?.intraId) {
+						context.setMessageNum(context.messageNumb + 1);
+					}
+				}
+			});
+		}
+		return () => {
+			if (context.socket) {
+				context.socket.off('privateChat');
+			}
+		};
+	}, [context.messageNumb]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');
