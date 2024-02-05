@@ -40,6 +40,7 @@ export class GameService {
 			height: height,
 			antialias: true, // Enable antialiasing
 			resolution: 1, //? Should I use this
+			resizeTo: window, // Resize canvas to window
 			...options,
 			// autoDensity: true, // Should I use this/,
 		});
