@@ -59,6 +59,9 @@ const ChannelsLobby = () => {
 	};
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+      if (context.user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,

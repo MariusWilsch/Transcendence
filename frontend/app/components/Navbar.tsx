@@ -54,6 +54,9 @@ export const Navbar = () => {
 	const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -62,7 +65,7 @@ export const Navbar = () => {
 						credentials: 'include',
 					},
 				);
-				
+
 				var data = await response.json();
 				if (data.succes === false) {
 					return;
