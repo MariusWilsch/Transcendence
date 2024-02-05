@@ -22,33 +22,27 @@ export default function Home() {
 		context.socket?.on('privateMatch', (data: any) => {
 			const msg = 'invitation from ' + data.from.login + ' for a game';
 			toast((t) => (
-				<div className="flex flex-row rounded-lg bg-slate-500 bg-opacity-80">
-					<div className='w-[60%]'> {msg} </div>
+				<div className="flex flex-row items-center ">
+					<div className="font-serif text-black font-semibold w-[64%]">{msg}</div>
 					<button
-						className="w-[20%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+						className="w-[18%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
 						onClick={() => {
-							console.log('accept handler');
 							toast.dismiss(t.id);
-							if (context.user)
-							{
-								handleInvite(context.user.intraId, isConnected, Invite.ACCEPTING);
-							}
+							handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
 						}}
 					>
 						<FiCheckCircle size="30" className="text-green-300" />
 					</button>
 					<button
-						className="w-[20%] border border-transparent rounded-none rounded-r-lg p-3 flex items-center justify-center text-sm font-medium"
+						className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
 						onClick={() => {
 							toast.dismiss(t.id);
-							console.log('dismiss handler');
 						}}
 					>
 						<FiXCircle size="30" className="text-red-300" />
 					</button>
 				</div>
 			));
-			console.log('the private chat event has been occured');
 		});
 		return () => {
 			toast.dismiss();
