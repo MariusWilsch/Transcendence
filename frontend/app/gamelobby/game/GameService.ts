@@ -40,9 +40,8 @@ export class GameService {
 			height: height,
 			antialias: true, // Enable antialiasing
 			resolution: 1, //? Should I use this
-			resizeTo: window, // Resize canvas to window
+			// resizeTo: container,
 			...options,
-			// autoDensity: true, // Should I use this/,
 		});
 		container.appendChild(this.app.view as HTMLCanvasElement);
 		mapChoice === mapType.STANDARD ? this.drawMap1() : this.drawMap2(height);
@@ -52,6 +51,12 @@ export class GameService {
 	}
 
 	//* Private methods
+
+	public resize = (parent: HTMLDivElement) => {
+		// Example resize logic (you might need to adjust this based on your exact needs)
+		console.log(parent.clientWidth, parent.clientHeight);
+		this.app.renderer.resize(parent.clientWidth, parent.clientHeight);
+	};
 
 	private drawMap1() {
 		const graphics = new PIXI.Graphics();

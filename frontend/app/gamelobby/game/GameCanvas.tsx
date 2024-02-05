@@ -11,9 +11,6 @@ import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { Direction } from '@/interfaces';
 import { handleKeyDown, handleKeyUp, handleMouseMove } from './interaction';
 import { disconnect } from '@/app/gamelobby/GlobalRedux/features';
-import { useAppContext } from '@/app/AppContext';
-import { usePathname } from 'next/navigation';
-import path from 'path';
 
 export const GameCanvas: React.FC = () => {
 	//* Refs
@@ -37,12 +34,20 @@ export const GameCanvas: React.FC = () => {
 			handleKeyDown(dispatch, curDir, e);
 		const keyUpHandler = (e: KeyboardEvent) => handleKeyUp(dispatch, curDir, e);
 
+		const resizeHandler = () => {
+			// serviceRef.current?.resize(canvasRef.current as HTMLDivElement);
+		};
+
+		//* Add event listeners based on input type
+
 		if (inputType === InputType.MOUSE) {
 			canvasRef.current?.addEventListener('mousemove', mouseMoveHandler);
 		} else if (inputType === InputType.KEYBOARD) {
 			window.addEventListener('keydown', keyDownHandler);
 			window.addEventListener('keyup', keyUpHandler);
 		}
+
+		window.addEventListener('resize', resizeHandler);
 
 		return () => {
 			if (inputType === InputType.MOUSE) {
@@ -51,6 +56,7 @@ export const GameCanvas: React.FC = () => {
 				window.removeEventListener('keydown', keyDownHandler);
 				window.removeEventListener('keyup', keyUpHandler);
 			}
+			window.removeEventListener('resize', resizeHandler);
 		};
 	}, [inputType, canvasRef, dispatch]);
 
@@ -61,8 +67,8 @@ export const GameCanvas: React.FC = () => {
 
 			serviceRef.current = new GameService(
 				canvasRef.current as HTMLDivElement,
-				gameState.canvasWidth,
-				gameState.canvasHeight,
+				canvasRef.current?.offsetWidth as number,
+				canvasRef.current?.offsetHeight as number,
 				mapChoice,
 			);
 			serviceRef.current.initGameElements(gameState.ball, gameState.paddles);
@@ -75,7 +81,7 @@ export const GameCanvas: React.FC = () => {
 	}, [gameState, mapChoice, isConnected]);
 
 	useEffect(() => {
-		const handleBackButton = (event: any) => {
+		const handleBackButton = () => {
 			// Custom logic here
 			console.log('Back button pressed');
 			dispatch(disconnect());
@@ -98,7 +104,7 @@ export const GameCanvas: React.FC = () => {
 					'No game state updates received for 1 second, resetting isGameStarted',
 				);
 				dispatch(gameFinished());
-			}, 1000); // 1 second
+			}, 1000);
 		}
 
 		return () => clearTimeout(timer);
@@ -106,7 +112,7 @@ export const GameCanvas: React.FC = () => {
 
 	return (
 		<div
-			className={`z-10 border white rounded-lg ${
+			className={`z-10  border white rounded-lg ${
 				mapChoice === mapType.STANDARD ? 'px-8' : ''
 			}`}
 		>

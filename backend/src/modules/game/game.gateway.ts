@@ -18,9 +18,14 @@ import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
 import { UserService } from 'modules/user/user.service';
 
+// @WebSocketGateway({
+// 	cors: {
+// 		origin: `${URL}:3000`,
+// 	},
+// })
 @WebSocketGateway({
 	cors: {
-		origin: `${URL}:3000`,
+		origin: 'http://localhost:3000',
 	},
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -39,9 +44,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected via ${client.id}`);
 		//* If the client is not authenticated, disconnect him
 		if (!client.handshake.auth.token) return client.disconnect(true);
+		this.checkForDuplicateUsers(client);
+	}
 
-		const user = this.authService.getUserFromJwt(client.handshake.auth.token);
-
+	async checkForDuplicateUsers(client: IO) {
+		const user = await this.authService.getUserFromJwt(
+			client.handshake.auth.token
+		);
+		if (this.duplicateUsers.has(user.intraId)) {
+			console.log('Duplicate user detected');
+			client.emit('duplicateRequest');
+			client.disconnect(true);
+		}
+		this.duplicateUsers.add(user.intraId);
 		client.data = {
 			user: {
 				intraId: user.intraId,
@@ -49,27 +64,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				login: user.login,
 			},
 		};
-		//* If the user is already connected, disconnect him
-		if (this.duplicateUsers.has(client.data.user.intraId)) {
-			console.log('Duplicate user detected');
-			client.emit('duplicateRequest');
-			client.disconnect(true);
-		}
-		this.duplicateUsers.add(client.data.user.intraId);
+		client.emit('connectionSuccess');
 	}
 
-	async handleDisconnect(client: IO) {
+	handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
-		const roomID = client.data.roomID;
-		if (this.gameService.hasRoom(roomID))
-			this.gameService.deleteGameSession(client.id, roomID);
-		if (this.gameService.isInGame(roomID)) {
-			console.log('Client was in a running game, clearing interval');
-			clearInterval(this.gameService.getIntervalID(roomID));
-		}
-		this.duplicateUsers.delete(client.data.user.intraId);
+		if (this.gameService.hasRoom(client.data.roomID))
+			this.gameService.deleteGameSession(client.id, client.data.roomID);
+		if (this.gameService.isInGame(client.data.roomID))
+			clearInterval(this.gameService.getIntervalID(client.data.roomID));
+		if (client.data.user) this.duplicateUsers.delete(client.data.user.intraId);
 	}
 
 	checkForAvailablePlayers() {
@@ -80,7 +86,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.createGame(player1, player2);
 	}
 
-	async createGame(player1: IO, player2: IO) {
+	createGame(player1: IO, player2: IO) {
 		// Generate a room ID
 		const roomID = uuidv4();
 
@@ -120,9 +126,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const gameSession = this.gameService.getSession(roomID);
 			if (!gameSession) return;
 
-			// if (deltaTime > 0.02) {
-			// 	console.log(`High Delta Time Detected: ${deltaTime}`);
-			// }
+			if (deltaTime > 0.02) {
+				console.log(`High Delta Time Detected: ${deltaTime}`);
+			}
 
 			// const startUpdateTime = performance.now();
 			this.gameService.updateGameState(gameSession, deltaTime);
@@ -174,6 +180,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.Server.to(roomID).emit('gameState', gameState);
 	}
 
+	@SubscribeMessage('addToLobby')
+	handleAddToLobby(client: IO): void {
+		this.lobby.push(client);
+		console.log(
+			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
+		);
+		this.checkForAvailablePlayers();
+	}
+
 	@SubscribeMessage('onPaddleMove')
 	handlePaddleMove(client: IO, payload: PlayerMove): void {
 		const gameSession: GameSession = this.gameService.getSession(
@@ -214,7 +229,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		if (this.gameService.areCommandsSet(client.data.roomID))
+		if (!this.gameService.areCommandsSet(client.data.roomID))
 			client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
 		this.beginGameLoop(client.data.roomID);
@@ -247,14 +262,5 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log('Match found --> calling `createGame function`');
 		this.createGame(client, this.privateLobby.get(payload.inviteeID));
 		this.privateLobby.delete(payload.inviteeID);
-	}
-
-	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO): void {
-		this.lobby.push(client);
-		console.log(
-			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
-		);
-		this.checkForAvailablePlayers();
 	}
 }

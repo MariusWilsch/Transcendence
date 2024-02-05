@@ -487,6 +487,8 @@ export class GameService {
 
 	public areCommandsSet(roomID: string): boolean {
 		const gameSession = this.gameSessions.get(roomID);
+		console.log(gameSession.command);
+		return true;
 		// Check if the game session exists and both commands are valid (not undefined, null, etc.)
 		return (
 			gameSession.command.length === 2 &&
