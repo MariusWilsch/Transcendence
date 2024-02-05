@@ -153,9 +153,15 @@ export async function searchMember(query:string, channelId:string) {
       {
         return undefined;
       }
-      const user = res.json();
-      return user;
-    }
+      var data = await res.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+          return data.data;
+				}
+        return;
+      }
     catch(e){
       console.log(e);
     }
@@ -171,8 +177,14 @@ export async function searchMember(query:string, channelId:string) {
       if (!res.ok){
         return undefined;
       }
-      const user = res.json();
-      return user;
+      var data = await res.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+          return data.data;
+				}
+        return;
     }
     catch(e){
       console.log(e);

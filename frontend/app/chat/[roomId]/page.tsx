@@ -107,6 +107,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   }
   useEffect(() => {
     fetchDataAndSetupSocket();
+    context.setMessageNum(0);
     if (context.socket && permission) {
       fetchData();
       context.socket.on('privateChat', (message: any) => {

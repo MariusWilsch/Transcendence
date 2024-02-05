@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { User, useAppContext } from '../AppContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getUser } from '../utiles/utiles';
 
 const ConversationCard = ({ room }: any) => {
 	const [user, setUser] = useState<User | undefined>();
@@ -11,16 +12,20 @@ const ConversationCard = ({ room }: any) => {
 	useEffect(() => {
 		const fetchUser = async () => {
 			try {
-				const response3 = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${room.participantsIds[0]}`,
-					{
-						method: 'GET',
-						credentials: 'include',
-					},
-				);
-				const recp: User | undefined = await response3.json();
-				if (recp === undefined) {
-					setLoading(false);
+				// const response3 = await fetch(
+				// 	`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${room.participantsIds[0]}`,
+				// 	{
+				// 		method: 'GET',
+				// 		credentials: 'include',
+				// 	},
+				// );
+				// const recp: User | undefined = await response3.json();
+				// if (recp === undefined) {
+				// 	setLoading(false);
+				// 	return;
+				// }
+				const recp = await getUser(room.participantsIds[0]);
+				if (recp === undefined || !recp){
 					return;
 				}
 				setUser(recp);
