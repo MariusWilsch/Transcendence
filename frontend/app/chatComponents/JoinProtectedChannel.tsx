@@ -78,7 +78,10 @@ async function joinChannel(channelId: string, type: string, password: string, us
         }
         {
           selectedChannel.type !== "PROTECTED" &&
-          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${selectedChannel.id}`}><button className="p-2 text-blue-700 font-bold" onClick={() => handleSubmit("default")}>JOIN</button></Link>
+          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${selectedChannel.id}`}>
+            <button className="p-2 text-blue-700 font-bold hover:scale-110" onClick={() => handleSubmit("default")}>
+              JOIN
+            </button></Link>
         }
       </>
     );

@@ -134,21 +134,22 @@ export const Sidebar = () => {
 		}
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
-		if (context.socket && context.user) {
-			context.socket.on('privateChat', (data: Message) => {
-				if (data) {
-					if (data.sender !== context.user?.intraId) {
-						context.setMessageNum(context.messageNumb + 1);
-					}
-				}
-			});
-		}
-		return () => {
-			if (context.socket) {
-				context.socket.off('privateChat');
+		if (context.socket) {
+		  context.socket.on('privateChat', (data: Message) => {
+			if (data && data.sender !== context.user?.intraId) {
+			//   context.setMessageNum((prevMessageNum) => prevMessageNum + 1);
 			}
+		  });
+		}
+	  
+		return () => {
+		  if (context.socket) {
+			context.socket.off('privateChat');
+		  }
 		};
-	}, [context.messageNumb]);
+	  }, [context.socket]);  
+	  
+	  
 
 	useEffect(() => {
 		const segments = pathname.split('/');

@@ -103,6 +103,13 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
+  @Get('channels/:id/availChan')
+  @UseGuards(JwtAuthGuard)
+  async getSearchedChannels(@Param('id') id: string,@Res() res:any, @Query('q') query: string): Promise<Channel | undefined>{
+    const data = await this.chatService.getSerachedChan(query, id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
   @Get('invitesChannels/:id')
   @UseGuards(JwtAuthGuard)
   async getIviteChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
@@ -198,10 +205,10 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async updateInviteStatus(@Param('id') intraId:string ,
   @Param('name') channelName:string ,
-  @Body() payload:{status:boolean},
+  @Body() payload:{status:string},
   @Res() res:any){
     try{
-      await this.chatService.updateInvite(intraId, channelName, payload.status);
+      await this.chatService.updateInvite(intraId, channelName, payload.status==='true'?true:false);
       res.json({sucess:true});
     }
     catch(e){
@@ -209,13 +216,6 @@ export class ChatController {
       res.json({sucess:false, e});
     }
   }
-  // async joinChannel(payload:{channelId:string, type:string,password:string}){
-  //   try{
-  //     await this.chatService.joinChannel(payload.channelId, payload.type, payload.password);
-  //   }
-  //   catch(e){
-  //   }
-  // }
   @Post('joinChannel/:id/:name')
   @UseGuards(JwtAuthGuard)
   async joinChannel(@Param('id') intraId:string ,
@@ -239,7 +239,7 @@ export class ChatController {
   @Res() res:any){
     try{
       await this.chatService.inviteChannel(intraId,payload.invitedId, channelName);
-      res.json({sucess:true});
+      res.json({sucess:true, error:'invitation sent'});
     }
     catch(e){
       console.log(e);
@@ -273,10 +273,5 @@ export class ChatController {
       return [];
     }
   }
-  // @Post('private-message')
-  // @UseGuards(JwtAuthGuard)
-  // async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
-  //   const { sender, recipient, message } = data;
-  //   await this.chatService.sendPrivateMessage(sender, recipient, message);
-  // }
+
 }
