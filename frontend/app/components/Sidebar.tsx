@@ -40,7 +40,7 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-	const createSocket = () => { };
+	const createSocket = () => {};
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -111,29 +111,25 @@ export const Sidebar = () => {
 			context.socket.on('privateMatch', (data: any) => {
 				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
-					<div className="flex flex-row">
-						<div>
-							<p> {msg} </p>
-						</div>
-						<div className="flex flex-1">
-							<button
-								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-								onClick={() => {
-									toast.dismiss(t.id);
-									handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
-								}}
-							>
-								<FiCheckCircle size="30" className="text-green-300" />
-							</button>
-							<button
-								className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-								onClick={() => {
-									toast.dismiss(t.id);
-								}}
-							>
-								<FiXCircle size="30" className="text-red-300" />
-							</button>
-						</div>
+					<div className="flex flex-row items-center bg-[#323643]">
+						<div className='font-serif text-white w-[60%]'>{msg}</div>
+						<button
+							className="w-[20%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+							onClick={() => {
+								toast.dismiss(t.id);
+								handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
+							}}
+						>
+							<FiCheckCircle size="30" className="text-green-300" />
+						</button>
+						<button
+							className="w-[20%] border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
+							onClick={() => {
+								toast.dismiss(t.id);
+							}}
+						>
+							<FiXCircle size="30" className="text-red-300" />
+						</button>
 					</div>
 				));
 			});
@@ -152,6 +148,9 @@ export const Sidebar = () => {
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (context.user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -179,10 +178,11 @@ export const Sidebar = () => {
 	return (
 		<div>
 			{context.isSidebarVisible && (
-				<div className="z-50 w-16 custom-height ">
+				<div className="z-50 w-16 custom-height bg-[#292D39]">
 					<div
-						className={`transition-all duration-500 ease-in-out ${context.isSidebarVisible ? 'w-16 opacity-100' : 'w-0 opacity-0'
-							}`}
+						className={`transition-all duration-500 ease-in-out ${
+							context.isSidebarVisible ? 'w-16 opacity-100' : 'w-0 opacity-0'
+						}`}
 					>
 						<div className="relative custom-height bg-[#292D39] ">
 							<div className="absolute buttom-0 left-0 bg-[#292D39]">
@@ -190,10 +190,11 @@ export const Sidebar = () => {
 									<ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
 										<div className="flex flex-col justify-between custom-height bg-[#292D39]">
 											<div
-												className={`${context.user === null
+												className={`${
+													context.user === null
 														? 'pointer-events-none'
 														: 'pointer-events-auto'
-													}
+												}
                     `}
 											>
 												<li className="">
@@ -206,8 +207,9 @@ export const Sidebar = () => {
 														>
 															<CgProfile
 																size="30"
-																className={`${RouterName === 'profile' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8
+																className={`${
+																	RouterName === 'profile' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8
                         `}
 															/>
 														</motion.div>
@@ -223,8 +225,9 @@ export const Sidebar = () => {
 														<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/notif`}>
 															<IoMdNotificationsOutline
 																size="30"
-																className={`${RouterName === 'notif' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																className={`${
+																	RouterName === 'notif' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
 															{context.notif && (
 																<div className="absolute top-0 right-4 flex items-end">
@@ -247,10 +250,11 @@ export const Sidebar = () => {
 														<Link href={`/leaderboard`}>
 															<MdLeaderboard
 																size="30"
-																className={`${RouterName === 'leaderboard'
+																className={`${
+																	RouterName === 'leaderboard'
 																		? 'text-slate-50'
 																		: 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</Link>
 													</motion.div>
@@ -265,8 +269,9 @@ export const Sidebar = () => {
 														>
 															<FaUserFriends
 																size="30"
-																className={`${RouterName === 'friends' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																className={`${
+																	RouterName === 'friends' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
@@ -281,16 +286,18 @@ export const Sidebar = () => {
 														>
 															<GrGroup
 																size="30"
-																className={`${RouterName === 'channels' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																className={`${
+																	RouterName === 'channels' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>
 												</li>
 												<li>
-													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
+													<Link
+														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
 														onClick={() => context.setMessageNum(0)}
-														className='relative'
+														className="relative"
 													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
@@ -300,12 +307,13 @@ export const Sidebar = () => {
 														>
 															<IoChatbubblesOutline
 																size="30"
-																className={`${RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																className={`${
+																	RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
-															{context.messageNumb > 0 &&(
+															{context.messageNumb > 0 && (
 																<div className="notification-dot">
-																	 {context?.messageNumb > 99 ? '99+' : context?.messageNumb }
+																	{context?.messageNumb > 99 ? '99+' : context?.messageNumb}
 																</div>
 															)}
 														</motion.div>
@@ -321,8 +329,9 @@ export const Sidebar = () => {
 														>
 															<RiPingPongLine
 																size="30"
-																className={`${RouterName === 'play' ? 'text-slate-50' : 'text-slate-500'
-																	} hover:text-slate-50 mx-auto m-8`}
+																className={`${
+																	RouterName === 'play' ? 'text-slate-50' : 'text-slate-500'
+																} hover:text-slate-50 mx-auto m-8`}
 															/>
 														</motion.div>
 													</Link>

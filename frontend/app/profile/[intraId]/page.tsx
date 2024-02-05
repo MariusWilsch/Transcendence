@@ -53,6 +53,9 @@ export default function Profile(params: any) {
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,

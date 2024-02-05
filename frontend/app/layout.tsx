@@ -2,7 +2,7 @@
 
 import './globals.css';
 import '@mantine/core/styles.css';
-import { AppProvider, User } from './AppContext';
+import { AppProvider, User, useAppContext } from './AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -17,7 +17,6 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
-
 	const router = useRouter();
 
 	const checkJwtCookie = async () => {
@@ -29,10 +28,12 @@ export default function RootLayout({
 					credentials: 'include',
 				},
 			);
-			var data  = await response.json();
+			var data = await response.json();
 
-			if (data.succes === false ) {
+			if (data.succes === false) {
 				router.push('/');
+			}
+			if (data.data !== null && data.data !== undefined) {
 			}
 		} catch (error: any) {
 			router.push('/');

@@ -8,18 +8,18 @@ import { FiXCircle } from 'react-icons/fi';
 
 export default function Search() {
 	const context = useAppContext();
-
 	const [friends, setFriends] = useState<User[] | null>(null);
-	const {
-		setisSidebarVisible,
-	} = useAppContext();
+
 
 	useEffect(() => {
-		setisSidebarVisible(window.innerWidth > 768);
+		context.setisSidebarVisible(window.innerWidth > 768);
 	}, []);
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (context.user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,

@@ -19,14 +19,14 @@ export default function Friends() {
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
 					{
 						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-						},
 						credentials: 'include',
 					},
 				);
