@@ -485,6 +485,16 @@ export class GameService {
 		return this.gameSessions.has(roomID);
 	}
 
+	public areCommandsSet(roomID: string): boolean {
+		const gameSession = this.gameSessions.get(roomID);
+		// Check if the game session exists and both commands are valid (not undefined, null, etc.)
+		return (
+			gameSession.command.length === 2 &&
+			gameSession.command[0] !== undefined &&
+			gameSession.command[1] !== undefined
+		);
+	}
+
 	/**
 	 * The function checks if the ball is close to the paddle based on its position and proximity
 	 * threshold.

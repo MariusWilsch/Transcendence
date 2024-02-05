@@ -16,23 +16,18 @@ import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
-import { PrismaClient } from '@prisma/client';
-import { URL } from '../auth/constants'
-
-const prisma = new PrismaClient();
-
+import { UserService } from 'modules/user/user.service';
 
 @WebSocketGateway({
 	cors: {
 		origin: `${URL}:3000`,
 	},
-
-	// namespace: '/gamelobby/game',
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
-		private authService: AuthService
+		private authService: AuthService,
+		private userService: UserService
 	) {}
 
 	@WebSocketServer() Server: Server;
@@ -42,11 +37,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleConnection(client: IO) {
 		console.log(`Client connected via ${client.id}`);
-		if (!client.handshake.auth.token) return;
-		const id = this.authService.getUserFromJwt(
-			client.handshake.auth.token
-		).intraId;
-		if (this.duplicateUsers.has(id)) {
+		//* If the client is not authenticated, disconnect him
+		if (!client.handshake.auth.token) return client.disconnect(true);
+
+		const user = this.authService.getUserFromJwt(client.handshake.auth.token);
+
+		client.data = {
+			user: {
+				intraId: user.intraId,
+				Avatar: user.Avatar,
+				login: user.login,
+			},
+		};
+		//* If the user is already connected, disconnect him
+		if (this.duplicateUsers.has(client.data.user.intraId)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
 			client.disconnect(true);
@@ -210,15 +214,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		if (!this.gameService.isInGame(client.data.roomID)) {
-			this.beginGameLoop(client.data.roomID);
-		}
-		
-		
+		if (this.gameService.areCommandsSet(client.data.roomID))
+			client.disconnect(true); //! should send disconnect message to client
+		if (this.gameService.isInGame(client.data.roomID)) return;
+		this.beginGameLoop(client.data.roomID);
+		this.userService.updateUserState(client.data.user.intraId, 'INGAME');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')
-	handleCancelMatchmaking(client: IO): void {
+	handleCancelMatchmaking(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(
 			`Client ${client.id} removed from matchmaking. New lobby size: ${this.lobby.length}`
@@ -246,7 +250,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO, payload: any): void {
+	handleAddToLobby(client: IO): void {
 		this.lobby.push(client);
 		console.log(
 			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
