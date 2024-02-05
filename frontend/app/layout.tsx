@@ -1,32 +1,53 @@
 'use client';
 
-import { Inter } from 'next/font/google';
 import './globals.css';
-import { AppProvider, User } from './AppContext';
+import '@mantine/core/styles.css';
+import { AppProvider, User, useAppContext } from './AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
-import '@mantine/core/styles.css';
-import { MantineProvider } from '@mantine/core';
-import { Provider } from 'react-redux';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
-
-const inter = Inter({ subsets: ['latin'] });
+import { MantineProvider } from '@mantine/core';
 
 export default function RootLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const [user, setUser] = useState<User | null>(null);
 	const pathname = usePathname();
+	const router = useRouter();
+
+	const checkJwtCookie = async () => {
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+				{
+					method: 'GET',
+					credentials: 'include',
+				},
+			);
+			var data = await response.json();
+
+			if (data.succes === false) {
+				router.push('/');
+			}
+			if (data.data !== null && data.data !== undefined) {
+			}
+		} catch (error: any) {
+			router.push('/');
+		}
+	};
+
+	useEffect(() => {
+		checkJwtCookie();
+	}, [pathname]);
 
 	return (
 		<html lang="en">
-			{pathname === '/' ? (
-				<body className={inter.className}>
+			{pathname === '/' || pathname === '/2FA' ? (
+				<body>
 					<Providers>
 						<AppProvider>
 							<MantineProvider>
@@ -42,11 +63,12 @@ export default function RootLayout({
 					</Providers>
 				</body>
 			) : (
-				<body className={inter.className}>
+				<body>
 					<Providers>
-						<MantineProvider>
-							<AppProvider>
+						<AppProvider>
+							<MantineProvider>
 								<motion.div
+									className="overflow-y-scroll no-scrollbar"
 									initial={{ opacity: 0, y: -100 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ delay: 0.3 }}
@@ -63,8 +85,8 @@ export default function RootLayout({
 										</div>
 									</AnimatePresence>
 								</motion.div>
-							</AppProvider>
-						</MantineProvider>
+							</MantineProvider>
+						</AppProvider>
 					</Providers>
 				</body>
 			)}

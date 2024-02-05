@@ -5,6 +5,7 @@ import { JWT_SECRET } from './constants';
 import { Email2FAService } from './nodemailer/email.service';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UserService } from 'modules/user/user.service';
 // import { User } from '@prisma/client';
 
 type User = {
@@ -26,7 +27,8 @@ const prisma = new PrismaClient();
 export class AuthService {
 	constructor(
 		private Email2FAService: Email2FAService,
-		private jwtService: JwtService
+		private jwtService: JwtService,
+		private userService: UserService,
 	) {}
 
 	getUser(user: authDto): User {
@@ -72,7 +74,7 @@ export class AuthService {
 		}
 	}
 
-	getUserFromJwt(jwt: any): User | undefined {
+	async getUserFromJwt(jwt: any): Promise<any | undefined> {
 		if (!jwt) {
 			return undefined;
 		}
@@ -83,8 +85,27 @@ export class AuthService {
 			});
 
 			const user = payload.userWithoutDate;
+			const userIntraId = user.intraId;
+			const user1 = await this.userService.getUserbyId(userIntraId);
 
-			// console.log('payload: ', payload);
+			return user1;
+		} catch (error) {
+			console.error('JWT Verification Error:', error);
+			return undefined;
+		}
+	}
+
+	getUserFromJwtstatic(jwt: any): User | undefined {
+		if (!jwt) {
+			return undefined;
+		}
+
+		try {
+			const payload = this.jwtService.verify(jwt, {
+				secret: JWT_SECRET,
+			});
+
+			const user = payload.userWithoutDate;
 			return user;
 		} catch (error) {
 			console.error('JWT Verification Error:', error);

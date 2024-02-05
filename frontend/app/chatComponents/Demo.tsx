@@ -23,11 +23,12 @@ async function creatChannel(Channelname: string, type: string, password: string,
         }),
       }
     );
+    const res = await response.json();
     if (response.ok) {
-      toast.success('channel created successfuly')
+      res.sucess ? toast.success('channel created successfuly') : toast.error(res.error);
     }
     else {
-      const msg = 'Error: ' + response;
+      const msg = 'Error: ' + res.error;
       toast.error(msg);
     }
   }
@@ -79,7 +80,7 @@ const Demo = () => {
       <div className="pt-2" >
         <div className="mb-4">
           <label className="block text-white  mb-2">
-            Channel Name
+            Channel name
           </label>
           <input
             type="text"
@@ -126,13 +127,13 @@ const Demo = () => {
             />
           </div>
         }
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-center p-3">
           <button
             onClick={(e) => {
 
               createAChannel(e);
             }}
-            className="bg-slate-700 hover:bg-slate-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-slate-700 mt-2 hover:bg-slate-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
             Create Channel
           </button>

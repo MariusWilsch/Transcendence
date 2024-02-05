@@ -1,10 +1,9 @@
 // chat.controller.ts
 import { Controller, Post, Body, Get, Res,Param, UseGuards, Query, Req } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { Room , User, Message, Channel } from './dto/chat.dto';
+import { Room , Channel } from './dto/chat.dto';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { AuthService } from 'modules/auth/auth.service';
-import { Console } from 'console';
 
 @Controller('chat')
 export class ChatController {
@@ -34,7 +33,6 @@ export class ChatController {
   async getAllRooms(@Res() res:any): Promise<Room | undefined>{
     const data = await this.chatService.getAllPrivateRooms();
     res.json(data);
-    console.log(data);
     return data;
   }
   @Get(':id/privateRooms')
@@ -60,9 +58,9 @@ export class ChatController {
   }
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
-  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number=1, @Query('pageSize') pageSize:number=20) :Promise<void>{
+  async getRoomMessages(@Param('id') id: string, @Res() res:any,@Query('page') page:number, @Query('pageSize') pageSize:number=30) :Promise<void>{
     try{
-      const skip = (page - 1 ) * pageSize;
+      const skip = page * pageSize;
       const data = await this.chatService.getPrivateRoomMessages(id, pageSize, skip);
       res.json(data);
       return data;
@@ -105,6 +103,13 @@ export class ChatController {
     const dataBeta = res.json(data);
     return dataBeta;
   }
+  @Get('channels/:id/availChan')
+  @UseGuards(JwtAuthGuard)
+  async getSearchedChannels(@Param('id') id: string,@Res() res:any, @Query('q') query: string): Promise<Channel | undefined>{
+    const data = await this.chatService.getSerachedChan(query, id);
+    const dataBeta = res.json(data);
+    return dataBeta;
+  }
   @Get('invitesChannels/:id')
   @UseGuards(JwtAuthGuard)
   async getIviteChannel(@Param('id') id: string,@Res() res:any): Promise<Channel | undefined>{
@@ -133,7 +138,6 @@ export class ChatController {
       const user = this.authService.getUserFromCookie(cookie) ;
       let data = await this.chatService.getChannelMessages(id);
       let blockedUsers = await this.chatService.getBlockedUser(user.intraId);
-      console.log(data);
       data = data.filter((item: any) => {
         return !blockedUsers.some((entry) => {
           if (entry.userId === user.intraId) {
@@ -144,7 +148,6 @@ export class ChatController {
           return false; // Make sure to have a default return value
         });
       });
-      // console.log(data);
       const dataBeta = res.json(data);
       return dataBeta;
     }
@@ -181,7 +184,7 @@ export class ChatController {
     }
     catch(e){
       console.log(e);
-      res.json({e});
+      res.json({sucess:false,error:e});
     }
   }
   @Post('leaveChannel/:id/:name')
@@ -202,10 +205,10 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async updateInviteStatus(@Param('id') intraId:string ,
   @Param('name') channelName:string ,
-  @Body() payload:{status:boolean},
+  @Body() payload:{status:string},
   @Res() res:any){
     try{
-      await this.chatService.updateInvite(intraId, channelName, payload.status);
+      await this.chatService.updateInvite(intraId, channelName, payload.status==='true'?true:false);
       res.json({sucess:true});
     }
     catch(e){
@@ -213,13 +216,6 @@ export class ChatController {
       res.json({sucess:false, e});
     }
   }
-  // async joinChannel(payload:{channelId:string, type:string,password:string}){
-  //   try{
-  //     await this.chatService.joinChannel(payload.channelId, payload.type, payload.password);
-  //   }
-  //   catch(e){
-  //   }
-  // }
   @Post('joinChannel/:id/:name')
   @UseGuards(JwtAuthGuard)
   async joinChannel(@Param('id') intraId:string ,
@@ -228,7 +224,7 @@ export class ChatController {
   @Res() res:any){
     try{
       await this.chatService.joinChannel(intraId, payload.channelId, payload.type, payload.password);
-      res.json({sucess:true});
+      res.json({success:true,error:"Invitation sent"});
     }
     catch(e){
       console.log(e);
@@ -243,7 +239,7 @@ export class ChatController {
   @Res() res:any){
     try{
       await this.chatService.inviteChannel(intraId,payload.invitedId, channelName);
-      res.json({sucess:true});
+      res.json({sucess:true, error:'invitation sent'});
     }
     catch(e){
       console.log(e);
@@ -265,11 +261,17 @@ export class ChatController {
       res.json({sucess:false,e});
     }
   }
-
-  @Post('private-message')
+  @Get('channelsRoom/:userId')
   @UseGuards(JwtAuthGuard)
-  async sendPrivateMessage(@Body() data: { sender: string; recipient: string; message: string }): Promise<void> {
-    const { sender, recipient, message } = data;
-    await this.chatService.sendPrivateMessage(sender, recipient, message);
+  async getUserActiveChannels(@Param('userId') intraId:string){
+    try{
+
+      const data = await this.chatService.getUserActiveChannels(intraId);
+      return data;
+    }
+    catch(e){
+      return [];
+    }
   }
+
 }

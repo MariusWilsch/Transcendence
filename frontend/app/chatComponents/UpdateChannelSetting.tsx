@@ -10,10 +10,10 @@ import ChannelAvatar from "./ChannelAvatar";
 import { FaRegEdit } from "react-icons/fa";
 
 
-async function updateChannel(Channelname: string,newName:string, type: string, password: string, owner: User) {
+async function updateChannel(channelId:string,Channelname: string,newName:string, type: string, password: string, owner: User) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/updateChannel/${owner.intraId}/${Channelname}`,
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/updateChannel/${owner.intraId}/${channelId}`,
       {
         method: "POST",
         headers: {
@@ -67,7 +67,7 @@ const UpdateChannelSetting = (props:any) => {
         return;
       }
       if (context.channel)
-      updateChannel(context.channel.name,channelName===context.channel.name? '':channelName
+      updateChannel(context.channel.id, context.channel.name,channelName===context.channel.name? '':channelName
                 , !channelType ? context.channel.type:channelType, password
                 , context.userData);
       handleSubmit(e);
@@ -142,7 +142,7 @@ const UpdateChannelSetting = (props:any) => {
             />
           </div>
         }
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-center p-3">
           <button
             onClick={(e) => {
 

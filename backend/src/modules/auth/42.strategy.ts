@@ -26,7 +26,6 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     super({
       clientID: clientIDD,
       clientSecret: clientSecrett,
-      // callbackURL: `${URL}:3001/auth/42/callback`,
       callbackURL:
         configService.get('REDIRECT_URI') ||
         `${URL}:3001/auth/42/callback`,
@@ -37,7 +36,7 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         intraId: 'id',
         avatar: 'image.link',
       },
-    }); // Config
+    });
   }
 
   async validate(
@@ -47,11 +46,6 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
     done: Function
   ): Promise<any> {
     try {
-      // console.log("accessToken" ,accessToken);
-      // console.log("refreshToken" ,refreshToken);
-      // console.log("profile" ,profile);
-      // console.log("done" ,done);
-
       const { username, usual_full_name, email, intraId, avatar } = profile;
       const user: authDto = {
         username: username,
@@ -60,7 +54,6 @@ export class IntraStrategy extends PassportStrategy(Strategy, '42') {
         UId: intraId.toString(),
         Avatar: avatar,
       };
-      // console.log("user: ", user);
 
       done(null, user);
     } catch (e) {

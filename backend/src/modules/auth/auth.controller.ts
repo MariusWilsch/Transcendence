@@ -35,12 +35,12 @@ export class AuthController {
 
       const userfromcookie = this.authService.getUserFromCookie(ccokie);
       if (userfromcookie === undefined) {
-        return undefined;
+        return res.json({ succes: false });
       }
-
+      
       return res.redirect(`${URL}:3001/users/${userfromcookie.intraId}`);
     } catch (e) {
-      console.log('Error auth user : ', e);
+      return res.json({ succes: false });
     }
   }
 

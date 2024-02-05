@@ -20,45 +20,38 @@ export default function Home() {
 	useEffect(() => {
 		if (!context.socket || !context.user) return;
 		context.socket?.on('privateMatch', (data: any) => {
-			// if (data.from.intraId !== context.user?.intraId)
-			// {
 			const msg = 'invitation from ' + data.from.login + ' for a game';
 			toast((t) => (
-				<>
-					<p> {msg} </p>
-					<span className="flex flex-row space-x-6">
-						<button
-							className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-							onClick={() => {
-								console.log('accept handler');
-								toast.dismiss(t.id);
-								handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
-							}}
-						>
-							<FiCheckCircle size="30" className="text-green-300" />
-						</button>
-						<button
-							className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-							onClick={() => {
-								toast.dismiss(t.id);
-								console.log('dismiss handler');
-							}}
-						>
-							<FiXCircle size="30" className="text-red-300" />
-						</button>
-					</span>
-				</>
+				<div className="flex flex-row items-center ">
+					<div className="font-serif text-black font-semibold w-[64%]">{msg}</div>
+					<button
+						className="w-[18%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+						onClick={() => {
+							toast.dismiss(t.id);
+							handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
+						}}
+					>
+						<FiCheckCircle size="30" className="text-green-300" />
+					</button>
+					<button
+						className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
+						onClick={() => {
+							toast.dismiss(t.id);
+						}}
+					>
+						<FiXCircle size="30" className="text-red-300" />
+					</button>
+				</div>
 			));
-			console.log('the private chat event has been occured');
-			// }
 		});
 		return () => {
 			toast.dismiss();
+			if (context.socket) context.socket.off('privateMatch');
 		};
 	}, [context.user]);
 
 	return (
-		<div>
+		<div className="text-white">
 			<Cards />
 			<Toaster />
 		</div>

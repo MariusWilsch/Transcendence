@@ -33,7 +33,16 @@ export const Card: React.FC<CardProps> = ({
 			className="card bg-base-200 rounded-xl boxTransform w-2/4  sm:w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] md:max-h-[40vh] lg:max-h-[60vh]"
 		>
 			<figure>
-				<Image src={img} alt={alt} />
+				<Image
+					src={img}
+					alt={alt}
+					unoptimized={true}
+					onError={(e: any) => {
+						e.target.onerror = null;
+						e.target.src =
+							'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+					}}
+				/>
 			</figure>
 			<div className="card-body text-left">
 				<h2 className="card-title">{title}</h2>

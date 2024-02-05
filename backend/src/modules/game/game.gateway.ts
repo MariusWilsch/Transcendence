@@ -16,10 +16,15 @@ import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
+import { PrismaClient } from '@prisma/client';
+import { URL } from '../auth/constants'
+
+const prisma = new PrismaClient();
+
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: `${URL}:3000`,
 	},
 
 	// namespace: '/gamelobby/game',
@@ -37,20 +42,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleConnection(client: IO) {
 		console.log(`Client connected via ${client.id}`);
-		//* If the client is not authenticated, disconnect him
-		if (!client.handshake.auth.token) return client.disconnect(true);
-
-		const user = this.authService.getUserFromJwt(client.handshake.auth.token);
-
-		client.data = {
-			user: {
-				intraId: user.intraId,
-				Avatar: user.Avatar,
-				login: user.login,
-			},
-		};
-		//* If the user is already connected, disconnect him
-		if (this.duplicateUsers.has(client.data.user.intraId)) {
+		if (!client.handshake.auth.token) return;
+		const id = this.authService.getUserFromJwt(
+			client.handshake.auth.token
+		).intraId;
+		if (this.duplicateUsers.has(id)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
 			client.disconnect(true);
@@ -58,7 +54,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.duplicateUsers.add(client.data.user.intraId);
 	}
 
-	handleDisconnect(client: IO) {
+	async handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
@@ -80,7 +76,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.createGame(player1, player2);
 	}
 
-	createGame(player1: IO, player2: IO) {
+	async createGame(player1: IO, player2: IO) {
 		// Generate a room ID
 		const roomID = uuidv4();
 
@@ -139,7 +135,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.gameState
 				);
 				if (gameResult === undefined) return;
-				console.log('Game result', gameResult);
 				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
 				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);
 				//! Save match result here!
@@ -218,6 +213,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!this.gameService.isInGame(client.data.roomID)) {
 			this.beginGameLoop(client.data.roomID);
 		}
+		
+		
 	}
 
 	@SubscribeMessage('cancelMatchmaking')

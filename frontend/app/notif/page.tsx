@@ -1,38 +1,25 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { use, useEffect, useState } from 'react';
-import { useAppContext, AppProvider, User } from '../AppContext';
-import { CiCirclePlus } from 'react-icons/ci';
-import { CiSaveUp2 } from 'react-icons/ci';
-import { CiEdit } from 'react-icons/ci';
-import { IoIosCloseCircleOutline } from 'react-icons/io';
-import toast, { Toaster } from 'react-hot-toast';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
+import {  useEffect, useState } from 'react';
+import { useAppContext, User } from '../AppContext';
+import toast  from 'react-hot-toast';
 import { FiCheckCircle } from 'react-icons/fi';
 import { FiXCircle } from 'react-icons/fi';
 
 export default function Search() {
 	const context = useAppContext();
-
 	const [friends, setFriends] = useState<User[] | null>(null);
-	const {
-		isDivVisible,
-		toggleDivVisibility,
-		setDivVisible,
-		isSidebarVisible,
-		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
-	} = useAppContext();
+
 
 	useEffect(() => {
-		setisSidebarVisible(window.innerWidth > 768);
+		context.setisSidebarVisible(window.innerWidth > 768);
 	}, []);
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (context.user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -44,10 +31,12 @@ export default function Search() {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					context.setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					context.setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;
@@ -76,7 +65,6 @@ export default function Search() {
 				if (data.success === false) {
 					const msg = 'Error getting friends';
 					toast.error(msg);
-					console.log(msg);
 				}
 				if (data.success === true && data.friendsDetails) {
 					setFriends(data.friendsDetails);

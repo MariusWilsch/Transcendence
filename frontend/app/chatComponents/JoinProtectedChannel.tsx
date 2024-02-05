@@ -34,6 +34,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
       }
     );
     if (response.ok) {
+      const res = await response.json();
       toast.success('Joined channel');
     } else {
       const errorData = await response.json();
@@ -59,7 +60,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
           selectedChannel.type === "PROTECTED" &&
           <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
             <Popover.Target>
-              <Button>JOIN</Button>
+              <button className="p-2 text-blue-700 font-bold" >JOIN</button>
             </Popover.Target>
             <Popover.Dropdown>
               <div className="flex ">
@@ -77,7 +78,10 @@ async function joinChannel(channelId: string, type: string, password: string, us
         }
         {
           selectedChannel.type !== "PROTECTED" &&
-          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${selectedChannel.name}`}><button className="p-2 text-blue-700 font-bold" onClick={() => handleSubmit("default")}>JOIN</button></Link>
+          <Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/channels/${selectedChannel.id}`}>
+            <button className="p-2 text-blue-700 font-bold hover:scale-110" onClick={() => handleSubmit("default")}>
+              JOIN
+            </button></Link>
         }
       </>
     );

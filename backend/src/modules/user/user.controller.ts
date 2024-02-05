@@ -81,7 +81,7 @@ export class UserController {
   @Get('search')
   @UseGuards(JwtAuthGuard)
   async search(@Res() res, @Query('searchTerm') searchTerm: string) {
-    const targetURL = `http://localhost:3000/search?query=${encodeURIComponent(
+    const targetURL = `${URL}:3000/search?query=${encodeURIComponent(
       searchTerm
     )}`;
     return res.redirect(targetURL);
@@ -90,6 +90,9 @@ export class UserController {
   @Get('Gamehistory/:id')
   @UseGuards(JwtAuthGuard)
   async Gamehistory(@Param('id') id: string, @Res() res: any) {
+    if (id === undefined || id === '' || id === null) {
+      return res.json({ success: false });
+    }
     try {
       const Gamehistory = await this.userService.Gamehistory(id);
       return res.json({ success: true, Gamehistory });
@@ -102,6 +105,9 @@ export class UserController {
   @Get('Achievements/:id')
   @UseGuards(JwtAuthGuard)
   async Achievements(@Param('id') id: string, @Res() res: any) {
+    if (id === undefined || id === '' || id === null) {
+      return res.json({ success: false });
+    }
     try {
       const Achievements = await this.userService.Achievements(id);
 
@@ -112,14 +118,36 @@ export class UserController {
     }
   }
 
+  // @Get(':id')
+  // async getUserbyId(@Param('id') id: string , @Res() res : any): Promise<User | undefined> {
+  //   if (id === undefined || id === '' || id === null) {
+  //     return undefined;
+  //   }
+  //   try {
+  //     const data = await this.userService.getUserbyId(id);
+  //     if (data === undefined) {
+  //       return res.json({ succes: false });
+  //     }
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Error getUserbyId:', error);
+  //     return res.json({ succes: false });
+  //   }
+  // }
   @Get(':id')
-  async getUserbyId(@Param('id') id: string): Promise<User | undefined> {
+  async getUserbyId(@Param('id') id: string , @Res() res : any): Promise<User | undefined> {
+    if (id === undefined || id === '' || id === null) {
+      return undefined;
+    }
     try {
       const data = await this.userService.getUserbyId(id);
-      return data;
+      if (data === undefined) {
+        return res.json({ succes: false });
+      }
+      return res.json({ succes: true , data});
     } catch (error) {
       console.error('Error getUserbyId:', error);
-      return undefined;
+      return res.json({ succes: false });
     }
   }
 
@@ -131,6 +159,9 @@ export class UserController {
     @Res() res: any
   ) {
     try {
+      if (userId === undefined || userId === '' || userId === null) {
+        return res.json({ success: false });
+      }
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
         return res.json({ success: false });
@@ -155,6 +186,9 @@ export class UserController {
     @Res() res: any
   ) {
     try {
+      if (userId === undefined || userId === '' || userId === null) {
+        return res.json({ sucess: false });
+      }
       const isVerified = await this.authService.verifyOtp(userId, body.otp);
 
       if (isVerified) {
@@ -182,6 +216,9 @@ export class UserController {
   @Get(':id/enableOtp')
   @UseGuards(JwtAuthGuard)
   async enableOtp(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ sucess: false });
+    }
     try {
       const isEnabled = await this.authService.enableOtp(userId);
 
@@ -199,6 +236,9 @@ export class UserController {
   @Get(':id/disableOtp')
   @UseGuards(JwtAuthGuard)
   async disableOtp(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ sucess: false });
+    }
     try {
       const disEnabled = await this.authService.disableOtp(userId);
 
@@ -228,6 +268,9 @@ export class UserController {
     @Res() res: any,
     @Req() req: any
   ) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ sucess: false });
+    }
     try {
       let user = await this.userService.getUserbyId(userId);
       if (!user) {
@@ -261,6 +304,12 @@ export class UserController {
   ) {
     try {
       const { userId, friendId } = body;
+      if (userId === undefined || userId === '' || userId === null) {
+        return res.json({ success: false });
+      }
+      if (friendId === undefined || friendId === '' || friendId === null) {
+        return res.json({ success: false });
+      }
       const isFriend = await this.userService.createFriend(userId, friendId);
 
       return res.json({ success: true });
@@ -278,6 +327,12 @@ export class UserController {
   ) {
     try {
       const { userId, friendId } = body;
+      if (userId === undefined || userId === '' || userId === null) {
+        return res.json({ success: false });
+      }
+      if (friendId === undefined || friendId === '' || friendId === null) {
+        return res.json({ success: false });
+      }
       const isBlocked = await this.userService.blockFriend(userId, friendId);
 
       if (isBlocked === 'alreadyFriend') {
@@ -299,6 +354,12 @@ export class UserController {
   ) {
     try {
       const { userId, friendId } = body;
+      if (userId === undefined || userId === '' || userId === null) {
+        return res.json({ success: false });
+      }
+      if (friendId === undefined || friendId === '' || friendId === null) {
+        return res.json({ success: false });
+      }
       await this.userService.removefrinship(userId, friendId);
 
       return res.json({ success: true });
@@ -311,6 +372,10 @@ export class UserController {
   @Get(':id/friends')
   @UseGuards(JwtAuthGuard)
   async getFriends(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
+   
     try {
       const friends = await this.userService.getFriends(userId);
       return res.json({ success: true, friends });
@@ -323,6 +388,9 @@ export class UserController {
   @Get(':id/onlinefriends')
   @UseGuards(JwtAuthGuard)
   async getonlineFriends(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
     try {
       const onlinefriends = await this.userService.getonlineFriends(userId);
       return res.json({ success: true, onlinefriends });
@@ -335,6 +403,9 @@ export class UserController {
   @Get(':id/PendingInvite')
   @UseGuards(JwtAuthGuard)
   async PendingInvite(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
     try {
       const PendingInvite = await this.userService.PendingInvite(userId);
       const friendIds = PendingInvite.map((item) => item.friendId);
@@ -352,6 +423,9 @@ export class UserController {
   @Get(':id/freindrequest')
   @UseGuards(JwtAuthGuard)
   async freindrequest(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
     try {
       const freindrequest = await this.userService.freindrequest(userId);
       const friendIds = freindrequest.map((item) => item.userId);
@@ -373,6 +447,9 @@ export class UserController {
   @Get(':id/BlockedFriends')
   @UseGuards(JwtAuthGuard)
   async BlockedFriends(@Param('id') userId: string, @Res() res: any) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
     try {
       const BlockedFriends = await this.userService.BlockedFriends(userId);
       const friendIds = BlockedFriends.map((item) => item.friendId);
@@ -394,6 +471,9 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
     try {
       const acceptFriendRequest = await this.userService.acceptFriendRequest(
         userId,
@@ -413,6 +493,12 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
+    if (friendId === undefined || friendId === '' || friendId === null) {
+      return res.json({ success: false });
+    }
     try {
       const declineFriendRequest = await this.userService.declineFriendRequest(
         userId,
@@ -432,6 +518,13 @@ export class UserController {
     @Param('friendId') friendId: string,
     @Res() res: any
   ) {
+    if (userId === undefined || userId === '' || userId === null) {
+      return res.json({ success: false });
+    }
+    if (friendId === undefined || friendId === '' || friendId === null) {
+      return res.json({ success: false });
+    }
+
     try {
       const friend = await this.userService.FriendshipStatus(userId, friendId);
       return res.json({ success: true, friend });

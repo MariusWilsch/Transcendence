@@ -1,24 +1,17 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
-import { use, useEffect, useState, useRef } from 'react';
-import { useAppContext, AppProvider, User } from '../../AppContext';
+import { useEffect, useState, useRef } from 'react';
+import { useAppContext, User } from '../../AppContext';
 import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { Loading } from '../../components/Loading';
-import { Navbar } from '../../components/Navbar';
 import { Achievements } from '../../components/Achievements';
 import { Gamehistory } from '../../components/Gamehistory';
 import { UserDetailsCard } from '../../components/UserDetailsCard';
 import { UserProfileImage } from '../../components/UserProfileImage';
-import { Sidebar } from '../../components/Sidebar';
 import { TwoFactorAuth } from '../../components/TwoFactorAuth';
 import { Friend } from '../../components/Friend';
-import { useParams, redirect, useRouter } from 'next/navigation';
-import loading from '../../../public/loading.json';
-import Lottie, { LottieRefCurrentProps } from 'lottie-react';
 
 export default function Profile(params: any) {
 	const {
@@ -27,11 +20,8 @@ export default function Profile(params: any) {
 		isDivVisible,
 		toggleDivVisibility,
 		setDivVisible,
-		isSidebarVisible,
 		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
 	} = useAppContext();
-	const router = useRouter();
 
 	const [socket, setsocket] = useState<Socket | null>(null);
 
@@ -39,7 +29,6 @@ export default function Profile(params: any) {
 		undefined,
 	);
 	const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
-	const lottieRef = useRef<LottieRefCurrentProps>(null);
 
 	useEffect(() => {
 		setisSidebarVisible(window.innerWidth > 768);
@@ -59,12 +48,14 @@ export default function Profile(params: any) {
 					secondary: '#FFFAEE',
 				},
 			});
-			console.log('🌟 Please update your nickname and avatar.');
 		}
 	};
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -73,10 +64,12 @@ export default function Profile(params: any) {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;
@@ -99,17 +92,20 @@ export default function Profile(params: any) {
 
 			if (!response.ok) {
 				toast.error('User not found');
-				console.log('User not found');
 				return;
 			}
 			const contentType = response.headers.get('content-type');
 
 			if (contentType && contentType.includes('application/json')) {
-				var data: User = await response.json();
-				setuserFromRoutId(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setuserFromRoutId(data.data);
+				}
 			} else {
 				toast.error('User not found');
-				console.log('User not found');
 			}
 		} catch (error: any) {
 			const msg = 'Error during login' + error.message;
@@ -187,53 +183,30 @@ export default function Profile(params: any) {
 
 	let Login = 'Login';
 	let intraId = '';
-	let FullName = 'Full Name';
 	let isTfaEnabled = false;
-	let level = 'Level 6.31';
-	let email = 'Email';
 	let IntraPic = '/gon.jpg';
 
-	if (isProfileOwner) {
-		Login = user?.login || 'Login';
-		intraId = user?.intraId || '';
-		FullName = user?.fullname || 'Full Name';
-		isTfaEnabled = user?.isTfaEnabled || false;
-		level = 'Level 6.31';
-		email = user?.email || 'Email';
-		IntraPic = user?.Avatar || IntraPic;
+	if (isProfileOwner && user !== null) {
+		Login = user.login;
+		intraId = user.intraId;
+		isTfaEnabled = user.isTfaEnabled;
+		IntraPic = user.Avatar;
 	} else {
-		Login = userFromRoutId?.login || 'Login';
-		intraId = userFromRoutId?.intraId || '';
-		FullName = userFromRoutId?.fullname || 'Full Name';
-		isTfaEnabled = userFromRoutId?.isTfaEnabled || false;
-		level = 'Level 6.31';
-		email = userFromRoutId?.email || 'Email';
-		IntraPic = userFromRoutId?.Avatar || IntraPic;
+		Login = userFromRoutId?.login;
+		intraId = userFromRoutId?.intraId;
+		isTfaEnabled = userFromRoutId?.isTfaEnabled;
+		IntraPic = userFromRoutId?.Avatar;
 	}
 
 	return (
-		<div className="relative w-full  flex justify-center"
-		style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
-	
-		
-		>
-			{/* <div className="z-0 absolute w-full mt-80 ">
-				<Lottie
-					animationData={loading}
-					className="w-full h-auto"
-					onDOMLoaded={(e) => {
-						lottieRef.current?.setSpeed(0.05);
-					}}
-					lottieRef={lottieRef as any}
-				/>
-			</div> */}
-
+		<div className="w-full  flex justify-center overflow-y-scroll no-scrollbar">
 			<div className="z-10 relative flex-1 ">
 				<UserProfileImage
 					status={userFromRoutId?.status}
 					isProfileOwner={isProfileOwner}
 					src={IntraPic}
 					intraId={intraId}
+					userFromRoutId={userFromRoutId}
 				/>
 				<div
 					className={`${isDivVisible ? 'md:mt-28 mt-10' : 'md:mt-24 mt-12'} p-10 `}
@@ -244,6 +217,7 @@ export default function Profile(params: any) {
 							isProfileOwner={isProfileOwner}
 							userId={user?.intraId}
 							friendId={params.params.intraId}
+							inChat={false}
 						/>
 					) : (
 						<div className="flex items-center justify-center text-gray-400">
@@ -253,6 +227,7 @@ export default function Profile(params: any) {
 						</div>
 					)}
 					<TwoFactorAuth intraId={intraId} isTfa={isTfaEnabled} />
+
 					<Gamehistory intraId={intraId} />
 					<Achievements intraId={intraId} />
 				</div>

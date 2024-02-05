@@ -1,12 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAppContext, User } from '../AppContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
 import { io, Socket } from 'socket.io-client';
 import Cookies from 'universal-cookie';
 import { motion } from 'framer-motion';
@@ -16,32 +13,29 @@ export default function Friends() {
 	const {
 		user,
 		setUser,
-		isDivVisible,
-		toggleDivVisibility,
-		setDivVisible,
-		isSidebarVisible,
 		setisSidebarVisible,
-		toggleSidebarVisibleVisibility,
 	} = useAppContext();
 	const [socket, setsocket] = useState<Socket | null>(null);
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
 					{
 						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-						},
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;
@@ -77,7 +71,6 @@ export default function Friends() {
 			if (data.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friendsDetails) {
 				setUsers(data.friendsDetails);
@@ -106,7 +99,6 @@ export default function Friends() {
 			if (data.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friendsDetails) {
 				setUsers(data.friendsDetails);
@@ -176,12 +168,9 @@ export default function Friends() {
 			if (response.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
 			}
 			if (data.friends) {
 				setUsers(data.friends);
-
-				// console.log("User friends ", users);
 			}
 		} catch (error: any) {
 			const msg = 'Error getting friends: ' + error.message;

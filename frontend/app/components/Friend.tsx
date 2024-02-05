@@ -6,7 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { use, useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User } from '../AppContext';
 import { MdOutlineBlock } from 'react-icons/md';
-import { CgUnblock } from 'react-icons/cg';
+import { CgProfile, CgUnblock } from 'react-icons/cg';
 import { BiMessageRounded } from 'react-icons/bi';
 import { IoGameControllerOutline } from 'react-icons/io5';
 import { FiUserPlus } from 'react-icons/fi';
@@ -18,15 +18,18 @@ import { RootState } from '../gamelobby/GlobalRedux/store';
 import { useSelector } from 'react-redux';
 import { Invite } from '../gamelobby/GlobalRedux/features';
 import { useDispatch } from 'react-redux';
+import Cookies from 'universal-cookie';
 
 export const Friend = ({
 	isProfileOwner,
 	userId,
 	friendId,
+	inChat,
 }: {
 	isProfileOwner: boolean;
 	userId: string | undefined;
 	friendId: string;
+	inChat: boolean;
 }) => {
 	const context = useAppContext();
 	const { handleInvite } = useStartGame();
@@ -40,6 +43,9 @@ export const Friend = ({
 	>('NOTFRIENDS');
 
 	const addfriend = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/addfriend`,
@@ -72,6 +78,9 @@ export const Friend = ({
 	};
 
 	const blockFriend = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/blockfriend`,
@@ -103,6 +112,9 @@ export const Friend = ({
 	};
 
 	const removefrinship = async () => {
+		if (!userId || !friendId) {
+			return;
+		}
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}:3001/users/removefrinship`,
@@ -136,7 +148,7 @@ export const Friend = ({
 	const [sender, setSender] = useState<boolean>(false);
 
 	const FriendshipStatus = async () => {
-		if (!userId) {
+		if (!userId || !friendId) {
 			return;
 		}
 		try {
@@ -181,12 +193,13 @@ export const Friend = ({
 
 	useEffect(() => {
 		FriendshipStatus();
-	}, [userId]);
+	}, [userId, inChat, friendId]);
 
 	const handler = () => {
 		if (context.socket) {
-			console.log('emitting to private match');
-			context.socket.emit('privateMatch', { to: userId, other: friendId });
+			const cookie = new Cookies();
+            const jwt = cookie.get('jwt');
+			context.socket.emit('privateMatch', { to: userId, other: friendId, jwt });
 		}
 		handleInvite(friendId, isConnected, Invite.INVITING);
 	};
@@ -311,24 +324,56 @@ export const Friend = ({
 							</button>
 						)}
 					</div>
-					<div>
-						<button className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}>
-							<motion.div
-								whileHover={{ scale: 1.1 }}
-								whileTap={{ scale: 0.9 }}
-								initial={{ opacity: 0, y: -5 }}
-								animate={{ opacity: 1, x: 0 }}
-								transition={{ delay: 0.02 }}
+					{userId && friendId && !inChat && (
+						<div className="mx-2">
+							<Link
+								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat/${
+									parseInt(friendId as string) > parseInt(userId as string)
+										? friendId + userId
+										: userId + friendId
+								}`}
+								onClick={() =>{
+
+									context.setMessageNum(0);
+									context.setComponent('conversation')
+								}
+								
+								}
+								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
 							>
-								<BiMessageRounded size="25" />
-							</motion.div>
-						</button>
-					</div>
-					<div>
-						{/* Here comes the private match logic */}
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+									initial={{ opacity: 0, y: -5 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.02 }}
+								>
+									<BiMessageRounded size="25" className="mb-1" />
+								</motion.div>
+							</Link>
+						</div>
+					)}
+					{inChat && (
+						<div className="mx-2">
+							<Link
+								href={`${process.env.NEXT_PUBLIC_API_URL}:3000/profile/${friendId}`}
+								className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
+							>
+								<motion.div
+									whileHover={{ scale: 1.1 }}
+									whileTap={{ scale: 0.9 }}
+									initial={{ opacity: 0, y: -5 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.02 }}
+								>
+									<CgProfile size="25" className="mb-1" />
+								</motion.div>
+							</Link>
+						</div>
+					)}
+					<div className="ml-1 mr-2">
 						<button
 							className={`mx-2 ${blocked ? '  pointer-events-none' : ''}`}
-							//! Friend ID here
 							onClick={handler}
 						>
 							<motion.div

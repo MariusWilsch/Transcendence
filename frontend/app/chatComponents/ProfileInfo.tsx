@@ -31,16 +31,19 @@ const ProfileInfo = ({ recipient }: any) => {
         <IoMdArrowBack style={{'display':!context.responsive ? "":"none"}} className=" text-white w-8 h-8 hover:cursor-pointer hover:scale-110 " onClick={() => context.setComponent("conversation")} />
         </div>
         <div className=''>
-        <UserProfileImage
+        {
+          recipient?.Avatar &&
+          <UserProfileImage
           status={"ONLINE"}
           isProfileOwner={false}
           src={recipient?.Avatar}
           intraId={recipient?.intraId}
-          />
+          />}
         <Friend
           isProfileOwner={false}
           friendId={recipient?.intraId}
           userId={context.userData?.intraId}
+          inChat={true}
           />
           </div>
         <div className='flex flex-col  justify-center mt-4 items-center  px-1 w-3/4 h-fit bg-[#1a1d24] rounded border border-[#292D39] p-2'>

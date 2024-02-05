@@ -38,6 +38,23 @@ model User {
   receivedMessages Message[]      @relation("ReceivedMessages")
 }
 
+model MemberShip {
+  memberId      String    @id @unique
+  intraId       String
+  channelId     String
+  channelName   String
+  Avatar        String    @default("")
+  login         String    @default("")
+  isOwner       Boolean   @default(false)
+  isModerator   Boolean   @default(false)
+  isBanned      Boolean   @default(false)
+  isMuted       Boolean   @default(false)
+  mutedTime     DateTime?
+  joined_at     DateTime  @default(now())
+  onInviteState Boolean   @default(false)
+  channel       Channel   @relation("channelMember", fields: [channelName], references: [name])
+  user          User      @relation(fields: [intraId], references: [intraId])
+}
 model MatchHistory {
   id          Int      @id @default(autoincrement())
   winner      User?    @relation(name: "userWins", fields: [winnerId], references: [intraId])
@@ -65,23 +82,6 @@ model Channel {
   messages    ChannelMessage[]
 }
 
-model MemberShip {
-  memberId      String    @id @unique
-  intraId       String
-  channelId     String
-  channelName   String
-  Avatar        String    @default("")
-  login         String    @default("")
-  isOwner       Boolean   @default(false)
-  isModerator   Boolean   @default(false)
-  isBanned      Boolean   @default(false)
-  isMuted       Boolean   @default(false)
-  mutedTime     DateTime?
-  joined_at     DateTime  @default(now())
-  onInviteState Boolean   @default(false)
-  channel       Channel   @relation("channelMember", fields: [channelName], references: [name])
-  user          User      @relation(fields: [intraId], references: [intraId])
-}
 
 model ChannelMessage {
   id          Int      @id @default(autoincrement())

@@ -141,6 +141,31 @@ export class UserService {
 		if (!userId || !friendId) {
 			return;
 		}
+
+		const friedshipexist = await prisma.friend.findFirst({
+			where: {
+				OR: [
+					{ userId: userId, friendId: friendId },
+					{ userId: friendId, friendId: userId },
+				],
+			},
+		});
+		if (friedshipexist)
+		{
+			await prisma.friend.update
+			({
+				where: {
+					unique_user_friend: {
+						userId: friedshipexist.userId,
+						friendId: friedshipexist.friendId,
+					},
+				},
+				data: {
+					friendshipStatus: 'ACCEPTED',
+				},
+			});
+			return ;
+		}
 		const friend = await prisma.friend.create({
 			data: {
 				friendshipStatus: 'PENDING',
@@ -163,14 +188,14 @@ export class UserService {
 			},
 		});
 		if (ifTheFriendshipExists) {
-			await prisma.friend.deleteMany({
-				where: {
-					OR: [
-						{ userId: userId, friendId: friendId },
-						{ userId: friendId, friendId: userId },
-					],
-				},
-			});
+			// await prisma.friend.deleteMany({
+			// 	where: {
+			// 		OR: [
+			// 			{ userId: userId, friendId: friendId },
+			// 			{ userId: friendId, friendId: userId },
+			// 		],
+			// 	},
+			// });
 
 			return 'alreadyFriend';
 		}
@@ -371,6 +396,7 @@ export class UserService {
 		status: 'ONLINE' | 'OFFLINE' | 'INGAME'
 	) {
 		try {
+			if (userId === undefined) return;
 			const userexist = await prisma.user.findUnique({
 				where: {
 					intraId: userId,

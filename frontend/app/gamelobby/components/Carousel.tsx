@@ -17,7 +17,17 @@ const CarouselItem = ({
 }) => {
 	return (
 		<div id={id} className="carousel-item w-full">
-			<Image src={src} className="w-full object-contain" alt={alt} />
+			<Image
+				src={src}
+				className="w-full object-contain"
+				alt={alt}
+				unoptimized={true}
+				onError={(e: any) => {
+					e.target.onerror = null;
+					e.target.src =
+						'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+				}}
+			/>
 		</div>
 	);
 };
@@ -36,7 +46,7 @@ export const Carousel = () => {
 export const CarouselNavigation = () => {
 	const dispatch = useDispatch();
 	return (
-		<div className="flex justify-center w-full py-2 gap-2">
+		<div className="flex justify-center w-full py-2 gap-2 text-white">
 			<Link
 				href="/gamelobby/steps/#item1"
 				onClick={() => dispatch(setMapChoice(mapType.STANDARD))}

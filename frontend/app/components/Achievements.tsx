@@ -27,18 +27,15 @@ export const Achievements = ({ intraId }: { intraId: string | undefined }) => {
 				if (data.success === false) {
 					return;
 				}
-
-				console.log(data);
 				setAchievements(data.Achievements);
 			} catch (error) {
-				console.log(error);
 			}
 		};
 		Achievements();
 	}, [intraId]);
 
 	return (
-		<div className="flex items-center justify-center text-gray-400 w-full p-10 overflow-hidden">
+		<div className="flex items-center justify-center text-gray-400 w-full mt-10 px-10 overflow-hidden">
 			<div className="border border-gray-600 bg-[#292D39] bg-opacity-70 rounded-md w-full md:w-[600px] lg:w-[800px] h-[300px] p-4 ">
 				<div className="mt-1 font-bold text-gray-300">Achievements</div>
 				<div className="mt-5 border-b border-zinc-500 "></div>

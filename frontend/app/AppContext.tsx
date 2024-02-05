@@ -58,27 +58,29 @@ export type User = {
 	status: string;
 };
 export type Channel = {
-	id: number;
-	name: string;
-	type: string;
-	ownerId: string;
-	password: string;
-	description: string;
-};
+  id: string;
+  name: string;
+  type: string;
+  ownerId: string;
+  password: string;
+  description: string;
+}
 
-export type MemberShip = {
-	memberId: string;
-	intraId: string;
-	channelId: string;
-	Avatar: string;
-	login: string;
-	isOwner: boolean;
-	isModerator: boolean;
-	isBanned: boolean;
-	isMuted: boolean;
-	mutedTime: Date;
-	joined_at: Date;
-};
+export type MemberShip={
+  memberId: string;
+    intraId: string;
+    channelId: string;
+    channelName:string;
+    Avatar: string;
+    login: string;
+    isOwner: boolean;
+    isModerator: boolean;
+    isBanned: boolean;
+    onInviteState:boolean;
+    isMuted: boolean;
+    mutedTime: Date;
+    joined_at: Date;
+}
 
 export type AppContextProps = {
 	isDivVisible: boolean;
@@ -110,6 +112,8 @@ export type AppContextProps = {
 	notifSocket: Socket | null;
 	setNotifSocket: (notifSocket: Socket | null) => void;
 	notif: boolean;
+	setMessageNum: (messageNumb: number) => void;
+	messageNumb: number;
 	setnotif: (notif: boolean) => void;
 	setComponent: (component: string) => void;
 	component: string;
@@ -137,6 +141,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 	const [rooms, setRooms] = useState<Room[]>([]); // Provide a type for the messages state
 	const [notifSocket, setNotifSocket] = useState<Socket | null>(null);
 	const [notif, setnotif] = useState<boolean>(false);
+	const [messageNumb, setMessageNum] = useState(0);
 	const [component, setComponent] = useState('conversation'); //for resposive purposes
 	const [responsive, setResponsive] = useState(true);
 	const [channel, setChannel] = useState<Channel | undefined>();
@@ -149,6 +154,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 		setisSidebarVisible((prev) => !prev);
 	};
 	const contextValue: AppContextProps = {
+		setMessageNum,
+		messageNumb,
 		setChannel,
 		channel,
 		setComponent,

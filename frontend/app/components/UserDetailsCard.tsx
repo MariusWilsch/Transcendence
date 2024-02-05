@@ -27,6 +27,11 @@ export const UserDetailsCard = ({
       toast.error("Choose another login");
       return;
     }
+    if (newLoginInput === 'Computer') {
+      toast.error("Choose another login");
+      return;
+    }
+    
     if (newLoginInput.trim() !== "" && intraId !== undefined) {
       try {
         const response = await fetch(

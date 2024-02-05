@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
-import { PrismaClient } from '@prisma/client';
+import { MemberShip, Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'modules/auth/constants';
 
 enum ChannelType {
-	Public = 1,
-	PROTECTED,
-	PRIVATE,
+  Public = 1,
+  PROTECTED,
+  PRIVATE
 }
 const prisma = new PrismaClient();
 @Injectable()
@@ -19,6 +19,23 @@ export class ChatService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService
     ) { }
+
+  async updateUserStatus(intraId:string, status:string){
+    const user = await prisma.user.findUnique({
+      where:{
+        intraId,
+      },
+    })
+    if (!user)return;
+    await prisma.user.update({
+      where:{
+        intraId,
+      },
+      data:{
+        status:status==='ONLINE'?'ONLINE':'OFFLINE',
+      }
+    })
+  }
   async createMessage(sender: string, recipient: string, content: string): Promise<any> {
     const date = new Date();
     const dateToIso : string = date.toISOString(); 
@@ -35,19 +52,22 @@ export class ChatService {
     }
     const userStatue = await prisma.friend.findFirst({
       where:{
-        friendId:sender,
+        OR:
+        [
+          {
+            friendId : sender,
+            userId : recipient,
+          },
+          {
+            userId : sender,
+            friendId:recipient,
+          }
+        ]
       }
     });
-    const userStatueReciepent = await prisma.friend.findFirst({
-      where:{
-        userId:sender,
-      },
-    });
 
-    if ( (userStatue?.friendshipStatus === 'BLOCKED') || (userStatueReciepent?.friendshipStatus === 'BLOCKED') )
+    if ((userStatue?.friendshipStatus === 'BLOCKED') )
     {
-      console.log(userStatue?.friendshipStatus);
-      console.log( userStatueReciepent?.friendshipStatus);
       throw ('message can\'t be sent');
     }
     if (!room && (senderUser && recipientUser))
@@ -85,104 +105,87 @@ export class ChatService {
         updated_at:dateToIso
       },
     });
-    console.log(message);
     return message;
   }
 
-	getUserFromJwt(jwt: any): User | undefined {
-		if (!jwt) {
-			return undefined;
-		}
+  async createPrivateRoom(user1: string, user2: string, clientRoomid:string): Promise<void> {
+    if (user1 === user2)
+    {
+      return;
+    }
+    const romeName  = parseInt(user1) > parseInt(user2) ? user1 + user2 :user2 + user1;
+    if (romeName !== clientRoomid)
+    {
+      return ;
+    }
+    const room = await prisma.privateRoom.findUnique({
+      where:{
+        name:romeName,
+      }
+    });
+    if (room)
+    {
+      console.log('room already exist');
+      return;
+    }
+    const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
+    const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
+    if (!member1 || !member2) {
+      // Handle the case where either sender or recipient does not exis
+      throw ('Sender or recipient not found.');
+    }
+    await prisma.privateRoom.create({
+      data: {
+        name:romeName,
+        participantsIds:[member1.intraId, member2.intraId],
+        participants: {
+          connect: [
+            { intraId: member1.intraId },
+            { intraId: member2.intraId},
+          ],
+        },
+      },
+    });
+  }
 
-		try {
-			const payload = this.jwtService.verify(jwt, {
-				secret: JWT_SECRET,
-			});
+  async getMessagesByUsr(userId: string): Promise<any[]> {
+    return prisma.message.findMany({
+      where: {
+        OR: [
+          { sender: userId },
+          { recipient: userId },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
 
-			const user = payload.userWithoutDate;
-			return user;
-		} catch (error) {
-			console.error('JWT Verification Error:', error);
-			return undefined;
-		}
-	}
+  // You can add other methods for more database operations as needed
+  async getAllMessages(): Promise<any[]> {
+    return prisma.message.findMany();
+  }
+  //get user by id
+  async getUserById(userId: string): Promise<any> {
+    return prisma.user.findUnique({
+      where: {
+        intraId: userId,
+      },
+    });
+  }
+  //get all users
+  async getAllUsers(): Promise<any[]> {
+    return prisma.user.findMany();
+  }
 
-	async createPrivateRoom(
-		user1: string,
-		user2: string,
-		clientRoomid: string
-	): Promise<void> {
-		if (user1 === user2) {
-			return;
-		}
-		const romeName =
-			parseInt(user1) > parseInt(user2) ? user1 + user2 : user2 + user1;
-		if (romeName !== clientRoomid) {
-			return;
-		}
-		const room = await prisma.privateRoom.findUnique({
-			where: {
-				name: romeName,
-			},
-		});
-		if (room) {
-			console.log('room already exist');
-			return;
-		}
-		const member1 = await prisma.user.findUnique({ where: { intraId: user1 } });
-		const member2 = await prisma.user.findUnique({ where: { intraId: user2 } });
-		console.log(member1);
-		console.log(member2);
-		if (!member1 || !member2) {
-			// Handle the case where either sender or recipient does not exis
-			throw 'Sender or recipient not found.';
-		}
-		await prisma.privateRoom.create({
-			data: {
-				name: romeName,
-				participantsIds: [member1.intraId, member2.intraId],
-				participants: {
-					connect: [{ intraId: member1.intraId }, { intraId: member2.intraId }],
-				},
-			},
-		});
-	}
-
-	async getMessagesByUsr(userId: string): Promise<any[]> {
-		return prisma.message.findMany({
-			where: {
-				OR: [{ sender: userId }, { recipient: userId }],
-			},
-			orderBy: {
-				createdAt: 'asc',
-			},
-		});
-	}
-
-	// You can add other methods for more database operations as needed
-	async getAllMessages(): Promise<any[]> {
-		return prisma.message.findMany();
-	}
-	//get user by id
-	async getUserById(userId: string): Promise<any> {
-		return prisma.user.findUnique({
-			where: {
-				intraId: userId,
-			},
-		});
-	}
-	//get all users
-	async getAllUsers(): Promise<any[]> {
-		return prisma.user.findMany();
-	}
-
-	async getAllRooms() {
-		try {
-			const rooms = await prisma.privateRoom.findMany({
-				orderBy: {
-					updated_at: 'asc',
-				},
-			});
+  async getAllRooms() {
+    try {
+      const rooms = await prisma.privateRoom.findMany({
+        orderBy: {
+          updated_at: 'asc',
+        },
+      });
 
       return rooms;
     } catch (e) {
@@ -284,6 +287,9 @@ export class ChatService {
     const name = channelName;
     let password:string;
     const saltRounds = 10;
+    if (channelName.length > 30 || channelName.length < 3 ){
+      throw('Invalid input: channel name required 3 to 30 characters')
+    }
     const channel = await prisma.channel.findUnique({
       where:{
         name,
@@ -382,7 +388,6 @@ export class ChatService {
   async createChannelMessage(channelId:string, message:string, sender:User){
     const dateNow = new Date();
     const dateOs = dateNow.toISOString();
-    console.log('now ',dateOs);
     const memberShip = await  prisma.memberShip.findFirst({
       where:{
         channelId,
@@ -410,14 +415,18 @@ export class ChatService {
         })
       }
       else{
-        throw(`you re muted for until ` );
+        throw(`you re muted for until a specific time ` );
       }
     }
     const user =  await prisma.user.findUnique({
       where:{
         intraId:sender.intraId
       }
-    })
+    });
+    if (!user)
+    {
+      throw ('no such user');
+    }
     return await prisma.channelMessage.create({
       data:{
         channelId,
@@ -432,6 +441,7 @@ export class ChatService {
   async getAllAvailableChannels(intraId:string){
     
     return await prisma.channel.findMany({
+      take:5,
       where:{
         type:{
           not:{
@@ -602,7 +612,7 @@ export class ChatService {
   }
 
   async leaveChannel(intraId:string, channelName:string){
-    
+    let newOwner :MemberShip ;
     const channel = await prisma.channel.findUnique({
       where:{
         id:channelName,
@@ -621,8 +631,9 @@ export class ChatService {
       throw('no such member');
     }
     if (membership.isOwner){
-      let newOwner = await prisma.memberShip.findFirst({
+       newOwner = await prisma.memberShip.findFirst({
         where:{
+          channelId:channelName,
           intraId:{
             not:intraId,
           },
@@ -632,6 +643,7 @@ export class ChatService {
       if (!newOwner){
         newOwner = await prisma.memberShip.findFirst({
           where:{
+            channelId:channelName,
             intraId:{
               not:intraId,
             },
@@ -639,7 +651,16 @@ export class ChatService {
           }
         })
       }
-
+      if (!newOwner){
+        await prisma.memberShip.deleteMany();
+        await prisma.channelMessage.deleteMany();
+        await prisma.channel.delete({
+          where:{
+            id:channelName,
+          },
+        });
+        return;
+      }
       await prisma.memberShip.update({
         where:{
           memberId:newOwner.memberId,
@@ -748,4 +769,71 @@ export class ChatService {
       }
     })
   }
+
+
+  async getUserActiveChannels(intraId: string) {
+    const memberShips = await prisma.memberShip.findMany({
+      where: {
+        intraId,
+      },
+    });
+  
+    const channels = await Promise.all(
+      memberShips.map(async (memberShip) => {
+        const channel = await prisma.channel.findUnique({
+          where: {
+            id: memberShip.channelId,
+          },
+          include: {
+            messages: {
+              orderBy: {
+                createdAt: 'desc',
+              },
+              take: 1,
+            },
+          },
+        });
+  
+        if (channel && channel.messages && channel.messages.length > 0) {
+          return {
+            id: channel.id,
+            name: channel.name,
+            latestMessage: channel.messages[0],
+          };
+        }
+  
+        return null;
+      })
+    );
+  
+    const filteredChannels = channels.filter((channel) => channel !== null);
+  
+    const sortedChannels = filteredChannels.sort(
+      (a, b) => b.latestMessage.createdAt.getTime() - a.latestMessage.createdAt.getTime()
+    );
+  
+    return sortedChannels;
+  }
+  async getSerachedChan(query:string, intraId:string){
+
+     return await prisma.channel.findMany({
+      take:5,
+      where:{
+        type:{
+          not:{
+            equals:'PRIVATE',
+          }
+        },
+        members:{
+          none:{
+            intraId,
+          }
+        },
+        name: {
+          contains: query,
+        },
+      }
+    })
+  }
+  
 }

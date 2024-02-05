@@ -54,6 +54,9 @@ export const Navbar = () => {
 	const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -62,10 +65,13 @@ export const Navbar = () => {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
 
-				if (data !== null) {
-					setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					setUser(data.data);
 				}
 			} catch (error: any) {}
 		};
@@ -83,7 +89,7 @@ export const Navbar = () => {
 	}, [user, pathname]);
 
 	return (
-		<div className="z-20 bg-[#1F212A] flex flex-row w-full overflow-hidden">
+		<div className="z-20 bg-[#1F212A] flex flex-row w-[100vw]">
 			<div className="w-16 h-16 bg-[#292D39]">
 				<Image
 					unoptimized={true}
@@ -134,7 +140,7 @@ export const Navbar = () => {
 								</div>
 							</div>
 						</div>
-						<div className="flex justify-end p-4 flex-grow">
+						<div className="flex justify-end p-4 flex-grow md:mr-3">
 							{!isDivVisible && isProfileOwner && (
 								<button onClick={toggleDivVisibility} className="tooltip">
 									<div className="text-sm tooltiptext w-24 bg-gray-800 bg-opacity-80 top-0 right-8 text-white p-1 rounded-md hover:transition duration-300 ease-in">
@@ -149,12 +155,8 @@ export const Navbar = () => {
 								</button>
 							)}
 							{!isProfileOwner && user && (
-								<Link
-									href={`/profile/${user.intraId}`}
-									className="flex flex-row"
-								>
+								<Link href={`/profile/${user.intraId}`} className="flex flex-row">
 									<Image
-										unoptimized={true}
 										src={user.Avatar}
 										alt="Description of the image"
 										priority={true}
@@ -162,6 +164,12 @@ export const Navbar = () => {
 										height={30}
 										sizes=""
 										className="rounded-full mr-2 w-[30px] h-[30px]"
+										unoptimized={true}
+										onError={(e: any) => {
+											e.target.onerror = null;
+											e.target.src =
+												'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+										}}
 									/>
 									<div className="text-slate-400 font-sans">{user.login}</div>
 								</Link>

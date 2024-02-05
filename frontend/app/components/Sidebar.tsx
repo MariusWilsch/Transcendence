@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { use, useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User, Message } from '../AppContext';
 import { RiPingPongLine } from 'react-icons/ri';
@@ -11,13 +11,12 @@ import { GrGroup } from 'react-icons/gr';
 import { FaUserFriends } from 'react-icons/fa';
 import { GrAchievement } from 'react-icons/gr';
 import { MdLeaderboard } from 'react-icons/md';
-import { IoHome } from 'react-icons/io5';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { CgProfile } from 'react-icons/cg';
 import { CiLogout } from 'react-icons/ci';
 import { usePathname } from 'next/navigation';
 import { FaCircleDot } from 'react-icons/fa6';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Cookies from 'universal-cookie';
 import { io } from 'socket.io-client';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
@@ -32,6 +31,7 @@ import { RootState } from '../gamelobby/GlobalRedux/store';
 
 export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
+	const [renderOnce, setRenderOnce] = useState(false);
 	const pathname = usePathname();
 	const { handleInvite } = useStartGame();
 	const { isConnected, isGameStarted, countDownDone } = useSelector(
@@ -40,11 +40,7 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-	// console.log("isSidebarVisible", context.isSidebarVisible);
-	//   useEffect(() => {
-	//     context.setisSidebarVisible(window.innerWidth > 768);
-	//   }, []);
-
+	const createSocket = () => {};
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -75,7 +71,6 @@ export const Sidebar = () => {
 
 	useEffect(() => {
 		if (countDownDone && isGameStarted && pathname !== '/gamelobby/game') {
-			console.log('in game should not be in game');
 			dispatch(disconnect());
 		}
 	}, [pathname, isGameStarted]);
@@ -106,48 +101,55 @@ export const Sidebar = () => {
 			context.setSocket(newSocket);
 		}
 		if (context.socket && context.user) {
-			context.socket.on('privateChat', (data: Message) => {
-				if (data) {
-					if (data.sender !== context.user?.intraId) {
-						toast.success('new message');
-					}
-				}
-			});
 			context.socket.on('privateMatch', (data: any) => {
-				// if (data.from.intraId !== context.user?.intraId)
-				// {
-				const msg = 'invitation from ' + data.from.login + ' for a game';
+				const msg = data.from.login + ' invite you for a game';
 				toast((t) => (
-					<>
-						<p> {msg} </p>
-						<span className="flex flex-row space-x-6">
-							<button
-								className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-								onClick={() => {
-									console.log('accept handler');
-									toast.dismiss(t.id);
-									handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
-								}}
-							>
-								<FiCheckCircle size="30" className="text-green-300" />
-							</button>
-							<button
-								className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-								onClick={() => {
-									toast.dismiss(t.id);
-									console.log('dismiss handler');
-								}}
-							>
-								<FiXCircle size="30" className="text-red-300" />
-							</button>
-						</span>
-					</>
+					<div className="flex flex-row items-center ">
+						<div className="font-serif text-black font-semibold w-[64%]">{msg}</div>
+						<button
+							className="w-[18%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
+							onClick={() => {
+								toast.dismiss(t.id);
+								handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
+							}}
+						>
+							<FiCheckCircle size="30" className="text-green-300" />
+						</button>
+						<button
+							className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
+							onClick={() => {
+								toast.dismiss(t.id);
+							}}
+						>
+							<FiXCircle size="30" className="text-red-300" />
+						</button>
+					</div>
 				));
-				console.log('the private chat event has been occured');
-				// }
 			});
+			return () => {
+				if (context.socket) {
+					context.socket.off('privateMatch');
+				}
+			};
 		}
 	}, [context.socket, context.user, isConnected]);
+	useEffect(() => {
+		if (context.socket) {
+		  context.socket.on('privateChat', (data: Message) => {
+			if (data && data.sender !== context.user?.intraId) {
+			//   context.setMessageNum((prevMessageNum) => prevMessageNum + 1);
+			}
+		  });
+		}
+	  
+		return () => {
+		  if (context.socket) {
+			context.socket.off('privateChat');
+		  }
+		};
+	  }, [context.socket]);  
+	  
+	  
 
 	useEffect(() => {
 		const segments = pathname.split('/');
@@ -156,6 +158,9 @@ export const Sidebar = () => {
 
 	useEffect(() => {
 		const checkJwtCookie = async () => {
+			if (context.user !== null) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -164,10 +169,12 @@ export const Sidebar = () => {
 						credentials: 'include',
 					},
 				);
-				var data: User = await response.json();
-
-				if (data !== null) {
-					context.setUser(data);
+				var data = await response.json();
+				if (data.succes === false) {
+					return;
+				}
+				if (data.data !== null && data.data !== undefined) {
+					context.setUser(data.data);
 				}
 			} catch (error: any) {
 				const msg = 'Error during login' + error.message;
@@ -181,7 +188,7 @@ export const Sidebar = () => {
 	return (
 		<div>
 			{context.isSidebarVisible && (
-				<div className="z-50 w-16 custom-height ">
+				<div className="z-50 w-16 custom-height bg-[#292D39]">
 					<div
 						className={`transition-all duration-500 ease-in-out ${
 							context.isSidebarVisible ? 'w-16 opacity-100' : 'w-0 opacity-0'
@@ -192,17 +199,16 @@ export const Sidebar = () => {
 								<div className=" custom-height fixed text-black bg-[#292D39]">
 									<ul className="list-none text-center justify-center items-center w-[64px] bg-[#292D39]">
 										<div className="flex flex-col justify-between custom-height bg-[#292D39]">
-											<div className="">
-												<li className="">
-													<Link
-														href={`/profile/${context.user?.intraId}`}
-														className={`${
-															context.user === null
-																? 'pointer-events-none'
-																: 'pointer-events-auto'
-														}
+											<div
+												className={`${
+													context.user === null
+														? 'pointer-events-none'
+														: 'pointer-events-auto'
+												}
                     `}
-													>
+											>
+												<li className="">
+													<Link href={`/profile/${context.user?.intraId}`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -298,7 +304,11 @@ export const Sidebar = () => {
 													</Link>
 												</li>
 												<li>
-													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}>
+													<Link
+														href={`${process.env.NEXT_PUBLIC_API_URL}:3000/chat`}
+														onClick={() => context.setMessageNum(0)}
+														className="relative"
+													>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
 															initial={{ opacity: 0 }}
@@ -311,6 +321,11 @@ export const Sidebar = () => {
 																	RouterName === 'chat' ? 'text-slate-50' : 'text-slate-500'
 																} hover:text-slate-50 mx-auto m-8`}
 															/>
+															{context.messageNumb > 0 && (
+																<div className="notification-dot">
+																	{context?.messageNumb > 99 ? '99+' : context?.messageNumb}
+																</div>
+															)}
 														</motion.div>
 													</Link>
 												</li>
@@ -333,7 +348,7 @@ export const Sidebar = () => {
 												</li>
 											</div>
 											<div>
-												<li onClick={() => console.log('cfsdfaf')} className=" ">
+												<li className=" ">
 													<Link href={`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/logout`}>
 														<motion.div
 															whileTap={{ scale: 0.8 }}
