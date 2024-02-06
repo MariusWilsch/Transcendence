@@ -11,6 +11,7 @@ import {
 	setMatchmaking,
 	MatchmakingStatus,
 	resetConfig,
+	addToLobby,
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
@@ -28,8 +29,9 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		return;
 	}
 
-	socket = io('http://localhost:3001', {
+	socket = io(`${process.env.NEXT_PUBLIC_API_URL}:3001`, {
 		auth: { token },
+		reconnection: false,
 	});
 
 	if (!socket) return;
@@ -54,6 +56,8 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
 		socket?.disconnect();
 	});
+
+	socket.on('connectionSuccess', () => store.dispatch(addToLobby()));
 
 	socket.on('createGame', (gameState: GameState) => {
 		store.dispatch(initGame(gameState));
@@ -93,6 +97,7 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			ClientSocket?.emit('cancelMatchmaking');
 			break;
 		case 'connection/addToLobby':
+			store.dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 			ClientSocket?.emit('addToLobby');
 			break;
 		case 'gameConfig/setupInteraction':

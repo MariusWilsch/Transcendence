@@ -40,9 +40,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected via ${client.id}`);
 		//* If the client is not authenticated, disconnect him
 		if (!client.handshake.auth.token) return client.disconnect(true);
+		this.checkForDuplicateUsers(client);
+	}
 
-		const user = this.authService.getUserFromJwt(client.handshake.auth.token);
-
+	async checkForDuplicateUsers(client: IO) {
+		const user = await this.authService.getUserFromJwt(
+			client.handshake.auth.token
+		);
+		if (this.duplicateUsers.has(user.intraId)) {
+			console.log('Duplicate user detected');
+			client.emit('duplicateRequest');
+			client.disconnect(true);
+		}
+		this.duplicateUsers.add(user.intraId);
 		client.data = {
 			user: {
 				intraId: user.intraId,
@@ -50,13 +60,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				login: user.login,
 			},
 		};
-		//* If the user is already connected, disconnect him
-		if (this.duplicateUsers.has(client.data.user.intraId)) {
-			console.log('Duplicate user detected');
-			client.emit('duplicateRequest');
-			client.disconnect(true);
-		}
-		this.duplicateUsers.add(client.data.user.intraId);
+		client.emit('connectionSuccess');
 	}
 
 	handleDisconnect(client: IO) {
@@ -70,7 +74,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
-		this.duplicateUsers.delete(client.data.user.intraId);
+		if (client.data.user) this.duplicateUsers.delete(client.data.user.intraId);
 	}
 
 	checkForAvailablePlayers() {
@@ -216,8 +220,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		if (this.gameService.areCommandsSet(client.data.roomID))
-			client.disconnect(true); //! should send disconnect message to client
+		// if (this.gameService.areCommandsSet(client.data.roomID))
+		// 	client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
 		this.beginGameLoop(client.data.roomID);
 		this.userService.updateUserState(client.data.user.intraId, 'INGAME');

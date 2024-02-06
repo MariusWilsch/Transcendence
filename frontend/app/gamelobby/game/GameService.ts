@@ -8,6 +8,7 @@ import { mapType } from '@/app/gamelobby/GlobalRedux/features';
 export class GameService {
 	//* Base variables
 	private app: PIXI.Application;
+	// private container: HTMLDivElement;
 	//* Game elements
 	private ball = new PIXI.Graphics();
 	private leftPaddle = new PIXI.Graphics();
@@ -39,8 +40,7 @@ export class GameService {
 			width: width,
 			height: height,
 			antialias: true, // Enable antialiasing
-			resolution: 1, //? Should I use this
-			resizeTo: window, // Resize canvas to window
+			// resizeTo: container, // Resize canvas to fit container
 			...options,
 			// autoDensity: true, // Should I use this/,
 		});
@@ -49,6 +49,7 @@ export class GameService {
 		this.prevBallPosition = { x: 0, y: 0 };
 		this.lastUpdateTime = performance.now(); // Get current time
 		// this.nextUpdateTime = this.lastUpdateTime + 1000 / 60; // 60 FPS
+		// this.container = container;
 	}
 
 	//* Private methods
@@ -181,4 +182,62 @@ export class GameService {
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
 	}
+
+	// adjustPaddlePosition(
+	// 	gameState: GameState,
+	// 	newCanvasWidth: number,
+	// 	newCanvasHeight: number,
+	// ) {
+	// 	const paddles = gameState.paddles;
+	// 	// Adjust the y position for both paddles to ensure they stay within the new canvas height
+	// 	paddles.player1.position.y = Math.max(
+	// 		0,
+	// 		Math.min(
+	// 			paddles.player1.position.y,
+	// 			newCanvasHeight - paddles.player1.size.height,
+	// 		),
+	// 	);
+	// 	paddles.player2.position.y = Math.max(
+	// 		0,
+	// 		Math.min(
+	// 			paddles.player2.position.y,
+	// 			newCanvasHeight - paddles.player2.size.height,
+	// 		),
+	// 	);
+
+	// 	// Adjust the x position of the right paddle (player2) based on the new canvas width
+	// 	paddles.player2.position.x = newCanvasWidth - paddles.player2.size.width;
+	// }
+
+	// adjustBallPosition(
+	// 	gameState: GameState,
+	// 	newCanvasWidth: number,
+	// 	newCanvasHeight: number,
+	// ) {
+	// 	const ball = gameState.ball;
+	// 	// Adjust the ball position to ensure it remains within the resized canvas bounds
+	// 	ball.position.x = Math.max(
+	// 		ball.radius,
+	// 		Math.min(ball.position.x, newCanvasWidth - ball.radius),
+	// 	);
+	// 	ball.position.y = Math.max(
+	// 		ball.radius,
+	// 		Math.min(ball.position.y, newCanvasHeight - ball.radius),
+	// 	);
+	// }
+
+	// public resizeGame(gameState: GameState, newWidth: number, newHeight: number) {
+	// 	// Resize the PIXI application
+	// 	this.app.renderer.resize(newWidth, newHeight);
+
+	// 	// Adjust paddles and ball positions
+	// 	this.adjustPaddlePosition(gameState, newWidth, newHeight);
+	// 	this.adjustBallPosition(gameState, newWidth, newHeight);
+
+	// 	// Update gameState with new canvas dimensions
+	// 	gameState.canvasWidth = newWidth;
+	// 	gameState.canvasHeight = newHeight;
+
+	// 	// Other necessary adjustments (e.g., velocity adjustments, aspect ratio considerations)
+	// }
 }

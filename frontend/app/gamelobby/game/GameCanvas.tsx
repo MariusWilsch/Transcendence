@@ -30,7 +30,6 @@ export const GameCanvas: React.FC = () => {
 	);
 	const dispatch = useDispatch();
 
-
 	useEffect(() => {
 		const mouseMoveHandler = (e: MouseEvent) =>
 			handleMouseMove(dispatch, e, canvasRef);
@@ -70,9 +69,48 @@ export const GameCanvas: React.FC = () => {
 		}
 		//* Update the game service with the current game state
 		if (serviceRef.current) {
-			console.log('Updating game service with', gameState);
 			serviceRef.current.updateGameElements(gameState);
 		}
+
+		// const handleResize = () => {
+		// 	// Assuming canvasRef is a ref to the container div
+		// 	const container = canvasRef.current;
+		// 	if (!container) return;
+
+		// 	const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
+		// 		container;
+		// 	const { newWidth, newHeight } = calculateNewDimensions(
+		// 		containerWidth,
+		// 		containerHeight,
+		// 	);
+
+		// 	// Call your resizeGame function with the new dimensions
+		// 	serviceRef.current?.resizeGame(gameState, newWidth, newHeight);
+		// };
+
+		// window.addEventListener('resize', handleResize);
+
+		// return () => {
+		// 	window.removeEventListener('resize', handleResize);
+		// };
+
+		function calculateNewDimensions(
+			containerWidth: number,
+			containerHeight: number,
+		) {
+			const aspectRatio = 3 / 2;
+			let newWidth = containerWidth;
+			let newHeight = containerWidth / aspectRatio;
+
+			// Adjust based on the height if the new height exceeds the container's height
+			if (newHeight > containerHeight) {
+				newHeight = containerHeight;
+				newWidth = newHeight * aspectRatio;
+			}
+
+			return { newWidth, newHeight };
+		}
+
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
 	}, [gameState, mapChoice, isConnected]);
 

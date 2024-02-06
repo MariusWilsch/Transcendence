@@ -11,7 +11,6 @@ import {
 	addToLobby,
 	aiDifficulty,
 	invitePrivate,
-	setMatchmaking,
 	startConnection,
 } from '../GlobalRedux/features';
 
@@ -27,11 +26,13 @@ const useStartGame = () => {
 	const pushGame = (isConnected: ConnectionStatus) => {
 		if (isConnected === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
-		if (isInMatchmaking === MatchmakingStatus.DUPLICATE) return;
-		dispatch(addToLobby());
-		gameConfig.aiDifficulty !== aiDifficulty.NONE
-			? dispatch(addToLobby())
-			: dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+		if (
+			isInMatchmaking === MatchmakingStatus.DUPLICATE ||
+			isInMatchmaking === MatchmakingStatus.SEARCHING
+		)
+			return;
+		if (isConnected === ConnectionStatus.CONNECTED) dispatch(addToLobby());
+		if (gameConfig.aiDifficulty !== aiDifficulty.NONE) dispatch(addToLobby());
 	};
 
 	const handleInvite = (
@@ -46,25 +47,28 @@ const useStartGame = () => {
 			: dispatch(acceptPrivate({ inviteeID }));
 	};
 
-	const showModal = () => {
-		const modal = document.getElementById(
-			'startMatchmakingModal',
-		) as HTMLDialogElement;
-		modal?.showModal();
-	};
-
-	const closeModal = () => {
-		if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
-		const modal = document.getElementById(
-			'startMatchmakingModal',
-		) as HTMLDialogElement;
-		modal?.close();
-	};
-
 	useEffect(() => {
+		const showModal = () => {
+			if (typeof document !== 'undefined') {
+				const modal = document.getElementById(
+					'startMatchmakingModal',
+				) as HTMLDialogElement;
+				modal?.showModal();
+			}
+		};
+
+		const closeModal = () => {
+			if (typeof document !== 'undefined') {
+				if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
+				const modal = document.getElementById(
+					'startMatchmakingModal',
+				) as HTMLDialogElement;
+				modal?.close();
+			}
+		};
 		if (isGameStarted) {
 			closeModal();
-			router.push(`/gamelobby/game`);
+			router.push(`/gamelobby/game`, { scroll: false });
 		} else if (
 			isConnected === ConnectionStatus.CONNECTED &&
 			isInMatchmaking === MatchmakingStatus.SEARCHING
