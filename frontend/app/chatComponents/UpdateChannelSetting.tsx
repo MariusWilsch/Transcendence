@@ -99,8 +99,8 @@ const UpdateChannelSetting = (props:any) => {
           </label>
           <input
             type="text"
-            id="channelName"
-            name="channelName"
+            id="newChannelName"
+            name="newChannelName"
             value={channelName}
             onChange={(e) => setChannelName(e.target.value)}
             className="bg-[#66757F] text-white  rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
@@ -112,7 +112,7 @@ const UpdateChannelSetting = (props:any) => {
             Type
           </label>
           <select
-            id="choseBox"
+            id="SekectChoseBox"
             value={channelType}
             onChange={handleSelectChange}
             className="bg-[#66757F] text-white rounded w-full py-2 px-3 text-whiteleading-tight focus:outline-none focus:shadow-outline"
@@ -133,7 +133,7 @@ const UpdateChannelSetting = (props:any) => {
             </label>
             <input
               type="password"
-              id="password"
+              id="newPassword"
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

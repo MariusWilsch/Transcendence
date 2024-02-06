@@ -7,45 +7,45 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 
 
-async function creatChannel(Channelname: string, type: string, password: string, owner: User) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/createChannel/${owner.intraId}/${Channelname}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          type: `${type}`,
-          password: `${password}`,
-        }),
-      }
-    );
-    const res = await response.json();
-    if (response.ok) {
-      res.sucess ? toast.success('channel created successfuly') : toast.error(res.error);
-    }
-    else {
-      const msg = 'Error: ' + res.error;
-      toast.error(msg);
-    }
-  }
-  catch (e) {
-    const msg = 'Error' + e;
-    toast.error(msg);
-  }
-}
-const Demo = () => {
+const CreateChannelModal = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [channelName, setChannelName] = useState('');
   const [channelType, setChannelType] = useState('PUBLIC');
   const [password, setPassword] = useState('');
   const context = useAppContext();
-
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
+  
+  async function creatChannel(Channelname: string, type: string, password: string, owner: User) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/createChannel/${owner.intraId}/${Channelname}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            type: `${type}`,
+            password: `${password}`,
+          }),
+        }
+      );
+      const res = await response.json();
+      if (response.ok) {
+        res.sucess ? toast.success('channel created successfuly') : toast.error(res.error);
+        context.setTrigger(!context.trigger);
+      }
+      else {
+        const msg = 'Error: ' + res.error;
+        toast.error(msg);
+      }
+    }
+    catch (e) {
+      const msg = 'Error' + e;
+      toast.error(msg);
+    }
+  }
+  const handleSubmit = () => {
     setChannelName('');
     setPassword('');
     close();
@@ -55,14 +55,15 @@ const Demo = () => {
   }
   const createAChannel = (e: any) => {
     e.preventDefault();
-    if (channelName && context.userData) {
+    console.log('this is the channel name', channelName);
+    if (channelName && context.user) {
       if (channelType === "PROTECTED" && password.length < 3)
       {
         toast.error("error : password require more than 3 characters ");
         return;
       }
-      creatChannel(channelName, channelType, password, context.userData);
-      handleSubmit(e);
+      creatChannel(channelName, channelType, password, context.user);
+      handleSubmit();
     }
     else {
       toast.error('you should enter atleast the name of your channel');
@@ -70,7 +71,7 @@ const Demo = () => {
   }
   useEffect(() => {
 
-  }, [context.userData]);
+  }, [context.user]);
   return (
     <>
       <Modal
@@ -151,4 +152,4 @@ const Demo = () => {
   );
 }
 
-export default Demo;
+export default CreateChannelModal;

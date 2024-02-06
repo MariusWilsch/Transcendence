@@ -8,7 +8,6 @@ import Link from "next/link";
 const JoinProtectedChannel = ({ selectedChannel }: any) => {
     const context = useAppContext();
     const [password, setPassword] = useState('');
-    const [loading, seLoading] = useState(false);
     const handleKeyPress = (event: any) => {
       if (event.key === 'Enter') {
         handleSubmit(password);
@@ -35,7 +34,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
     );
     if (response.ok) {
       const res = await response.json();
-      toast.success('Joined channel');
+      if (res.success) toast.success('Joined channel');
     } else {
       const errorData = await response.json();
       throw new Error(`Failed to join channel: ${errorData.message}`);
@@ -63,7 +62,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
               <button className="p-2 text-blue-700 font-bold" >JOIN</button>
             </Popover.Target>
             <Popover.Dropdown>
-              <div className="flex ">
+              <div className="flex space-x-3 ">
                 <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -71,7 +70,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
                   type="password"
                   placeholder="password"
                 />
-                <Button onClick={() => handleSubmit(password)}>submit</Button>
+                <button className="border border-slate-800 bg-blue-500 p-2" onClick={() => handleSubmit(password)}>submit</button>
               </div>
             </Popover.Dropdown>
           </Popover>

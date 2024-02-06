@@ -40,7 +40,6 @@ export const Sidebar = () => {
 	const dispatch = useDispatch();
 	const context = useAppContext();
 
-	const createSocket = () => {};
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -135,19 +134,20 @@ export const Sidebar = () => {
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
 		if (context.socket) {
-		  context.socket.on('privateChat', (data: Message) => {
-			if (data && data.sender !== context.user?.intraId) {
-			//   context.setMessageNum((prevMessageNum) => prevMessageNum + 1);
+		  context.socket.on('messageNotification', (data: Message) => {
+			if (data && context?.user) {
+			  context.setMessageNum(context.messageNumb + 1);
+			toast.success('new message');
 			}
 		  });
 		}
 	  
 		return () => {
 		  if (context.socket) {
-			context.socket.off('privateChat');
+			context.socket.off('messageNotification');
 		  }
 		};
-	  }, [context.socket]);  
+	  }, [context.socket, context.messageNumb]);  
 	  
 	  
 
@@ -184,7 +184,7 @@ export const Sidebar = () => {
 		};
 		checkJwtCookie();
 	}, []);
-
+	console.log('this is the message number', context.messageNumb);
 	return (
 		<div>
 			{context.isSidebarVisible && (
