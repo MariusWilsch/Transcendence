@@ -12,9 +12,6 @@ import { RootState } from '@/app/gamelobby/GlobalRedux/store';
 import { Direction } from '@/interfaces';
 import { handleKeyDown, handleKeyUp, handleMouseMove } from './interaction';
 import { disconnect } from '@/app/gamelobby/GlobalRedux/features';
-import { useAppContext } from '@/app/AppContext';
-import { usePathname } from 'next/navigation';
-import path from 'path';
 
 export const GameCanvas: React.FC = () => {
 	//* Refs
@@ -33,7 +30,7 @@ export const GameCanvas: React.FC = () => {
 
 	useEffect(() => {
 		const mouseMoveHandler = (e: MouseEvent) =>
-			handleMouseMove(dispatch, e, canvasRef);
+			handleMouseMove(dispatch, e, canvasRef, serviceRef.current);
 		const keyDownHandler = (e: KeyboardEvent) =>
 			handleKeyDown(dispatch, curDir, e);
 		const keyUpHandler = (e: KeyboardEvent) => handleKeyUp(dispatch, curDir, e);
@@ -59,19 +56,15 @@ export const GameCanvas: React.FC = () => {
 		//* Create the game service if it doesn't exist
 		if (!serviceRef.current) {
 			console.log('Creating game service with', gameState);
-
 			serviceRef.current = new GameService(
 				canvasRef.current as HTMLDivElement,
-				gameState.canvasWidth,
-				gameState.canvasHeight,
 				mapChoice,
 			);
 			serviceRef.current.initGameElements(gameState.ball, gameState.paddles);
 		}
 
 		const handler = () => {
-			const obj = serviceRef.current?.resizeHandler();
-			if (obj) dispatch(sendCtxDimensions(obj));
+			serviceRef.current?.resizeHandler(gameState);
 		};
 
 		//* Update the game service with the current game state

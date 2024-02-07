@@ -2,6 +2,7 @@ import { Direction } from '@/interfaces';
 import { mouseMove, movePaddle } from '@/app/gamelobby/GlobalRedux/features';
 import { MutableRefObject } from 'react';
 import { Dispatch, UnknownAction } from 'redux';
+import { GameService } from './GameService';
 
 const updateDirection = (
 	newDirection: Direction,
@@ -54,10 +55,18 @@ export const handleMouseMove = (
 	dispatch: Dispatch<UnknownAction>,
 	e: MouseEvent,
 	canvasRef: React.RefObject<HTMLDivElement>,
+	serviceRef: GameService | null,
 ) => {
 	if (canvasRef.current) {
 		const canvasBounds = canvasRef.current.getBoundingClientRect();
-		const relativeYPos = e.clientY - canvasBounds.top;
-		dispatch(mouseMove({ yPos: relativeYPos }));
+
+		// Calculate the Y position in the backend's coordinate space
+		// (e.clientY - canvasBounds.top) gives the mouse's Y position relative to the canvas
+
+		const scaledYPos =
+			(e.clientY - canvasBounds.top) * serviceRef?.getScaleFactors().scaleY;
+
+		// Dispatch the mouse move with the Y position scaled to the backend's coordinate space
+		dispatch(mouseMove({ yPos: scaledYPos }));
 	}
 };

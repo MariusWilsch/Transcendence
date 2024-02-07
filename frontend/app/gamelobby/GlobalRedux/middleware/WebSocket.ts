@@ -63,6 +63,7 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		store.dispatch(initGame(gameState));
 		//* Will be set twice, once for each player
 		store.dispatch(gameStarted());
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('gameState', (gameState: GameState) => {

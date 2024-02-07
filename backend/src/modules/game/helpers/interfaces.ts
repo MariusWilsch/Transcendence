@@ -93,14 +93,6 @@ export interface GameSession {
 			username: string;
 		},
 	];
-	player1: {
-		canvasWidth: number;
-		canvasHeight: number;
-	};
-	player2: {
-		canvasWidth: number;
-		canvasHeight: number;
-	};
 }
 
 //* Client side interfaces
