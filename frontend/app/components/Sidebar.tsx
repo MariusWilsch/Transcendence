@@ -39,6 +39,7 @@ export const Sidebar = () => {
 	);
 	const dispatch = useDispatch();
 	const context = useAppContext();
+	const pattern: RegExp = /^localhost:3000\/chat\/\d+$/;
 
 	const getFriends = async () => {
 		try {
@@ -89,7 +90,6 @@ export const Sidebar = () => {
 			listenForFriendships();
 		}
 	}, [context.user, context.notifSocket]);
-
 	useEffect(() => {
 		if (!context.socket) {
 			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
@@ -133,9 +133,9 @@ export const Sidebar = () => {
 		}
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
-		if (context.socket) {
-		  context.socket.on('messageNotification', (data: Message) => {
-			if (data && context?.user) {
+		if (context.socket  && !pattern.test(pathname)) {
+		  context.socket.on('messageNotification', (data: any) => {
+			if (context?.user) {
 			  context.setMessageNum(context.messageNumb + 1);
 			toast.success('new message');
 			}
@@ -147,7 +147,7 @@ export const Sidebar = () => {
 			context.socket.off('messageNotification');
 		  }
 		};
-	  }, [context.socket, context.messageNumb]);  
+	  }, [context.socket, context.messageNumb, context.user, pathname]);  
 	  
 	  
 
@@ -184,7 +184,6 @@ export const Sidebar = () => {
 		};
 		checkJwtCookie();
 	}, []);
-	console.log('this is the message number', context.messageNumb);
 	return (
 		<div>
 			{context.isSidebarVisible && (

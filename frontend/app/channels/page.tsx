@@ -59,7 +59,6 @@ const ChannelsLobby = () => {
 	useEffect(() => {
 		const checkJwtCookie = async () => {
 			try {
-				console.log(context.user);
 				if (!context.user)
 				{
 					const user = await getCurrentUser();
@@ -218,7 +217,6 @@ const ChannelsLobby = () => {
 			toast.error(msg);
 		}
 	};
-	console.log('this is the invitation channels',invitationChannels);
 	if (isLoading)
 	{
 		return <Loading />

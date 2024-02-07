@@ -34,7 +34,11 @@ async function joinChannel(channelId: string, type: string, password: string, us
     );
     if (response.ok) {
       const res = await response.json();
-      if (res.success) toast.success('Joined channel');
+      if (res.success)
+      {
+        toast.success('Joined channel');
+        context.setTrigger(!context.trigger);
+      }
     } else {
       const errorData = await response.json();
       throw new Error(`Failed to join channel: ${errorData.message}`);
