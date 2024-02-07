@@ -21,7 +21,22 @@ const useStartGame = () => {
 		(state: RootState) => state.connection,
 	);
 	const gameConfig = useSelector((state: RootState) => state.gameConfig);
-	//! Modal shouldn't be fetched by using getElementById
+
+	function initCanvasSize() {
+		let size = [window.innerWidth / 2, window.innerHeight / 2];
+		const ratio = 16 / 9;
+
+		let w, h;
+
+		if (size[0] / size[1] >= ratio) {
+			w = size[1] * ratio;
+			h = size[1];
+		} else {
+			w = size[0];
+			h = size[0] / ratio;
+		}
+		return { width: w, height: h };
+	}
 
 	const pushGame = (isConnected: ConnectionStatus) => {
 		if (isConnected === ConnectionStatus.DISCONNECTED)
@@ -31,7 +46,8 @@ const useStartGame = () => {
 			isInMatchmaking === MatchmakingStatus.SEARCHING
 		)
 			return;
-		if (isConnected === ConnectionStatus.CONNECTED) dispatch(addToLobby());
+		if (isConnected === ConnectionStatus.CONNECTED)
+			dispatch(addToLobby(initCanvasSize()));
 		if (gameConfig.aiDifficulty !== aiDifficulty.NONE) dispatch(addToLobby());
 	};
 

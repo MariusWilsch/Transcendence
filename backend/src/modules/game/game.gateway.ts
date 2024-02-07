@@ -18,21 +18,25 @@ import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
 import { UserService } from 'modules/user/user.service';
 
+export interface LobbyObject {
+	client: IO;
+	canvasWidth: number;
+	canvasHeight: number;
+}
+
 @WebSocketGateway({
 	cors: {
 		origin: 'http://localhost:3000',
 	},
-	// namespace: '/gamelobby/game',
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
-		private authService: AuthService,
-		private userService: UserService
+		private authService: AuthService
 	) {}
 
 	@WebSocketServer() Server: Server;
-	lobby: IO[] = [];
+	lobby: LobbyObject[] = [];
 	privateLobby = new Map<string, IO>();
 	duplicateUsers: Set<string> = new Set();
 
@@ -64,7 +68,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleDisconnect(client: IO) {
-		this.lobby = this.lobby.filter((player) => player.id !== client.id);
+		this.lobby = this.lobby.filter((player) => player.client.id !== client.id);
 		console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
 		const roomID = client.data.roomID;
@@ -85,7 +89,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.createGame(player1, player2);
 	}
 
-	createGame(player1: IO, player2: IO) {
+	createGame(player1: LobbyObject, player2: LobbyObject) {
 		// Generate a room ID
 		const roomID = uuidv4();
 
@@ -223,13 +227,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// if (this.gameService.areCommandsSet(client.data.roomID))
 		// 	client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
-		this.beginGameLoop(client.data.roomID);
-		this.userService.updateUserState(client.data.user.intraId, 'INGAME');
+		// this.beginGameLoop(client.data.roomID);
+		// this.userService.updateUserState(client.data.user.intraId, 'INGAME');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')
 	handleCancelMatchmaking(client: IO) {
-		this.lobby = this.lobby.filter((player) => player.id !== client.id);
+		this.lobby = this.lobby.filter((player) => player.client.id !== client.id);
 		console.log(
 			`Client ${client.id} removed from matchmaking. New lobby size: ${this.lobby.length}`
 		);
@@ -256,11 +260,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO): void {
-		this.lobby.push(client);
+	handleAddToLobby(client: IO, payload: any): void {
+		console.log('payload: ', payload);
+		const lobbyObject = {
+			client,
+			canvasWidth: payload.canvasWidth,
+			canvasHeight: payload.canvasHeight,
+		};
+		this.lobby.push(lobbyObject);
 		console.log(
 			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
 		);
 		this.checkForAvailablePlayers();
 	}
+
+	// @SubscribeMessage('sendCtxDimensions')
+	// handleSendCtxDimensions(client: IO, payload: any): void {
+	// 	console.log('sendCtxDimensions event received', payload);
+
+	// }
 }

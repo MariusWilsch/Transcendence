@@ -3,7 +3,6 @@ import * as PIXI from 'pixi.js';
 import { GameState } from '../../../interfaces/GameState';
 import { mapType } from '@/app/gamelobby/GlobalRedux/features';
 //* Decide later if I want to use this
-// import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 
 export class GameService {
 	//* Base variables
@@ -13,6 +12,8 @@ export class GameService {
 	private ball = new PIXI.Graphics();
 	private leftPaddle = new PIXI.Graphics();
 	private rightPaddle = new PIXI.Graphics();
+	private map = new PIXI.Graphics();
+	private mapChoice: number;
 	//* Lerp Variables
 	private prevBallPosition: { x: number; y: number };
 	private lastUpdateTime: number;
@@ -37,8 +38,8 @@ export class GameService {
 				? { backgroundAlpha: 0 }
 				: { background: 0x000000 };
 		this.app = new PIXI.Application<HTMLCanvasElement>({
-			width: width,
-			height: height,
+			width,
+			height,
 			antialias: true, // Enable antialiasing
 			// resizeTo: container, // Resize canvas to fit container
 			...options,
@@ -46,6 +47,7 @@ export class GameService {
 		});
 		container.appendChild(this.app.view as HTMLCanvasElement);
 		mapChoice === mapType.STANDARD ? this.drawMap1() : this.drawMap2(height);
+		this.mapChoice = mapChoice;
 		this.prevBallPosition = { x: 0, y: 0 };
 		this.lastUpdateTime = performance.now(); // Get current time
 		// this.nextUpdateTime = this.lastUpdateTime + 1000 / 60; // 60 FPS
@@ -54,11 +56,27 @@ export class GameService {
 
 	//* Private methods
 
-	private drawMap1() {
-		const graphics = new PIXI.Graphics();
+	public resizeHandler(): { width: number; height: number } {
+		let size = [window.innerWidth / 2, window.innerHeight / 2];
+		let ratio = 16 / 9;
+		let w, h;
+		if (size[0] / size[1] >= ratio) {
+			w = size[1] * ratio;
+			h = size[1];
+		} else {
+			w = size[0];
+			h = size[0] / ratio;
+		}
+		this.app.renderer.resize(w, h);
+		this.map.clear();
+		this.mapChoice === mapType.STANDARD ? this.drawMap1() : this.drawMap2(h);
 
+		return { width: w, height: h };
+	}
+
+	private drawMap1() {
 		// Set the line style (width, color)
-		graphics.lineStyle(2, 0xffffff, 1);
+		this.map.lineStyle(2, 0xffffff, 1);
 
 		// Get the middle of the canvas
 		const middleX = this.app.view.width / 2;
@@ -66,32 +84,30 @@ export class GameService {
 
 		// Draw a circle in the middle of the canvas
 		const radius = 20;
-		graphics.drawCircle(middleX, middleY, radius);
+		this.map.drawCircle(middleX, middleY, radius);
 		// Draw a line from the top to the top edge of the circle
-		graphics.moveTo(middleX, 0);
-		graphics.lineTo(middleX, middleY - radius);
+		this.map.moveTo(middleX, 0);
+		this.map.lineTo(middleX, middleY - radius);
 
 		// Draw a line from the bottom to the bottom edge of the circle
-		graphics.moveTo(middleX, middleY + radius);
-		graphics.lineTo(middleX, this.app.view.height);
+		this.map.moveTo(middleX, middleY + radius);
+		this.map.lineTo(middleX, this.app.view.height);
 
-		// Add the graphics to the stage
-		this.app.stage.addChild(graphics);
+		// Add the this.map to the stage
+		this.app.stage.addChild(this.map);
 	}
 
 	private drawMap2(length: number) {
-		const graphics = new PIXI.Graphics();
-
-		graphics.lineStyle(2, 0xffffff, 1);
+		this.map.lineStyle(2, 0xffffff, 1);
 		const dashFrequency = 10 + 5;
 		const dashCount = Math.floor(length / dashFrequency);
 		const midX = this.app.view.width / 2;
 		for (let i = 0; i <= dashCount; i++) {
 			let lineStart = dashFrequency * i;
-			graphics.moveTo(midX, lineStart);
-			graphics.lineTo(midX, lineStart + 10);
+			this.map.moveTo(midX, lineStart);
+			this.map.lineTo(midX, lineStart + 10);
 		}
-		this.app.stage.addChild(graphics);
+		this.app.stage.addChild(this.map);
 	}
 
 	private lerp(start: number, end: number, t: number) {
@@ -182,62 +198,4 @@ export class GameService {
 		this.drawPaddle(paddles.player1, 'left');
 		this.drawPaddle(paddles.player2, 'right');
 	}
-
-	// adjustPaddlePosition(
-	// 	gameState: GameState,
-	// 	newCanvasWidth: number,
-	// 	newCanvasHeight: number,
-	// ) {
-	// 	const paddles = gameState.paddles;
-	// 	// Adjust the y position for both paddles to ensure they stay within the new canvas height
-	// 	paddles.player1.position.y = Math.max(
-	// 		0,
-	// 		Math.min(
-	// 			paddles.player1.position.y,
-	// 			newCanvasHeight - paddles.player1.size.height,
-	// 		),
-	// 	);
-	// 	paddles.player2.position.y = Math.max(
-	// 		0,
-	// 		Math.min(
-	// 			paddles.player2.position.y,
-	// 			newCanvasHeight - paddles.player2.size.height,
-	// 		),
-	// 	);
-
-	// 	// Adjust the x position of the right paddle (player2) based on the new canvas width
-	// 	paddles.player2.position.x = newCanvasWidth - paddles.player2.size.width;
-	// }
-
-	// adjustBallPosition(
-	// 	gameState: GameState,
-	// 	newCanvasWidth: number,
-	// 	newCanvasHeight: number,
-	// ) {
-	// 	const ball = gameState.ball;
-	// 	// Adjust the ball position to ensure it remains within the resized canvas bounds
-	// 	ball.position.x = Math.max(
-	// 		ball.radius,
-	// 		Math.min(ball.position.x, newCanvasWidth - ball.radius),
-	// 	);
-	// 	ball.position.y = Math.max(
-	// 		ball.radius,
-	// 		Math.min(ball.position.y, newCanvasHeight - ball.radius),
-	// 	);
-	// }
-
-	// public resizeGame(gameState: GameState, newWidth: number, newHeight: number) {
-	// 	// Resize the PIXI application
-	// 	this.app.renderer.resize(newWidth, newHeight);
-
-	// 	// Adjust paddles and ball positions
-	// 	this.adjustPaddlePosition(gameState, newWidth, newHeight);
-	// 	this.adjustBallPosition(gameState, newWidth, newHeight);
-
-	// 	// Update gameState with new canvas dimensions
-	// 	gameState.canvasWidth = newWidth;
-	// 	gameState.canvasHeight = newHeight;
-
-	// 	// Other necessary adjustments (e.g., velocity adjustments, aspect ratio considerations)
-	// }
 }

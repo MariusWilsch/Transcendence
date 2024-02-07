@@ -54,6 +54,10 @@ const gameSlice = createSlice({
 //* Action creators
 export const movePaddle = createAction<PlayerMove>('game/movePaddle');
 export const mouseMove = createAction<MouseMove>('game/mouseMove');
+export const sendCtxDimensions = createAction<{
+	width: number;
+	height: number;
+}>('game/sendCtxDimensions');
 
 //! I think this one should go to connectionSlice.ts
 

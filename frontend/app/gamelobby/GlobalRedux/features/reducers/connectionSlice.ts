@@ -1,4 +1,3 @@
-import { MatchType } from '@/interfaces';
 import { createAction, createSlice } from '@reduxjs/toolkit';
 
 export enum GameOutcome {
@@ -22,6 +21,11 @@ export enum MatchmakingStatus {
 	SEARCHING = 'SEARCHING',
 	NOT_SEARCHING = 'NOT_SEARCHING',
 	DUPLICATE = 'DUPLICATE',
+}
+
+interface canvas {
+	width: number;
+	height: number;
 }
 
 interface PrivateMatch {
@@ -89,7 +93,7 @@ const connectionSlice = createSlice({
 //* Action creators
 export const startConnection = createAction('connection/startConnection');
 export const disconnect = createAction('connection/disconnect');
-export const addToLobby = createAction('connection/addToLobby');
+export const addToLobby = createAction<canvas | undefined>('connection/addToLobby');
 export const cancelMatchmaking = createAction('connection/cancelMatchmaking');
 export const startLoop = createAction('connection/startLoop');
 export const invitePrivate = createAction<PrivateMatch>(

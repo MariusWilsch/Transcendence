@@ -12,7 +12,6 @@ import {
 	PlayerMove,
 	Direction,
 	GameConfigState,
-	AiDifficulty,
 	InputType,
 	GameResult,
 	MatchOutcome,
@@ -21,6 +20,7 @@ import {
 import { Socket } from 'socket.io';
 import { createCommand } from './helpers/inputCommand';
 import { PrismaClient } from '@prisma/client';
+import { LobbyObject } from './game.gateway';
 //! What is the right way to import this?
 
 const prisma = new PrismaClient();
@@ -37,6 +37,8 @@ export class GameService {
 	private paddleSpeed: number;
 	private collisionOccurred = false;
 	private justScored = false;
+	private width;
+	private height;
 
 	//* Business logic
 
@@ -53,18 +55,30 @@ export class GameService {
 	 * to the server. In this case, it is used to represent the second player's connection to the game
 	 * server.
 	 */
-	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
+	public createGameSession(
+		roomID: string,
+		player1: LobbyObject,
+		player2: LobbyObject
+	) {
 		// Join both Sockets to a Socket.io room
-		player1.join(roomID);
-		player2.join(roomID);
+		player1.client.join(roomID);
+		player2.client.join(roomID);
 
 		// Associate the room ID and PlayerID with each Socket
-		player1.data = { ...player1.data, roomID, playerID: Player.P1 };
-		player2.data = { ...player2.data, roomID, playerID: Player.P2 };
+		player1.client.data = {
+			...player1.client.data,
+			roomID,
+			playerID: Player.P1,
+		};
+		player2.client.data = {
+			...player2.client.data,
+			roomID,
+			playerID: Player.P2,
+		};
 
-		if (player1.data.user.intraId === player2.data.user.intraId) {
+		if (player1.client.data.user.intraId === player2.client.data.user.intraId) {
 			console.log('AI game detected, user1 needs AI Avatar and username');
-			player1.data.user.login = 'Computer';
+			player1.client.data.user.login = 'Computer';
 		}
 
 		// Create a new game session and store it in the Map
@@ -75,10 +89,16 @@ export class GameService {
 			),
 			//! Strings need to be changed to the actual ID's but how do I get them?
 			players: [
-				{ playerIDs: player1.data.user.intraId, playerSockets: player1 },
-				{ playerIDs: player2.data.user.intraId, playerSockets: player2 },
+				{
+					playerIDs: player1.client.data.user.intraId,
+					playerSockets: player1.client,
+				},
+				{
+					playerIDs: player2.client.data.user.intraId,
+					playerSockets: player2.client,
+				},
 			],
-			gameState: this.initGameState(),
+			gameState: this.initGameState(player1, player2),
 			intervalID: undefined,
 			input: [
 				{
@@ -95,20 +115,30 @@ export class GameService {
 			command: [],
 			userData: [
 				{
-					avatar: player1.data.user.Avatar,
-					username: player1.data.user.login,
+					avatar: player1.client.data.user.Avatar,
+					username: player1.client.data.user.login,
 				},
 				{
-					avatar: player2.data.user.Avatar,
-					username: player2.data.user.login,
+					avatar: player2.client.data.user.Avatar,
+					username: player2.client.data.user.login,
 				},
 			],
+			player1: {
+				canvasHeight: player1.canvasHeight,
+				canvasWidth: player1.canvasWidth,
+			},
+			player2: {
+				canvasHeight: player2.canvasHeight,
+				canvasWidth: player2.canvasWidth,
+			},
 		});
 	}
 
-	private initGameState() {
-		const { paddleWidth, paddleHeight, ballRadius, canvasWidth, canvasHeight } =
-			GAME_CONFIG;
+	private initGameState(
+		{ canvasWidth, canvasHeight }: LobbyObject,
+		{ canvasWidth: canvasWidth2, canvasHeight: canvasHeight2 }: LobbyObject
+	): GameState {
+		const { paddleWidth, paddleHeight, ballRadius } = GAME_CONFIG;
 		this.paddleSpeed = canvasHeight / 1;
 		const paddleY = canvasHeight / 2 - paddleHeight / 2;
 		return {
@@ -146,8 +176,8 @@ export class GameService {
 	 */
 	public updateGameState(gameSession: GameSession, deltaTime: number) {
 		if (this.gameSessions.size == 0) return;
-		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		this.updatePaddles(gameSession, deltaTime);
+		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
 		this.checkPaddleCollision(
 			gameSession,
@@ -421,7 +451,6 @@ export class GameService {
 			ball,
 			difficulty: aiDifficulty,
 		});
-		console.log(command[playerRole]);
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {

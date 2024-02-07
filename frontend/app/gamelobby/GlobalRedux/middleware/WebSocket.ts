@@ -98,7 +98,7 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			break;
 		case 'connection/addToLobby':
 			store.dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-			ClientSocket?.emit('addToLobby');
+			ClientSocket?.emit('addToLobby', action.payload);
 			break;
 		case 'gameConfig/setupInteraction':
 			ClientSocket?.emit('setupInteraction', action.payload);
@@ -115,6 +115,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		//* Action creators middleware
 		case 'connection/gameFinished':
 			store.dispatch(resetConfig());
+			break;
+		case 'game/sendCtxDimensions':
+			ClientSocket?.emit('sendCtxDimensions', action.payload);
 			break;
 		//* Can be expanded to handle more actions - Add below
 		default:

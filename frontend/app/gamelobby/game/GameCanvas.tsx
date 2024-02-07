@@ -4,6 +4,7 @@ import {
 	InputType,
 	gameFinished,
 	mapType,
+	sendCtxDimensions,
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { GameService } from './GameService';
@@ -67,49 +68,22 @@ export const GameCanvas: React.FC = () => {
 			);
 			serviceRef.current.initGameElements(gameState.ball, gameState.paddles);
 		}
+
+		const handler = () => {
+			const obj = serviceRef.current?.resizeHandler();
+			if (obj) dispatch(sendCtxDimensions(obj));
+		};
+
 		//* Update the game service with the current game state
 		if (serviceRef.current) {
 			serviceRef.current.updateGameElements(gameState);
 		}
 
-		// const handleResize = () => {
-		// 	// Assuming canvasRef is a ref to the container div
-		// 	const container = canvasRef.current;
-		// 	if (!container) return;
+		window.addEventListener('resize', handler);
 
-		// 	const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
-		// 		container;
-		// 	const { newWidth, newHeight } = calculateNewDimensions(
-		// 		containerWidth,
-		// 		containerHeight,
-		// 	);
-
-		// 	// Call your resizeGame function with the new dimensions
-		// 	serviceRef.current?.resizeGame(gameState, newWidth, newHeight);
-		// };
-
-		// window.addEventListener('resize', handleResize);
-
-		// return () => {
-		// 	window.removeEventListener('resize', handleResize);
-		// };
-
-		function calculateNewDimensions(
-			containerWidth: number,
-			containerHeight: number,
-		) {
-			const aspectRatio = 3 / 2;
-			let newWidth = containerWidth;
-			let newHeight = containerWidth / aspectRatio;
-
-			// Adjust based on the height if the new height exceeds the container's height
-			if (newHeight > containerHeight) {
-				newHeight = containerHeight;
-				newWidth = newHeight * aspectRatio;
-			}
-
-			return { newWidth, newHeight };
-		}
+		return () => {
+			if (serviceRef.current) window.removeEventListener('resize', handler);
+		};
 
 		//? Do I even need to clean up anything because I'm gonna reuse app for other game sessions?
 	}, [gameState, mapChoice, isConnected]);
