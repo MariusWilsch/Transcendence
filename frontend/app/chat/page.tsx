@@ -1,10 +1,8 @@
 'use client';
-// import '@mantine/core/styles.css';
 import { useEffect } from 'react';
 import io from 'socket.io-client';
 import {useAppContext, User } from '../AppContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { MantineProvider} from '@mantine/core';
 import Cookies from "universal-cookie";
 import { getCurrentUser, getRooms } from "../utiles/utiles";
 import Conversations from "../chatComponents/Converstions";

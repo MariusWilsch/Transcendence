@@ -112,7 +112,7 @@ const UpdateChannelSetting = (props:any) => {
             Type
           </label>
           <select
-            id="SekectChoseBox"
+            id="SelectChoseBox"
             value={channelType}
             onChange={handleSelectChange}
             className="bg-[#66757F] text-white rounded w-full py-2 px-3 text-whiteleading-tight focus:outline-none focus:shadow-outline"

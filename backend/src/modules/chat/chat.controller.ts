@@ -28,13 +28,6 @@ export class ChatController {
     return await this.chatService.getMember(id, intraId);
   }
   
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  async getAllRooms(@Res() res:any): Promise<Room | undefined>{
-    const data = await this.chatService.getAllPrivateRooms();
-    res.json(data);
-    return data;
-  }
   @Get(':id/privateRooms')
   @UseGuards(JwtAuthGuard)
   async getPrivateRoomsByUser(@Param('id') id:string , @Res() res:any)
@@ -172,14 +165,13 @@ export class ChatController {
     return dataBeta;
   }
 
-  @Post('createChannel/:id/:name')
+  @Post('createChannel/:id')
   @UseGuards(JwtAuthGuard)
   async createChannel(@Param('id') intraId:string ,
-  @Param('name') channelName:string ,
-  @Body() payload:{type:string, password:string},
+  @Body() payload:{channelName:string, type:string, password:string},
   @Res() res:any){
     try{
-      await this.chatService.createChannel(intraId, channelName, payload);
+      await this.chatService.createChannel(intraId, payload.channelName, payload);
       res.json({sucess:true});
     }
     catch(e){

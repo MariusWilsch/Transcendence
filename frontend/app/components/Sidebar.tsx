@@ -3,13 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppContext, AppProvider, User, Message } from '../AppContext';
 import { RiPingPongLine } from 'react-icons/ri';
 import { IoChatbubblesOutline } from 'react-icons/io5';
 import { GrGroup } from 'react-icons/gr';
 import { FaUserFriends } from 'react-icons/fa';
-import { GrAchievement } from 'react-icons/gr';
 import { MdLeaderboard } from 'react-icons/md';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { CgProfile } from 'react-icons/cg';
@@ -133,7 +132,7 @@ export const Sidebar = () => {
 		}
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
-		if (context.socket  && !pattern.test(pathname)) {
+		if (context.socket) {
 		  context.socket.on('messageNotification', (data: any) => {
 			if (context?.user) {
 			  context.setMessageNum(context.messageNumb + 1);

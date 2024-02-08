@@ -17,7 +17,7 @@ const CreateChannelModal = () => {
   async function creatChannel(Channelname: string, type: string, password: string, owner: User) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/createChannel/${owner.intraId}/${Channelname}`,
+        `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/createChannel/${owner.intraId}/`,
         {
           method: "POST",
           headers: {
@@ -25,6 +25,7 @@ const CreateChannelModal = () => {
           },
           credentials: "include",
           body: JSON.stringify({
+            channelName:`${Channelname}`,
             type: `${type}`,
             password: `${password}`,
           }),
@@ -85,7 +86,7 @@ const CreateChannelModal = () => {
           </label>
           <input
             type="text"
-            id="channelName"
+            id="channelNameField"
             name="channelName"
             value={channelName}
             onChange={(e) => setChannelName(e.target.value)}
@@ -119,7 +120,7 @@ const CreateChannelModal = () => {
             </label>
             <input
               type="password"
-              id="password"
+              id="passwordForm"
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

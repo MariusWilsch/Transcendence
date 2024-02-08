@@ -1,17 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { User, Room, Message } from './dto/chat.dto';
-import { MemberShip, Prisma, PrismaClient } from '@prisma/client';
+import { MemberShip, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from 'modules/auth/constants';
 
-enum ChannelType {
-  Public = 1,
-  PROTECTED,
-  PRIVATE
-}
 const prisma = new PrismaClient();
 @Injectable()
 export class ChatService {
@@ -527,23 +521,12 @@ export class ChatService {
         channelId:memberShip.channelId,
       }
     });
-    // if (!moderator
-    //     || (!moderator.isModerator)
-    //     || (!moderator.isModerator && !moderator.isOwner)){
-    //       throw('lack of privilege');    
-    //    }
     if (!memberShip){
       throw('member doesn t exist')
     }
     if (memberShip.isOwner){
       throw('you can t modify the owner privilege');
     }
-    // console.log({
-    //   isBanned:info.banning !== memberShip.isBanned ? info.banning:memberShip.isBanned,
-    //   isModerator:info.userPrivilige!== memberShip.isModerator?info.userPrivilige:memberShip.isModerator,
-    //   isMuted:info.Muting.action !==memberShip.isMuted?info.Muting.action:memberShip.isMuted,
-    //   mutedTime:info.Muting.time,
-    // });
     await prisma.memberShip.update({
       where:{
         memberId,

@@ -101,7 +101,7 @@ const ChannelDashBoard = (props: any) => {
         <div className="  z-20 text-white p-4 w-full">
           <label className="">
             <input
-              id="searchField"
+              id="searchFieldDashBoard"
               name={`inputValue${Math.random()}`}
               type="text"
               value={query}

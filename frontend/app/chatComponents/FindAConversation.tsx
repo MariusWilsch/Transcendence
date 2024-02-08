@@ -16,10 +16,10 @@ function FindAConversation() {
 	};
 	useEffect(() => {
 		const fetchData = async () => {
-			const data = await searchUsers(query);
+			const data = await searchUsers(query.trimStart());
 			data !== undefined ? setData(data) : setData([]);
 		};
-		if (query) {
+		if (query.trimStart()) {
 			fetchData();
 		}
 	}, [query]);
@@ -96,6 +96,8 @@ function FindAConversation() {
 			<div className="max-w-545 mx-auto bg-black">
 				<Spotlight.Root query={query} onQueryChange={setQuery}>
 					<Spotlight.Search
+						id="spotLightSearch"
+						name='search'
 						placeholder="Search by username..."
 						leftSection={<CiSearch stroke={"1.5"} />}
 					/>

@@ -88,7 +88,7 @@ const InviteUsers = () => {
 					<div className="searchBar">
 						<label className="">
 							<input
-								id="searchField"
+								id="searchFieldInviteUser"
 								name={`inputValue${Math.random()}`}
 								type="text"
 								value={query}
