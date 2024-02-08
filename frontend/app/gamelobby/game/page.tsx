@@ -31,6 +31,8 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
+	console.log(gameData.username);
+
 	return (
 		<div className="flex items-center gap-x-8">
 			{scorePos === 'right' ? (

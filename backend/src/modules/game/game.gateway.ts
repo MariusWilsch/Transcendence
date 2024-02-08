@@ -89,8 +89,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
+		// Assign userData
+
+		const userData: GameSession['userData'] = [
+			{
+				avatar: player1.data.user.Avatar,
+				username: player1.data.user.login,
+			},
+			{
+				avatar: player2.data.user.Avatar,
+				username: player2.data.user.login,
+			},
+		];
+
 		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(roomID, player1, player2);
+		this.gameService.createGameSession(roomID, player1, player2, userData);
+
+		// Change the username and avatar if the game is against AI
+		if (player1.data.user.intraId === player2.data.user.intraId) {
+			console.log('AI game detected, user1 needs AI Avatar and username');
+			userData[0].username = 'Computer';
+		}
 
 		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
@@ -98,16 +117,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			...gameState,
 			canvasWidth: GAME_CONFIG.canvasWidth,
 			canvasHeight: GAME_CONFIG.canvasHeight,
-			userData: [
-				{
-					avatar: player1.data.user.Avatar,
-					username: player1.data.user.login,
-				},
-				{
-					avatar: player2.data.user.Avatar,
-					username: player2.data.user.login,
-				},
-			],
+			userData,
 		});
 	}
 
@@ -143,11 +153,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.players,
 					gameSession.gameState
 				);
-				if (gameResult === undefined) return;
-				console.log('Game result', gameResult);
-				gameSession.players[0].playerSockets.emit('gameOver', gameResult[0]);
-				gameSession.players[1].playerSockets.emit('gameOver', gameResult[1]);
-				//! Save match result here!
+				gameSession.players[0].playerSockets.emit(
+					'gameOver',
+					gameResult.result[0]
+				);
+				gameSession.players[1].playerSockets.emit(
+					'gameOver',
+					gameResult.result[1]
+				);
 				this.gameService
 					.saveMatchResult(
 						gameSession,
@@ -158,18 +171,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.catch((error) => {
 						console.error('Error saving match result:', error);
 					});
-
-				// The game loop continues without waiting for the save operation to complete
-
 				clearInterval(intervalId);
 			}
-			// const startUpdateTime1 = performance.now();
 			this.sendGameState(roomID, gameSession.gameState);
-			// const endUpdateTime1 = performance.now();
-
-			// console.log(
-			// 	`Game state send took ${endUpdateTime1 - startUpdateTime1} milliseconds`
-			// );
 		}, 1000 / 60); //! Run the loop at approximately 60 FPS or try 25/30 FPS like ALII suggested
 
 		this.gameService.setIntervalID(roomID, intervalId);
@@ -224,7 +228,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// 	client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
 		this.beginGameLoop(client.data.roomID);
-		this.userService.updateUserState(client.data.user.intraId, 'INGAME');
+		// this.userService.updateUserState(client.data.user.intraId, 'INGAME');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')

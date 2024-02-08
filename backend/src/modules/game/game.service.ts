@@ -40,20 +40,12 @@ export class GameService {
 
 	//* Business logic
 
-	/**
-	 * The createGameSession function creates a new game session by joining two players to a room,
-	 * associating the room ID with each player, and storing the game session in a Map.
-	 * @param {string} roomID - The roomID is a string that represents the unique identifier for the game
-	 * session. It is used to associate the players and their game state with a specific room.
-	 * @param {Socket} player1 - The `player1` parameter is a Socket object representing the first player
-	 * in the game session. It is used to join the player to a Socket.io room and associate the room ID
-	 * with the player's data.
-	 * @param {Socket} player2 - The `player2` parameter is a Socket object representing the second player
-	 * in the game session. A Socket object is typically used in Socket.io to represent a client connection
-	 * to the server. In this case, it is used to represent the second player's connection to the game
-	 * server.
-	 */
-	public createGameSession(roomID: string, player1: Socket, player2: Socket) {
+	public createGameSession(
+		roomID: string,
+		player1: Socket,
+		player2: Socket,
+		userData: GameSession['userData']
+	) {
 		// Join both Sockets to a Socket.io room
 		player1.join(roomID);
 		player2.join(roomID);
@@ -61,11 +53,6 @@ export class GameService {
 		// Associate the room ID and PlayerID with each Socket
 		player1.data = { ...player1.data, roomID, playerID: Player.P1 };
 		player2.data = { ...player2.data, roomID, playerID: Player.P2 };
-
-		if (player1.data.user.intraId === player2.data.user.intraId) {
-			console.log('AI game detected, user1 needs AI Avatar and username');
-			player1.data.user.login = 'Computer';
-		}
 
 		// Create a new game session and store it in the Map
 		this.gameSessions.set(roomID, {
@@ -93,16 +80,7 @@ export class GameService {
 				},
 			],
 			command: [],
-			userData: [
-				{
-					avatar: player1.data.user.Avatar,
-					username: player1.data.user.login,
-				},
-				{
-					avatar: player2.data.user.Avatar,
-					username: player2.data.user.login,
-				},
-			],
+			userData,
 		});
 	}
 
@@ -373,11 +351,6 @@ export class GameService {
 	}
 
 	public getWinner(players: Players[], { score }: GameState): GameResult {
-		if (
-			score.player1 < GAME_CONFIG.WinningScore &&
-			score.player2 < GAME_CONFIG.WinningScore
-		)
-			return undefined;
 		const scoreAsString = `${score.player1}${score.player2}`;
 		if (score.player1 === GAME_CONFIG.WinningScore) {
 			return {
@@ -421,7 +394,6 @@ export class GameService {
 			ball,
 			difficulty: aiDifficulty,
 		});
-		console.log(command[playerRole]);
 	}
 
 	public setIntervalID(roomID: string, intervalID: NodeJS.Timeout) {
