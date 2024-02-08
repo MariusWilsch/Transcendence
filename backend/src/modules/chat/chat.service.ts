@@ -441,6 +441,7 @@ export class ChatService {
   async getAllAvailableChannels(intraId:string){
     
     return await prisma.channel.findMany({
+      take:5,
       where:{
         type:{
           not:{
@@ -768,39 +769,8 @@ export class ChatService {
       }
     })
   }
-  // async getUserActiveChannels(intraId: string) {
-  //   const memberShips = await prisma.memberShip.findMany({
-  //     where: {
-  //       intraId,
-  //     },
-  //   });
-  
-  //   const channels = await Promise.all(
-  //     memberShips.map(async (memberShip) => {
-  //       const channel = await prisma.channel.findUnique({
-  //         where: {
-  //           id: memberShip.channelId,
-  //         },
-  //         include: {
-  //           messages: {
-  //             orderBy: {
-  //               createdAt: 'desc',
-  //             },
-  //             take: 1,
-  //           },
-  //         },
-  //       });
-  
-  //       if (channel && channel.messages && channel.messages.length > 0) {
-  //         return channel;
-  //       }
-  
-  //       return null; // If the channel has no messages or is not found, return null
-  //     })
-  //   );
-  
-  //   return channels.filter((channel) => channel !== null);
-  // }
+
+
   async getUserActiveChannels(intraId: string) {
     const memberShips = await prisma.memberShip.findMany({
       where: {
@@ -832,7 +802,7 @@ export class ChatService {
           };
         }
   
-        return null; // If the channel has no messages or is not found, return null
+        return null;
       })
     );
   
@@ -844,6 +814,26 @@ export class ChatService {
   
     return sortedChannels;
   }
-  
+  async getSerachedChan(query:string, intraId:string){
+
+     return await prisma.channel.findMany({
+      take:5,
+      where:{
+        type:{
+          not:{
+            equals:'PRIVATE',
+          }
+        },
+        members:{
+          none:{
+            intraId,
+          }
+        },
+        name: {
+          contains: query,
+        },
+      }
+    })
+  }
   
 }

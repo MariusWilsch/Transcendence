@@ -39,8 +39,8 @@ export const Sidebar = () => {
 	);
 	const dispatch = useDispatch();
 	const context = useAppContext();
+	const pattern: RegExp = /^localhost:3000\/chat\/\d+$/;
 
-	const createSocket = () => {};
 	const getFriends = async () => {
 		try {
 			if (context.user?.intraId) {
@@ -90,7 +90,6 @@ export const Sidebar = () => {
 			listenForFriendships();
 		}
 	}, [context.user, context.notifSocket]);
-
 	useEffect(() => {
 		if (!context.socket) {
 			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
@@ -134,21 +133,23 @@ export const Sidebar = () => {
 		}
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
-		if (context.socket && context.user) {
-			context.socket.on('privateChat', (data: Message) => {
-				if (data) {
-					if (data.sender !== context.user?.intraId) {
-						context.setMessageNum(context.messageNumb + 1);
-					}
-				}
-			});
-		}
-		return () => {
-			if (context.socket) {
-				context.socket.off('privateChat');
+		if (context.socket  && !pattern.test(pathname)) {
+		  context.socket.on('messageNotification', (data: any) => {
+			if (context?.user) {
+			  context.setMessageNum(context.messageNumb + 1);
+			toast.success('new message');
 			}
+		  });
+		}
+	  
+		return () => {
+		  if (context.socket) {
+			context.socket.off('messageNotification');
+		  }
 		};
-	}, [context.messageNumb]);
+	  }, [context.socket, context.messageNumb, context.user, pathname]);  
+	  
+	  
 
 	useEffect(() => {
 		const segments = pathname.split('/');
@@ -183,7 +184,6 @@ export const Sidebar = () => {
 		};
 		checkJwtCookie();
 	}, []);
-
 	return (
 		<div>
 			{context.isSidebarVisible && (

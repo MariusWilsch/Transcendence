@@ -13,6 +13,8 @@ import ProfileInfo from '@/app/chatComponents/ProfileInfo';
 import { getCurrentUser, getMessages, getRooms, getUser } from '@/app/utiles/utiles';
 import Conversations from '@/app/chatComponents/Converstions';
 import PermissionDenied from '@/app/chatComponents/PermissionDenied';
+//message response
+
 
 interface PageProps {
   params: {
@@ -205,7 +207,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
   }
   return (
     // <MantineProvider>
-    <div className=" w-full  bg-[#12141A]">
+    <div className=" w-screen  bg-[#12141A]">
       <div className="flex ">
         <div className="flex-1 overflow-y-auto custom-height ">
           <div className="flex custom-height">
@@ -267,7 +269,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         handleScroll();
                       }
                     }
-                    className="chat-message  z-40 h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    className="chat-message  z-40 h-screen whitespace-normal break-words  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)
@@ -328,7 +330,7 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                         handleScroll();
                       }
                     }
-                    className="chat-message z-40  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    className="chat-message z-40 whitespace-normal break-words  h-screen  flex flex-col-reverse p-2 overflow-x-auto overflow-y-auto bg-slate-650  border-white scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {desplayedMessages?.map((msg: any, index) => (
                         (msg.sender === context.userData?.intraId && <SingleMessageSent key={index} message={msg.content} />) ||
                         (msg.sender !== context.userData?.intraId && recipient ? <SingleMessageReceived key={index} recipient={recipient} message={msg.content} /> : null)

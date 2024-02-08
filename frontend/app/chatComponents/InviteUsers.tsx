@@ -28,12 +28,18 @@ async function inviteUser(
 				}),
 			},
 		);
+		const res = await response.json();
 		if (response.ok) {
-			const msg = 'invitation Sent';
-			const res = await response.json();
-			toast.success(res.error);
+			if (response.ok) {
+				if (res.status) {
+					toast.success('invitation sent');
+				} else {
+					toast.success(`${res.error}`);
+				}
+			}
 		} else {
-			const msg = 'Error: ' + response;
+			const msg = 'Error: ' + res.error();
+			;
 			toast.error(msg);
 		}
 	} catch (e) {

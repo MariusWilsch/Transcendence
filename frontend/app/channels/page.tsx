@@ -4,14 +4,13 @@ import { Channel, User, useAppContext } from '@/app/AppContext';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { io } from 'socket.io-client';
-import Cookies from 'universal-cookie';
 import { motion } from 'framer-motion';
 import { GrGroup } from 'react-icons/gr';
 import JoinProtectedChannel from '../chatComponents/JoinProtectedChannel';
-import Demo from '../chatComponents/Demo';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
-import { MantineProvider } from '@mantine/core';
+import { Loading } from '../components/Loading';
+import CreateChannelModal from '../chatComponents/CreateChannel';
+import { getCurrentUser } from '../utiles/utiles';
 
 async function inviteHandler(Channelname: string, status: boolean, user: User) {
 	try {
@@ -28,14 +27,16 @@ async function inviteHandler(Channelname: string, status: boolean, user: User) {
 				}),
 			},
 		);
+		const res = await response.json();
 		if (response.ok) {
-			if (status) {
-				toast.success('you  successfully joined the channel');
+			if (status===true) {
+				toast.success('you successfully joined the channel');
 			} else {
 				toast.success('invitation is declained');
 			}
 		} else {
-			const msg = 'Error: ' + response;
+			const msg = 'Error: ' + res.error();
+			;
 			toast.error(msg);
 		}
 	} catch (e) {
@@ -52,77 +53,71 @@ const ChannelsLobby = () => {
 	);
 	const [channels, setUserChannels] = useState<Channel[]>([]); // Provide a type for the messages stat
 	const [inputValue, setInputValue] = useState('');
-	const [selectedFeild, setselectedFeild] = useState('my channels');
+	const [selectedFeild, setselectedFeild] = useState('');
+	const [isLoading, setIsLoading] = useState(false); 
 
-	const handleFilterCHannels = (query: string, channels: Channel[] | []) => {
-		return channels.filter((item) => item.name.startsWith(query));
-	};
 	useEffect(() => {
 		const checkJwtCookie = async () => {
-      if (context.user !== null) {
-				return;
-			}
 			try {
-				const response = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
+				if (!context.user)
+				{
+					const user = await getCurrentUser();
+					if (!user || user ===undefined)
 					{
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						credentials: 'include',
-					},
-				);
-				var data = await response.json();
-				if (data.succes === false) {
-					return;
+						return;
+					}
+					context.setUser(user);
 				}
-				if (data.data !== null && data.data !== undefined) {
-					context.setUserData(data.data);
-				}
-			} catch (error: any) {
+					} catch (error: any) {
 				const msg = 'Error during login' + error.message;
 				toast.error(msg);
 				console.error('Error during login:', error);
 			}
 		};
 		checkJwtCookie();
-		if (!context.socket) {
-			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
-			const cookie = new Cookies();
-			const newSocket = io(chatNameSpace, {
-				query: { user: cookie.get('jwt') },
-			});
-			context.setSocket(newSocket);
-		}
-		// if (context.socket) {
-		//   context.socket.on('JoinAChannel', (res: any) => {
-		//     const msg = res.e;
-		//     if (msg === "password incorrect") {
-		//       toast.error(msg);
-		//     }
-		//     else {
-		//       toast.success(msg);
-		//       exploreChannels();
-		//     }
-		//   })
-		// }
-	}, [context.socket, availabelChannels]);
+	}, [context.user]);
 
 	useEffect(() => {
-		if (inputValue && availabelChannels) {
-			setAvailableChannels(handleFilterCHannels(inputValue, availabelChannels));
-		}
-	}, [inputValue]);
-	// const [users, setUsers] = useState<User[] | undefined>(undefined);
+		const fetchChannels = async()=>{
 
+			if (inputValue) {
+				exploreChannelsQuery(inputValue);
+			}
+		}
+		fetchChannels();
+	}, [inputValue]);
+
+	useEffect(()=>{
+		if (selectedFeild ==='' && !isLoading && context.user){
+			setselectedFeild('my channels');
+			userChannels();
+		}
+	},[channels, context.user])
+	useEffect(()=>{
+		const fetchUserChannels=async()=>{
+			if (selectedFeild === 'my channels')
+			{
+				userChannels();
+			}
+			else if (selectedFeild === 'Explore')
+			{
+				exploreChannels();
+			}
+			else if (selectedFeild === 'Invitations')
+			{
+				inviteChannels();
+			}
+		}
+		fetchUserChannels();
+	}, [selectedFeild, context.trigger]);
 	const userChannels = async () => {
-		if (!context.userData) {
+		if (!context.user) {
 			return;
 		}
 		try {
+			setIsLoading(true);
 			const response: any = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.userData?.intraId}/userChannels`,
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.user?.intraId}/userChannels`,
 				{
 					method: 'GET',
 					credentials: 'include',
@@ -135,19 +130,49 @@ const ChannelsLobby = () => {
 			}
 			if (data) {
 				setUserChannels(data);
+				setIsLoading(false);
 			}
 		} catch (error: any) {
 			const msg = 'Error getting friends: ' + error.message;
 			toast.error(msg);
+			setIsLoading(false);
 		}
 	};
 	const exploreChannels = async () => {
-		if (!context.userData) {
+		if (!context.user) {
+			return;
+		}
+		try {
+			setIsLoading(true);
+			const response: any = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.user.intraId}/availabelChannels`,
+				{
+					method: 'GET',
+					credentials: 'include',
+				},
+			);
+			const data = await response.json();
+			if (!data) {
+				const msg = 'Error getting channels';
+				toast.error(msg);
+			}
+			if (data) {
+				setAvailableChannels(data);
+				setIsLoading(false);
+			}
+		} catch (error: any) {
+			const msg = 'Error getting channels: ' + error.message;
+			toast.error(msg);
+			setIsLoading(false);
+		}
+	};
+	const exploreChannelsQuery = async (query:string) => {
+		if (!context.user) {
 			return;
 		}
 		try {
 			const response: any = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.userData.intraId}/availabelChannels`,
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channels/${context.user.intraId}/availChan?q=${query}`,
 				{
 					method: 'GET',
 					credentials: 'include',
@@ -168,12 +193,12 @@ const ChannelsLobby = () => {
 	};
 
 	const inviteChannels = async () => {
-		if (!context.userData) {
+		if (!context.user) {
 			return;
 		}
 		try {
 			const response: any = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channelInvitation/${context.userData.intraId}`,
+				`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/channelInvitation/${context.user.intraId}`,
 				{
 					method: 'GET',
 					credentials: 'include',
@@ -192,6 +217,10 @@ const ChannelsLobby = () => {
 			toast.error(msg);
 		}
 	};
+	if (isLoading)
+	{
+		return <Loading />
+	}
 	return (
 		// <MantineProvider>
 		<div className="custom-height z-20 w-screen bg-[#12141A]">
@@ -205,8 +234,7 @@ const ChannelsLobby = () => {
 								<div className="flex flex-row justify-between md:w-[50vw] w-full  bg-gray-600 rounded-md mb-4">
 									<button
 										className="w-full"
-										onClick={() => {
-											userChannels();
+										onClick={ () => {
 											setselectedFeild('my channels');
 										}}
 									>
@@ -223,7 +251,6 @@ const ChannelsLobby = () => {
 									<button
 										className="w-full"
 										onClick={() => {
-											exploreChannels();
 											setselectedFeild('Explore');
 										}}
 									>
@@ -240,7 +267,6 @@ const ChannelsLobby = () => {
 									<button
 										className="w-full"
 										onClick={() => {
-											inviteChannels();
 											setselectedFeild('Invitations');
 										}}
 									>
@@ -257,11 +283,6 @@ const ChannelsLobby = () => {
 								</div>
 							</div>
 							{selectedFeild === 'Explore' && (
-								<motion.div
-									initial={{ opacity: 0, x: -100 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.02 }}
-								>
 									<div className="w-full flex items-center justify-center mb-6">
 										<div className="md:w-[50vw] w-full flex items-center justify-center">
 											<div className="md:w-[50vw] w-full flex flex-row-reverse">
@@ -278,18 +299,10 @@ const ChannelsLobby = () => {
 														className="min-w-[80vw] md:min-w-[50vw] bg-[#1E2028] items-center justify-center p-2 rounded-lg border-opacity-40 border-2 border-slate-300  text-sm outline-none text-white"
 													/>
 													<div className="md:hidden">&nbsp; &nbsp;</div>
-													{/* <button
-                              onClick={() => console.log('cho-fo-uniiiii')}
-                              className="md:hidden flex-grow items-center justify-center p-2 rounded-lg bg-[#292D39] text-white"
-                              type="submit"
-                            >
-                              <RiSearchLine size="30" className="" />
-                            </button> */}
 												</label>
 											</div>
 										</div>
 									</div>
-								</motion.div>
 							)}
 
 							<motion.div
@@ -301,9 +314,10 @@ const ChannelsLobby = () => {
 									<div className=" w-full flex flex-col items-center">
 										{selectedFeild === 'my channels' && (
 											<div>
-												<Demo />{' '}
+												<CreateChannelModal  />{' '}
 											</div>
 										)}
+										{isLoading && <div>loading........</div>}
 										{availabelChannels &&
 											selectedFeild === 'Explore' &&
 											availabelChannels.map((channel: Channel) => (
@@ -311,13 +325,6 @@ const ChannelsLobby = () => {
 													key={channel.name}
 													className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
 												>
-													<motion.div
-														whileTap={{ scale: 0.9 }}
-														whileHover={{ scale: 1.1 }}
-														initial={{ opacity: 0, y: -100 }}
-														animate={{ opacity: 1, y: 0 }}
-														transition={{ delay: 0.02 }}
-													>
 														<div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
 															<div className="flex-1 w-0 p-4">
 																<div className="flex items-center">
@@ -336,9 +343,9 @@ const ChannelsLobby = () => {
 																<JoinProtectedChannel selectedChannel={channel} />
 															</div>
 														</div>
-													</motion.div>
 												</div>
 											))}
+											{isLoading && <div>loading........</div>}
 										{channels &&
 											selectedFeild === 'my channels' &&
 											channels?.map((channel: any) => (
@@ -378,6 +385,7 @@ const ChannelsLobby = () => {
 													</motion.div>
 												</div>
 											))}
+											{isLoading && <div>loading........</div>}
 										{invitationChannels &&
 											selectedFeild === 'Invitations' &&
 											invitationChannels?.map((channel: any) => (
@@ -385,13 +393,6 @@ const ChannelsLobby = () => {
 													key={channel.channelId}
 													className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
 												>
-													<motion.div
-														whileTap={{ scale: 0.9 }}
-														whileHover={{ scale: 1.1 }}
-														initial={{ opacity: 0, y: -100 }}
-														animate={{ opacity: 1, y: 0 }}
-														transition={{ delay: 0.02 }}
-													>
 														<div>
 															<div className="max-w-md w-full min-w-full bg-[#1E2028] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5">
 																<div className="flex-1 w-0 p-4">
@@ -408,8 +409,12 @@ const ChannelsLobby = () => {
 																		<span className="flex flex-row space-x-3 ml-auto">
 																			<button
 																				className="w-full flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
-																				onClick={() => {
-																					inviteHandler(channel.channelId, true, context.userData);
+																				onClick={async () => {
+																					if (context.user)
+																					{
+																						await inviteHandler(channel.channelId, true, context.user);
+																						inviteChannels();
+																					}
 																				}}
 																			>
 																				<FiCheckCircle
@@ -419,8 +424,13 @@ const ChannelsLobby = () => {
 																			</button>
 																			<button
 																				className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium"
-																				onClick={() => {
-																					inviteHandler(channel.channelId, false, context.userData);
+																				onClick={async () => {
+																					if (context.user)
+																					{
+																						await inviteHandler(channel.channelId, false, context.user);
+																						inviteChannels();
+																					}
+
 																				}}
 																			>
 																				<FiXCircle
@@ -433,7 +443,6 @@ const ChannelsLobby = () => {
 																</div>
 															</div>
 														</div>
-													</motion.div>
 												</div>
 											))}
 									</div>

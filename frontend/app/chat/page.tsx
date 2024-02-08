@@ -47,9 +47,9 @@ const Chat = () => {
 
       context.socket?.on('privateChat', (message: any) => {
         fetchDataAndSetupSocket();
-        const msg = message.content;
-
-        toast.success(`you have a new message : ${msg}`);
+        if (message){
+          // context.setMessageNum(() =>context. prevMessageNum + 1 );
+        }
       })
     }
     return () => {

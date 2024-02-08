@@ -107,7 +107,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (recipientSocket) {
         
         const message = await this.chatService.createMessage(user.intraId, payload.to, payload.message);
-        recipientSocket.map((socket:any) =>socket.emit('privateChat',message));
+        recipientSocket.map((socket:any) =>{
+          socket.emit('privateChat',message);
+          socket.emit('messageNotification',{data:"this message"});
+      });
         senderSocket.map((socket:any) =>{
           if (client.id != socket.id)
           {

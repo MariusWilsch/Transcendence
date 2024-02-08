@@ -11,7 +11,6 @@ import {
 	addToLobby,
 	aiDifficulty,
 	invitePrivate,
-	setMatchmaking,
 	startConnection,
 } from '../GlobalRedux/features';
 
@@ -28,10 +27,8 @@ const useStartGame = () => {
 		if (isConnected === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
 		if (isInMatchmaking === MatchmakingStatus.DUPLICATE) return;
-		dispatch(addToLobby());
-		gameConfig.aiDifficulty !== aiDifficulty.NONE
-			? dispatch(addToLobby())
-			: dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+		if (isConnected === ConnectionStatus.CONNECTED) dispatch(addToLobby());
+		if (gameConfig.aiDifficulty !== aiDifficulty.NONE) dispatch(addToLobby());
 	};
 
 	const handleInvite = (
@@ -46,21 +43,19 @@ const useStartGame = () => {
 			: dispatch(acceptPrivate({ inviteeID }));
 	};
 
-	
 	useEffect(() => {
-
 		const showModal = () => {
 			if (typeof document !== 'undefined') {
-					const modal = document.getElementById(
+				const modal = document.getElementById(
 					'startMatchmakingModal',
 				) as HTMLDialogElement;
 				modal?.showModal();
 			}
 		};
-	
+
 		const closeModal = () => {
 			if (typeof document !== 'undefined') {
-					if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
+				if (isInMatchmaking === MatchmakingStatus.SEARCHING) return null;
 				const modal = document.getElementById(
 					'startMatchmakingModal',
 				) as HTMLDialogElement;
