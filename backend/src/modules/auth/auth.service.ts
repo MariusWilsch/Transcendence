@@ -105,6 +105,7 @@ export class AuthService {
 				secret: JWT_SECRET,
 			});
 
+
 			const user = payload.userWithoutDate;
 			return user;
 		} catch (error) {
