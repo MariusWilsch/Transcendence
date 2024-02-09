@@ -11,6 +11,7 @@ export enum GameOutcome {
 export enum Invite {
 	INVITING,
 	ACCEPTING,
+	REJECTING,
 }
 
 export enum ConnectionStatus {
@@ -31,8 +32,7 @@ interface canvas {
 
 interface PrivateMatch {
 	inviteeID: string | undefined;
-	accepted?: boolean; // True if the friend has accepted the invite
-	socket?: any;
+	accepted?: boolean;
 }
 
 export interface ConnectionState {

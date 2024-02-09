@@ -190,15 +190,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.Server.to(roomID).emit('gameState', gameState);
 	}
 
-	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO): void {
-		this.lobby.push(client);
-		console.log(
-			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
-		);
-		this.checkForAvailablePlayers();
-	}
-
 	@SubscribeMessage('onPaddleMove')
 	handlePaddleMove(client: IO, payload: PlayerMove): void {
 		const gameSession: GameSession = this.gameService.getSession(
@@ -263,6 +254,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('acceptPrivate')
 	handleAcceptPrivate(client: IO, payload: any): void {
 		console.log('acceptPrivate event received', payload);
+		if (payload.accepted === false) {
+			client.disconnect(true);
+			this.privateLobby.delete(payload.inviteeID);
+		}
 		if (!this.privateLobby.has(payload.inviteeID))
 			return console.log('No such invite');
 		if (payload.accepted === false) {

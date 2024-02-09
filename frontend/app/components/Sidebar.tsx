@@ -117,6 +117,7 @@ export const Sidebar = () => {
 							className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
 							onClick={() => {
 								toast.dismiss(t.id);
+								handleInvite(context.user?.intraId, isConnected, Invite.REJECTING);
 							}}
 						>
 							<FiXCircle size="30" className="text-red-300" />
@@ -133,22 +134,20 @@ export const Sidebar = () => {
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
 		if (context.socket) {
-		  context.socket.on('messageNotification', (data: any) => {
-			if (context?.user) {
-			  context.setMessageNum(context.messageNumb + 1);
-			toast.success('new message');
-			}
-		  });
+			context.socket.on('messageNotification', (data: any) => {
+				if (context?.user) {
+					context.setMessageNum(context.messageNumb + 1);
+					toast.success('new message');
+				}
+			});
 		}
-	  
+
 		return () => {
-		  if (context.socket) {
-			context.socket.off('messageNotification');
-		  }
+			if (context.socket) {
+				context.socket.off('messageNotification');
+			}
 		};
-	  }, [context.socket, context.messageNumb, context.user, pathname]);  
-	  
-	  
+	}, [context.socket, context.messageNumb, context.user, pathname]);
 
 	useEffect(() => {
 		const segments = pathname.split('/');

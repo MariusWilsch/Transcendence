@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 import {
 	ConnectionStatus,
 	Invite,
-	MatchType,
 	MatchmakingStatus,
 	acceptPrivate,
 	addToLobby,
@@ -47,6 +46,17 @@ const useStartGame = () => {
 		invite === Invite.INVITING
 			? dispatch(invitePrivate({ inviteeID }))
 			: dispatch(acceptPrivate({ inviteeID }));
+		
+		switch (invite) {
+			case Invite.INVITING:
+				dispatch(invitePrivate({ inviteeID }));
+				break;
+			case Invite.ACCEPTING:
+				dispatch(acceptPrivate({ inviteeID }));
+				break;
+			case Invite.REJECTING:
+				dispatch(acceptPrivate({ inviteeID, accepted: false}));
+				break;
 	};
 
 	useEffect(() => {
