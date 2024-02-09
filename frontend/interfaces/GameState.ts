@@ -32,7 +32,6 @@ export interface GameState {
 	ball: {
 		position: { x: number; y: number };
 		radius: number;
-		velocity: { x: number; y: number };
 	};
 	score: { player1: number; player2: number };
 	canvasWidth: number;

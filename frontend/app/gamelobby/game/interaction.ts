@@ -2,6 +2,7 @@ import { Direction } from '@/interfaces';
 import { mouseMove, movePaddle } from '@/app/gamelobby/GlobalRedux/features';
 import { MutableRefObject } from 'react';
 import { Dispatch, UnknownAction } from 'redux';
+import { GameService } from './GameService';
 
 const updateDirection = (
 	newDirection: Direction,
@@ -54,10 +55,23 @@ export const handleMouseMove = (
 	dispatch: Dispatch<UnknownAction>,
 	e: MouseEvent,
 	canvasRef: React.RefObject<HTMLDivElement>,
+	serviceRef: GameService | null,
 ) => {
-	if (canvasRef.current) {
-		const canvasBounds = canvasRef.current.getBoundingClientRect();
-		const relativeYPos = e.clientY - canvasBounds.top;
-		dispatch(mouseMove({ yPos: relativeYPos }));
-	}
+	if (!canvasRef.current || !serviceRef) return;
+
+	const canvasBounds = canvasRef.current.getBoundingClientRect();
+	const frontendHeight = serviceRef.getCanvasSize().height;
+
+	// Calculate relative Y position within the frontend canvas
+	let relativeYPos = e.clientY - canvasBounds.top;
+
+	// Adjust relativeYPos to ensure it's within the frontend canvas bounds
+	relativeYPos = Math.max(0, Math.min(relativeYPos, frontendHeight));
+
+	// Calculate the proportional position within the backend coordinate system
+	// No direct scaleY multiplication needed here; we're mapping proportionally
+	const proportionalYPos = (relativeYPos / frontendHeight) * 400; // 400 is the backend's canvas height
+
+	// Dispatch the mouse move with the Y position mapped to the backend's coordinate space
+	dispatch(mouseMove({ yPos: proportionalYPos }));
 };

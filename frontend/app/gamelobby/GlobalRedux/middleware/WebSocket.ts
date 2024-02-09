@@ -57,12 +57,15 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		socket?.disconnect();
 	});
 
-	socket.on('connectionSuccess', () => store.dispatch(addToLobby()));
+	socket.on('connectionSuccess', () =>
+		store.dispatch(addToLobby(store.getState().gameConfig.aiDifficulty)),
+	);
 
 	socket.on('createGame', (gameState: GameState) => {
 		store.dispatch(initGame(gameState));
 		//* Will be set twice, once for each player
 		store.dispatch(gameStarted());
+		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('gameState', (gameState: GameState) => {
@@ -98,7 +101,7 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			break;
 		case 'connection/addToLobby':
 			store.dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
-			ClientSocket?.emit('addToLobby');
+			ClientSocket?.emit('addToLobby', action.payload);
 			break;
 		case 'gameConfig/setupInteraction':
 			ClientSocket?.emit('setupInteraction', action.payload);
@@ -115,6 +118,9 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 		//* Action creators middleware
 		case 'connection/gameFinished':
 			store.dispatch(resetConfig());
+			break;
+		case 'game/sendCtxDimensions':
+			ClientSocket?.emit('sendCtxDimensions', action.payload);
 			break;
 		//* Can be expanded to handle more actions - Add below
 		default:

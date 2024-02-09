@@ -62,7 +62,7 @@ export function GameOutcomeModal({ outcome }: any) {
 	return (
 		<>
 			<Modal />
-			<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
+			<dialog ref={modalRef} className="modal modal-middle">
 				<div className="modal-box flex flex-col justify-center items-center ">
 					{outcome === GameOutcome.NONE ? (
 						<div className="font-bold text-lg">Something went Wrong!</div>
@@ -111,7 +111,6 @@ export function CountdownModal() {
 
 	useEffect(() => {
 		const handleBackButton = () => {
-			console.log('Back button pressed');
 			dispatch(disconnect());
 		};
 		window.addEventListener('popstate', handleBackButton);
@@ -145,7 +144,7 @@ export function CountdownModal() {
 	};
 
 	return (
-		<dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
+		<dialog ref={modalRef} className="modal modal-middle">
 			<div className="modal-box flex justify-center">
 				<div className="py-4">
 					Game starting in{' '}

@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import {
 	ConnectionStatus,
 	Invite,
+	MatchType,
 	MatchmakingStatus,
 	acceptPrivate,
 	addToLobby,
@@ -21,14 +22,19 @@ const useStartGame = () => {
 		(state: RootState) => state.connection,
 	);
 	const gameConfig = useSelector((state: RootState) => state.gameConfig);
-	//! Modal shouldn't be fetched by using getElementById
 
 	const pushGame = (isConnected: ConnectionStatus) => {
 		if (isConnected === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
-		if (isInMatchmaking === MatchmakingStatus.DUPLICATE) return;
-		if (isConnected === ConnectionStatus.CONNECTED) dispatch(addToLobby());
-		if (gameConfig.aiDifficulty !== aiDifficulty.NONE) dispatch(addToLobby());
+		if (
+			isInMatchmaking === MatchmakingStatus.DUPLICATE ||
+			isInMatchmaking === MatchmakingStatus.SEARCHING
+		)
+			return;
+		if (isConnected === ConnectionStatus.CONNECTED)
+			dispatch(addToLobby(gameConfig.aiDifficulty));
+		if (gameConfig.aiDifficulty !== aiDifficulty.NONE)
+			dispatch(addToLobby(gameConfig.aiDifficulty));
 	};
 
 	const handleInvite = (
@@ -64,7 +70,7 @@ const useStartGame = () => {
 		};
 		if (isGameStarted) {
 			closeModal();
-			router.push(`/gamelobby/game`);
+			router.push(`/gamelobby/game`, { scroll: false });
 		} else if (
 			isConnected === ConnectionStatus.CONNECTED &&
 			isInMatchmaking === MatchmakingStatus.SEARCHING

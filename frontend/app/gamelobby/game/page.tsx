@@ -40,30 +40,18 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 				{gameData.username === 'Computer' ? (
 					<Image
 						src={computer}
-						width={100}
-						height={100}
+						width={80}
+						height={80}
 						alt="Computer"
-						unoptimized={true}
-						onError={(e: any) => {
-							e.target.onerror = null;
-							e.target.src =
-								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
-						}}
-						className="rounded-md border border-stone-600 w-32 h-32"
+						style={{ borderRadius: '50%', width: '100%' }}
 					/>
 				) : (
 					<Image
 						src={gameData.avatar}
 						alt="Avatar"
-						width={100}
-						height={100}
-						unoptimized={true}
-						onError={(e: any) => {
-							e.target.onerror = null;
-							e.target.src =
-								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
-						}}
-						className="rounded-md border border-stone-600 w-32 h-32"
+						width={80}
+						height={80}
+						style={{ borderRadius: '50%', width: '100%' }}
 					/>
 				)}
 			</div>
