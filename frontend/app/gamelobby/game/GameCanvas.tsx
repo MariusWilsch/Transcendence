@@ -219,8 +219,8 @@ export const GameCanvas: React.FC = () => {
 
 	return (
 		<div
-			className={`z-10 border white rounded-lg ${
-				mapChoice === mapType.STANDARD ? 'px-8' : ''
+			className={`z-10 ${
+				mapChoice === mapType.STANDARD ? 'px-8 border white rounded-lg' : ''
 			}`}
 		>
 			<div ref={canvasRef} />
