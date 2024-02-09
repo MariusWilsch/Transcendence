@@ -72,9 +72,9 @@ export const createCommand = (
 ): PaddleControlCommand => {
 	switch (type) {
 		case InputType.AI:
-			if (AiDifficulty.EASY) difficulty = 0.013;
-			else if (AiDifficulty.MEDIUM) difficulty = 0.15;
-			else if (AiDifficulty.HARD) difficulty = 0.18;
+			if (AiDifficulty.EASY) difficulty = 0.01;
+			else if (AiDifficulty.MEDIUM) difficulty = 0.012;
+			else if (AiDifficulty.HARD) difficulty = 0.014;
 			return new AICommand(paddle, ball, speed, difficulty);
 		case InputType.KEYBOARD:
 			return new KeyboardCommand(paddle, speed);

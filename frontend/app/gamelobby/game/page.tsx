@@ -31,8 +31,6 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
-	console.log(gameData.username);
-
 	return (
 		<div className="flex items-center gap-x-8">
 			{scorePos === 'right' ? (
@@ -40,9 +38,21 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 			) : null}
 			<div className="avatar">
 				{gameData.username === 'Computer' ? (
-					<Image src={computer} width={100} height={100} alt="Computer" />
+					<Image
+						src={computer}
+						width={80}
+						height={80}
+						alt="Computer"
+						style={{ borderRadius: '50%', width: '100%' }}
+					/>
 				) : (
-					<Image src={gameData.avatar} alt="Avatar" width={100} height={100} />
+					<Image
+						src={gameData.avatar}
+						alt="Avatar"
+						width={80}
+						height={80}
+						style={{ borderRadius: '50%', width: '100%' }}
+					/>
 				)}
 			</div>
 			{scorePos === 'left' ? (

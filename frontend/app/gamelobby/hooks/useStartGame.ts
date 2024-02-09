@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import {
 	ConnectionStatus,
 	Invite,
+	MatchType,
 	MatchmakingStatus,
 	acceptPrivate,
 	addToLobby,
@@ -30,8 +31,10 @@ const useStartGame = () => {
 			isInMatchmaking === MatchmakingStatus.SEARCHING
 		)
 			return;
-		if (isConnected === ConnectionStatus.CONNECTED) dispatch(addToLobby());
-		if (gameConfig.aiDifficulty !== aiDifficulty.NONE) dispatch(addToLobby());
+		if (isConnected === ConnectionStatus.CONNECTED)
+			dispatch(addToLobby(gameConfig.aiDifficulty));
+		if (gameConfig.aiDifficulty !== aiDifficulty.NONE)
+			dispatch(addToLobby(gameConfig.aiDifficulty));
 	};
 
 	const handleInvite = (

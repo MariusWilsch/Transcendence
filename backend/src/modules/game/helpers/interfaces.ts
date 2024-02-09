@@ -75,6 +75,11 @@ export interface GameResult {
 	outcome: MatchOutcome;
 }
 
+interface UserData {
+	avatar: string;
+	username: string;
+}
+
 // Structure to keep track of player associations within a game session
 export interface GameSession {
 	ballVelocity: Vector;
@@ -83,16 +88,8 @@ export interface GameSession {
 	intervalID: NodeJS.Timeout | undefined;
 	input: PlayerInput[];
 	command: PaddleControlCommand[];
-	userData: [
-		{
-			avatar: string;
-			username: string;
-		},
-		{
-			avatar: string;
-			username: string;
-		},
-	];
+	userData: UserData[];
+	aiMatch : boolean;
 }
 
 //* Client side interfaces

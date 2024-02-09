@@ -6,9 +6,8 @@ import React, { useEffect } from 'react';
 import useStartGame from '../hooks/useStartGame';
 import { useRouter } from 'next/navigation';
 import { Modal } from '.';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../GlobalRedux/store';
-import { ConnectionStatus, startConnection } from '../GlobalRedux/features';
 
 type CardProps = {
 	img: StaticImageData;

@@ -11,12 +11,12 @@ import {
 	GameSession,
 	PlayerMove,
 	GameConfigState,
+	AiDifficulty,
 } from './helpers/interfaces';
 import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
-import { UserService } from 'modules/user/user.service';
 
 @WebSocketGateway({
 	cors: {
@@ -27,12 +27,12 @@ import { UserService } from 'modules/user/user.service';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
-		private authService: AuthService,
-		private userService: UserService
+		private authService: AuthService
 	) {}
 
 	@WebSocketServer() Server: Server;
 	lobby: IO[] = [];
+	aiLobby: IO[] = [];
 	privateLobby = new Map<string, IO>();
 	duplicateUsers: Set<string> = new Set();
 
@@ -77,10 +77,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (client.data.user) this.duplicateUsers.delete(client.data.user.intraId);
 	}
 
-	checkForAvailablePlayers() {
-		if (this.lobby.length < 2) return;
-		const player1 = this.lobby.shift();
-		const player2 = this.lobby.shift();
+	checkForAvailablePlayers(lobbyType: 'aiLobby' | 'lobby') {
+		const lobby = this[lobbyType];
+		if (lobby.length < 2) return;
+		const player1 = lobby.shift();
+		const player2 = lobby.shift();
 		console.log('Match found --> calling `createGame function`');
 		this.createGame(player1, player2);
 	}
@@ -102,14 +103,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			},
 		];
 
-		// Create a new game session and store it in the Map
-		this.gameService.createGameSession(roomID, player1, player2, userData);
-
 		// Change the username and avatar if the game is against AI
 		if (player1.data.user.intraId === player2.data.user.intraId) {
 			console.log('AI game detected, user1 needs AI Avatar and username');
 			userData[0].username = 'Computer';
 		}
+
+		// Create a new game session and store it in the Map
+		this.gameService.createGameSession(roomID, player1, player2, userData);
 
 		// Emit an event to both Sockets in the room
 		const gameState = this.gameService.getGameState(roomID);
@@ -149,6 +150,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
+				clearInterval(intervalId);
 				const gameResult = this.gameService.getWinner(
 					gameSession.players,
 					gameSession.gameState
@@ -157,6 +159,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					'gameOver',
 					gameResult.result[0]
 				);
+				if (gameSession.aiMatch) return;
 				gameSession.players[1].playerSockets.emit(
 					'gameOver',
 					gameResult.result[1]
@@ -171,7 +174,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					.catch((error) => {
 						console.error('Error saving match result:', error);
 					});
-				clearInterval(intervalId);
 			}
 			this.sendGameState(roomID, gameSession.gameState);
 		}, 1000 / 60); //! Run the loop at approximately 60 FPS or try 25/30 FPS like ALII suggested
@@ -260,12 +262,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('addToLobby')
-	handleAddToLobby(client: IO): void {
-		this.lobby.push(client);
+	handleAddToLobby(client: IO, payload: AiDifficulty): void {
+		const lobbyType = payload === AiDifficulty.NONE ? 'lobby' : 'aiLobby';
+		this[lobbyType].push(client);
 		console.log(
-			`Client ${client.id} added to matchmaking. New lobby size: ${this.lobby.length}`
+			`Client ${client.id} added to matchmaking. New ${lobbyType} size: ${this[lobbyType].length}`
 		);
-		this.checkForAvailablePlayers();
+		this.checkForAvailablePlayers(lobbyType);
 	}
 
 	@SubscribeMessage('sendCtxDimensions')

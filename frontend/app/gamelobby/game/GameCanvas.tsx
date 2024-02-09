@@ -15,7 +15,7 @@ import { disconnect } from '@/app/gamelobby/GlobalRedux/features';
 // Constants
 const BACKEND_WIDTH = 600;
 const BACKEND_HEIGHT = 400;
-const MIN_PADDLE_WIDTH = 5;
+const MIN_PADDLE_WIDTH = 8;
 
 function calculateCanvasSize(): { width: number; height: number } {
 	let viewportWidth = window.innerWidth / 2; // Adjust if necessary for initial sizing
@@ -111,7 +111,7 @@ export const GameCanvas: React.FC = () => {
 		const keyUpHandler = (e: KeyboardEvent) => handleKeyUp(dispatch, curDir, e);
 
 		if (inputType === InputType.MOUSE) {
-			window.addEventListener('mousemove', mouseMoveHandler);
+			canvasRef.current?.addEventListener('mousemove', mouseMoveHandler);
 		} else if (inputType === InputType.KEYBOARD) {
 			window.addEventListener('keydown', keyDownHandler);
 			window.addEventListener('keyup', keyUpHandler);
@@ -119,7 +119,7 @@ export const GameCanvas: React.FC = () => {
 
 		return () => {
 			if (inputType === InputType.MOUSE) {
-				window.removeEventListener('mousemove', mouseMoveHandler);
+				canvasRef.current?.removeEventListener('mousemove', mouseMoveHandler);
 			} else if (inputType === InputType.KEYBOARD) {
 				window.removeEventListener('keydown', keyDownHandler);
 				window.removeEventListener('keyup', keyUpHandler);
@@ -149,10 +149,6 @@ export const GameCanvas: React.FC = () => {
 				frontendWidth: width,
 				frontendHeight: height,
 			});
-
-			// Log the scaled ball and paddles
-			console.log('Scaled ball:', scaledBall);
-			console.log('Scaled paddles:', scaledPaddles);
 
 			// Now, pass the scaled ball and paddles to the initGameElements function
 			serviceRef.current.initGameElements(scaledBall, scaledPaddles);
@@ -193,9 +189,8 @@ export const GameCanvas: React.FC = () => {
 	}, [gameState, mapChoice, isConnected]);
 
 	useEffect(() => {
-		const handleBackButton = (event: any) => {
+		const handleBackButton = () => {
 			// Custom logic here
-			console.log('Back button pressed');
 			dispatch(disconnect());
 			// You can perform actions like redirecting the user here
 		};

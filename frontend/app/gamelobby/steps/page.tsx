@@ -1,6 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Step1, Step2, Step3 } from './index';
+import { useDispatch } from 'react-redux';
+import { resetConfig } from '../GlobalRedux/features';
 
 const StepItem: React.FC<{ stepNumber: number; currentStep: number }> = ({
 	stepNumber,
@@ -23,6 +25,14 @@ const StepItem: React.FC<{ stepNumber: number; currentStep: number }> = ({
 
 const StepsList: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState(1);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		const handleBackButton = () => dispatch(resetConfig());
+
+		window.addEventListener('popstate', handleBackButton);
+		return () => window.removeEventListener('popstate', handleBackButton);
+	});
 
 	return (
 		<div className="z-50 flex pt-4 flex-col items-center gap-x-12 h-full justify-between">

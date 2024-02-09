@@ -54,6 +54,8 @@ export class GameService {
 		player1.data = { ...player1.data, roomID, playerID: Player.P1 };
 		player2.data = { ...player2.data, roomID, playerID: Player.P2 };
 
+		const aiMatch = userData[0].username === 'Computer' ? true : false;
+
 		// Create a new game session and store it in the Map
 		this.gameSessions.set(roomID, {
 			ballVelocity: createVec2(
@@ -81,6 +83,7 @@ export class GameService {
 			],
 			command: [],
 			userData,
+			aiMatch: aiMatch,
 		});
 	}
 
@@ -350,24 +353,28 @@ export class GameService {
 		return this.gameSessions.get(roomID);
 	}
 
+	private createGameResult(
+		winnerIndex: number,
+		loserIndex: number,
+		scoreAsString: string,
+		players: Players[]
+	): GameResult {
+		return {
+			winnerId: players[winnerIndex].playerIDs,
+			loserId: players[loserIndex].playerIDs,
+			score: scoreAsString,
+			result: winnerIndex === 0 ? [true, false] : [false, true],
+			outcome: MatchOutcome.FINISHED,
+		};
+	}
+
 	public getWinner(players: Players[], { score }: GameState): GameResult {
 		const scoreAsString = `${score.player1}${score.player2}`;
+
 		if (score.player1 === GAME_CONFIG.WinningScore) {
-			return {
-				winnerId: players[0].playerIDs,
-				loserId: players[1].playerIDs,
-				score: scoreAsString,
-				result: [true, false],
-				outcome: MatchOutcome.FINISHED,
-			};
+			return this.createGameResult(0, 1, scoreAsString, players);
 		} else {
-			return {
-				winnerId: players[1].playerIDs,
-				loserId: players[0].playerIDs,
-				score: scoreAsString,
-				result: [false, true],
-				outcome: MatchOutcome.FINISHED,
-			};
+			return this.createGameResult(1, 0, scoreAsString, players);
 		}
 	}
 
