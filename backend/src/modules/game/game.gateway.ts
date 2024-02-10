@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'modules/user/user.service';
 
 @WebSocketGateway({
 	cors: {
@@ -28,7 +29,8 @@ import { JwtService } from '@nestjs/jwt';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
-		private authService: AuthService
+		private authService: AuthService,
+		private userService: UserService
 	) {}
 
 	@WebSocketServer() Server: Server;
@@ -135,18 +137,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let lastTime = performance.now();
 
 		console.log('Game loop started');
+
 		const intervalId = setInterval(() => {
 			const currentTime = performance.now();
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
 			const gameSession = this.gameService.getSession(roomID);
-			if (!gameSession) return;
+
+			// if (!this.gameService.updateGameState(gameSession, deltaTime)) {
+			// 	gameSession.players[0].playerSockets.disconnect(true);
+			// }
 
 			this.gameService.updateGameState(gameSession, deltaTime);
 
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
 				clearInterval(intervalId);
+				this.userService.updateUserState(
+					gameSession.players[0].playerSockets.data.user.intraId,
+					'ONLINE'
+				);
+				this.userService.updateUserState(
+					gameSession.players[1].playerSockets.data.user.intraId,
+					'ONLINE'
+				);
 				if (gameSession.aiMatch) {
 					const res =
 						gameSession.gameState.score.player1 === GAME_CONFIG.WinningScore
@@ -230,11 +244,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		if (!this.gameService.areCommandsSet(client.data.roomID))
-			client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
+		const gameSession = this.gameService.getSession(client.data.roomID);
+		this.userService.updateUserState(
+			gameSession.players[0].playerSockets.data.user.intraId,
+			'INGAME'
+		);
+		this.userService.updateUserState(
+			gameSession.players[1].playerSockets.data.user.intraId,
+			'INGAME'
+		);
 		this.beginGameLoop(client.data.roomID);
-		// this.userService.updateUserState(client.data.user.intraId, 'INGAME');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')
@@ -257,14 +277,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (payload.accepted === false) {
 			client.disconnect(true);
 			this.privateLobby.delete(payload.inviteeID);
-			return ;
+			return;
 		}
 		if (!this.privateLobby.has(payload.inviteeID))
 			return console.log('No such invite');
-		if (payload.accepted === false) {
-			this.privateLobby.delete(payload.inviteeID);
-			return;
-		}
 		console.log('Match found --> calling `createGame function`');
 		this.createGame(client, this.privateLobby.get(payload.inviteeID));
 		this.privateLobby.delete(payload.inviteeID);

@@ -11,6 +11,7 @@ import {
 	addToLobby,
 	aiDifficulty,
 	invitePrivate,
+	setPrivateMatch,
 	startConnection,
 } from '../GlobalRedux/features';
 
@@ -37,15 +38,26 @@ const useStartGame = () => {
 	};
 
 	const handleInvite = (
-		inviteeID: string | undefined,
+		inviteeID: string,
 		connectionStatus: ConnectionStatus,
 		invite: Invite,
 	) => {
+		dispatch(setPrivateMatch(true));
 		if (connectionStatus === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());
-		invite === Invite.INVITING
-			? dispatch(invitePrivate({ inviteeID }))
-			: dispatch(acceptPrivate({ inviteeID }));
+		switch (invite) {
+			case Invite.INVITING:
+				dispatch(invitePrivate({ inviteeID }));
+				break;
+			case Invite.ACCEPTING:
+				dispatch(acceptPrivate({ inviteeID }));
+				break;
+			case Invite.REJECTING:
+				dispatch(acceptPrivate({ inviteeID, accepted: false }));
+				break;
+			default:
+				break;
+		}
 	};
 
 	useEffect(() => {

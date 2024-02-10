@@ -124,8 +124,13 @@ export class GameService {
 	 * @returns There is no return statement in the provided code snippet. Therefore, nothing is being
 	 * returned.
 	 */
-	public updateGameState(gameSession: GameSession, deltaTime: number) {
-		if (this.gameSessions.size == 0) return;
+	public updateGameState(gameSession: GameSession, deltaTime: number): boolean {
+		// if (this.gameSessions.size == 0) return;
+		// if (
+		// 	gameSession.command[0] === undefined ||
+		// 	gameSession.command[1] === undefined
+		// )
+		// 	return false;
 		this.updatePaddles(gameSession, deltaTime);
 		this.updateBall(gameSession.gameState, gameSession.ballVelocity, deltaTime);
 		if (!this.isBallCloseToPaddle(gameSession.gameState.ball)) return;
@@ -451,8 +456,8 @@ export class GameService {
 	 * @param {string} roomID - A string representing the ID of a game room.
 	 * @returns a boolean value.
 	 */
-	public isInGame(roomID: string): boolean  {
-		if (this.gameSessions.size == 0) return false;
+	public isInGame(roomID: string): boolean {
+		// if (this.gameSessions.size == 0) return false;
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
@@ -542,5 +547,10 @@ export class GameService {
 				user2Avatar: userData[1].avatar,
 			},
 		});
+	}
+
+	public getCommmand(roomID: string): any {
+		if (this.gameSessions.size === 0) return false;
+		return this.gameSessions.get(roomID).command;
 	}
 }

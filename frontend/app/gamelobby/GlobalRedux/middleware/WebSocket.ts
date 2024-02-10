@@ -59,9 +59,10 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		socket?.disconnect();
 	});
 
-	socket.on('connectionSuccess', () =>
-		store.dispatch(addToLobby(store.getState().gameConfig.aiDifficulty)),
-	);
+	socket.on('connectionSuccess', () => {
+		if (store.getState().connection.privateMatch == false)
+			store.dispatch(addToLobby(store.getState().gameConfig.aiDifficulty));
+	});
 
 	socket.on('createGame', (gameState: GameState) => {
 		store.dispatch(initGame(gameState));

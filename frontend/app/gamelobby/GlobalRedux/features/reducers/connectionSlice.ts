@@ -25,13 +25,8 @@ export enum MatchmakingStatus {
 	DUPLICATE = 'DUPLICATE',
 }
 
-interface canvas {
-	width: number;
-	height: number;
-}
-
 interface PrivateMatch {
-	inviteeID: string | undefined;
+	inviteeID: string;
 	accepted?: boolean;
 }
 
@@ -45,6 +40,7 @@ export interface ConnectionState {
 		avatar: string;
 	};
 	countDownDone: boolean;
+	privateMatch: boolean;
 }
 
 const initialState = {
@@ -57,6 +53,7 @@ const initialState = {
 		avatar: '',
 	},
 	countDownDone: false,
+	privateMatch: false,
 } as ConnectionState;
 
 const connectionSlice = createSlice({
@@ -78,6 +75,7 @@ const connectionSlice = createSlice({
 			state.isGameStarted = false;
 			state.countDownDone = false;
 			state.playerOutcome = GameOutcome.NONE;
+			state.privateMatch = false;
 		},
 		setPlayerOutcome: (state, action) => {
 			state.playerOutcome = action.payload;
@@ -87,6 +85,9 @@ const connectionSlice = createSlice({
 		},
 		setCountDownDone: (state, action) => {
 			state.countDownDone = action.payload;
+		},
+		setPrivateMatch: (state, action) => {
+			state.privateMatch = action.payload;
 		},
 	},
 });
@@ -113,5 +114,6 @@ export const {
 	setMatchmaking,
 	setGameData,
 	setCountDownDone,
+	setPrivateMatch,
 } = connectionSlice.actions;
 export const connectionReducer = connectionSlice.reducer;
