@@ -95,8 +95,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		const user1 = await this.authService.getUserFromJwt(player1.handshake.auth.token);
-		const user2 = await this.authService.getUserFromJwt(player2.handshake.auth.token);
+		const user1 = await this.authService.getUserFromJwt(
+			player1.handshake.auth.token
+		);
+		const user2 = await this.authService.getUserFromJwt(
+			player2.handshake.auth.token
+		);
 
 		const userData: GameSession['userData'] = [
 			{
@@ -147,10 +151,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
 				clearInterval(intervalId);
-				const gameResult = this.gameService.getWinner(
-					gameSession.players,
-					gameSession.gameState
-				);
 				if (gameSession.aiMatch) {
 					const res =
 						gameSession.gameState.score.player1 === GAME_CONFIG.WinningScore
@@ -159,6 +159,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.players[0].playerSockets.emit('gameOver', res);
 					return;
 				}
+				const gameResult = this.gameService.getWinner(
+					gameSession.players,
+					gameSession.gameState
+				);
 				if (gameSession.aiMatch) return;
 				gameSession.players[0].playerSockets.emit(
 					'gameOver',
