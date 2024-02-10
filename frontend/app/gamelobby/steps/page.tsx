@@ -12,7 +12,7 @@ const StepItem: React.FC<{ stepNumber: number; currentStep: number }> = ({
 		<li
 			className={`step ${
 				currentStep >= stepNumber ? 'step-accent' : ''
-			} text-lg font-bold`}
+			} text-sm lg:text-lg font-bold`}
 		>
 			<div className="pt-2">
 				{stepNumber === 1 && 'Select Game Type'}

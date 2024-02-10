@@ -12,6 +12,8 @@ import {
 	MatchmakingStatus,
 	resetConfig,
 	addToLobby,
+	aiDifficulty,
+	resetScore,
 } from '../features';
 import { GameState, MiddlewareStore, Middleware } from '@/interfaces';
 import Cookies from 'universal-cookie';
@@ -100,7 +102,8 @@ export const socketMiddleware: Middleware = (store) => (next) => (action) => {
 			ClientSocket?.emit('cancelMatchmaking');
 			break;
 		case 'connection/addToLobby':
-			store.dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
+			if (action.payload === aiDifficulty.NONE)
+				store.dispatch(setMatchmaking(MatchmakingStatus.SEARCHING));
 			ClientSocket?.emit('addToLobby', action.payload);
 			break;
 		case 'gameConfig/setupInteraction':

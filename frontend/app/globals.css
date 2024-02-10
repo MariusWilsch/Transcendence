@@ -14,11 +14,8 @@ body {
 	background-color: white;
 } */
 
-
-
-
-.step{
-	color:aliceblue;
+.step {
+	color: aliceblue;
 }
 .notification-dot {
 	width: 20px;
@@ -33,7 +30,7 @@ body {
 	justify-content: center;
 	color: white;
 	font-size: 12px;
-  }
+}
 .mantine-Modal-body {
 	background-color: rgb(75 85 99);
 }
@@ -129,16 +126,20 @@ body {
 	}
 } */
 
-
-
 @layer utilities {
 	/* Hide scrollbar for Chrome, Safari and Opera */
 	.no-scrollbar::-webkit-scrollbar {
 		display: none;
 	}
-   /* Hide scrollbar for IE, Edge and Firefox */
+	/* Hide scrollbar for IE, Edge and Firefox */
 	.no-scrollbar {
-		-ms-overflow-style: none;  /* IE and Edge */
-		scrollbar-width: none;  /* Firefox */
-  }
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+}
+
+@layer base {
+	.gamelobby-root {
+		font-size: 1.2vw;
+	}
 }

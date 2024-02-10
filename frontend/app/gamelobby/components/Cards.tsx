@@ -29,12 +29,14 @@ export const Card: React.FC<CardProps> = ({
 	return (
 		<div
 			onClick={onClick}
-			className="card bg-base-200 rounded-xl boxTransform w-2/4  sm:w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] md:max-h-[40vh] lg:max-h-[60vh]"
+			className="card bg-base-200 rounded-xl boxTransform w-2/4 sm:w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] lg:max-h-[60vh] h-full"
 		>
-			<figure>
+			<figure className="">
 				<Image
 					src={img}
 					alt={alt}
+					layout="responsive"
+					objectFit="cover"
 					unoptimized={true}
 					onError={(e: any) => {
 						e.target.onerror = null;
@@ -43,11 +45,11 @@ export const Card: React.FC<CardProps> = ({
 					}}
 				/>
 			</figure>
-			<div className="card-body text-left">
-				<h2 className="card-title">{title}</h2>
+			<div className="card-body text-left max-h-[60%]  md:py-2 lg:py-8">
+				<h2 className="card-title sm:text-base lg:text-xl">{title}</h2>
 				<p>{desc}</p>
 				<div className="card-actions justify-center mt-4">
-					<button className="btn btn-primary btn-wide text-white bg-primary hover:border-2 hover:bg-transparent hover:border-accent/40 shadow transition duration-300 ease-in-out hover:shadow-lg">
+					<button className="btn sm:btn-sm lg:btn-md  btn-primary btn-wide text-white bg-primary hover:border-2 hover:bg-transparent hover:border-accent/40 shadow transition duration-300 ease-in-out hover:shadow-lg">
 						{btnText}
 					</button>
 				</div>
@@ -65,7 +67,7 @@ const Cards: React.FC = () => {
 
 	return (
 		<>
-			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12">
+			<div className="flex flex-wrap justify-center items-center py-6 gap-12 sm:gap-4 md:gap-6 lg:gap-12 h-full">
 				<Card
 					img={pic1}
 					alt={'Play now!'}
