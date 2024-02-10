@@ -15,7 +15,6 @@ const initialState: GameState = {
 	ball: {
 		position: { x: 0, y: 0 },
 		radius: 0,
-		velocity: { x: 0, y: 0 },
 	},
 	score: { player1: 0, player2: 0 },
 	canvasWidth: 0,
@@ -30,7 +29,6 @@ const initialState: GameState = {
 			username: '',
 		},
 	],
-	scaleY: 0,
 };
 
 const gameSlice = createSlice({
