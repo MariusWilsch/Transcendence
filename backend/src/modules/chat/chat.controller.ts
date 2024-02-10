@@ -208,7 +208,7 @@ export class ChatController {
       res.json({sucess:false, e});
     }
   }
-  @Post('joinChannel/:id/:name')
+  @Post('joinChannel/:id')
   @UseGuards(JwtAuthGuard)
   async joinChannel(@Param('id') intraId:string ,
   @Param('name') channelName:string ,

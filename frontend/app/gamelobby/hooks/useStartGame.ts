@@ -94,5 +94,5 @@ const useStartGame = () => {
 		handleInvite,
 	};
 };
-
+} 
 export default useStartGame;

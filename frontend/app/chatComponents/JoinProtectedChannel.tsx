@@ -18,7 +18,7 @@ const JoinProtectedChannel = ({ selectedChannel }: any) => {
 async function joinChannel(channelId: string, type: string, password: string, user: User) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/joinChannel/${user.intraId}/${channelId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}:3001/chat/joinChannel/${user.intraId}`,
       {
         method: "POST",
         headers: {
@@ -50,7 +50,7 @@ async function joinChannel(channelId: string, type: string, password: string, us
 }
     const handleSubmit = (pass: string) => {
       if (context.userData && ((selectedChannel.type === "PROTECTED" && pass) || (selectedChannel.type !== "PROTECTED" && pass === "default"))) {
-        joinChannel(selectedChannel.name, selectedChannel.type,password, context.userData)
+        joinChannel(selectedChannel.id, selectedChannel.type,password, context.userData);
       }
       else {
         toast.error('enter a password first');
