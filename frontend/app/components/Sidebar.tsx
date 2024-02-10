@@ -32,7 +32,7 @@ export const Sidebar = () => {
 	const [RouterName, setRouterName] = useState('profile');
 	const [renderOnce, setRenderOnce] = useState(false);
 	const pathname = usePathname();
-	const { handleInvite } = useStartGame();
+	// const { handleInvite } = useStartGame();
 	const { isConnected, isGameStarted, countDownDone } = useSelector(
 		(state: RootState) => state.connection,
 	);
@@ -108,7 +108,7 @@ export const Sidebar = () => {
 							className="w-[18%] flex items-center justify-center text-sm font-medium text-indigo-600  hover:text-indigo-500 "
 							onClick={() => {
 								toast.dismiss(t.id);
-								handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
+								// handleInvite(context.user?.intraId, isConnected, Invite.ACCEPTING);
 							}}
 						>
 							<FiCheckCircle size="30" className="text-green-300" />
@@ -117,7 +117,7 @@ export const Sidebar = () => {
 							className="w-[18%] border border-transparent rounded-none rounded-r-lg flex items-center justify-center text-sm font-medium"
 							onClick={() => {
 								toast.dismiss(t.id);
-								handleInvite(context.user?.intraId, isConnected, Invite.REJECTING);
+								// handleInvite(context.user?.intraId, isConnected, Invite.REJECTING);
 							}}
 						>
 							<FiXCircle size="30" className="text-red-300" />

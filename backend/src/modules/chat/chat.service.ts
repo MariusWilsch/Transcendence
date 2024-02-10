@@ -336,7 +336,7 @@ export class ChatService {
   {
     const channel = await prisma.channel.findUnique({
       where:{
-        name:channelId,
+        id:channelId,
       },
     })
     if (!channel){
