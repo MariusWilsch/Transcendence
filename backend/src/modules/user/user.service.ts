@@ -86,7 +86,6 @@ export class UserService {
 		const user = await this.getUserbyId(userId);
 
 		if (!user) {
-			console.log(`User with ID ${userId} not found`);
 			return;
 		}
 
@@ -97,13 +96,6 @@ export class UserService {
 				},
 				data: {
 					login: newLogin,
-				},
-			});
-			await prisma.user.update({
-				where: {
-					intraId: userId,
-				},
-				data: {
 					isRegistred: true,
 				},
 			});

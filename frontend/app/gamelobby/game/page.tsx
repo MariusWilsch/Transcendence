@@ -50,7 +50,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className='rounded-full w-44 h-44 border border-gray-200'
+						className='hidden md:inline-block md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full  border border-gray-200'
 
 					/>
 				) : (
@@ -66,7 +66,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className='rounded-full w-44 h-44 border border-gray-200'
+						className='hidden md:inline-block md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full border border-gray-200'
 					/>
 				)}
 			</div>

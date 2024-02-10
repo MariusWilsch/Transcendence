@@ -38,7 +38,7 @@ export const Sidebar = () => {
 	);
 	const dispatch = useDispatch();
 	const context = useAppContext();
-	const pattern: RegExp = /^localhost:3000\/chat\/\d+$/;
+	const pattern: RegExp = /^\/chat\/\d+$/;
 
 	const getFriends = async () => {
 		try {
@@ -133,7 +133,7 @@ export const Sidebar = () => {
 		}
 	}, [context.socket, context.user, isConnected]);
 	useEffect(() => {
-		if (context.socket) {
+		if (context.socket && !pathname.match(pattern)) {
 			context.socket.on('messageNotification', (data: any) => {
 				if (context?.user) {
 					context.setMessageNum(context.messageNumb + 1);

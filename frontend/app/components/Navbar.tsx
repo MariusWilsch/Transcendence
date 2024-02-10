@@ -52,11 +52,12 @@ export const Navbar = () => {
 	};
 
 	const [isProfileOwner, setIsProfileOwner] = useState<boolean>(false);
+	const path = usePathname();
 	useEffect(() => {
 		const checkJwtCookie = async () => {
-			if (user !== null) {
-				return;
-			}
+			// if (user !== null) {
+			// 	return;
+			// }
 			try {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}:3001/auth/user`,
@@ -76,7 +77,7 @@ export const Navbar = () => {
 			} catch (error: any) {}
 		};
 		checkJwtCookie();
-	}, []);
+	}, [path]);
 
 	useEffect(() => {
 		if (pathname.split('/')[1] === 'profile') {

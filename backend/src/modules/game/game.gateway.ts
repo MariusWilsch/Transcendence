@@ -21,7 +21,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
 	cors: {
-		origin: `${URL}:3000`,
+		origin: `${process.env.URL}:3000`,
 	},
 })
 
