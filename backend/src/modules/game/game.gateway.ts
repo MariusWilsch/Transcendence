@@ -157,6 +157,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
 				clearInterval(intervalId);
+				this.userService.updateUserState(
+					gameSession.players[0].playerSockets.data.user.intraId,
+					'ONLINE'
+				);
+				this.userService.updateUserState(
+					gameSession.players[1].playerSockets.data.user.intraId,
+					'ONLINE'
+				);
 				if (gameSession.aiMatch) {
 					const res =
 						gameSession.gameState.score.player1 === GAME_CONFIG.WinningScore
@@ -241,8 +249,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
 		if (this.gameService.isInGame(client.data.roomID)) return;
+		const gameSession = this.gameService.getSession(client.data.roomID);
+		this.userService.updateUserState(
+			gameSession.players[0].playerSockets.data.user.intraId,
+			'INGAME'
+		);
+		this.userService.updateUserState(
+			gameSession.players[1].playerSockets.data.user.intraId,
+			'INGAME'
+		);
 		this.beginGameLoop(client.data.roomID);
-		this.userService.updateUserState(client.data.user.intraId, 'INGAME');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')
@@ -276,7 +292,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('addToLobby')
 	handleAddToLobby(client: IO, payload: AiDifficulty): void {
-		console.log('HEEEEEEEEEELLLLLLOOOOOOOOOOO');
 		const lobbyType = payload === AiDifficulty.NONE ? 'lobby' : 'aiLobby';
 		this[lobbyType].push(client);
 		console.log(
