@@ -17,6 +17,7 @@ import { GameService } from './game.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 // @WebSocketGateway({
 // 	cors: {
@@ -90,20 +91,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.createGame(player1, player2);
 	}
 
-	createGame(player1: IO, player2: IO) {
+	async createGame(player1: IO, player2: IO) {
 		// Generate a room ID
 		const roomID = uuidv4();
 
-		// Assign userData
+		const user1 = await this.authService.getUserFromJwt(player1.handshake.auth.token);
+		const user2 = await this.authService.getUserFromJwt(player2.handshake.auth.token);
 
 		const userData: GameSession['userData'] = [
 			{
-				avatar: player1.data.user.Avatar,
-				username: player1.data.user.login,
+				avatar: user1.Avatar,
+				username: user1.login,
 			},
 			{
-				avatar: player2.data.user.Avatar,
-				username: player2.data.user.login,
+				avatar: user2.Avatar,
+				username: user2.login,
 			},
 		];
 
