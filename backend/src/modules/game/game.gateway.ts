@@ -140,17 +140,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const gameSession = this.gameService.getSession(roomID);
 			if (!gameSession) return;
 
-			if (deltaTime > 0.02) {
-				console.log(`High Delta Time Detected: ${deltaTime}`);
-			}
-
-			// const startUpdateTime = performance.now();
 			this.gameService.updateGameState(gameSession, deltaTime);
-			// const endUpdateTime = performance.now();
-
-			// console.log(
-			// 	`Game state update took ${endUpdateTime - startUpdateTime} milliseconds`
-			// );
 
 			if (this.gameService.isGameOver(gameSession.gameState)) {
 				console.log('Game over, clearing interval');
@@ -159,11 +149,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					gameSession.players,
 					gameSession.gameState
 				);
+				if (gameSession.aiMatch) {
+					const res =
+						gameSession.gameState.score.player1 === GAME_CONFIG.WinningScore
+							? 1
+							: 0;
+					gameSession.players[0].playerSockets.emit('gameOver', res);
+					return;
+				}
+				if (gameSession.aiMatch) return;
 				gameSession.players[0].playerSockets.emit(
 					'gameOver',
 					gameResult.result[0]
 				);
-				if (gameSession.aiMatch) return;
 				gameSession.players[1].playerSockets.emit(
 					'gameOver',
 					gameResult.result[1]
@@ -230,8 +228,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
-		// if (this.gameService.areCommandsSet(client.data.roomID))
-		// 	client.disconnect(true); //! should send disconnect message to client
+		if (!this.gameService.areCommandsSet(client.data.roomID))
+			client.disconnect(true); //! should send disconnect message to client
 		if (this.gameService.isInGame(client.data.roomID)) return;
 		this.beginGameLoop(client.data.roomID);
 		// this.userService.updateUserState(client.data.user.intraId, 'INGAME');
