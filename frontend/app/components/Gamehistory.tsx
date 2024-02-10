@@ -84,7 +84,7 @@ export const Gamehistory = ({ intraId }: { intraId: string | undefined }) => {
 													<div className="text-gray-300 text-sm m-2">{game.user1Login}</div>
 												</div>
 												<div className="w-1/3 p-2 m-2 h-10 flex flex-col items-center justify-center">
-													{intraId !== game.winnerId ? (
+													{intraId === game.winnerId ? (
 														<div className="text-gray-200 text-sm flex flex-row">
 															<div className="text-gray-200 text-sm">
 																{game.score[1]}&nbsp;

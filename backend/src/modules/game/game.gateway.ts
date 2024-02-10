@@ -19,16 +19,12 @@ import { GAME_CONFIG } from './helpers/game.constants';
 import { AuthService } from 'modules/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
-// @WebSocketGateway({
-// 	cors: {
-// 		origin: `${URL}:3000`,
-// 	},
-// })
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: `${URL}:3000`,
 	},
 })
+
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
@@ -261,6 +257,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (payload.accepted === false) {
 			client.disconnect(true);
 			this.privateLobby.delete(payload.inviteeID);
+			return ;
 		}
 		if (!this.privateLobby.has(payload.inviteeID))
 			return console.log('No such invite');

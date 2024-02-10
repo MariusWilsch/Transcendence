@@ -56,7 +56,6 @@ const CreateChannelModal = () => {
   }
   const createAChannel = (e: any) => {
     e.preventDefault();
-    console.log('this is the channel name', channelName);
     if (channelName && context.user) {
       if (channelType === "PROTECTED" && password.length < 3)
       {

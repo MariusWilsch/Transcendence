@@ -49,8 +49,8 @@ async function joinChannel(channelId: string, type: string, password: string, us
   }
 }
     const handleSubmit = (pass: string) => {
-      if (context.userData && ((selectedChannel.type === "PROTECTED" && pass) || (selectedChannel.type !== "PROTECTED" && pass === "default"))) {
-        joinChannel(selectedChannel.id, selectedChannel.type,password, context.userData);
+      if (context.user && ((selectedChannel.type === "PROTECTED" && pass) || (selectedChannel.type !== "PROTECTED" && pass === "default"))) {
+        joinChannel(selectedChannel.id, selectedChannel.type,password, context.user);
       }
       else {
         toast.error('enter a password first');

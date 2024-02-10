@@ -48,7 +48,7 @@ export default function Home() {
 			toast.dismiss();
 			if (context.socket) context.socket.off('privateMatch');
 		};
-	}, [context.user]);
+	}, [context.user,context.socket]);
 
 	return (
 		<div className="text-white">

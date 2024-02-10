@@ -456,7 +456,7 @@ export class UserService {
 				const winPercentage =
 					totalMatches === 0
 						? 0
-						: (user.lostMatches.length / totalMatches) * 100;
+						: (user.wonMatches.length / totalMatches) * 100;
 
 				await prisma.user.update({
 					where: {

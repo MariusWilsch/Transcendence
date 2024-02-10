@@ -451,8 +451,8 @@ export class GameService {
 	 * @param {string} roomID - A string representing the ID of a game room.
 	 * @returns a boolean value.
 	 */
-	public isInGame(roomID: string): boolean {
-		if (this.gameSessions.size == 0) return true;
+	public isInGame(roomID: string): boolean  {
+		if (this.gameSessions.size == 0) return false;
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
@@ -466,7 +466,12 @@ export class GameService {
 	}
 
 	public areCommandsSet(roomID: string): boolean {
-		return this.gameSessions.get(roomID).command.length === 2;
+		let bool; 
+
+		bool = this.gameSessions.get(roomID).command.length === 2;
+		bool = this.gameSessions.get(roomID).command[0] !== undefined;
+		bool = this.gameSessions.get(roomID).command[1] !== undefined;
+		return bool;
 	}
 
 	/**

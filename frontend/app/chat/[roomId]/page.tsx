@@ -235,8 +235,6 @@ const PrivateRoom: FC<PageProps> = ({ params }: PageProps) => {
                           />
                         </Indicator>
                           : ( recipient &&
-                          // <Image width={144} height={144} src={recipient.Avatar} alt="user avatar" className="w-10 sm:w-16 h-10 sm:h-16 rounded-full"
-                          // />
                           <Image
                           unoptimized={true}
                           src={recipient.Avatar}

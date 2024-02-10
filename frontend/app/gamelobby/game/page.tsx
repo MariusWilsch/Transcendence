@@ -44,6 +44,14 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 						height={80}
 						alt="Computer"
 						style={{ borderRadius: '50%', width: '100%' }}
+						unoptimized={true}
+						onError={(e: any) => {
+							e.target.onerror = null;
+							e.target.src =
+								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+						}}
+						className='rounded-full w-44 h-44 border border-gray-200'
+
 					/>
 				) : (
 					<Image
@@ -52,6 +60,13 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 						width={80}
 						height={80}
 						style={{ borderRadius: '50%', width: '100%' }}
+						unoptimized={true}
+						onError={(e: any) => {
+							e.target.onerror = null;
+							e.target.src =
+								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+						}}
+						className='rounded-full w-44 h-44 border border-gray-200'
 					/>
 				)}
 			</div>

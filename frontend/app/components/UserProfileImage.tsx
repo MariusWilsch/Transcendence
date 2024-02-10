@@ -171,7 +171,7 @@ export const UserProfileImage = ({
 				let gameswon = 0;
 				let gamesloss = 0;
 				data.Gamehistory.forEach((game: any) => {
-					if (game.winnerId !== intraId) {
+					if (game.winnerId === intraId) {
 						gameswon++;
 					} else {
 						gamesloss++;
@@ -370,6 +370,11 @@ export const UserProfileImage = ({
 						{imagePreview && (
 							<Image
 								unoptimized={true}
+								onError={(e: any) => {
+									e.target.onerror = null;
+									e.target.src =
+										'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
+								}}
 								src={imagePreview}
 								alt="image Preview"
 								width={300}
@@ -377,11 +382,6 @@ export const UserProfileImage = ({
 								priority={true}
 								quality={100}
 								className="rounded-full border-2 border-black w-48 h-48 md:w-72 md:h-72"
-								onError={(e: any) => {
-									e.target.onerror = null;
-									e.target.src =
-										'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
-								}}
 							/>
 						)}
 
