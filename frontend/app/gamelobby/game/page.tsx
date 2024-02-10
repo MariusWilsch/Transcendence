@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { GameOutcomeModal, CountdownModal } from '@/app/gamelobby/components';
 import Image from 'next/image';
 import computer from '@/public/static/images/computer.png';
+import { useEffect } from 'react';
 
 interface ScoreProps {
 	score: number;
@@ -31,11 +32,14 @@ interface StatsProps {
 const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 	const score = useSelector((state: RootState) => state.game.score);
 
+	console.log(gameData.username)
+
 	return (
 		<div className="flex items-center gap-x-8">
 			{scorePos === 'right' ? (
 				<Score score={score.player1} username={gameData.username} />
 			) : null}
+			
 			<div className="">
 				{gameData.username === 'Computer' ? (
 					<Image
@@ -50,7 +54,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className='hidden md:inline-block md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full  border border-gray-200'
+						className='h-10 w-10 md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full  border border-gray-200'
 
 					/>
 				) : (
@@ -66,7 +70,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 							e.target.src =
 								'http://m.gettywallpapers.com/wp-content/uploads/2023/05/Cool-Anime-Profile-Picture.jpg';
 						}}
-						className='hidden md:inline-block md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full border border-gray-200'
+						className='h-10 w-10 md:h-20 md:w-20 lg:w-44 lg:h-44 rounded-full border border-gray-200'
 					/>
 				)}
 			</div>
@@ -80,6 +84,7 @@ const Stats: React.FC<StatsProps> = ({ scorePos, gameData }) => {
 const GameHeader = () => {
 	const userData = useSelector((state: RootState) => state.game.userData);
 	//! this is not gonna show the right avatar gameData will be the same for both
+
 
 	return (
 		<div className="h-1/4 flex items-center justify-evenly">

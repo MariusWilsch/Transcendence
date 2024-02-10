@@ -85,10 +85,13 @@ export const Sidebar = () => {
 	};
 
 	useEffect(() => {
+		console.log("Here")
 		if (context.notifSocket) {
 			listenForFriendships();
 		}
 	}, [context.user, context.notifSocket]);
+
+
 	useEffect(() => {
 		if (!context.socket) {
 			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
@@ -98,6 +101,10 @@ export const Sidebar = () => {
 			});
 			context.setSocket(newSocket);
 		}
+	},[context.socket]);
+
+	useEffect(() => {
+		
 		if (context.socket && context.user) {
 			context.socket.on('privateMatch', (data: any) => {
 				const msg = data.from.login + ' invite you for a game';
@@ -128,6 +135,8 @@ export const Sidebar = () => {
 			return () => {
 				if (context.socket) {
 					context.socket.off('privateMatch');
+					// handleInvite(context.user?.intraId, isConnected, Invite.REJECTING);
+
 				}
 			};
 		}

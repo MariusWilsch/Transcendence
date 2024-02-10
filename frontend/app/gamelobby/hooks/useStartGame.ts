@@ -38,10 +38,11 @@ const useStartGame = () => {
 	};
 
 	const handleInvite = (
-		inviteeID: string,
+		inviteeID: string | undefined ,
 		connectionStatus: ConnectionStatus,
 		invite: Invite,
 	) => {
+		if (inviteeID === undefined) return;
 		dispatch(setPrivateMatch(true));
 		if (connectionStatus === ConnectionStatus.DISCONNECTED)
 			dispatch(startConnection());

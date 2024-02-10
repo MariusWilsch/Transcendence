@@ -25,11 +25,15 @@ const cookies = new Cookies();
 const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 	const token = cookies.get('jwt');
 
+	console.log(token);
+
 	if (!token) {
 		console.log('Client does not have a valid token');
 		alert('You are not logged in');
 		return;
 	}
+
+
 
 	socket = io(`${process.env.NEXT_PUBLIC_API_URL}:3001`, {
 		auth: { token },
@@ -85,7 +89,7 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
-	if (action.type === 'connection/startConnection')
+	if (action.type === 'connection/startConnection' )
 		ClientSocket = connect(store, ClientSocket);
 
 	switch (action.type) {
