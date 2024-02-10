@@ -38,7 +38,9 @@ export class GameService {
 			width,
 			height,
 			antialias: true, // Enable antialiasing
+			// resizeTo: container, // Resize canvas to fit container
 			...options,
+			// autoDensity: true, // Should I use this/,
 		});
 		container.appendChild(this.app.view as HTMLCanvasElement);
 		mapChoice === mapType.STANDARD ? this.drawMap1() : this.drawMap2(height);

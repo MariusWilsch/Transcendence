@@ -14,7 +14,7 @@ interface ScoreProps {
 const Score: React.FC<ScoreProps> = ({ score, username }) => {
 	return (
 		<div className="flex flex-col">
-			<div className="text-2xl font-bold"> {username} </div>
+			<div className="text-base lg:text-2xl font-bold mr-4"> {username} </div>
 			<div className="text-xl">{score}</div>
 		</div>
 	);

@@ -110,20 +110,12 @@ export const GameCanvas: React.FC = () => {
 			handleKeyDown(dispatch, curDir, e);
 		const keyUpHandler = (e: KeyboardEvent) => handleKeyUp(dispatch, curDir, e);
 
-		const resizeHandler = () => {
-			// serviceRef.current?.resize(canvasRef.current as HTMLDivElement);
-		};
-
-		//* Add event listeners based on input type
-
 		if (inputType === InputType.MOUSE) {
 			canvasRef.current?.addEventListener('mousemove', mouseMoveHandler);
 		} else if (inputType === InputType.KEYBOARD) {
 			window.addEventListener('keydown', keyDownHandler);
 			window.addEventListener('keyup', keyUpHandler);
 		}
-
-		window.addEventListener('resize', resizeHandler);
 
 		return () => {
 			if (inputType === InputType.MOUSE) {
@@ -132,7 +124,6 @@ export const GameCanvas: React.FC = () => {
 				window.removeEventListener('keydown', keyDownHandler);
 				window.removeEventListener('keyup', keyUpHandler);
 			}
-			window.removeEventListener('resize', resizeHandler);
 		};
 	}, [inputType, canvasRef, dispatch]);
 
@@ -220,7 +211,7 @@ export const GameCanvas: React.FC = () => {
 					'No game state updates received for 1 second, resetting isGameStarted',
 				);
 				dispatch(gameFinished());
-			}, 1000);
+			}, 1000); // 1 second
 		}
 
 		return () => clearTimeout(timer);

@@ -383,9 +383,9 @@ export class GameService {
 		const scoreAsString = `${score.player1}${score.player2}`;
 
 		if (score.player1 === GAME_CONFIG.WinningScore) {
-			return this.createGameResult(0, 1, scoreAsString, players);
-		} else {
 			return this.createGameResult(1, 0, scoreAsString, players);
+		} else {
+			return this.createGameResult(0, 1, scoreAsString, players);
 		}
 	}
 
@@ -466,15 +466,7 @@ export class GameService {
 	}
 
 	public areCommandsSet(roomID: string): boolean {
-		const gameSession = this.gameSessions.get(roomID);
-		console.log(gameSession.command);
-		return true;
-		// Check if the game session exists and both commands are valid (not undefined, null, etc.)
-		return (
-			gameSession.command.length === 2 &&
-			gameSession.command[0] !== undefined &&
-			gameSession.command[1] !== undefined
-		);
+		return this.gameSessions.get(roomID).command.length === 2;
 	}
 
 	/**

@@ -49,8 +49,8 @@ const gameSlice = createSlice({
 			state.ball = action.payload.ball;
 			state.score = action.payload.score;
 		},
-		updateScaleY: (state, action) => {
-			state.scaleY = action.payload;
+		resetScore: (state) => {
+			state.score = { player1: 0, player2: 0 };
 		},
 	},
 });
@@ -66,5 +66,5 @@ export const sendCtxDimensions = createAction<{
 //! I think this one should go to connectionSlice.ts
 
 //* Slice definitions
-export const { initGame, updateGame, updateScaleY } = gameSlice.actions;
+export const { initGame, updateGame, resetScore } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;
