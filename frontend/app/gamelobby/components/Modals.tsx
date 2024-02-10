@@ -9,6 +9,7 @@ import {
 	setupInteraction,
 	aiDifficulty,
 	InputType,
+	resetScore,
 } from '@/app/gamelobby/GlobalRedux/features';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef, useEffect } from 'react';
@@ -103,6 +104,7 @@ export function CountdownModal() {
 	useEffect(() => {
 		if (isGameStarted) {
 			countDown();
+			dispatch(resetScore());
 		}
 		return () => {
 			if (intervalRef.current) clearInterval(intervalRef.current!);
@@ -138,6 +140,7 @@ export function CountdownModal() {
 					modal.close();
 					clearInterval(intervalRef.current!);
 					dispatch(setCountDownDone(true));
+					countdown.style.setProperty('--value', '5');
 				}
 			}, 1000);
 		}
