@@ -5,6 +5,8 @@ import EditMemberShip from './EditMemberShip';
 import Link from 'next/link';
 import { CgProfile } from 'react-icons/cg';
 import Image from 'next/image';
+import { GiTatteredBanner } from "react-icons/gi";
+
 
 const MemberCard = (props: any) => {
 	const context = useAppContext();
@@ -31,7 +33,7 @@ const MemberCard = (props: any) => {
 				memberId,
 				info: {
 					userPrivilige: isModerator,
-					banning: true,
+					banning: !isBanned,
 					Muting: { action: isMuted, time: mutedTime },
 				},
 			});
@@ -39,12 +41,21 @@ const MemberCard = (props: any) => {
 	};
 	const Ban = () => (
 		<div className=" flex flex-row space-x-5">
-			<PiFlagBannerLight
+			{
+				!isBanned ?
+				(<PiFlagBannerLight
 				onClick={() => {
 					handleBanning();
 				}}
 				className="text-white w-6 h-6 transform transition-transform hover:scale-150"
-			/>
+			/>) :
+			(< GiTatteredBanner
+				onClick={() => {
+					handleBanning();
+				}}
+				className="text-white w-6 h-6 transform transition-transform hover:scale-150"
+			/>) 
+		}
 			<EditMemberShip member={member} currentMember={currentMember} />
 		</div>
 	);

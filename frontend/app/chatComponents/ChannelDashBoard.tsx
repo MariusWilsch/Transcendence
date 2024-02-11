@@ -56,13 +56,12 @@ const ChannelDashBoard = (props: any) => {
     }, [context.channel])
     useEffect(() => {
       const search = async () => {
-        if (context.channel){
-
-          const members = await searchMember(query, context.channel.id); 
+        if (context.channel && query.trimStart()){
+          const members = await searchMember(query.trimStart(), context.channel.id); 
           setmembers(members);
         }
       }
-        query && search();
+      query.trimStart() && search();
     }, [query])
     const handleQuery = (event: any) => {
       event.preventDefault(); // Fix the typo here

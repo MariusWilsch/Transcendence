@@ -511,7 +511,6 @@ export class ChatService {
 		return await prisma.memberShip.findMany({
 			where: {
 				channelId,
-				isBanned: false,
 				onInviteState: false,
 				login: {
 					contains: query,
