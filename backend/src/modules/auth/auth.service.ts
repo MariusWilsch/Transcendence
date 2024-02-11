@@ -28,7 +28,7 @@ export class AuthService {
 	constructor(
 		private Email2FAService: Email2FAService,
 		private jwtService: JwtService,
-		private userService: UserService,
+		private userService: UserService
 	) {}
 
 	getUser(user: authDto): User {
@@ -66,7 +66,7 @@ export class AuthService {
 
 			const user = payload.userWithoutDate;
 
-			// console.log('payload: ', payload);
+			// // console.log('payload: ', payload);
 			return user;
 		} catch (error) {
 			console.error('JWT Verification Error:', error);
@@ -104,7 +104,6 @@ export class AuthService {
 			const payload = this.jwtService.verify(jwt, {
 				secret: JWT_SECRET,
 			});
-
 
 			const user = payload.userWithoutDate;
 			return user;

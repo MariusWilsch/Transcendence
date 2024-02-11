@@ -134,7 +134,7 @@ export const GameCanvas: React.FC = () => {
 		if (!serviceRef.current && canvasRef.current) {
 			const { width, height } = calculateCanvasSize();
 
-			console.log('Creating game service with');
+			// console.log('Creating game service with');
 			serviceRef.current = new GameService(
 				canvasRef.current as HTMLDivElement,
 				width,
@@ -169,13 +169,13 @@ export const GameCanvas: React.FC = () => {
 		const handler = () => {
 			if (serviceRef.current) {
 				const { width, height } = serviceRef.current.resizeHandler();
-				const { scaledBall, scaledPaddles } = scaleGameElementsToFrontend({
-					ball: gameState.ball,
-					paddles: gameState.paddles,
-					frontendWidth: width,
-					frontendHeight: height,
-				});
-				serviceRef.current.updateGameElements(scaledBall, scaledPaddles);
+				// const { scaledBall, scaledPaddles } = scaleGameElementsToFrontend({
+				// 	ball: gameState.ball,
+				// 	paddles: gameState.paddles,
+				// 	frontendWidth: width,
+				// 	frontendHeight: height,
+				// });
+				// serviceRef.current.updateGameElements(scaledBall, scaledPaddles);
 			}
 		};
 
@@ -207,9 +207,9 @@ export const GameCanvas: React.FC = () => {
 
 		if (isGameStarted && countDownDone) {
 			timer = setTimeout(() => {
-				console.log(
-					'No game state updates received for 1 second, resetting isGameStarted',
-				);
+				// console.log(
+				// 	'No game state updates received for 1 second, resetting isGameStarted',
+				// );
 				dispatch(gameFinished());
 			}, 1000); // 1 second
 		}

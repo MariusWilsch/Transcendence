@@ -8,7 +8,7 @@
 // 	// 		const x = 1 - Math.pow(0.25, deltaTime);
 // 	// 		const targetY = position.y - GAME_CONFIG.canvasHeight * 0.5;
 // 	// 		position.y = this.lerp(position.y, targetY, x);
-// 	// 		console.log(position.y);
+// 	// 		// console.log(position.y);
 
 // 	// 		didPaddleMove = true;
 // 	// 	} else if (input.down) {
@@ -44,7 +44,7 @@
 // 		if (yPos + paddle.size.height > GAME_CONFIG.canvasHeight) return;
 // 		paddle.position.y = yPos;
 // }
-	
+
 // 	private AIUpdatePaddle(paddle: Paddle, ball: Ball, deltaTime: number) {
 // 		const deltaY =
 // 			ball.position.y - (paddle.position.y + paddle.size.height / 2);

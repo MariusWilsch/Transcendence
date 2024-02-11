@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({ label, difficulty, setStep }) => {
 	return (
 		<button
 			onClick={handleClick}
-			className="btn join-item text-white bg-opacity-0 bg-white hover:bg-opacity-70 font-medium py-2 px-4 rounded-lg transition duration-150 ease-in-out"
+			className="btn btn-xs md:btn-md join-item text-white bg-opacity-0 bg-white hover:bg-opacity-70 font-medium py-2 px-4 rounded-lg transition duration-150 ease-in-out"
 		>
 			{label}
 		</button>

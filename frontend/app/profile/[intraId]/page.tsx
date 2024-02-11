@@ -232,7 +232,7 @@ export default function Profile(params: any) {
 					<Achievements intraId={intraId} />
 				</div>
 			</div>
-			<Toaster />
+			{/* <Toaster /> */}
 		</div>
 	);
 }

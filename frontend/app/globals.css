@@ -119,13 +119,6 @@ body {
 	background-color: black;
 }
 
-/* 
-@layer {
-	:root {
-		font-size: 1vw;
-	}
-} */
-
 @layer utilities {
 	/* Hide scrollbar for Chrome, Safari and Opera */
 	.no-scrollbar::-webkit-scrollbar {
@@ -140,6 +133,6 @@ body {
 
 @layer base {
 	.gamelobby-root {
-		font-size: 1.2vw;
+        font-size: clamp(13px, 1.2vw, 18px);
 	}
 }

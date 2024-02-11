@@ -13,13 +13,13 @@ const ConversationCard = ({ room }: any) => {
 		const fetchUser = async () => {
 			try {
 				const recp = await getUser(room.participantsIds[0]);
-				if (recp === undefined || !recp){
+				if (recp === undefined || !recp) {
 					return;
 				}
 				setUser(recp);
 				setLoading(false);
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 			}
 		};
 		fetchUser();

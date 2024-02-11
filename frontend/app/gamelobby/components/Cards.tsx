@@ -29,7 +29,7 @@ export const Card: React.FC<CardProps> = ({
 	return (
 		<div
 			onClick={onClick}
-			className="card bg-base-200 rounded-xl boxTransform w-2/4 sm:w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] lg:max-h-[60vh] h-full"
+			className="card bg-base-200 rounded-xl boxTransform w-3/5 md:w-[55%] lg:w-2/5 mb-4 sm:max-h-[40vh] lg:max-h-[60vh]"
 		>
 			<figure className="">
 				<Image
@@ -49,7 +49,7 @@ export const Card: React.FC<CardProps> = ({
 				<h2 className="card-title sm:text-base lg:text-xl">{title}</h2>
 				<p>{desc}</p>
 				<div className="card-actions justify-center mt-4">
-					<button className="btn sm:btn-sm lg:btn-md  btn-primary btn-wide text-white bg-primary hover:border-2 hover:bg-transparent hover:border-accent/40 shadow transition duration-300 ease-in-out hover:shadow-lg">
+					<button className="btn btn-xs sm:btn-sm lg:btn-md  btn-primary btn-wide text-white bg-primary hover:border-2 hover:bg-transparent hover:border-accent/40 shadow transition duration-300 ease-in-out hover:shadow-lg">
 						{btnText}
 					</button>
 				</div>

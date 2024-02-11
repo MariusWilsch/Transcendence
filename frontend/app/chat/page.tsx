@@ -86,7 +86,7 @@ const Chat = () => {
             </div>
           </div>
         </div>
-        <Toaster />
+        {/* <Toaster /> */}
       </div>
   );
 };

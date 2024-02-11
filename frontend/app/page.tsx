@@ -30,7 +30,7 @@ export default function Home() {
 					credentials: 'include',
 				},
 			);
-			var data  = await response.json();
+			var data = await response.json();
 			if (data.succes === false) {
 				return;
 			}
@@ -188,7 +188,7 @@ export default function Home() {
 				}
 			} else if (data.succes === false) {
 				toast.error(data.message);
-				console.log('Error : ', data);
+				// console.log('Error : ', data);
 			}
 		} catch (e) {
 			toast.error('Error while logging in');
@@ -590,7 +590,7 @@ export default function Home() {
 					</AnimatePresence>
 				</div>
 
-				<Toaster />
+				{/* <Toaster /> */}
 			</AppProvider>
 		</div>
 	);

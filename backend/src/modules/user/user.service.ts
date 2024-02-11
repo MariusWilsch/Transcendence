@@ -19,7 +19,7 @@ export class UserService {
 
 			return Users;
 		} catch (e) {
-			console.log('Error in getAllUsers: ', e);
+			// console.log('Error in getAllUsers: ', e);
 		}
 	}
 
@@ -65,7 +65,7 @@ export class UserService {
 
 			return User;
 		} catch (error: any) {
-			console.log('Error in getUserbyId: ', error);
+			// console.log('Error in getUserbyId: ', error);
 		}
 	}
 
@@ -78,7 +78,7 @@ export class UserService {
 			});
 			return User;
 		} catch (error: any) {
-			console.log('Error in getUserbyLogin: ', error);
+			// console.log('Error in getUserbyLogin: ', error);
 		}
 	}
 
@@ -142,10 +142,8 @@ export class UserService {
 				],
 			},
 		});
-		if (friedshipexist)
-		{
-			await prisma.friend.update
-			({
+		if (friedshipexist) {
+			await prisma.friend.update({
 				where: {
 					unique_user_friend: {
 						userId: friedshipexist.userId,
@@ -156,7 +154,7 @@ export class UserService {
 					friendshipStatus: 'ACCEPTED',
 				},
 			});
-			return ;
+			return;
 		}
 		const friend = await prisma.friend.create({
 			data: {

@@ -25,7 +25,6 @@ import { UserService } from 'modules/user/user.service';
 		origin: `${process.env.URL}:3000`,
 	},
 })
-
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private gameService: GameService,
@@ -40,22 +39,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	duplicateUsers: Set<string> = new Set();
 
 	handleConnection(client: IO) {
-		console.log(`Client connected via ${client.id}`);
+		// console.log(`Client connected via ${client.id}`);
 		//* If the client is not authenticated, disconnect him
-		if (!client.handshake.auth.token){
-			console.log('Client not authenticated');
+		if (!client.handshake.auth.token) {
+			// console.log('Client not authenticated');
 			return client.disconnect(true);
-		} 
+		}
 		this.checkForDuplicateUsers(client);
 	}
 
-	async checkForDuplicateUsers(client: IO) {
-		const user = await this.authService.getUserFromJwt(
+	checkForDuplicateUsers(client: IO) {
+		const user = this.authService.getUserFromJwtstatic(
 			client.handshake.auth.token
 		);
-		// console.log('User:', user);
+		if (!user) return ;
 		if (this.duplicateUsers.has(user.intraId)) {
-			console.log('Duplicate user detected');
+			// console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
 			client.disconnect(true);
 		}
@@ -63,8 +62,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		client.data = {
 			user: {
 				intraId: user.intraId,
-				Avatar: user.Avatar,
-				login: user.login,
 			},
 		};
 		client.emit('connectionSuccess');
@@ -72,17 +69,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleDisconnect(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
-		console.log(`Client disconnected via ${client.id}`);
+		// console.log(`Client disconnected via ${client.id}`);
 		// If the client was in a running game clear the interval
 		const roomID = client.data.roomID;
 		if (this.gameService.hasRoom(roomID))
 			this.gameService.deleteGameSession(client.id, roomID);
 		if (this.gameService.isInGame(roomID)) {
-			console.log('Client was in a running game, clearing interval');
+			// console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
-		console.log(client.data);
-		if (client.data.user) this.duplicateUsers.delete(client.data.user.intraId);
+		// console.log(client.data);
+		if (client.data.user) {
+			this.duplicateUsers.delete(client.data.user.intraId);
+			this.userService.updateUserState(client.data.user.intraId, 'ONLINE');
+		}
 	}
 
 	checkForAvailablePlayers(lobbyType: 'aiLobby' | 'lobby') {
@@ -90,7 +90,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (lobby.length < 2) return;
 		const player1 = lobby.shift();
 		const player2 = lobby.shift();
-		console.log('Match found --> calling `createGame function`');
+		// console.log('Match found --> calling `createGame function`');
 		this.createGame(player1, player2);
 	}
 
@@ -118,7 +118,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		// Change the username and avatar if the game is against AI
 		if (player1.data.user.intraId === player2.data.user.intraId) {
-			console.log('AI game detected, user1 needs AI Avatar and username');
+			// console.log('AI game detected, user1 needs AI Avatar and username');
 			userData[0].username = 'Computer';
 		}
 
@@ -136,16 +136,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	beginGameLoop(roomID: string) {
-		//! or https://www.thecodeship.com/web-development/alternative-to-javascript-evil-setinterval/
-		//! try out https://github.com/timetocode/node-game-loop
-		//! or https://www.npmjs.com/package/node-gameloop?activeTab=code or https://github.com/norlin/node-gameloop/tree/master/lib
 		let lastTime = performance.now();
 
-		console.log('Game loop started');
+		// console.log('Game loop started');
 
 		const intervalId = setInterval(() => {
 			const currentTime = performance.now();
-			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+			const deltaTime = (currentTime - lastTime) / 1000;
 			lastTime = currentTime;
 			const gameSession = this.gameService.getSession(roomID);
 			if (!gameSession) return clearInterval(intervalId);
@@ -157,7 +154,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.gameService.updateGameState(gameSession, deltaTime);
 
 			if (this.gameService.isGameOver(gameSession.gameState)) {
-				console.log('Game over, clearing interval');
+				// console.log('Game over, clearing interval');
 				clearInterval(intervalId);
 				this.userService.updateUserState(
 					gameSession.players[0].playerSockets.data.user.intraId,
@@ -221,7 +218,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			gameSession.input[client.data.playerID],
 			payload
 		);
-		console.log('onPaddleMove event received', payload);
+		// console.log('onPaddleMove event received', payload);
 	}
 
 	@SubscribeMessage('onMouseMove')
@@ -239,8 +236,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('setupInteraction')
 	handleSetupInteraction(client: IO, payload: GameConfigState): void {
-		console.log('Client playerID', client.data.playerID);
-		console.log("Client's gameConfigState", payload.inputType);
+		// console.log('Client playerID', client.data.playerID);
+		// console.log("Client's gameConfigState", payload.inputType);
 		this.gameService.setCommand(
 			payload,
 			this.gameService.getSession(client.data.roomID),
@@ -250,6 +247,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('startLoop')
 	handleStartLoop(client: IO): void {
+		this.gameService.checkCommands(client.data.roomID);
 		if (this.gameService.isInGame(client.data.roomID)) return;
 		const gameSession = this.gameService.getSession(client.data.roomID);
 		this.userService.updateUserState(
@@ -266,30 +264,28 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('cancelMatchmaking')
 	handleCancelMatchmaking(client: IO) {
 		this.lobby = this.lobby.filter((player) => player.id !== client.id);
-		console.log(
-			`Client ${client.id} removed from matchmaking. New lobby size: ${this.lobby.length}`
-		);
+		// console.log(
+		// 	`Client ${client.id} removed from matchmaking. New lobby size: ${this.lobby.length}`
+		// );
 	}
 
 	@SubscribeMessage('invitePrivate')
 	handlePrivateGame(client: IO, payload: any): void {
-		console.log('invitePrivate event received', payload);
+		// console.log('invitePrivate event received', payload);
 		this.privateLobby.set(payload.inviteeID, client);
 	}
 
 	@SubscribeMessage('acceptPrivate')
 	handleAcceptPrivate(client: IO, payload: any): void {
-		console.log('acceptPrivate event received', payload);
+		// console.log('acceptPrivate event received', payload);
 		if (payload.accepted === false) {
 			this.privateLobby.delete(payload.inviteeID);
-			// this.duplicateUsers.delete(client.data.user.intraId);
 			return;
 		}
 
-
 		if (!this.privateLobby.has(payload.inviteeID))
-			return console.log('No such invite');
-		console.log('Match found --> calling `createGame function`');
+			return // console.log('No such invite');
+		// console.log('Match found --> calling `createGame function`');
 		this.createGame(client, this.privateLobby.get(payload.inviteeID));
 		this.privateLobby.delete(payload.inviteeID);
 	}
@@ -298,15 +294,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handleAddToLobby(client: IO, payload: AiDifficulty): void {
 		const lobbyType = payload === AiDifficulty.NONE ? 'lobby' : 'aiLobby';
 		this[lobbyType].push(client);
-		console.log(
-			`Client ${client.id} added to matchmaking. New ${lobbyType} size: ${this[lobbyType].length}`
-		);
+		// console.log(
+		// 	`Client ${client.id} added to matchmaking. New ${lobbyType} size: ${this[lobbyType].length}`
+		// );
 		this.checkForAvailablePlayers(lobbyType);
 	}
 
 	@SubscribeMessage('sendCtxDimensions')
 	handleSendCtxDimensions(client: IO, payload: any): void {
-		console.log('sendCtxDimensions event received', payload);
+		// console.log('sendCtxDimensions event received', payload);
 		client.data.roomID = payload.roomID;
 		client.data.playerID = payload.playerID;
 	}

@@ -158,8 +158,8 @@ export class GameService {
 		ballVelocity: Vector,
 		deltaTime: number
 	): void {
-		// console.log('Ball state before sending', ball);
-		// console.log("Ball's velocity before sending", ballVelocity);
+		// // console.log('Ball state before sending', ball);
+		// // console.log("Ball's velocity before sending", ballVelocity);
 
 		ball.position.x += ballVelocity.x * deltaTime;
 
@@ -336,7 +336,7 @@ export class GameService {
 	public deleteGameSession(clientID: string, roomID: string): void {
 		if (this.gameSessions.size == 0) return;
 		const gameSession = this.gameSessions.get(roomID);
-		console.log('Client was in a room, deleting game session...');
+		// console.log('Client was in a room, deleting game session...');
 
 		if (gameSession) {
 			// Remove the game session
@@ -346,7 +346,7 @@ export class GameService {
 				(player) => player.playerIDs !== clientID
 			);
 			if (otherPlayer) {
-				console.log('Disconnecting other player...');
+				// console.log('Disconnecting other player...');
 				otherPlayer.playerSockets.emit('test');
 				otherPlayer.playerSockets.disconnect();
 			}
@@ -407,7 +407,7 @@ export class GameService {
 		const { paddles, ball } = gameState;
 
 		if (inputType === InputType.AI) {
-			console.log('AI Match detected');
+			// console.log('AI Match detected');
 			playerRole = Player.P1;
 		}
 
@@ -471,7 +471,7 @@ export class GameService {
 	}
 
 	public areCommandsSet(roomID: string): boolean {
-		let bool; 
+		let bool;
 
 		bool = this.gameSessions.get(roomID).command.length === 2;
 		bool = this.gameSessions.get(roomID).command[0] !== undefined;
@@ -552,5 +552,22 @@ export class GameService {
 	public getCommmand(roomID: string): any {
 		if (this.gameSessions.size === 0) return false;
 		return this.gameSessions.get(roomID).command;
+	}
+
+	public checkCommands(roomID: string): boolean {
+		const gameSession = this.gameSessions.get(roomID);
+		if (!gameSession.command)
+			return false;
+
+		if (gameSession.command.length === 2) {
+			return true;
+		}
+		if (
+			gameSession.command[0] !== undefined ||
+			gameSession.command[1] !== undefined
+		) {
+			return true;
+		}
+		return false;
 	}
 }

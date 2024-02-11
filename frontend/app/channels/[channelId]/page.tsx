@@ -382,7 +382,7 @@ const ChannelRoom: FC<PageProps> = ({ params }: PageProps) => {
 							<PermissionDenied />
 						)}
 					</div>
-					<Toaster />
+					{/* <Toaster /> */}
 				</div>
 			{/* </MantineProvider> */}
 		</>

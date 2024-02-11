@@ -11,6 +11,7 @@ import { Sidebar } from './components/Sidebar';
 import { Providers } from '@/app/gamelobby/GlobalRedux/provider';
 import { MantineProvider } from '@mantine/core';
 import path from 'path';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
 	children,
@@ -62,6 +63,7 @@ export default function RootLayout({
 								>
 									<AnimatePresence>{children}</AnimatePresence>
 								</motion.div>
+								<Toaster />
 							</MantineProvider>
 						</AppProvider>
 					</Providers>
@@ -89,6 +91,7 @@ export default function RootLayout({
 										</div>
 									</AnimatePresence>
 								</motion.div>
+								<Toaster />
 							</MantineProvider>
 						</AppProvider>
 					</Providers>

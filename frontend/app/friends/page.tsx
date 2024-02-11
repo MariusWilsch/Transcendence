@@ -10,11 +10,7 @@ import { motion } from 'framer-motion';
 import { FaCircle } from 'react-icons/fa';
 
 export default function Friends() {
-	const {
-		user,
-		setUser,
-		setisSidebarVisible,
-	} = useAppContext();
+	const { user, setUser, setisSidebarVisible } = useAppContext();
 	const [socket, setsocket] = useState<Socket | null>(null);
 
 	useEffect(() => {
@@ -195,7 +191,7 @@ export default function Friends() {
 			if (response.success === false) {
 				const msg = 'Error getting friends';
 				toast.error(msg);
-				console.log(msg);
+				// console.log(msg);
 			}
 			if (data.onlinefriends) {
 				setUsers(data.onlinefriends);
@@ -367,10 +363,7 @@ export default function Friends() {
 							<div className="mt-4 w-full flex flex-col items-center overflow-x-hidden">
 								{users &&
 									users?.map((user) => (
-										<Link
-											key={user.intraId}
-											href={`/profile/${user.intraId}`}
-										>
+										<Link key={user.intraId} href={`/profile/${user.intraId}`}>
 											<div
 												key={user.intraId}
 												className=" p-2 mb-2 min-w-[80vw] md:min-w-[50vw] items-center justify-center "
@@ -438,7 +431,7 @@ export default function Friends() {
 					</motion.div>
 				</div>
 			</div>
-			<Toaster />
+			{/* <Toaster /> */}
 		</div>
 	);
 }

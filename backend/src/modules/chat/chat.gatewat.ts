@@ -38,7 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
     }
-    else console.log('you should authenticated first');
+    // else console.log('you should authenticated first');
   }
   
   handleDisconnect(client: any): void {
@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const message = await this.chatService.createMessage(user.intraId, payload.to, payload.message);
         recipientSocket.map((socket:any) =>{
           socket.emit('privateChat',message);
-          socket.emit('messageNotification',{data:"this message"});
+          socket.emit('messageNotification',{data:user.login});
       });
         senderSocket.map((socket:any) =>{
           if (client.id != socket.id)
@@ -96,7 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
     catch(e){
-      console.log(e);
+      // console.log(e);
     }
   }
 
@@ -132,7 +132,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     }
     catch(e){
-      console.log(e);
+      // console.log(e);
       client.emit('channelBroadcast', {e});
     }
   }
@@ -153,7 +153,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
     }
     catch(e){
-      console.log(e);
+      // console.log(e);
         client.emit('updateChannelUser',{e});
     }
   }

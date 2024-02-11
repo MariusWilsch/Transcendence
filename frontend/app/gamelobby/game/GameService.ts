@@ -143,7 +143,7 @@ export class GameService {
 		//     this.fps = this.frameCount;
 		//     this.frameCount = 0;
 		//     this.lastFpsCheck = now
-		//     console.log(`FPS: ${this.fps}`);
+		//     // console.log(`FPS: ${this.fps}`);
 		// }
 	}
 
@@ -153,7 +153,7 @@ export class GameService {
 		ball: GameState['ball'] | null,
 		paddles: GameState['paddles'] | null,
 	) {
-		console.log('Initializing game elements');
+		// console.log('Initializing game elements');
 		// Draw ball
 		if (!ball || !paddles) return;
 		this.drawBall(ball);

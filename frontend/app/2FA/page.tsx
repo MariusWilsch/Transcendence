@@ -119,7 +119,7 @@ const TwoFactorVerification = () => {
 							</div>
 						</div>
 					</div>
-					<Toaster />
+					{/* <Toaster /> */}
 				</div>
 			</div>
 		</div>

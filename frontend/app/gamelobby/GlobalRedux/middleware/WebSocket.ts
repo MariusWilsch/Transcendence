@@ -25,15 +25,13 @@ const cookies = new Cookies();
 const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 	const token = cookies.get('jwt');
 
-	console.log(token);
+	// console.log(token);
 
 	if (!token) {
-		console.log('Client does not have a valid token');
+		// console.log('Client does not have a valid token');
 		alert('You are not logged in');
 		return;
 	}
-
-
 
 	socket = io(`${process.env.NEXT_PUBLIC_API_URL}:3001`, {
 		auth: { token },
@@ -43,24 +41,23 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 	if (!socket) return;
 
 	socket.on('connect', () => {
-		console.log('Connected to server');
+		// console.log('Connected to server');
 		store.dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
 	});
 
 	socket.on('disconnect', () => {
 		if (socket?.active === false)
 			setConnectionStatus(ConnectionStatus.DISCONNECTED);
-		console.log('Disconnected from server');
+		// console.log('Disconnected from server');
 		store.dispatch(gameFinished());
 		store.dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
 		store.dispatch(setMatchmaking(MatchmakingStatus.NOT_SEARCHING));
 	});
 
 	socket.on('duplicateRequest', () => {
-		console.log('Duplicate request');
+		// console.log('Duplicate request');
 		alert('You are already connected on another tab');
 		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
-		socket?.disconnect();
 	});
 
 	socket.on('connectionSuccess', () => {
@@ -89,7 +86,7 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 };
 
 export const socketMiddleware: Middleware = (store) => (next) => (action) => {
-	if (action.type === 'connection/startConnection' )
+	if (action.type === 'connection/startConnection')
 		ClientSocket = connect(store, ClientSocket);
 
 	switch (action.type) {

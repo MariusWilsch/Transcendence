@@ -35,7 +35,7 @@ export default function Search(params: any) {
 				setUsers(data.leaderboard);
 			}
 		} catch (error) {
-			console.log(error);
+			// console.log(error);
 		}
 	};
 
@@ -43,13 +43,13 @@ export default function Search(params: any) {
 		leaderboard();
 	}, [page]);
 
-	const getRadialProgressStyles = (winrate : any) => {
+	const getRadialProgressStyles = (winrate: any) => {
 		return {
-		  '--size': '60px',
-		  fontSize: '16px',
-		  '--value': winrate.toFixed(0),
+			'--size': '60px',
+			fontSize: '16px',
+			'--value': winrate.toFixed(0),
 		};
-	  };
+	};
 
 	return (
 		<div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -120,7 +120,7 @@ export default function Search(params: any) {
 															<div className="text-lg font-bold text-blue-400 mr-2">
 																<div
 																	className="radial-progress"
-																	style = {getRadialProgressStyles(user.winrate)}
+																	style={getRadialProgressStyles(user.winrate)}
 																	role="progressbar"
 																>
 																	{user.winrate.toFixed(0)}%
@@ -174,7 +174,7 @@ export default function Search(params: any) {
 					</button>
 				</div>
 			</div>
-			<Toaster />
+			{/* <Toaster /> */}
 		</div>
 	);
 }
