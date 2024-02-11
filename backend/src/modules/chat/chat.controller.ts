@@ -1,4 +1,3 @@
-// chat.controller.ts
 import { Controller, Post, Body, Get, Res,Param, UseGuards, Query, Req } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Room , Channel } from './dto/chat.dto';
@@ -251,6 +250,21 @@ export class ChatController {
     catch(e){
       console.log(e);
       res.json({sucess:false,e});
+    }
+  }
+  @Post('kick/:id/:name')
+  @UseGuards(JwtAuthGuard)
+  async kickUser( @Param('id') intraId:string ,
+  @Param('name') channelName:string ,
+  @Body() payload:{memberId:string},
+  @Res() res:any){
+    try{
+      await this.chatService.kickFromChannel(intraId,payload.memberId, channelName);
+      res.json({sucess:true});
+    }
+    catch(e){
+      console.log(e);
+      res.json({sucess:false,error:e});
     }
   }
   @Get('channelsRoom/:userId')

@@ -42,7 +42,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handleConnection(client: IO) {
 		console.log(`Client connected via ${client.id}`);
 		//* If the client is not authenticated, disconnect him
-		if (!client.handshake.auth.token) return client.disconnect(true);
+		if (!client.handshake.auth.token){
+			console.log('Client not authenticated');
+			return client.disconnect(true);
+		} 
 		this.checkForDuplicateUsers(client);
 	}
 
@@ -50,6 +53,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const user = await this.authService.getUserFromJwt(
 			client.handshake.auth.token
 		);
+		// console.log('User:', user);
 		if (this.duplicateUsers.has(user.intraId)) {
 			console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
@@ -77,6 +81,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log('Client was in a running game, clearing interval');
 			clearInterval(this.gameService.getIntervalID(roomID));
 		}
+		console.log(client.data);
 		if (client.data.user) this.duplicateUsers.delete(client.data.user.intraId);
 	}
 
@@ -143,6 +148,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
 			const gameSession = this.gameService.getSession(roomID);
+			if (!gameSession) return clearInterval(intervalId);
 
 			// if (!this.gameService.updateGameState(gameSession, deltaTime)) {
 			// 	gameSession.players[0].playerSockets.disconnect(true);
@@ -275,10 +281,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	handleAcceptPrivate(client: IO, payload: any): void {
 		console.log('acceptPrivate event received', payload);
 		if (payload.accepted === false) {
-			client.disconnect(true);
 			this.privateLobby.delete(payload.inviteeID);
+			// this.duplicateUsers.delete(client.data.user.intraId);
 			return;
 		}
+
+
 		if (!this.privateLobby.has(payload.inviteeID))
 			return console.log('No such invite');
 		console.log('Match found --> calling `createGame function`');

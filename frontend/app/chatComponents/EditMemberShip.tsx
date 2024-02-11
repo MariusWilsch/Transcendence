@@ -5,6 +5,9 @@ import Cookies from 'universal-cookie';
 import { Button, Modal, Select } from '@mantine/core';
 import { FaUserEdit } from 'react-icons/fa';
 import Image from 'next/image';
+import { GiBootKick } from "react-icons/gi";
+import toast from 'react-hot-toast';
+import { Loading } from '../components/Loading';
 
 function addHoursToNow(hours: string) {
 	const hoursToAdd = parseInt(hours, 10);
@@ -16,6 +19,7 @@ function addHoursToNow(hours: string) {
 const EditMemberShip = (props: any) => {
 	const [opened, { open, close }] = useDisclosure(false);
 	const context = useAppContext();
+	const [loading, setLoading] = useState(false);
 	const { member, currentMember } = props;
 	const {
 		memberId,
@@ -32,6 +36,42 @@ const EditMemberShip = (props: any) => {
 	} = member;
 	const [ModeValue, setModeValue] = useState('');
 	const [muteValue, setMuteValue] = useState('');
+	async function kick() {
+		try {
+			if (!context.user) return;
+			setLoading(true);
+		  const response = await fetch(
+			`${process.env.NEXT_PUBLIC_API_URL}:3001/chat/kick/${context.user.intraId}/${channelId}`,
+			{
+			  method: "POST",
+			  headers: {
+				"Content-Type": "application/json",
+			  },
+			  credentials: "include",
+			  body: JSON.stringify({
+				memberId:`${memberId}`
+			  }),
+			}
+		  );
+		  if (response.ok) {
+			const res = await response.json();
+			if (res.sucess === true){
+				toast.success('the user is kicked from the channel');
+				setLoading(false);
+				return;
+			}
+			else{
+				toast.error(`error:${res.error}`);
+				setLoading(false);
+				return;
+			}
+		  }
+		}
+		catch (e) {
+		  const msg = 'Error' + e;
+		  setLoading(false);
+		}
+	  }
 	const handleSubmit = () => {
 		if (ModeValue || muteValue) {
 			if (context.socket) {
@@ -66,6 +106,14 @@ const EditMemberShip = (props: any) => {
 				{ value: '12', label: 'Mute for 12h' },
 				{ value: '131651616516165167', label: 'until Unmute' },
 		  ];
+		if (loading)
+		{
+			return (
+				<>
+				<Loading />
+				</>
+			)
+		}
 	return (
 		<>
 			<Modal
@@ -94,6 +142,16 @@ const EditMemberShip = (props: any) => {
 							}}
 						/>
 						<h1>{login}</h1>
+						<GiBootKick
+						size={"30"}
+						className='hover:scale-110 cursor-pointer'
+						onClick={()=>{
+							setModeValue('');
+							setMuteValue('');
+							close();
+							kick();
+						}}
+						/>
 					</div>
 					<div className="change-privilege p-2">
 						<Select

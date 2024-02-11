@@ -12,18 +12,6 @@ const ConversationCard = ({ room }: any) => {
 	useEffect(() => {
 		const fetchUser = async () => {
 			try {
-				// const response3 = await fetch(
-				// 	`${process.env.NEXT_PUBLIC_API_URL}:3001/users/${room.participantsIds[0]}`,
-				// 	{
-				// 		method: 'GET',
-				// 		credentials: 'include',
-				// 	},
-				// );
-				// const recp: User | undefined = await response3.json();
-				// if (recp === undefined) {
-				// 	setLoading(false);
-				// 	return;
-				// }
 				const recp = await getUser(room.participantsIds[0]);
 				if (recp === undefined || !recp){
 					return;

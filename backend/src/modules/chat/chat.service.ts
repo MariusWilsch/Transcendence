@@ -818,5 +818,33 @@ export class ChatService {
       }
     })
   }
+
+  async kickFromChannel(intraId:string, memberId:string, channelId:string){
+    const moderator = await prisma.memberShip.findFirst({
+      where:{
+        channelId,
+        intraId,
+      }
+    });
+    if (!moderator){
+      throw('no such user');
+    }
+    if (!moderator.isModerator){
+      throw('lack of privilige');
+    }
+    const member = await prisma.memberShip.findUnique({
+      where:{
+        memberId,
+      },
+    });
+    if (!member){
+      throw('no such member');
+    }
+    await prisma.memberShip.delete({
+      where:{
+        memberId,
+      },
+    })
+  }
   
 }
