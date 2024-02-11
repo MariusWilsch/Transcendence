@@ -90,6 +90,7 @@ export const Sidebar = () => {
 		}
 	}, [context.user, context.notifSocket]);
 	useEffect(() => {
+		console.log('Is socket  connected', context.socket?.connected);
 		if (!context.socket) {
 			const chatNameSpace = `${process.env.NEXT_PUBLIC_API_URL}:3002/chat`;
 			const cookie = new Cookies();

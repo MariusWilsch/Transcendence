@@ -38,7 +38,7 @@ const useStartGame = () => {
 	};
 
 	const handleInvite = (
-		inviteeID: string,
+		inviteeID: string | undefined,
 		connectionStatus: ConnectionStatus,
 		invite: Invite,
 	) => {

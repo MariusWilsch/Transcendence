@@ -147,6 +147,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
 			lastTime = currentTime;
 			const gameSession = this.gameService.getSession(roomID);
+			if (!gameSession) return clearInterval(intervalId);
 
 			// if (!this.gameService.updateGameState(gameSession, deltaTime)) {
 			// 	gameSession.players[0].playerSockets.disconnect(true);

@@ -26,7 +26,7 @@ export enum MatchmakingStatus {
 }
 
 interface PrivateMatch {
-	inviteeID: string;
+	inviteeID: string | undefined;
 	accepted?: boolean;
 }
 

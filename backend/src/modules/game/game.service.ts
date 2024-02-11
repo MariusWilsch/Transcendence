@@ -457,7 +457,7 @@ export class GameService {
 	 * @returns a boolean value.
 	 */
 	public isInGame(roomID: string): boolean {
-		// if (this.gameSessions.size == 0) return false;
+		// if (this.gameSessions.size == 0) return true;
 		return this.gameSessions.get(roomID)?.intervalID !== undefined;
 	}
 
