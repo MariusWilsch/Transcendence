@@ -58,10 +58,12 @@ const connect = (store: MiddlewareStore, socket: Socket | undefined) => {
 		// console.log('Duplicate request');
 		alert('You are already connected on another tab');
 		store.dispatch(setMatchmaking(MatchmakingStatus.DUPLICATE));
+		socket?.disconnect();
 	});
 
 	socket.on('connectionSuccess', () => {
-		if (store.getState().connection.privateMatch == false)
+		const connection = store.getState().connection;
+		if (connection.privateMatch == false)
 			store.dispatch(addToLobby(store.getState().gameConfig.aiDifficulty));
 	});
 

@@ -56,7 +56,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (this.duplicateUsers.has(user.intraId)) {
 			// console.log('Duplicate user detected');
 			client.emit('duplicateRequest');
-			client.disconnect(true);
+			return ;
 		}
 		this.duplicateUsers.add(user.intraId);
 		client.data = {
